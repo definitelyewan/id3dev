@@ -40,6 +40,7 @@ int id3ReaderGetCh(Id3Reader *reader);
 //unicode functions
 bool hasBOM(unsigned char *buffer);
 size_t strlenUTF16(unsigned char *buffer);
+size_t strlenUTF16BE(unsigned char *buffer);
 
 //extra
 void id3ReaderPrintf(Id3Reader *reader);

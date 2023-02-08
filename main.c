@@ -7,7 +7,7 @@
 
 int main(int argc, char *argv[]){
 
-    Id3v2 *data = Id3v2Tag("_v4ext");
+    Id3v2 *data = Id3v2Tag("17. On GP.mp3");
 
     if(data == NULL){
         printf("[*]struct overall is null\n");
@@ -30,6 +30,12 @@ int main(int argc, char *argv[]){
             printf("padding. %d\n",data->header->extendedHeader->padding);
             printf("crc. %s\n",data->header->extendedHeader->crc);
             printf("update. %d\n",data->header->extendedHeader->update);
+            printf("tag size restriction %x\n",data->header->extendedHeader->tagSizeRestriction);
+            printf("tag encoding restriction %x\n",data->header->extendedHeader->encodingRestriction);
+            printf("text size restriction %x\n",data->header->extendedHeader->textSizeRestriction);
+            printf("image encoding restriction %x\n",data->header->extendedHeader->imageEncodingRestriction);
+            printf("image size restriction %x\n",data->header->extendedHeader->imageSizeRestriction);
+            
         }else{
             printf("[*]no extended header\n");
         }
@@ -70,6 +76,21 @@ int main(int argc, char *argv[]){
                 
                 printf("value:[");
                 for(int i = 0; i < strlenUTF16(body->value); i++){
+                    printf("[%x]",body->value[i]);
+                }
+                printf("]");
+            }
+
+            if(body->encoding == 2){
+                if(body->description != NULL){
+                    printf("desc:[");
+                    for(int i = 0; i < strlenUTF16BE(body->description); i++){
+                        printf("[%x]",body->description[i]);
+                    }
+                    printf("] ");
+                }
+                printf("value:[");
+                for(int i = 0; i < strlenUTF16BE(body->value); i++){
                     printf("[%x]",body->value[i]);
                 }
                 printf("]");

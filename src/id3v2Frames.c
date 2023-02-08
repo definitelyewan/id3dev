@@ -368,11 +368,11 @@ Id3v2Frame *id3v2ParseTextFrame(unsigned char *buffer, Id3v2Header *header){
 
 Id3v2TextBody *id3v2ParseTextBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
 
-    if (buffer == NULL){
+    if(buffer == NULL){
         return NULL;
     }
 
-    if (frameHeader == NULL){
+    if(frameHeader == NULL){
         return NULL;
     }
 
@@ -393,6 +393,9 @@ Id3v2TextBody *id3v2ParseTextBody(unsigned char *buffer, Id3v2FrameHeader *frame
     }
 
     // copy value
+    if(frameHeader->idNum == TALB){
+        id3ReaderPrintf(stream);
+    }
     value = id3ReaderEncodedRemainder(stream, encoding);
 
     id3FreeReader(stream);
@@ -2895,7 +2898,7 @@ void id3v2FreePrivateFrame(Id3v2Frame *toDelete){
     FLAG FUNCTIONS
 */
 
-Id3v2FlagContent *id3v2NewFlagContent(bool tagAlterPreservation, bool fileAlterPreservation, bool readOnly, unsigned int decompressedSize, unsigned char encryption, unsigned char grouping){
+Id3v2FlagContent *id3v2NewFlagContent(bool tagAlterPreservation, bool fileAlterPreservation, bool readOnly, bool unsynchronisation, bool dataLengthIndicator, unsigned int decompressedSize, unsigned char encryption, unsigned char grouping){
 
     Id3v2FlagContent *newContent = malloc(sizeof(Id3v2FlagContent));
 
@@ -2905,51 +2908,94 @@ Id3v2FlagContent *id3v2NewFlagContent(bool tagAlterPreservation, bool fileAlterP
     newContent->decompressedSize = decompressedSize;
     newContent->encryption = encryption;
     newContent->grouping = grouping;
+    newContent->unsynchronisation = unsynchronisation;
+    newContent->dataLengthIndicator = dataLengthIndicator;
 
     return newContent;
 }
 
-Id3v2FlagContent *id3v2ParseFlagContent(unsigned char *buffer){
+Id3v2FlagContent *id3v2ParseFlagContent(unsigned char *buffer, Id3v2HeaderVersion version){
 
     if(buffer == NULL){
+        return NULL;
+    }
+
+    if(version == ID3V2INVLAIDVERSION){
         return NULL;
     }
 
     bool tagAlterPreservation = false;
     bool fileAlterPreservation = false;
     bool readOnly = false;
+    bool unsynchronisation = false;
+    bool dataLengthIndicator = false;
     unsigned int decompressedSize = 0;
     unsigned char encryption = 0x00;
     unsigned char grouping = 0x00;
 
-    //read flags
-    tagAlterPreservation = ((buffer[0] >> 7) & 1) ? true : false;
-    fileAlterPreservation = ((buffer[0] >> 6) & 1) ? true : false;
-    readOnly = ((buffer[0] >> 5) & 1) ? true : false;
-    buffer = buffer + 1;
 
-    decompressedSize = ((buffer[0] >> 7) & 1) ? true : false;
-    encryption = ((buffer[0] >> 6) & 1) ? true : false;
-    grouping = ((buffer[0] >> 5) & 1) ? true : false;
-    buffer = buffer + 1;
-
-    if(decompressedSize == true){
-        decompressedSize = getBits8((unsigned char *)buffer, 4);
-        buffer = buffer + 4;
-
-    }
-
-    if(encryption == true){
-        encryption = buffer[0];
+    // read flags
+    if(version != ID3V24){
+        tagAlterPreservation = ((buffer[0] >> 7) & 1) ? true : false;
+        fileAlterPreservation = ((buffer[0] >> 6) & 1) ? true : false;
+        readOnly = ((buffer[0] >> 5) & 1) ? true : false;
         buffer = buffer + 1;
-    }
 
-    if(grouping == true){
-        grouping = buffer[0];
+        decompressedSize = ((buffer[0] >> 7) & 1) ? true : false;
+        encryption = ((buffer[0] >> 6) & 1) ? true : false;
+        grouping = ((buffer[0] >> 5) & 1) ? true : false;
         buffer = buffer + 1;
+    
+        // read the extra bits after the flags
+        if(decompressedSize == true){
+            decompressedSize = getBits8((unsigned char *)buffer, 4);
+            buffer = buffer + 4;
+
+        }
+
+        if(encryption == true){
+            encryption = buffer[0];
+            buffer = buffer + 1;
+        }
+
+        if(grouping == true){
+            grouping = buffer[0];
+            buffer = buffer + 1;
+        }
+
+    }else{
+        // format %0abc0000 %0h00kmnp
+        tagAlterPreservation = ((buffer[0] >> 6) & 1) ? true : false;
+        fileAlterPreservation = ((buffer[0] >> 5) & 1) ? true : false;
+        readOnly = ((buffer[0] >> 5) & 4) ? true : false;
+        buffer = buffer + 1;
+
+        grouping = ((buffer[0] >> 6) & 1) ? true : false;
+        decompressedSize = ((buffer[0] >> 3) & 1) ? true : false;
+        encryption = ((buffer[0] >> 2) & 1) ? true : false;
+        unsynchronisation = ((buffer[0] >> 1) & 1) ? true : false;
+        dataLengthIndicator = ((buffer[0] >> 0) & 1) ? true : false;
+        buffer = buffer + 1;
+
+        if(grouping == true){
+            grouping = buffer[0];
+            buffer = buffer + 1;
+        }
+
+        if(decompressedSize == true){
+            decompressedSize = getBits8((unsigned char *)buffer, 4);
+            buffer = buffer + 4;
+
+        }
+
+        if(encryption == true){
+            encryption = buffer[0];
+            buffer = buffer + 1;
+        }
+
     }
 
-    return id3v2NewFlagContent(tagAlterPreservation, fileAlterPreservation, readOnly, decompressedSize, encryption, grouping);
+    return id3v2NewFlagContent(tagAlterPreservation, fileAlterPreservation, readOnly, unsynchronisation, dataLengthIndicator, decompressedSize, encryption, grouping);
 }
 
 void id3v2FreeFlagContent(Id3v2FlagContent *toDelete){
@@ -2996,6 +3042,7 @@ Id3v2FrameHeader *id3v2ParseFrameHeader(unsigned char *buffer, Id3v2Header *head
     char *id = NULL;
     unsigned int frameSize = 0;
     unsigned int headerSize = 0;
+    unsigned char *frameSizeOffset = NULL;
     Id3v2FlagContent *flagContent = NULL;
     
     int versionOffset = 0;
@@ -3012,14 +3059,20 @@ Id3v2FrameHeader *id3v2ParseFrameHeader(unsigned char *buffer, Id3v2Header *head
     buffer = buffer + versionOffset;
 
     // read size
-    frameSize = getBits8(buffer, versionOffset);
+    frameSize = (header->versionMajor == ID3V24) ? syncint_decode(getBits8(buffer, versionOffset)): getBits8(buffer, versionOffset);
+    frameSizeOffset = buffer;
     buffer = buffer + versionOffset;
 
     // parse flags for 2.3 and 2.4
     if(header->versionMajor != ID3V22){
-        flagContent = id3v2ParseFlagContent(buffer);
+        flagContent = id3v2ParseFlagContent(buffer, header->versionMajor);
         headerSize = headerSize + id3v2SizeOfFlagContent(flagContent);
         buffer = buffer + id3v2SizeOfFlagContent(flagContent);
+
+        // in id3v2.4 a syncsafe int or a 4 byte int can be used
+        if(flagContent->dataLengthIndicator == true){
+            frameSize = getBits8(frameSizeOffset, versionOffset);
+        }
     }
 
     return id3v2NewFrameHeader(id, frameSize, headerSize, flagContent);

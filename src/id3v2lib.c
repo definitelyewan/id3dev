@@ -70,20 +70,8 @@ Id3v2 *Id3v2Tag(const char *filePath){
     tag->header = headerInfo;
     free(headerBytes);
     fclose(fp);
-    /*
 
-    */
-
-/*
-
-    
-
-
-
-    tag->header = headerInfo;
-    
     //unsync is not supported but the header can still be read from
-    
     if(tag->header->unsynchronisation == true){
         return tag;
     }
@@ -91,6 +79,6 @@ Id3v2 *Id3v2Tag(const char *filePath){
     frameList = id3v2ExtractFrames(filePath, headerInfo);
 
     tag->frames = frameList;
-    */
+    
     return tag;
 }

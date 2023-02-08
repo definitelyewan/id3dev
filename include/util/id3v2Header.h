@@ -10,7 +10,7 @@ extern "C"{
 #define ID3V2_PADDING_SIZE 4
 #define ID3V2_HEADER_SIZE 10
 
-//includes ext header, header, and crc
+//includes ext header, header, and crc for id3v2.2 & id3v2.3
 #define ID3V2_FULL_HEADER_LEN 24
 #include <stdbool.h>
 
@@ -43,11 +43,16 @@ typedef struct _Id3v2ExtHeader{
 
 
 typedef struct _Id3v2header{
+    
+    //version
     int versionMinor;
     int versionMajor;
+    
+    //flags
     bool unsynchronisation;
     bool experimentalIndicator;
     bool footer;
+    
     int size;
     Id3v2ExtHeader *extendedHeader;
 

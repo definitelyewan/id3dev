@@ -27,13 +27,10 @@ extern "C"{
 #define ID3V2_LANGUAGE_LEN 3
 #define ID3V2_TIME_STAMP_LEN 4
 
-
-#define ID3V2_MPEG_FORMAT 1
-#define ID3V2_MILLISECOND_FORMAT 2
-
+//static lengths within frames
 #define ID3V2_EVENT_CODE_LEN 5
-
 #define ID3V2_DATE_FORMAT_LEN 8
+
 
 typedef enum _Id3v2FrameId{
     BUF, //Recommended buffer size
@@ -181,6 +178,8 @@ typedef struct _Id3v2FlagContent{
     bool tagAlterPreservation;
     bool fileAlterPreservation;
     bool readOnly;
+    bool unsynchronisation;
+    bool dataLengthIndicator;
     unsigned int decompressedSize;
     unsigned char encryption;
     unsigned char grouping;
@@ -416,8 +415,8 @@ void id3v2FreeFrameHeader(Id3v2FrameHeader *toDelete);
 
 //flag content functions
 unsigned int id3v2SizeOfFlagContent(Id3v2FlagContent *content);
-Id3v2FlagContent *id3v2NewFlagContent(bool tagAlterPreservation, bool fileAlterPreservation, bool readOnly, unsigned int decompressedSize, unsigned char encryption, unsigned char grouping);
-Id3v2FlagContent *id3v2ParseFlagContent(unsigned char *buffer);
+Id3v2FlagContent *id3v2NewFlagContent(bool tagAlterPreservation, bool fileAlterPreservation, bool readOnly, bool unsynchronisation, bool dataLengthIndicator, unsigned int decompressedSize, unsigned char encryption, unsigned char grouping);
+Id3v2FlagContent *id3v2ParseFlagContent(unsigned char *buffer, Id3v2HeaderVersion version);
 void id3v2FreeFlagContent(Id3v2FlagContent *toDelete);
 
 //text frame functions

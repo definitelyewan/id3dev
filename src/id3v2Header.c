@@ -117,9 +117,11 @@ Id3v2ExtHeader *id3v2ParseExtendedHeader(unsigned char *buffer, Id3v2HeaderVersi
     unsigned char textSizeRestriction = 0x00;
     unsigned char imageEncodingRestriction = 0x00;
     unsigned char imageSizeRestriction = 0x00;
-    unsigned char crc[ID3V2_CRC_LEN+1];
+    unsigned char *crc = NULL;
     unsigned char tmpPaddingSize[ID3V2_PADDING_SIZE+1];
     bool crcFlag = false;
+    bool updateFlag = false;
+    bool restrictionsFlag = false;
     
     //extended headers are treated differently between versions
     if(version == ID3V23){
@@ -141,6 +143,7 @@ Id3v2ExtHeader *id3v2ParseExtendedHeader(unsigned char *buffer, Id3v2HeaderVersi
 
         //get crc
         if(crcFlag){
+            crc = calloc(sizeof(unsigned char), ID3V2_CRC_LEN + 1);
             id3ReaderRead(stream, crc, ID3V2_CRC_LEN);
         }
 
@@ -155,27 +158,53 @@ Id3v2ExtHeader *id3v2ParseExtendedHeader(unsigned char *buffer, Id3v2HeaderVersi
         //size is known so skip it
         id3ReaderSeek(stream, ID3V2_HEADER_SIZE_LEN, SEEK_CUR);
 
-        //if any other value this invalid
+        //if any other value this invalid flags exist
         if(id3ReaderGetCh(stream) == 1){
             
-            id3ReaderSeek(stream, 1, SEEK_CUR);
-            id3ReaderPrintf(stream);
-            if((id3ReaderCursor(stream)[0] >> 6) & 1){
-                id3ReaderSeek(stream, 1, SEEK_CUR);
-                update = id3ReaderGetCh(stream);
-                id3ReaderSeek(stream, -1, SEEK_CUR);
-            }
-            if((id3ReaderCursor(stream)[0] >> 5) & 1){
-            }
-            if((id3ReaderCursor(stream)[0] >> 4) & 1){
-            }
-
+            //read flags
             id3ReaderSeek(stream, 1, SEEK_CUR);
 
-            
-
+            updateFlag = ((id3ReaderGetCh(stream) >> 6) & 1) ? true : false;
+            crcFlag = ((id3ReaderGetCh(stream) >> 5) & 1) ? true : false;
+            restrictionsFlag = ((id3ReaderGetCh(stream) >> 4) & 1) ? true : false;
+    
+            id3ReaderSeek(stream, 1, SEEK_CUR);
 
         }
+
+        //read update byte
+        if(updateFlag){
+            update = id3ReaderGetCh(stream);
+            id3ReaderSeek(stream, 1, SEEK_CUR);
+        }
+
+        //read crc
+        if(crcFlag){
+            id3ReaderSeek(stream, 1, SEEK_CUR);
+            crc = calloc(sizeof(unsigned char), ID3V2_CRC_LEN + 1);
+            id3ReaderRead(stream, crc, ID3V2_CRC_LEN+1);
+        }
+
+        //read restrictions
+        if(restrictionsFlag){
+            id3ReaderSeek(stream, 1, SEEK_CUR);
+
+            tagSizeRestriction |= (id3ReaderGetCh(stream) >> 7) & 1;
+            tagSizeRestriction |= (id3ReaderGetCh(stream) >> 6) & 1;
+            
+            encodingRestriction = (id3ReaderGetCh(stream) >> 5) & 1;
+
+            textSizeRestriction |= (id3ReaderGetCh(stream) >> 4) & 1;
+            textSizeRestriction |= (id3ReaderGetCh(stream) >> 3) & 1;
+            
+            imageEncodingRestriction = (id3ReaderGetCh(stream) >> 2) & 1;
+
+            imageSizeRestriction |= (id3ReaderGetCh(stream) >> 1) & 1;
+            imageSizeRestriction |= (id3ReaderGetCh(stream) >> 0) & 1;    
+            id3ReaderSeek(stream, 1, SEEK_CUR);
+        }
+
+        padding = stream->bufferSize - stream->cursor;
 
         id3FreeReader(stream);
     }else{
@@ -211,14 +240,11 @@ void id3v2FreeExtHeader(Id3v2ExtHeader *extHeader){
     }
 
     if(extHeader->crc != NULL){
-        //free(extHeader->crc);
+        free(extHeader->crc);
     }
 
     free(extHeader);
 }
-
-
-
 
 bool containsId3v2(const char *filePath){
     

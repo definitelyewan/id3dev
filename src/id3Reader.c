@@ -44,6 +44,8 @@ unsigned int id3ReaderAllocationAdd(unsigned char encoding){
             return 1;
         case UTF16:
             return 2;
+        case UTF16BE:
+            return 2;
     }
 
     return 0;
@@ -113,7 +115,8 @@ size_t id3ReaderReadEncodedSize(Id3Reader *reader, unsigned char encoding){
             return readSize;
 
         case UTF16BE:
-            break;
+            readSize = strlenUTF16BE(id3ReaderCursor(reader));
+            return readSize;
         case UTF8:
             break;
         default:
@@ -196,6 +199,26 @@ size_t strlenUTF16(unsigned char *buffer){
 
     //not utf16
     if(!hasBOM(buffer)){
+        return len;
+    }
+    
+    while(true){
+        //0x00 0x00 means the end of utf
+        if(buffer[len] == 0x00 && buffer[len + 1] == 0x00){
+            break;
+        }
+
+        len = len + 2;
+    }
+
+    return len;
+}
+
+size_t strlenUTF16BE(unsigned char *buffer){
+
+    size_t len = 0;
+
+    if(buffer == NULL){
         return len;
     }
     

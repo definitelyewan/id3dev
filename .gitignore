@@ -3,3 +3,4 @@
 main
 *.o
 *.so
+*.png
