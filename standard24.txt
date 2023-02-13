@@ -2089,7 +2089,7 @@ Abstract
 
      <Header for 'Signature frame', ID: "SIGN">
      Group symbol      $xx
-     Signature         <binary data>
+     1Signature         <binary data>
 
 
 4.29.   Seek frame

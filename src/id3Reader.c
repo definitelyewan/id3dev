@@ -46,6 +46,8 @@ unsigned int id3ReaderAllocationAdd(unsigned char encoding){
             return 2;
         case UTF16BE:
             return 2;
+        case UTF8:
+            return 2;
     }
 
     return 0;
@@ -118,7 +120,8 @@ size_t id3ReaderReadEncodedSize(Id3Reader *reader, unsigned char encoding){
             readSize = strlenUTF16BE(id3ReaderCursor(reader));
             return readSize;
         case UTF8:
-            break;
+            readSize = strlenUTF8(id3ReaderCursor(reader));
+            return readSize;
         default:
             //just look for a single 0 and eat it
             for(readSize = 1; id3ReaderCursor(reader)[readSize-1] != 0x00; readSize++);
@@ -232,6 +235,11 @@ size_t strlenUTF16BE(unsigned char *buffer){
     }
 
     return len;
+}
+
+size_t strlenUTF8(unsigned char *buffer){
+    //utf8 does is variable length and will have no null bytes until the end
+    return strlen((char *)buffer);
 }
 
 void id3ReaderPrintf(Id3Reader *reader){

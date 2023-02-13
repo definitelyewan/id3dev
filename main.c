@@ -58,7 +58,7 @@ int main(int argc, char *argv[]){
         if(currFrame->header->id[0] == 'T'){
             Id3v2TextBody *body = (Id3v2TextBody *)currFrame->frame;
 
-            if(body->encoding == 0){
+            if(body->encoding == 0 || body->encoding == 3){
                 if(body->description != NULL){
                     printf("desc:[%s] ",body->description);
                 }

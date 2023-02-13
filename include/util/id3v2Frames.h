@@ -29,148 +29,154 @@ extern "C"{
 
 //static lengths within frames
 #define ID3V2_EVENT_CODE_LEN 5
-#define ID3V2_DATE_FORMAT_LEN 8
+#define ID3V2_BASE_DATE_FORMAT_LEN 8
+#define ID3V24_DATE_FORMAT_LEN 19
 
 
 typedef enum _Id3v2FrameId{
-    BUF, //Recommended buffer size
-    CNT, //Play counter
-    COM, //Comments
-    CRA, //Audio encryption
-    CRM, //Encrypted meta frame
-    ETC, //Event timing codes
-    EQU, //Equalization
-    GEO, //General encapsulated object
-    IPL, //Involved people list
-    LNK, //Linked information
-    MCI, //Music CD Identifier
-    MLL, //MPEG location lookup table
-    PIC, //Attached picture
-    POP, //Popularimeter
-    REV, //Reverb
-    RVA, //Relative volume adjustment
-    SLT, //Synchronized lyric/text
-    STC, //Synced tempo codes
-    TAL, //Album/Movie/Show title
-    TBP, //BPM (Beats Per Minute)
-    TCM, //Composer
-    TCO, //Content type
-    TCR, //Copyright message
-    TDA, //Date
-    TDY, //Playlist delay
-    TEN, //Encoded by
-    TFT, //File type
-    TIM, //Time
-    TKE, //Initial key
-    TLA, //Language(s)
-    TLE, //Length
-    TMT, //Media type
-    TOA, //Original artist(s)/performer(s)
-    TOF, //Original filename
-    TOL, //Original Lyricist(s)/text writer(s)
-    TOR, //Original release year
-    TOT, //Original album/Movie/Show title
-    TP1, //Lead artist(s)/Lead performer(s)/Soloist(s)/Performing group
-    TP2, //Band/Orchestra/Accompaniment
-    TP3, //Conductor/Performer refinement
-    TP4, //Interpreted, remixed, or otherwise modified by
-    TPA, //Part of a set
-    TPB, //Publisher
-    TRC, //ISRC (International Standard Recording Code)
-    TRD, //Recording dates
-    TRK, //Track number/Position in set
-    TSI, //Size
-    TSS, //Software/hardware and settings used for encoding
-    TT1, //Content group description
-    TT2, //Title/Songname/Content description
-    TT3, //Subtitle/Description refinement
-    TXT, //Lyricist/text writer
-    TXX, //User defined text information frame
-    TYE, //Year
-    UFI, //Unique file identifier
-    ULT, //Unsychronized lyric/text transcription
-    WAF, //Official audio file webpage
-    WAR, //Official artist/performer webpage
-    WAS, //Official audio source webpage
-    WCM, //Commercial information
-    WCP, //Copyright/Legal information
-    WPB, //Publishers official webpage
-    WXX, //User defined URL link frame
-    HUH, //got no idea man huh?
-    AENC, //Audio encryption
-    APIC, //Attached picture
-    COMM, //Comments
-    COMR, //Commercial frame
-    ENCR, //Encryption method registration
-    EQUA, //Equalization
-    ETCO, //Event timing codes
-    GEOB, //General encapsulated object
-    GRID, //Group identification registration
-    IPLS, //Involved people list
-    LINK, //Linked information
-    MCDI, //Music CD identifier
-    MLLT, //MPEG location lookup table
-    OWNE, //Ownership frame
-    PRIV, //Private frame
-    PCNT, //Play counter
-    POPM, //Popularimeter
-    POSS, //Position synchronisation frame
-    RBUF, //Recommended buffer size
-    RVAD, //Relative volume adjustment
-    RVRB, //Reverb
-    SYLT, //Synchronized lyric/text
-    SYTC, //Synchronized tempo codes
-    TALB, //Album/Movie/Show title
-    TBPM, //BPM (beats per minute)
-    TCOM, //Composer
-    TCON, //Content type
-    TCOP, //Copyright message
-    TDAT, //Date
-    TDLY, //Playlist delay
-    TENC, //Encoded by
-    TEXT, //Lyricist/Text writer
-    TFLT, //File type
-    TIME, //Time
-    TIT1, //Content group description
-    TIT2, //Title/songname/content description
-    TIT3, //Subtitle/Description refinement
-    TKEY, //Initial key
-    TLAN, //Language(s)
-    TLEN, //Length
-    TMED, //Media type
-    TOAL, //Original album/movie/show title
-    TOFN, //Original filename
-    TOLY, //Original lyricist(s)/text writer(s)
-    TOPE, //Original artist(s)/performer(s)
-    TORY, //Original release year
-    TOWN, //File owner/licensee
-    TPE1, //Lead performer(s)/Soloist(s)
-    TPE2, //Band/orchestra/accompaniment
-    TPE3, //Conductor/performer refinement
-    TPE4, //Interpreted, remixed, or otherwise modified by
-    TPOS, //Part of a set
-    TPUB, //Publisher
-    TRCK, //Track number/Position in set
-    TRDA, //Recording dates
-    TRSN, //Internet radio station name
-    TRSO, //Internet radio station owner
-    TSIZ, //Size
-    TSRC, //ISRC (international standard recording code)
-    TSSE, //Software/Hardware and settings used for encoding
-    TYER, //Year
-    TXXX, //User defined text information frame
-    UFID, //Unique file identifier
-    USER, //Terms of use
-    USLT, //Unsychronized lyric/text transcription
-    WCOM, //Commercial information
-    WCOP, //Copyright/Legal information
-    WOAF, //Official audio file webpage
-    WOAR, //Official artist/performer webpage
-    WOAS, //Official audio source webpage
-    WORS, //Official internet radio station homepage
-    WPAY, //Payment
-    WPUB, //Publishers official webpage
-    WXXX, //User defined URL link frame
+    BUF,  // Recommended buffer size
+    CNT,  // Play counter
+    COM,  // Comments
+    CRA,  // Audio encryption
+    CRM,  // Encrypted meta frame
+    ETC,  // Event timing codes
+    EQU,  // Equalization
+    GEO,  // General encapsulated object
+    IPL,  // Involved people list
+    LNK,  // Linked information
+    MCI,  // Music CD Identifier
+    MLL,  // MPEG location lookup table
+    PIC,  // Attached picture
+    POP,  // Popularimeter
+    REV,  // Reverb
+    RVA,  // Relative volume adjustment
+    SLT,  // Synchronized lyric/text
+    STC,  // Synced tempo codes
+    TAL,  // Album/Movie/Show title
+    TBP,  // BPM (Beats Per Minute)
+    TCM,  // Composer
+    TCO,  // Content type
+    TCR,  // Copyright message
+    TDA,  // Date
+    TDY,  // Playlist delay
+    TEN,  // Encoded by
+    TFT,  // File type
+    TIM,  // Time
+    TKE,  // Initial key
+    TLA,  // Language(s)
+    TLE,  // Length
+    TMT,  // Media type
+    TOA,  // Original artist(s)/performer(s)
+    TOF,  // Original filename
+    TOL,  // Original Lyricist(s)/text writer(s)
+    TOR,  // Original release year
+    TOT,  // Original album/Movie/Show title
+    TP1,  // Lead artist(s)/Lead performer(s)/Soloist(s)/Performing group
+    TP2,  // Band/Orchestra/Accompaniment
+    TP3,  // Conductor/Performer refinement
+    TP4,  // Interpreted, remixed, or otherwise modified by
+    TPA,  // Part of a set
+    TPB,  // Publisher
+    TRC,  // ISRC (International Standard Recording Code)
+    TRD,  // Recording dates
+    TRK,  // Track number/Position in set
+    TSI,  // Size
+    TSS,  // Software/hardware and settings used for encoding
+    TT1,  // Content group description
+    TT2,  // Title/Songname/Content description
+    TT3,  // Subtitle/Description refinement
+    TXT,  // Lyricist/text writer
+    TXX,  // User defined text information frame
+    TYE,  // Year
+    UFI,  // Unique file identifier
+    ULT,  // Unsychronized lyric/text transcription
+    WAF,  // Official audio file webpage
+    WAR,  // Official artist/performer webpage
+    WAS,  // Official audio source webpage
+    WCM,  // Commercial information
+    WCP,  // Copyright/Legal information
+    WPB,  // Publishers official webpage
+    WXX,  // User defined URL link frame
+    HUH,  // got no idea man huh?
+    AENC, // Audio encryption
+    APIC, // Attached picture
+    COMM, // Comments
+    COMR, // Commercial frame
+    ENCR, // Encryption method registration
+    EQUA, // Equalization
+    ETCO, // Event timing codes
+    GEOB, // General encapsulated object
+    GRID, // Group identification registration
+    IPLS, // Involved people list
+    LINK, // Linked information
+    MCDI, // Music CD identifier
+    MLLT, // MPEG location lookup table
+    OWNE, // Ownership frame
+    PRIV, // Private frame
+    PCNT, // Play counter
+    POPM, // Popularimeter
+    POSS, // Position synchronisation frame
+    RBUF, // Recommended buffer size
+    RVAD, // Relative volume adjustment
+    RVRB, // Reverb
+    SYLT, // Synchronized lyric/text
+    SYTC, // Synchronized tempo codes
+    TALB, // Album/Movie/Show title
+    TBPM, // BPM (beats per minute)
+    TCOM, // Composer
+    TCON, // Content type
+    TCOP, // Copyright message
+    TDAT, // Date
+    TDLY, // Playlist delay
+    TENC, // Encoded by
+    TEXT, // Lyricist/Text writer
+    TFLT, // File type
+    TIME, // Time
+    TIT1, // Content group description
+    TIT2, // Title/songname/content description
+    TIT3, // Subtitle/Description refinement
+    TKEY, // Initial key
+    TLAN, // Language(s)
+    TLEN, // Length
+    TMED, // Media type
+    TOAL, // Original album/movie/show title
+    TOFN, // Original filename
+    TOLY, // Original lyricist(s)/text writer(s)
+    TOPE, // Original artist(s)/performer(s)
+    TORY, // Original release year
+    TOWN, // File owner/licensee
+    TPE1, // Lead performer(s)/Soloist(s)
+    TPE2, // Band/orchestra/accompaniment
+    TPE3, // Conductor/performer refinement
+    TPE4, // Interpreted, remixed, or otherwise modified by
+    TPOS, // Part of a set
+    TPUB, // Publisher
+    TRCK, // Track number/Position in set
+    TRDA, // Recording dates
+    TRSN, // Internet radio station name
+    TRSO, // Internet radio station owner
+    TSIZ, // Size
+    TSRC, // ISRC (international standard recording code)
+    TSSE, // Software/Hardware and settings used for encoding
+    TYER, // Year
+    TXXX, // User defined text information frame
+    UFID, // Unique file identifier
+    USER, // Terms of use
+    USLT, // Unsychronized lyric/text transcription
+    WCOM, // Commercial information
+    WCOP, // Copyright/Legal information
+    WOAF, // Official audio file webpage
+    WOAR, // Official artist/performer webpage
+    WOAS, // Official audio source webpage
+    WORS, // Official internet radio station homepage
+    WPAY, // Payment
+    WPUB, // Publishers official webpage
+    WXXX, // User defined URL link frame
+    RVA2, // relative volume adjustmen frame for 2.4
+    EQU2, // Equalisation (2)
+    ASPI, // Audio seek point index [F:4.30]
+    SEEK, // Seek frame [F:4.29]
+    SIGN, // Signature frame [F:4.28]
 
 }Id3v2FrameId;
 
@@ -395,6 +401,17 @@ typedef struct _Id3v2PrivateBody{
 
 }Id3v2PrivateBody;
 
+typedef struct _Id3v2SignatureBody{
+    unsigned char groupSymbol;
+    unsigned char *signature;
+    unsigned int signatureDataLen;
+
+}Id3v2SignatureBody;
+
+typedef struct _Id3v2SeekBody{
+    size_t minimumOffsetToNextTag;
+    
+}Id3v2SeekBody;
 //can be any frame
 typedef struct _Id3v2Frame{
     Id3v2FrameHeader *header;
@@ -584,6 +601,18 @@ Id3v2Frame *id3v2ParseReverbFrame(unsigned char *buffer, Id3v2Header *header);
 Id3v2ReverbBody *id3v2ParseReverbBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
 Id3v2ReverbBody *id3v2NewReverbBody(unsigned char *value);
 void id3v2FreeReverbFrame(Id3v2Frame *toDelete);
+
+//Signature frame fnctions
+Id3v2Frame *id3v2ParseSignatureFrame(unsigned char *buffer, Id3v2Header *header);
+Id3v2SignatureBody *id3v2ParseSignatureBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
+Id3v2SignatureBody *id3v2NewSignatureBody(unsigned char groupSymbol, unsigned char *signature, unsigned int signatureDataLen);
+void id3v2FreeSignatureFrame(Id3v2Frame *toDelete);
+
+//Seek frame functions
+Id3v2Frame *id3v2ParseSeekFrame(unsigned char *buffer, Id3v2Header *header);
+Id3v2SeekBody *id3v2ParseSeekBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
+Id3v2SeekBody *id3v2NewSeekBody(size_t minimumOffsetToNextTag);
+void id3v2FreeSeekFrame(Id3v2Frame *toDelete);
 
 //other functions
 Id3v2FrameId id3v2FrameIdFromStr(char *str);

@@ -21,7 +21,6 @@ Id3v2 *Id3v2Tag(const char *filePath){
     
     
     unsigned char *headerBytes = NULL;
-    unsigned char *tagSizeOffset;
     unsigned char *extOffset;
     int bufferSize = ID3V2_HEADER_SIZE;
     FILE *fp = NULL;

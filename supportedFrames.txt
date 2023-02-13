@@ -60,13 +60,23 @@ GEO General encapsulated object
 EQU Equalization
 REV Reverb
 RVA Relative volume adjustment
+RVA2 Relative volume adjustment (2) [F:4.11]
+EQU2 Equalisation (2) [F:4.12]
+SIGN Signature frame [F:4.28]
+SEEK Seek frame [F:4.29]
 --------------------------------------------------------------------------UNSUPPORTED
-
-
-
+--------------------------------------------------------------------------dont update for 2.4
+EQUA
+IPLS
+RVAD
+TDAT
+TIME    
+TORY
+TRDA
+TSIZ
 
 //no support
 BUF Recommended buffer size
 MLL MPEG location lookup table
 LNK Linked information
-//subjective so there will be no support
+ASPI Audio seek point index [F:4.30]
