@@ -12,51 +12,9 @@ extern "C"{
 
 //includes ext header, header, and crc for id3v2.2 & id3v2.3
 #define ID3V2_FULL_HEADER_LEN 24
+
+#include "id3Types.h"
 #include <stdbool.h>
-
-typedef enum _Id3v2Headerversion{
-    ID3V22 = 2,
-    ID3V23 = 3,
-    ID3V24 = 4,
-    ID3V2INVLAIDVERSION = 0
-}Id3v2HeaderVersion;
-
-typedef struct _Id3v2ExtHeader{
-    int size;
-    int padding;
-
-    //update flag values
-    unsigned char update;
-
-    //crc flag values
-    unsigned char *crc;
-    unsigned int crcLen;
-    
-    //tag restrictions values
-    unsigned char tagSizeRestriction;
-    unsigned char encodingRestriction;
-    unsigned char textSizeRestriction;
-    unsigned char imageEncodingRestriction;
-    unsigned char imageSizeRestriction;
-
-}Id3v2ExtHeader;
-
-
-typedef struct _Id3v2header{
-    
-    //version
-    int versionMinor;
-    int versionMajor;
-    
-    //flags
-    bool unsynchronisation;
-    bool experimentalIndicator;
-    bool footer;
-    
-    int size;
-    Id3v2ExtHeader *extendedHeader;
-
-}Id3v2Header;
 
 //header functions
 Id3v2Header *id3v2ParseHeader(unsigned char *buffer, unsigned int bufferSiz);
@@ -70,7 +28,7 @@ void id3v2FreeExtHeader(Id3v2ExtHeader *extHeader);
 
 //utils
 Id3v2HeaderVersion id3v2TagVersion(Id3v2Header *tag);
-bool containsId3v2(const char *filePath);
+bool containsId3v2(unsigned char *buffer);
 
 #ifdef __cplusplus
 } //extern c end

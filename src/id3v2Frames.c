@@ -146,14 +146,8 @@ Id3v2Frame *id3v2NewFrame(Id3v2FrameHeader *header, void *bodyContent){
     return frame;
 }
 
-List *id3v2ExtractFrames(const char *filePath, Id3v2Header *header){
+List *id3v2ExtractFrames(unsigned char *buffer, Id3v2Header *header){
 
-    if(filePath == NULL || header == NULL){
-        return NULL;
-    }
-
-    FILE *fp = NULL;
-    unsigned char *buff = NULL;
     int saveSize = header->size - ID3V2_HEADER_SIZE;
     int extHeaderOffset = 0;
     int titleNameAndSizeLen = 0;
@@ -169,26 +163,11 @@ List *id3v2ExtractFrames(const char *filePath, Id3v2Header *header){
         saveSize = saveSize - extHeaderOffset;
     }
 
-    // read the file and set up a buffer
-    if((fp = fopen(filePath, "rb")) == NULL){
-        return NULL;
-    }
-
-    buff = calloc(sizeof(unsigned char), header->size + 1);
-
-    if(fread(buff, 1, sizeof(unsigned char) * header->size, fp) == 0){
-        free(buff);
-        fclose(fp);
-        return NULL;
-    }
-    fclose(fp);
-
-    Id3Reader *stream = id3NewReader(buff, header->size);
+    Id3Reader *stream = id3NewReader(buffer, saveSize);
 
     // create list
     List *list = newList(id3v2FreeFrame);
 
-    id3ReaderSeek(stream, ID3V2_HEADER_SIZE + extHeaderOffset, SEEK_CUR);
     while(saveSize > 0){
 
         Id3v2Frame *frame = NULL;
@@ -220,7 +199,6 @@ List *id3v2ExtractFrames(const char *filePath, Id3v2Header *header){
     }
 
     id3FreeReader(stream);
-    free(buff);
 
     return list;
 }
@@ -378,9 +356,19 @@ Id3v2Frame *id3v2ParseTextFrame(unsigned char *buffer, Id3v2Header *header){
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    //error checking
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
+    }
+
+    if(newHeader->id[0] != 'T'){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;     
     }
 
     buffer = buffer + newHeader->headerSize;
@@ -483,7 +471,17 @@ Id3v2Frame *id3v2ParseURLFrame(unsigned char *buffer, Id3v2Header *header){
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    //error checking
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->id[0] != 'W'){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -506,7 +504,7 @@ Id3v2URLBody *id3v2ParseURLBody(unsigned char *buffer, Id3v2FrameHeader *frameHe
 
     unsigned char *description = NULL;
     unsigned char *url = NULL;
-    unsigned int encoding = 0;
+    unsigned int encoding = ISO_8859_1;
 
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
@@ -590,7 +588,16 @@ Id3v2Frame *id3v2ParseInvolvedPeopleListFrame(unsigned char *buffer, Id3v2Header
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != IPL && newHeader->idNum != IPLS){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -684,7 +691,16 @@ Id3v2Frame *id3v2ParseMusicCDIdentifierFrame(unsigned char *buffer, Id3v2Header 
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != MCI && newHeader->idNum != MCDI){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -772,7 +788,16 @@ Id3v2Frame *id3v2ParseEventTimeCodesFrame(unsigned char *buffer, Id3v2Header *he
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != ETC && newHeader->idNum != ETCO){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -792,7 +817,7 @@ Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(unsigned char *buffer, Id3
     if(frameHeader == NULL){
         return NULL;
     }
-
+    
     //-1 to skip time format
     int saveSize = frameHeader->frameSize - 1;
     unsigned int timeStampFormat = 0;
@@ -904,7 +929,16 @@ Id3v2Frame *id3v2ParseSyncedTempoCodesFrame(unsigned char *buffer, Id3v2Header *
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != STC && newHeader->idNum != SYTC){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -995,7 +1029,16 @@ Id3v2Frame *id3v2ParseUnsynchronisedLyricsFrame(unsigned char *buffer, Id3v2Head
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != ULT && newHeader->idNum != USLT){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -1113,7 +1156,16 @@ Id3v2Frame *id3v2ParseSynchronisedLyricsFrame(unsigned char *buffer, Id3v2Header
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != SLT && newHeader->idNum != SYLT){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -1286,7 +1338,16 @@ Id3v2Frame *id3v2ParseCommentFrame(unsigned char *buffer, Id3v2Header *header){
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != COM && newHeader->idNum != COMM){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -1405,6 +1466,10 @@ Id3v2Frame *id3v2ParseSubjectiveFrame(unsigned char *buffer, Id3v2Header *header
     Id3v2SubjectiveBody *newSubjectiveBody = NULL;
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
+
+    if(newHeader == NULL){
+        return NULL;
+    }
 
     if(newHeader->frameSize == 0){
         id3v2FreeFrameHeader(newHeader);
@@ -1555,7 +1620,16 @@ Id3v2Frame *id3v2ParsePictureFrame(unsigned char *buffer, Id3v2Header *header){
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != PIC && newHeader->idNum != APIC){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -1701,7 +1775,16 @@ Id3v2Frame *id3v2ParseGeneralEncapsulatedObjectFrame(unsigned char *buffer, Id3v
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != GEO && newHeader->idNum != GEOB){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -1837,7 +1920,16 @@ Id3v2Frame *id3v2ParsePlayCounterFrame(unsigned char *buffer, Id3v2Header *heade
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != CNT && newHeader->idNum != PCNT){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -1923,7 +2015,16 @@ Id3v2Frame *id3v2ParsePopularFrame(unsigned char *buffer, Id3v2Header *header){
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != POP && newHeader->idNum != POPM){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -2033,7 +2134,16 @@ Id3v2Frame *id3v2ParseEncryptedMetaFrame(unsigned char *buffer, Id3v2Header *hea
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != CRM){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -2153,9 +2263,18 @@ Id3v2Frame *id3v2ParseAudioEncryptionFrame(unsigned char *buffer, Id3v2Header *h
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
+    }
+
+    if(newHeader->idNum != CRA && newHeader->idNum != AENC){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;        
     }
 
     buffer = buffer + newHeader->headerSize;
@@ -2279,7 +2398,16 @@ Id3v2Frame *id3v2ParseUniqueFileIdentiferFrame(unsigned char *buffer, Id3v2Heade
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum == UFI && newHeader->idNum == UFID){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -2383,7 +2511,16 @@ Id3v2Frame *id3v2ParsePositionSynchronisationFrame(unsigned char *buffer, Id3v2H
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != POSS){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -2469,7 +2606,16 @@ Id3v2Frame *id3v2ParseTermsOfUseFrame(unsigned char *buffer, Id3v2Header *header
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != USER){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -2574,7 +2720,16 @@ Id3v2Frame *id3v2ParseOwnershipFrame(unsigned char *buffer, Id3v2Header *header)
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != OWNE){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -2693,7 +2848,16 @@ Id3v2Frame *id3v2ParseCommercialFrame(unsigned char *buffer, Id3v2Header *header
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != COMR){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -2868,7 +3032,16 @@ Id3v2Frame *id3v2ParseEncryptionMethodRegistrationFrame(unsigned char *buffer, I
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != ENCR){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -2983,7 +3156,16 @@ Id3v2Frame *id3v2ParseGroupIDRegistrationFrame(unsigned char *buffer, Id3v2Heade
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != GRID){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -3031,7 +3213,16 @@ Id3v2Frame *id3v2ParsePrivateFrame(unsigned char *buffer, Id3v2Header *header){
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != PRIV){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -3129,7 +3320,7 @@ Id3v2Frame *id3v2ParseSignatureFrame(unsigned char *buffer, Id3v2Header *header)
     }
 
     int versionOffset = 0;
-
+    
     if((versionOffset = id3v2IdAndSizeOffset(header)) == 0){
         return NULL;
     }
@@ -3139,7 +3330,16 @@ Id3v2Frame *id3v2ParseSignatureFrame(unsigned char *buffer, Id3v2Header *header)
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
-    if(newHeader->frameSize == 0){
+    if(newHeader == NULL){
+        return NULL;
+    }
+
+    if(newHeader->frameSize == 0 ){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != SIGN){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -3242,7 +3442,16 @@ Id3v2Frame *id3v2ParseSeekFrame(unsigned char *buffer, Id3v2Header *header){
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
+    if(newHeader == NULL){
+        return NULL;
+    }
+
     if(newHeader->frameSize == 0){
+        id3v2FreeFrameHeader(newHeader);
+        return NULL;
+    }
+
+    if(newHeader->idNum != SEEK){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }

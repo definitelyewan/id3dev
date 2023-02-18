@@ -163,12 +163,12 @@ unsigned char *id3ReaderCursor(Id3Reader *reader){
     if(reader == NULL){
         return NULL;
     }
-
+   
     if(reader->cursor >= reader->bufferSize){
         return NULL;
         
     }
-    
+    //printf("buffer size = %ld, calc = %ld\n",reader->bufferSize ,reader->bufferSize - reader->cursor);
     return reader->buffer + reader->cursor; 
 }
 

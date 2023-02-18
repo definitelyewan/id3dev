@@ -5,18 +5,10 @@
 extern "C"{
 #endif
 
+#include "id3Types.h"
 #include <stdbool.h>
 
-typedef struct _List{
-    int size;
-    void (*deleteData)(void* toDelete);
-    struct _node *head;
-}List;
 
-typedef struct _node{
-    void *data;
-    struct _node *next;
-}Node;
 
 //byte functions
 int getBits8(unsigned char *bytes, int byteNum);

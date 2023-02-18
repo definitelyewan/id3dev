@@ -5,25 +5,22 @@
 extern "C"{
 #endif
 
+#include "id3Types.h"
 #include "id3v2Header.h"
 #include "id3v2Helpers.h"
 #include "id3v2Frames.h"
+#include "id3Reader.h"
 
 //offsets from the start of a tag
-#define ID3V2_TAG_SIZE_OFFSET 7
+#define ID3V2_TAG_SIZE_OFFSET 6
 #define ID3V2_EXTHEADER_SIZE_OFFSET 10
 
 
-typedef struct _Id3v2{
-
-    Id3v2Header *header;
-    List *frames;
-
-}Id3v2;
-
-void id3v2FreeTag(Id3v2 *tag);
-
-Id3v2 *Id3v2Tag(const char *filePath);
+//tag functions makers and deleters
+Id3v2Tag *id3v2ParseTagFromFile(const char *filePath);
+Id3v2Tag *id3v2ParseTagFromBuffer(unsigned char *buffer, int tagSize);
+Id3v2Tag *id3v2NewTag(Id3v2Header *header, List *frames);
+void id3v2FreeTag(void *toDelete);
 
 
 

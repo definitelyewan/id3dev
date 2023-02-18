@@ -30,6 +30,7 @@ Id3v2Header *id3v2ParseHeader(unsigned char *buffer, unsigned int bufferSize){
     //read version
     //version can not be 0xFF
     if(id3ReaderCursor(stream)[0] == 0xFF || id3ReaderCursor(stream)[1] == 0xFF){
+        id3FreeReader(stream);
         return NULL;
     }
     
@@ -38,6 +39,7 @@ Id3v2Header *id3v2ParseHeader(unsigned char *buffer, unsigned int bufferSize){
 
     // unsuported version
     if((int)version[0] > 4 || (int)version[0] < 2){
+        id3FreeReader(stream);
         return NULL;
     }
 
@@ -246,29 +248,6 @@ void id3v2FreeExtHeader(Id3v2ExtHeader *extHeader){
     free(extHeader);
 }
 
-bool containsId3v2(const char *filePath){
-    
-    FILE *fp = NULL;
-    char id3[3];
-
-    if(filePath == NULL || strlen(filePath) == 0){
-        return false;
-    }
-
-    if((fp = fopen(filePath,"rb")) == NULL){
-        return false;
-    }
-
-    if((fread(id3, 1, sizeof(char)*3, fp)) == 0){
-        fclose(fp);
-        return false;
-    }
-
-    if(strncmp("ID3",id3,3) == 0){
-        fclose(fp);
-        return true;
-    }
-
-    fclose(fp);
-    return false;
+bool containsId3v2(unsigned char *buffer){
+    return (memcmp("ID3",buffer,3) == 0) ? true: false;
 }
