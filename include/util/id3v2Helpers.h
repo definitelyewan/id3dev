@@ -9,7 +9,6 @@ extern "C"{
 #include <stdbool.h>
 
 
-
 //byte functions
 int getBits8(unsigned char *bytes, int byteNum);
 unsigned int syncint_decode(int value);

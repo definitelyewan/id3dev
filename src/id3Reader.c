@@ -242,6 +242,28 @@ size_t strlenUTF8(unsigned char *buffer){
     return strlen((char *)buffer);
 }
 
+size_t id3strlen(unsigned char *buffer){
+
+    if(buffer == NULL){
+        return 0;
+    }
+
+    //marker is exclusive to utf16
+    if(hasBOM(buffer)){
+        return strlenUTF16(buffer);
+    
+    }else{
+        //strlen for utf16be accounts for 0x00 utf8s does not
+        if(strlenUTF16BE(buffer) > strlenUTF8(buffer)){
+            return strlenUTF16BE(buffer);
+        }
+    }
+
+    //ISO_8859_1 and utf 8 are compatible
+    return strlenUTF8(buffer);
+}
+
+
 void id3ReaderPrintf(Id3Reader *reader){
 
     if(reader == NULL){

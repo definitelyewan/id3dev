@@ -507,46 +507,6 @@ typedef struct _Id3v2URLBody{
 
 }Id3v2URLBody;
 
-typedef struct _Id3v2SubjectiveBody{
-    unsigned char *value;
-
-}Id3v2SubjectiveBody;
-
-typedef struct _Id3v2SubjectiveBody Id3v2RelativeVolumeAdjustmentBody;
-typedef struct _Id3v2SubjectiveBody Id3v2EqualisationBody;
-typedef struct _Id3v2SubjectiveBody Id3v2ReverbBody;
-
-
-typedef struct _Id3v2PictureBody{
-    unsigned char encoding;
-    unsigned char *format;
-    unsigned char pictureType;
-    unsigned char *description;
-    unsigned char *pictureData;
-    int picSize;
-
-}Id3v2PictureBody;
-
-typedef struct _Id3v2PopularBody{
-    unsigned char *email;
-    unsigned int rating;
-    unsigned char *counter;
-
-}Id3v2PopularBody;
-
-typedef struct _Id3v2PlayCounterBody{
-    unsigned char *counter;
-
-}Id3v2PlayCounterBody;
-
-typedef struct _Id3v2CommentBody{
-    unsigned char encoding;
-    unsigned char *language;
-    unsigned char *description;
-    unsigned char *text;
-
-}Id3v2CommentBody;
-
 typedef struct _Id3v2EventTimeCodesEvent{
     unsigned char typeOfEvent;
     long timeStamp;
@@ -569,6 +529,21 @@ typedef struct _Id3v2MusicCDIdentifierBody{
     unsigned char *cdtoc;
 }Id3v2MusicCDIdentifierBody;
 
+typedef struct _Id3v2SyncedTempoCodesBody{
+    unsigned char timeStampFormat;
+    unsigned char *tempoData;
+    unsigned int tempoDataLen;
+
+}Id3v2SyncedTempoCodesBody;
+
+typedef struct _Id3v2UnsynchronisedLyricsBody{
+    unsigned char encoding;
+    unsigned char *language;
+    unsigned char *descriptor;
+    unsigned char *lyrics;
+
+}Id3v2UnsynchronisedLyricsBody;
+
 typedef struct _Id3v2SynchronisedLyricsBody{
     unsigned char encoding;
     unsigned char *language;
@@ -585,43 +560,33 @@ typedef struct _Id3v2StampedLyric{
 
 }Id3v2StampedLyric;
 
-typedef struct _Id3v2UniqueFileIdentifierBody{
-    unsigned char *ownerIdentifier;
-    unsigned char *identifier;
-
-}Id3v2UniqueFileIdentifierBody;
-
-typedef struct _Id3v2UnsynchronisedLyricsBody{
+typedef struct _Id3v2CommentBody{
     unsigned char encoding;
     unsigned char *language;
-    unsigned char *descriptor;
-    unsigned char *lyrics;
+    unsigned char *description;
+    unsigned char *text;
 
-}Id3v2UnsynchronisedLyricsBody;
+}Id3v2CommentBody;
 
-typedef struct _Id3v2AudioEncryptionBody{
-    unsigned char *ownerIdentifier;
-    void *previewStart;
-    unsigned int previewLength;
-    unsigned char *encryptionInfo;
-    unsigned int encryptionInfoLen;
+typedef struct _Id3v2SubjectiveBody{
+    unsigned char *value;
+    int valueSize;
 
-}Id3v2AudioEncryptionBody;
+}Id3v2SubjectiveBody;
 
-typedef struct _Id3v2EncryptedMetaBody{
-    unsigned char *ownerIdentifier;
-    unsigned char *content;
-    unsigned char *encryptedDatablock;
-    unsigned int encryptedDatablockLen;
+typedef struct _Id3v2SubjectiveBody Id3v2RelativeVolumeAdjustmentBody;
+typedef struct _Id3v2SubjectiveBody Id3v2EqualisationBody;
+typedef struct _Id3v2SubjectiveBody Id3v2ReverbBody;
 
-}Id3v2EncryptedMetaBody;
+typedef struct _Id3v2PictureBody{
+    unsigned char encoding;
+    unsigned char *format;
+    unsigned char pictureType;
+    unsigned char *description;
+    unsigned char *pictureData;
+    int picSize;
 
-typedef struct _Id3v2SyncedTempoCodesBody{
-    unsigned char timeStampFormat;
-    unsigned char *tempoData;
-    unsigned int tempoDataLen;
-
-}Id3v2SyncedTempoCodesBody;
+}Id3v2PictureBody;
 
 typedef struct _Id3v2GeneralEncapsulatedObjectBody{
     unsigned char encoding;
@@ -632,6 +597,41 @@ typedef struct _Id3v2GeneralEncapsulatedObjectBody{
     unsigned int encapsulatedObjectLen;
 
 }Id3v2GeneralEncapsulatedObjectBody;
+
+typedef struct _Id3v2PlayCounterBody{
+    unsigned char *counter;
+
+}Id3v2PlayCounterBody;
+
+typedef struct _Id3v2PopularBody{
+    unsigned char *email;
+    unsigned int rating;
+    long counter;
+
+}Id3v2PopularBody;
+
+typedef struct _Id3v2EncryptedMetaBody{
+    unsigned char *ownerIdentifier;
+    unsigned char *content;
+    unsigned char *encryptedDatablock;
+    unsigned int encryptedDatablockLen;
+
+}Id3v2EncryptedMetaBody;
+
+typedef struct _Id3v2AudioEncryptionBody{
+    unsigned char *ownerIdentifier;
+    void *previewStart;
+    unsigned int previewLength;
+    unsigned char *encryptionInfo;
+    unsigned int encryptionInfoLen;
+
+}Id3v2AudioEncryptionBody;
+
+typedef struct _Id3v2UniqueFileIdentifierBody{
+    unsigned char *ownerIdentifier;
+    unsigned char *identifier;
+
+}Id3v2UniqueFileIdentifierBody;
 
 typedef struct _Id3v2PositionSynchronisationBody{
     unsigned char timeStampFormat;
@@ -664,6 +664,7 @@ typedef struct _Id3v2CommercialBody{
     unsigned char *description;
     unsigned char *mimeType;
     unsigned char *sellerLogo;
+    unsigned int sellerLogoLen;
 
 }Id3v2CommercialBody;
 
@@ -694,12 +695,11 @@ typedef struct _Id3v2PrivateBody{
 typedef struct _Id3v2SignatureBody{
     unsigned char groupSymbol;
     unsigned char *signature;
-    unsigned int signatureDataLen;
 
 }Id3v2SignatureBody;
 
 typedef struct _Id3v2SeekBody{
-    size_t minimumOffsetToNextTag;
+    int minimumOffsetToNextTag;
     
 }Id3v2SeekBody;
 
