@@ -31,7 +31,7 @@ unsigned int syncint_decode(int value){
     return result;
 }
 
-List *newList(void (*deleteFunction)(void* toDelete)){
+List *newList(void (*deleteFunction)(void* toDelete), void *(*copyFunction)(void* toCopy)){
 
     List *list = malloc(sizeof(List));
 
@@ -146,4 +146,25 @@ void *listRemove(List *list, int pos){
         }
     }   
     return NULL;
+}
+
+List *copyList(List *list){
+
+    if(list == NULL){
+        return NULL;
+    }
+
+    if(list->copyData == NULL){
+        return NULL;
+    }
+
+    List *ret = newList(list->deleteData, list->copyData);
+    Node *n = list->head;
+
+    while(n != NULL){
+        listPush(ret, ret->copyData(n->data));
+        n = n->next;
+    }
+
+    return list;
 }

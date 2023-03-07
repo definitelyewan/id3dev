@@ -15,6 +15,7 @@ extern "C"{
 typedef struct _List{
     int size;
     void (*deleteData)(void* toDelete);
+    void *(*copyData)(void* toCopy);
     struct _node *head;
 }List;
 
@@ -22,18 +23,6 @@ typedef struct _node{
     void *data;
     struct _node *next;
 }Node;
-
-
-
-/*
-    Metadata types
-*/
-
-//structures
-typedef struct _Id3Metadata{
-    List *version2;
-    List *version1;
-}Id3Metadata;
 
 /*
     Id3v1 types
@@ -507,6 +496,16 @@ typedef struct _Id3v2URLBody{
 
 }Id3v2URLBody;
 
+typedef struct _Id3v2InvolvedPeopleListBody{
+    unsigned char encoding;
+    unsigned char *peopleListStrings;
+
+}Id3v2InvolvedPeopleListBody;
+
+typedef struct _Id3v2MusicCDIdentifierBody{
+    unsigned char *cdtoc;
+}Id3v2MusicCDIdentifierBody;
+
 typedef struct _Id3v2EventTimeCodesEvent{
     unsigned char typeOfEvent;
     long timeStamp;
@@ -519,16 +518,6 @@ typedef struct _Id3v2EventTimeCodesBody{
 
 }Id3v2EventTimeCodesBody;
 
-typedef struct _Id3v2InvolvedPeopleListBody{
-    unsigned char encoding;
-    unsigned char *peopleListStrings;
-
-}Id3v2InvolvedPeopleListBody;
-
-typedef struct _Id3v2MusicCDIdentifierBody{
-    unsigned char *cdtoc;
-}Id3v2MusicCDIdentifierBody;
-
 typedef struct _Id3v2SyncedTempoCodesBody{
     unsigned char timeStampFormat;
     unsigned char *tempoData;
@@ -536,15 +525,15 @@ typedef struct _Id3v2SyncedTempoCodesBody{
 
 }Id3v2SyncedTempoCodesBody;
 
-typedef struct _Id3v2UnsynchronisedLyricsBody{
+typedef struct _Id3v2UnsynchronizedLyricsBody{
     unsigned char encoding;
     unsigned char *language;
     unsigned char *descriptor;
     unsigned char *lyrics;
 
-}Id3v2UnsynchronisedLyricsBody;
+}Id3v2UnsynchronizedLyricsBody;
 
-typedef struct _Id3v2SynchronisedLyricsBody{
+typedef struct _Id3v2SynchronizedLyricsBody{
     unsigned char encoding;
     unsigned char *language;
     unsigned int timeStampFormat;
@@ -552,7 +541,7 @@ typedef struct _Id3v2SynchronisedLyricsBody{
     unsigned char *descriptor;
     List *lyrics;
     
-}Id3v2SynchronisedLyricsBody;
+}Id3v2SynchronizedLyricsBody;
 
 typedef struct _Id3v2StampedLyric{
     unsigned char *text;
@@ -710,6 +699,15 @@ typedef struct _Id3v2Frame{
 
 }Id3v2Frame;
 
+/*
+    Metadata types
+*/
+
+//structures
+typedef struct _Id3Metadata{
+    Id3v2Tag *version2;
+    Id3v1Tag *version1;
+}Id3Metadata;
 
 #ifdef __cplusplus
 } //extern c end

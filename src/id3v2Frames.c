@@ -53,7 +53,7 @@ void id3v2FreeFrame(void *toDelete){
 
     // synced lyric frame
     }else if(curr->header->idNum == SLT || curr->header->idNum == SYLT){
-        id3v2FreeSynchronisedLyricsFrame(curr);
+        id3v2FreeSynchronizedLyricsFrame(curr);
 
     // comment frame
     }else if(curr->header->idNum == COM || curr->header->idNum == COMM){
@@ -167,7 +167,7 @@ List *id3v2ExtractFrames(unsigned char *buffer, Id3v2Header *header){
     Id3Reader *stream = id3NewReader(buffer, saveSize);
 
     // create list
-    List *list = newList(id3v2FreeFrame);
+    List *list = newList(id3v2FreeFrame, id3v2CopyFrame);
 
     while(saveSize > 0){
 
@@ -243,11 +243,11 @@ Id3v2Frame *id3v2ParseFrame(unsigned char *buffer, Id3v2Header *header){
 
     // unsynced lyrics
     }else if((memcmp(buffer, "ULT", idSize) == 0) || (memcmp(buffer, "USLT", idSize) == 0)){
-        newFrame = id3v2ParseUnsynchronisedLyricsFrame(buffer, header);
+        newFrame = id3v2ParseUnsynchronizedLyricsFrame(buffer, header);
 
     // synced lyric frame
     }else if ((memcmp(buffer, "SLT", idSize) == 0) || (memcmp(buffer, "SYLT", idSize) == 0)){
-        newFrame = id3v2ParseSynchronisedLyricsFrame(buffer, header);
+        newFrame = id3v2ParseSynchronizedLyricsFrame(buffer, header);
 
     // comment frame
     }else if((memcmp(buffer,"COM",idSize) == 0) || (memcmp(buffer,"COMM",idSize) == 0)){
@@ -329,11 +329,133 @@ Id3v2Frame *id3v2ParseFrame(unsigned char *buffer, Id3v2Header *header){
     }else if(memcmp(buffer,"SEEK",idSize)){
         newFrame = id3v2ParseSeekFrame(buffer, header);
 
-    }else{
-        return NULL;
     }
 
     return newFrame;
+}
+
+void *id3v2CopyFrame(void *toCopy){
+
+    if(toCopy == NULL){
+        return NULL;
+    }
+
+    Id3v2Frame *curr = toCopy;
+
+    // all text frames
+    if(curr->header->id[0] == 'T'){
+        return id3v2CopyTextFrame(curr);
+
+    // all url frames
+    }else if(curr->header->id[0] == 'W'){
+        return id3v2CopyURLFrame(curr);
+
+    // Involved people list
+    }else if(curr->header->idNum == IPL || curr->header->idNum == IPLS){
+        return id3v2CopyInvolvedPeopleListFrame(curr);
+
+    // music cd identifier frame
+    }else if(curr->header->idNum == MCI || curr->header->idNum == MCDI){
+        return id3v2CopyMusicCDIdentifierFrame(curr);
+
+    // event timing codes frame
+    }else if(curr->header->idNum == ETC || curr->header->idNum == ETCO){
+        return id3v2CopyEventTimeCodesFrame(curr);
+
+    // synced temp codes
+    }else if(curr->header->idNum == STC || curr->header->idNum == SYTC){
+        return id3v2CopySyncedTempoCodesFrame(curr);
+
+    // unsynced lyrics
+    }else if(curr->header->idNum == ULT || curr->header->idNum == USLT){
+        return id3v2CopyUnsynchronizedLyricsFrame(curr);
+
+    // synced lyric frame
+    }else if(curr->header->idNum == SLT || curr->header->idNum == SYLT){
+        return id3v2CopySynchronizedLyricsFrame(curr);
+
+    // comment frame
+    }else if(curr->header->idNum == COM || curr->header->idNum == COMM){
+        return id3v2CopyCommentFrame(curr);
+
+    // picture frame
+    }else if(curr->header->idNum == PIC || curr->header->idNum == APIC){
+        return id3v2CopyPictureFrame(curr);
+
+    // general encapsulated object
+    }else if(curr->header->idNum == GEO || curr->header->idNum == GEOB){
+        return id3v2CopyGeneralEncapsulatedObjectFrame(curr);
+
+    // play counter
+    }else if(curr->header->idNum == CNT || curr->header->idNum == PCNT){
+        return id3v2CopyPlayCounterFrame(curr);
+
+    // popularmeter
+    }else if(curr->header->idNum == POP || curr->header->idNum == POPM){
+        return id3v2CopyPopularFrame(curr);
+
+    // encrypted meta frame 2.2 only
+    }else if(curr->header->idNum == CRM){
+        return id3v2CopyEncryptedMetaFrame(curr);
+
+    // audio encryption frame
+    }else if(curr->header->idNum == CRA || curr->header->idNum == AENC){
+        return id3v2CopyAudioEncryptionFrame(curr);
+
+    // unique file identifier frame
+    }else if(curr->header->idNum == UFI || curr->header->idNum == UFID){
+        return id3v2CopyUniqueFileIdentifierFrame(curr);
+
+    // position synchronisation frame
+    }else if(curr->header->idNum == POSS){
+        return id3v2CopyPositionSynchronisationFrame(curr);
+
+    // terms of use frame
+    }else if(curr->header->idNum == USER){
+        return id3v2CopyTermsOfUseFrame(curr);
+
+    // ownership frame
+    }else if(curr->header->idNum == OWNE){
+        return id3v2CopyOwnershipFrame(curr);
+
+    // commercial frame
+    }else if(curr->header->idNum == COMR){
+        return id3v2CopyCommercialFrame(curr);
+
+    // encryption method registration
+    }else if(curr->header->idNum == ENCR){
+        return id3v2CopyCommercialFrame(curr);
+
+    // group id regestration
+    }else if(curr->header->idNum == GRID){
+        return id3v2CopyGroupIDRegistrationFrame(curr);
+
+    // private frame
+    }else if(curr->header->idNum == PRIV){
+        return id3v2CopyPrivateFrame(curr);
+    
+    // relative volume adjustment frame
+    }else if(curr->header->idNum == RVA || curr->header->idNum == RVAD || curr->header->idNum == RVA2){
+        return id3v2CopyRelativeVolumeAdjustmentFrame(curr);
+    
+    // equalization frame
+    }else if(curr->header->idNum == EQU || curr->header->idNum == EQUA || curr->header->idNum == EQU2){
+        return id3v2CopyEqualisationFrame(curr);
+    
+    // reverb frame
+    }else if(curr->header->idNum == REV || curr->header->idNum == RVRB){
+        return id3v2CopyReverbFrame(curr);
+    
+    // signature frame 2.4 only
+    }else if(curr->header->idNum == SIGN){
+        return id3v2CopySignatureFrame(curr);
+    
+    // seek frame 2.4 only
+    }else if(curr->header->idNum == SEEK){
+        return id3v2CopySeekFrame(curr);
+    }
+
+    return NULL;
 }
 
 Id3v2Frame *id3v2SearchFrame(Id3v2Tag *tag, Id3v2FrameId id){
@@ -405,6 +527,44 @@ Id3v2Frame *id3v2ParseTextFrame(unsigned char *buffer, Id3v2Header *header){
     return id3v2NewFrame(newHeader, newTextBody);
 }
 
+Id3v2Frame *id3v2CopyTextFrame(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return NULL;
+    }
+
+    Id3v2FrameHeader *header = NULL;
+    Id3v2TextBody *body = NULL;
+
+    header = id3v2CopyFrameHeader(frame->header);
+    body = id3v2CopyTextBody(frame->frame);
+
+    return id3v2NewFrame(header, body);
+}
+
+Id3v2TextBody *id3v2CopyTextBody(Id3v2TextBody *body){
+
+    if(body == NULL){
+        return NULL;
+    }
+
+    unsigned char *description = NULL;
+    unsigned char *value = NULL;
+    unsigned char encoding = 0;
+
+    if(body->description != NULL){
+        description = calloc(sizeof(unsigned char), id3strlen(body->description) + id3ReaderAllocationAdd(encoding));
+        memcpy(description, body->description, id3strlen(body->description));
+    }
+
+    if(body->value != NULL){
+        value = calloc(sizeof(unsigned char), id3strlen(body->value) + id3ReaderAllocationAdd(encoding));
+        memcpy(value, body->value, id3strlen(body->value));
+    }
+
+    return id3v2NewTextBody(encoding, value, description);
+}
+
 Id3v2TextBody *id3v2ParseTextBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
@@ -417,7 +577,7 @@ Id3v2TextBody *id3v2ParseTextBody(unsigned char *buffer, Id3v2FrameHeader *frame
 
     unsigned char *description = NULL;
     unsigned char *value = NULL;
-    unsigned int encoding = 0;
+    unsigned char encoding = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
     // set encoding
@@ -520,6 +680,46 @@ Id3v2Frame *id3v2ParseURLFrame(unsigned char *buffer, Id3v2Header *header){
     return id3v2NewFrame(newHeader, newURLBody);
 }
 
+Id3v2Frame *id3v2CopyURLFrame(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return NULL;
+    }
+
+    Id3v2FrameHeader *header = NULL;
+    Id3v2URLBody *body = NULL;
+
+    header = id3v2CopyFrameHeader(frame->header);
+    body = id3v2CopyURLBody(frame->frame);
+
+    return id3v2NewFrame(header, body);
+}
+
+Id3v2URLBody *id3v2CopyURLBody(Id3v2URLBody *body){
+
+    if(body == NULL){
+        return NULL;
+    }
+
+    unsigned char *description = NULL;
+    unsigned char *url = NULL;
+    unsigned char encoding = ISO_8859_1;
+
+    encoding = body->encoding;
+
+    if(url != NULL){
+        url = calloc(sizeof(unsigned char), strlen((char *)body->url) + 1);
+        memcpy(url, body->url, strlen((char *)body->url));
+    }
+
+    if(body->description != NULL){
+        description = calloc(sizeof(unsigned char), id3strlen(body->description) + id3ReaderAllocationAdd(encoding));
+        memcpy(description, body->description, id3strlen(body->description));
+    }
+
+    return id3v2NewURLBody(encoding, url, description);
+}
+
 Id3v2URLBody *id3v2ParseURLBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
@@ -532,7 +732,7 @@ Id3v2URLBody *id3v2ParseURLBody(unsigned char *buffer, Id3v2FrameHeader *frameHe
 
     unsigned char *description = NULL;
     unsigned char *url = NULL;
-    unsigned int encoding = ISO_8859_1;
+    unsigned char encoding = ISO_8859_1; //will only ever change if wxx(x)
 
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
@@ -634,6 +834,41 @@ Id3v2Frame *id3v2ParseInvolvedPeopleListFrame(unsigned char *buffer, Id3v2Header
     newInvolvedPeopleListBody = id3v2ParseInvolvedPeopleListBody(buffer, newHeader);
 
     return id3v2NewFrame(newHeader, newInvolvedPeopleListBody);
+}
+
+Id3v2Frame *id3v2CopyInvolvedPeopleListFrame(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return NULL;
+    }
+
+    Id3v2FrameHeader *header = NULL;
+    Id3v2InvolvedPeopleListBody *body = NULL;
+
+    header = id3v2CopyFrameHeader(frame->header);
+    body = id3v2CopyInvolvedPeopleListBody(frame->frame);
+
+    return id3v2NewFrame(header, body);
+}
+
+Id3v2InvolvedPeopleListBody *id3v2CopyInvolvedPeopleListBody(Id3v2InvolvedPeopleListBody *body){
+
+    if(body == NULL){
+        return NULL;
+    }
+
+    unsigned char encoding = 0x00;
+    unsigned char *text = NULL;
+
+
+    encoding = body->encoding;
+
+    if(body->peopleListStrings != NULL){
+        text = calloc(sizeof(unsigned char), id3strlen(body->peopleListStrings) + id3ReaderAllocationAdd(encoding));
+        memcpy(text, body->peopleListStrings, id3strlen(body->peopleListStrings));
+    }
+
+    return id3v2NewInvolvedPeopleListBody(encoding, text);
 }
 
 Id3v2InvolvedPeopleListBody *id3v2ParseInvolvedPeopleListBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
@@ -739,6 +974,38 @@ Id3v2Frame *id3v2ParseMusicCDIdentifierFrame(unsigned char *buffer, Id3v2Header 
     return id3v2NewFrame(newHeader, newMusicCDIdentifierBody);
 }
 
+Id3v2Frame *id3v2CopyMusicCDIdentifierFrame(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return NULL;
+    }
+
+    Id3v2FrameHeader *header = NULL;
+    Id3v2MusicCDIdentifierBody *body = NULL;
+
+    header = id3v2CopyFrameHeader(frame->header);
+    body = id3v2CopyMusicCDIdentifierBody(frame->frame);
+
+    return id3v2NewFrame(header, body);
+
+}
+
+Id3v2MusicCDIdentifierBody *id3v2CopyMusicCDIdentifierBody(Id3v2MusicCDIdentifierBody *body){
+
+    if(body == NULL){
+        return NULL;
+    }
+
+    unsigned char *cdtoc = NULL;
+
+    if(body->cdtoc != NULL){
+        cdtoc = calloc(sizeof(unsigned char), sizeof(body) - sizeof(Id3v2MusicCDIdentifierBody) + 1);
+        memcpy(cdtoc, body->cdtoc, sizeof(body) - sizeof(Id3v2MusicCDIdentifierBody));
+    }
+
+    return id3v2NewMusicCDIdentifierBody(cdtoc);
+}
+
 Id3v2MusicCDIdentifierBody *id3v2ParseMusicCDIdentifierBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
@@ -750,7 +1017,6 @@ Id3v2MusicCDIdentifierBody *id3v2ParseMusicCDIdentifierBody(unsigned char *buffe
     }
 
     unsigned char *cdtoc = NULL;
-
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
     // copy cd toc
@@ -836,6 +1102,25 @@ Id3v2Frame *id3v2ParseEventTimeCodesFrame(unsigned char *buffer, Id3v2Header *he
     return id3v2NewFrame(newHeader, newEventTimeCodesBody);
 }
 
+Id3v2Frame *id3v2CopyEventTimeCodesFrame(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return NULL;
+    }
+
+    Id3v2FrameHeader *header = NULL;
+    Id3v2EventTimeCodesBody *body = NULL;
+
+    header = id3v2CopyFrameHeader(frame->header);
+    body = id3v2CopyEventTimeCodesBody(frame->frame);
+
+    return id3v2NewFrame(header, body);
+}
+
+Id3v2EventTimeCodesBody *id3v2CopyEventTimeCodesBody(Id3v2EventTimeCodesBody *body){
+    return (body == NULL) ? NULL : id3v2NewEventTimeCodesBody(body->timeStampFormat, copyList(body->eventTimeCodes));
+}
+
 Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
@@ -857,7 +1142,7 @@ Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(unsigned char *buffer, Id3
     id3ReaderSeek(stream, 1, SEEK_CUR);
 
     // get a list of event codes
-    events = newList(id3v2FreeEventCode);
+    events = newList(id3v2FreeEventCode, id3v2CopyEventCodeEvent);
 
     while(saveSize > 0){
 
@@ -927,6 +1212,17 @@ void id3v2FreeEventTimeCodesFrame(Id3v2Frame *toDelete){
     free(toDelete);
 }
 
+void *id3v2CopyEventCodeEvent(void *toCopy){
+    
+    if(toCopy == NULL){
+        return NULL;
+    }
+
+    Id3v2EventTimesCodeEvent *event = (Id3v2EventTimesCodeEvent *)toCopy;
+    
+    return id3v2NewEventCodeEvent(event->typeOfEvent, event->timeStamp);
+}
+
 void id3v2FreeEventCode(void *toDelete){
 
     if(toDelete == NULL){
@@ -975,6 +1271,39 @@ Id3v2Frame *id3v2ParseSyncedTempoCodesFrame(unsigned char *buffer, Id3v2Header *
     newSyncedTempoCodesBody = id3v2ParseSyncedTempoCodesBody(buffer, newHeader);
 
     return id3v2NewFrame(newHeader, newSyncedTempoCodesBody);
+}
+
+Id3v2Frame *id3v2CopySyncedTempoCodesFrame(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return NULL;
+    }
+
+    Id3v2FrameHeader *header = NULL;
+    Id3v2SyncedTempoCodesBody *body = NULL;
+
+    header = id3v2CopyFrameHeader(frame->header);
+    body = id3v2CopySyncedTempoCodesBody(frame->frame);
+
+    return id3v2NewFrame(header, body);
+
+}
+
+Id3v2SyncedTempoCodesBody *id3v2CopySyncedTempoCodesBody(Id3v2SyncedTempoCodesBody *body){
+
+    unsigned char timeStampFormat = 0x00;
+    unsigned char *tempoData = NULL;
+    unsigned int tempoDataLen = 0;
+
+    timeStampFormat = body->timeStampFormat;
+    tempoDataLen = body->tempoDataLen;
+
+    if(tempoData != NULL){
+        tempoData = calloc(sizeof(unsigned char), tempoDataLen + 1);
+        memcpy(tempoData, body->tempoData, body->tempoDataLen);
+    }
+
+    return id3v2NewSyncedTempoCodesBody(timeStampFormat, tempoData, tempoDataLen);
 }
 
 Id3v2SyncedTempoCodesBody *id3v2ParseSyncedTempoCodesBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
@@ -1040,7 +1369,7 @@ void id3v2FreeSyncedTempoCodesFrame(Id3v2Frame *toDelete){
     unsynced lyrics frame functions
 */
 
-Id3v2Frame *id3v2ParseUnsynchronisedLyricsFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseUnsynchronizedLyricsFrame(unsigned char *buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -1053,7 +1382,7 @@ Id3v2Frame *id3v2ParseUnsynchronisedLyricsFrame(unsigned char *buffer, Id3v2Head
     }
 
     Id3v2FrameHeader *newHeader = NULL;
-    Id3v2UnsynchronisedLyricsBody *newUnsynchronisedLyricsBody = NULL;
+    Id3v2UnsynchronizedLyricsBody *newUnsynchronizedLyricsBody = NULL;
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
@@ -1072,12 +1401,59 @@ Id3v2Frame *id3v2ParseUnsynchronisedLyricsFrame(unsigned char *buffer, Id3v2Head
     }
 
     buffer = buffer + newHeader->headerSize;
-    newUnsynchronisedLyricsBody = id3v2ParseUnsynchronisedLyricsBody(buffer, newHeader);
+    newUnsynchronizedLyricsBody = id3v2ParseUnsynchronizedLyricsBody(buffer, newHeader);
 
-    return id3v2NewFrame(newHeader, newUnsynchronisedLyricsBody);
+    return id3v2NewFrame(newHeader, newUnsynchronizedLyricsBody);
 }
 
-Id3v2UnsynchronisedLyricsBody *id3v2ParseUnsynchronisedLyricsBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2Frame *id3v2CopyUnsynchronizedLyricsFrame(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return NULL;
+    }
+
+    Id3v2FrameHeader *header = NULL;
+    Id3v2UnsynchronizedLyricsBody *body = NULL;
+
+    header = id3v2CopyFrameHeader(frame->header);
+    body = id3v2CopyUnsynchronizedLyricsBody(frame->frame);
+
+    return id3v2NewFrame(header, body);
+
+}
+
+Id3v2UnsynchronizedLyricsBody *id3v2CopyUnsynchronizedLyricsBody(Id3v2UnsynchronizedLyricsBody *body){
+
+    if(body == NULL){
+        return NULL;
+    }
+
+    unsigned char encoding = 0x00;
+    unsigned char *language = NULL;
+    unsigned char *descriptor = NULL;
+    unsigned char *lyrics = NULL;
+
+    encoding = body->encoding;
+
+    if(body->descriptor != NULL){
+        descriptor = calloc(sizeof(unsigned char), id3strlen(body->descriptor) + id3ReaderAllocationAdd(encoding));
+        memcpy(descriptor, body->descriptor, id3strlen(body->descriptor));
+    }
+
+    if(language != NULL){
+        language = calloc(sizeof(unsigned char), ID3V2_LANGUAGE_LEN + 1);
+        memcpy(language, body->language, ID3V2_LANGUAGE_LEN);
+    }
+
+    if(body->lyrics != NULL){
+        lyrics = calloc(sizeof(unsigned char), id3strlen(body->lyrics) + id3ReaderAllocationAdd(encoding));
+        memcpy(lyrics, body->lyrics, id3strlen(body->lyrics));
+    }
+
+    return id3v2NewUnsynchronizedLyricsBody(encoding, language, descriptor, lyrics);
+}
+
+Id3v2UnsynchronizedLyricsBody *id3v2ParseUnsynchronizedLyricsBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -1114,20 +1490,20 @@ Id3v2UnsynchronisedLyricsBody *id3v2ParseUnsynchronisedLyricsBody(unsigned char 
     lyrics = id3ReaderEncodedRemainder(stream, encoding);
 
     id3FreeReader(stream);
-    return id3v2NewUnsynchronisedLyricsBody(encoding, language, descriptor, lyrics);
+    return id3v2NewUnsynchronizedLyricsBody(encoding, language, descriptor, lyrics);
 }
 
-Id3v2UnsynchronisedLyricsBody *id3v2NewUnsynchronisedLyricsBody(unsigned char encoding, unsigned char *language, unsigned char *descriptor, unsigned char *lyrics){
+Id3v2UnsynchronizedLyricsBody *id3v2NewUnsynchronizedLyricsBody(unsigned char encoding, unsigned char *language, unsigned char *descriptor, unsigned char *lyrics){
 
-    Id3v2UnsynchronisedLyricsBody *unsynchronisedLyricsBody = malloc(sizeof(Id3v2UnsynchronisedLyricsBody));
+    Id3v2UnsynchronizedLyricsBody *unsynchronizedLyricsBody = malloc(sizeof(Id3v2UnsynchronizedLyricsBody));
 
     // copy data
-    unsynchronisedLyricsBody->encoding = encoding;
-    unsynchronisedLyricsBody->language = language;
-    unsynchronisedLyricsBody->descriptor = descriptor;
-    unsynchronisedLyricsBody->lyrics = lyrics;
+    unsynchronizedLyricsBody->encoding = encoding;
+    unsynchronizedLyricsBody->language = language;
+    unsynchronizedLyricsBody->descriptor = descriptor;
+    unsynchronizedLyricsBody->lyrics = lyrics;
 
-    return unsynchronisedLyricsBody;
+    return unsynchronizedLyricsBody;
 }
 
 void id3v2FreeUnsynchronizedLyricsFrame(Id3v2Frame *toDelete){
@@ -1145,7 +1521,7 @@ void id3v2FreeUnsynchronizedLyricsFrame(Id3v2Frame *toDelete){
         return;
     }
 
-    Id3v2UnsynchronisedLyricsBody *body = (Id3v2UnsynchronisedLyricsBody *)toDelete->frame;
+    Id3v2UnsynchronizedLyricsBody *body = (Id3v2UnsynchronizedLyricsBody *)toDelete->frame;
 
     if(body->descriptor != NULL){
         free(body->descriptor);
@@ -1167,7 +1543,7 @@ void id3v2FreeUnsynchronizedLyricsFrame(Id3v2Frame *toDelete){
     Synced lyrics frame functions
 */
 
-Id3v2Frame *id3v2ParseSynchronisedLyricsFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseSynchronizedLyricsFrame(unsigned char *buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -1180,7 +1556,7 @@ Id3v2Frame *id3v2ParseSynchronisedLyricsFrame(unsigned char *buffer, Id3v2Header
     }
 
     Id3v2FrameHeader *newHeader = NULL;
-    Id3v2SynchronisedLyricsBody *newSynchronisedLyricsBody = NULL;
+    Id3v2SynchronizedLyricsBody *newSynchronizedLyricsBody = NULL;
 
     newHeader = id3v2ParseFrameHeader(buffer, header);
 
@@ -1199,12 +1575,63 @@ Id3v2Frame *id3v2ParseSynchronisedLyricsFrame(unsigned char *buffer, Id3v2Header
     }
 
     buffer = buffer + newHeader->headerSize;
-    newSynchronisedLyricsBody = id3v2ParseSynchronisedLyricsBody(buffer, newHeader);
+    newSynchronizedLyricsBody = id3v2ParseSynchronizedLyricsBody(buffer, newHeader);
 
-    return id3v2NewFrame(newHeader, newSynchronisedLyricsBody);
+    return id3v2NewFrame(newHeader, newSynchronizedLyricsBody);
 }
 
-Id3v2SynchronisedLyricsBody *id3v2ParseSynchronisedLyricsBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2Frame *id3v2CopySynchronizedLyricsFrame(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return NULL;
+    }
+
+    Id3v2FrameHeader *header = NULL;
+    Id3v2SynchronizedLyricsBody *body = NULL;
+
+    header = id3v2CopyFrameHeader(frame->header);
+    body = id3v2CopySynchronizedLyricsBody(frame->frame);
+
+    return id3v2NewFrame(header, body);
+
+}
+
+Id3v2SynchronizedLyricsBody *id3v2CopySynchronizedLyricsBody(Id3v2SynchronizedLyricsBody *body){
+
+    if(body == NULL){
+        return NULL;
+    }
+
+    unsigned char encoding = 0x00;
+    unsigned char *descriptor = NULL;
+    unsigned char *language = NULL;
+    unsigned int timeStampFormat = 0;
+    unsigned int contentType = 0;
+    List *lyrics = NULL;
+
+
+    encoding = body->encoding;
+    timeStampFormat = body->timeStampFormat;
+    contentType = body->contentType;
+
+    if(body->descriptor != NULL){
+        descriptor = calloc(sizeof(unsigned char), id3strlen(body->descriptor) + id3ReaderAllocationAdd(encoding));
+        memcpy(descriptor, body->descriptor, id3strlen(body->descriptor));
+    }
+
+    if(body->language != NULL){
+        language = calloc(sizeof(unsigned char), ID3V2_LANGUAGE_LEN + 1);
+        memcpy(language, body->language, ID3V2_LANGUAGE_LEN);
+    }
+
+    if(body->lyrics->head != NULL){
+        lyrics = copyList(body->lyrics);
+    }
+
+    return id3v2NewSynchronizedLyricsBody(encoding, language, timeStampFormat, contentType, descriptor, lyrics);
+}
+
+Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -1245,7 +1672,7 @@ Id3v2SynchronisedLyricsBody *id3v2ParseSynchronisedLyricsBody(unsigned char *buf
     id3ReaderSeek(stream, id3ReaderAllocationAdd(encoding), SEEK_CUR);
 
     // body content
-    lyrics = newList(id3v2FreeStampedLyric);
+    lyrics = newList(id3v2FreeStampedLyric, id3v2CopyStampedLyric);
 
     while(id3ReaderGetCh(stream) != EOF){
 
@@ -1265,25 +1692,24 @@ Id3v2SynchronisedLyricsBody *id3v2ParseSynchronisedLyricsBody(unsigned char *buf
         listPush(lyrics, lyric);
         
     }
-    
 
     id3FreeReader(stream);
-    return id3v2NewSynchronisedLyricsBody(encoding, language, timeStampFormat, contentType, descriptor, lyrics);
+    return id3v2NewSynchronizedLyricsBody(encoding, language, timeStampFormat, contentType, descriptor, lyrics);
 }
 
-Id3v2SynchronisedLyricsBody *id3v2NewSynchronisedLyricsBody(unsigned char encoding, unsigned char *language, unsigned int timeStampFormat, unsigned int contentType, unsigned char *descriptor, List *lyrics){
+Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(unsigned char encoding, unsigned char *language, unsigned int timeStampFormat, unsigned int contentType, unsigned char *descriptor, List *lyrics){
 
-    Id3v2SynchronisedLyricsBody *synchronisedLyricsBody = malloc(sizeof(Id3v2SynchronisedLyricsBody));
+    Id3v2SynchronizedLyricsBody *synchronizedLyricsBody = malloc(sizeof(Id3v2SynchronizedLyricsBody));
 
     // copy data
-    synchronisedLyricsBody->encoding = encoding;
-    synchronisedLyricsBody->language = language;
-    synchronisedLyricsBody->timeStampFormat = timeStampFormat;
-    synchronisedLyricsBody->contentType = contentType;
-    synchronisedLyricsBody->descriptor = descriptor;
-    synchronisedLyricsBody->lyrics = lyrics;
+    synchronizedLyricsBody->encoding = encoding;
+    synchronizedLyricsBody->language = language;
+    synchronizedLyricsBody->timeStampFormat = timeStampFormat;
+    synchronizedLyricsBody->contentType = contentType;
+    synchronizedLyricsBody->descriptor = descriptor;
+    synchronizedLyricsBody->lyrics = lyrics;
 
-    return synchronisedLyricsBody;
+    return synchronizedLyricsBody;
 }
 
 Id3v2StampedLyric *id3v2NewStampedLyric(unsigned char *text, long timeStamp){
@@ -1296,7 +1722,7 @@ Id3v2StampedLyric *id3v2NewStampedLyric(unsigned char *text, long timeStamp){
     return newLyric;
 }
 
-void id3v2FreeSynchronisedLyricsFrame(Id3v2Frame *toDelete){
+void id3v2FreeSynchronizedLyricsFrame(Id3v2Frame *toDelete){
 
     if(toDelete == NULL){
         return;
@@ -1311,7 +1737,7 @@ void id3v2FreeSynchronisedLyricsFrame(Id3v2Frame *toDelete){
         return;
     }
 
-    Id3v2SynchronisedLyricsBody *body = (Id3v2SynchronisedLyricsBody *)toDelete->frame;
+    Id3v2SynchronizedLyricsBody *body = (Id3v2SynchronizedLyricsBody *)toDelete->frame;
 
     if(body->descriptor != NULL){
         free(body->descriptor);
@@ -1324,6 +1750,24 @@ void id3v2FreeSynchronisedLyricsFrame(Id3v2Frame *toDelete){
     destroyList(body->lyrics);
     free(body);
     free(toDelete);
+}
+
+void *id3v2CopyStampedLyric(void *toCopy){
+
+    if(toCopy == NULL){
+        return NULL;
+    }
+
+    Id3v2StampedLyric *lyric = (Id3v2StampedLyric *)toCopy;
+    unsigned char *text = NULL;
+    
+    if(lyric->text != NULL){
+        //+1 always iso?
+        text = calloc(sizeof(unsigned char), id3strlen(lyric->text) + 1);
+        memcpy(text, lyric->text, id3strlen(lyric->text));
+    }
+    
+    return id3v2NewStampedLyric(text, lyric->timeStamp);
 }
 
 void id3v2FreeStampedLyric(void *toDelete){
@@ -1420,7 +1864,7 @@ Id3v2CommentBody *id3v2CopyCommentBody(Id3v2CommentBody *body){
         memcpy(language, body->language, ID3V2_LANGUAGE_LEN);
     }
 
-    if(body->description){
+    if(body->description != NULL){
         description = calloc(sizeof(unsigned char), id3strlen(body->description) + id3ReaderAllocationAdd(encoding));
         memcpy(description, body->description, id3strlen(body->description));
     }
@@ -1817,12 +2261,12 @@ Id3v2PictureBody *id3v2CopyPictureBody(Id3v2PictureBody *body){
         memcpy(format, body->format, strlen((char *)body->format));
     }
 
-    if(description != NULL){
+    if(body->description != NULL){
         description = calloc(sizeof(unsigned char), id3strlen(body->description) + id3ReaderAllocationAdd(encoding));
         memcpy(description, body->description, id3strlen(body->description));
     }
 
-    if(pictureData != NULL){
+    if(body->pictureData != NULL){
         pictureData = calloc(sizeof(unsigned char), body->picSize + 1);
         memcpy(pictureData, body->pictureData, body->picSize);
     }
@@ -2218,7 +2662,7 @@ Id3v2PlayCounterBody *id3v2CopyPlayCounterBody(Id3v2PlayCounterBody *body){
 
     unsigned char *counter = NULL;
 
-    if(counter != NULL){
+    if(body->counter != NULL){
         counter = calloc(sizeof(unsigned char), strlen((char *)body->counter) + 1);
         memcpy(counter, body->counter, strlen((char *)body->counter));
     }
@@ -2689,7 +3133,7 @@ Id3v2AudioEncryptionBody *id3v2CopyAudioEncryptionBody(Id3v2AudioEncryptionBody 
     previewLength = body->previewLength;
     encryptionInfoLen = body->encryptionInfoLen;
 
-    if(ownerIdentifier != NULL){
+    if(body->ownerIdentifier != NULL){
         ownerIdentifier = calloc(sizeof(unsigned char), strlen((char *)body->ownerIdentifier) + 1);
         memcpy(ownerIdentifier, body->ownerIdentifier, strlen((char *)body->ownerIdentifier));
     }
@@ -3128,12 +3572,12 @@ Id3v2TermsOfUseBody *id3v2CopyTermsOfUseBody(Id3v2TermsOfUseBody *body){
 
     encoding = body->encoding;
 
-    if(language != NULL){
+    if(body->language != NULL){
         language = calloc(sizeof(unsigned char), ID3V2_LANGUAGE_LEN + 1);
         memcpy(language, body->language, ID3V2_LANGUAGE_LEN);
     }
 
-    if(text != NULL){
+    if(body->text != NULL){
         text = calloc(sizeof(unsigned char), id3strlen(body->text));
         memcpy(text, body->text, id3strlen(body->text));
     }
@@ -3867,7 +4311,6 @@ Id3v2Frame *id3v2CopyGroupIDRegistrationFrame(Id3v2Frame *frame){
     header = id3v2CopyFrameHeader(frame->header);
     body = id3v2CopyGroupIDRegistrationBody(frame->frame);
 
-
     return id3v2NewFrame(header, body);
 }
 
@@ -3961,9 +4404,11 @@ Id3v2PrivateBody *id3v2CopyPrivateBody(Id3v2PrivateBody *body){
         ownerIdentifier = calloc(sizeof(unsigned char), strlen((char *)body->ownerIdentifier) + 1);
         memcpy(ownerIdentifier, body->ownerIdentifier, strlen((char *)body->ownerIdentifier));
     }
+    if(body->privateData != NULL){
+        privateData = calloc(sizeof(unsigned char), privateDataLen + 1);
+        memcpy(privateData, body->privateData, privateDataLen);
+    }
 
-    privateData = calloc(sizeof(unsigned char), privateDataLen + 1);
-    memcpy(privateData, body->privateData, privateDataLen);
     
     return id3v2NewPrivateBody(ownerIdentifier, privateData, privateDataLen);    
 
@@ -4247,12 +4692,7 @@ Id3v2Frame *id3v2CopySeekFrame(Id3v2Frame *frame){
 }
 
 Id3v2SeekBody *id3v2CopySeekBody(Id3v2SeekBody *body){
-
-    if(body == NULL){
-        return NULL;
-    }
-
-    return id3v2NewSeekBody(body->minimumOffsetToNextTag);
+    return (body == NULL) ? NULL : id3v2NewSeekBody(body->minimumOffsetToNextTag);
 }
 
 Id3v2SeekBody *id3v2ParseSeekBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){

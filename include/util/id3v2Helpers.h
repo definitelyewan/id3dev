@@ -14,7 +14,8 @@ int getBits8(unsigned char *bytes, int byteNum);
 unsigned int syncint_decode(int value);
 
 //list functions
-List *newList(void (*deleteFunction)(void* toDelete));
+List *newList(void (*deleteFunction)(void* toDelete), void *(*copyFunction)(void* toCopy));
+List *copyList(List *list);
 Node *newNode(void *data);
 void listPush(List *list, void *toAdd);
 void *listRemove(List *list, int pos);

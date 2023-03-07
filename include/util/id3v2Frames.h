@@ -37,6 +37,7 @@ List *id3v2ExtractFrames(unsigned char *buffer, Id3v2Header *header);
 Id3v2Frame *id3v2NewFrame(Id3v2FrameHeader *header, void *bodyContent);
 Id3v2Frame *id3v2ParseFrame(unsigned char *buffer, Id3v2Header *header);
 Id3v2Frame *id3v2SearchFrame(Id3v2Tag *tag, Id3v2FrameId id);
+void *id3v2CopyFrame(void *toCopy);
 void id3v2FreeFrame(void *toDelete);
 
 //header frame functions
@@ -54,54 +55,72 @@ void id3v2FreeFlagContent(Id3v2FlagContent *toDelete);
 
 //text frame functions
 Id3v2Frame *id3v2ParseTextFrame(unsigned char *buffer, Id3v2Header *header);
+Id3v2Frame *id3v2CopyTextFrame(Id3v2Frame *frame);
+Id3v2TextBody *id3v2CopyTextBody(Id3v2TextBody *body);
 Id3v2TextBody *id3v2ParseTextBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
 Id3v2TextBody *id3v2NewTextBody(unsigned char encoding, unsigned char *value, unsigned char *description);
 void id3v2FreeTextFrame(Id3v2Frame *toDelete);
 
 //url frame functions
 Id3v2Frame *id3v2ParseURLFrame(unsigned char *buffer, Id3v2Header *header);
+Id3v2Frame *id3v2CopyURLFrame(Id3v2Frame *frame);
+Id3v2URLBody *id3v2CopyURLBody(Id3v2URLBody *body);
 Id3v2URLBody *id3v2ParseURLBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
 Id3v2URLBody *id3v2NewURLBody(unsigned char encoding, unsigned char *url, unsigned char *description);
 void id3v2FreeURLFrame(Id3v2Frame *toDelete);
 
 //involved persons list frame functions
 Id3v2Frame *id3v2ParseInvolvedPeopleListFrame(unsigned char *buffer, Id3v2Header *header);
+Id3v2Frame *id3v2CopyInvolvedPeopleListFrame(Id3v2Frame *frame);
+Id3v2InvolvedPeopleListBody *id3v2CopyInvolvedPeopleListBody(Id3v2InvolvedPeopleListBody *body);
 Id3v2InvolvedPeopleListBody *id3v2ParseInvolvedPeopleListBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
 Id3v2InvolvedPeopleListBody *id3v2NewInvolvedPeopleListBody(unsigned char encoding, unsigned char *peopleListStrings);
 void id3v2FreeInvolvedPeopleListFrame(Id3v2Frame *toDelete);
 
 //music cd identifier frame funstions
 Id3v2Frame *id3v2ParseMusicCDIdentifierFrame(unsigned char *buffer, Id3v2Header *header);
+Id3v2Frame *id3v2CopyMusicCDIdentifierFrame(Id3v2Frame *frame);
+Id3v2MusicCDIdentifierBody *id3v2CopyMusicCDIdentifierBody(Id3v2MusicCDIdentifierBody *body);
 Id3v2MusicCDIdentifierBody *id3v2ParseMusicCDIdentifierBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
 Id3v2MusicCDIdentifierBody *id3v2NewMusicCDIdentifierBody(unsigned char *cdtoc);
 void id3v2FreeMusicCDIdentifierFrame(Id3v2Frame *toDelete);
 
 //event time codes frame functions
 Id3v2Frame *id3v2ParseEventTimeCodesFrame(unsigned char *buffer, Id3v2Header *header);
+Id3v2Frame *id3v2CopyEventTimeCodesFrame(Id3v2Frame *frame);
+Id3v2EventTimeCodesBody *id3v2CopyEventTimeCodesBody(Id3v2EventTimeCodesBody *body);
 Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
 Id3v2EventTimeCodesBody *id3v2NewEventTimeCodesBody(unsigned int timeStampFormat, List *events);
 Id3v2EventTimesCodeEvent *id3v2NewEventCodeEvent(unsigned char typeOfEvent, long timeStamp);
 void id3v2FreeEventTimeCodesFrame(Id3v2Frame *toDelete);
+void *id3v2CopyEventCodeEvent(void *toCopy);
 void id3v2FreeEventCode(void *toDelete);
 
 //synced tempo codes functions
 Id3v2Frame *id3v2ParseSyncedTempoCodesFrame(unsigned char *buffer, Id3v2Header *header);
+Id3v2Frame *id3v2CopySyncedTempoCodesFrame(Id3v2Frame *frame);
+Id3v2SyncedTempoCodesBody *id3v2CopySyncedTempoCodesBody(Id3v2SyncedTempoCodesBody *body);
 Id3v2SyncedTempoCodesBody *id3v2ParseSyncedTempoCodesBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
 Id3v2SyncedTempoCodesBody *id3v2NewSyncedTempoCodesBody(unsigned char timeStampFormat, unsigned char *tempoData, unsigned int tempoDataLen);
 void id3v2FreeSyncedTempoCodesFrame(Id3v2Frame *toDelete);
 
 //unsynced lyrics frame functions
-Id3v2Frame *id3v2ParseUnsynchronisedLyricsFrame(unsigned char *buffer, Id3v2Header *header);
-Id3v2UnsynchronisedLyricsBody *id3v2ParseUnsynchronisedLyricsBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
-Id3v2UnsynchronisedLyricsBody *id3v2NewUnsynchronisedLyricsBody(unsigned char encoding, unsigned char *language, unsigned char *descriptor, unsigned char *lyrics);
+Id3v2Frame *id3v2ParseUnsynchronizedLyricsFrame(unsigned char *buffer, Id3v2Header *header);
+Id3v2Frame *id3v2CopyUnsynchronizedLyricsFrame(Id3v2Frame *frame);
+Id3v2UnsynchronizedLyricsBody *id3v2CopyUnsynchronizedLyricsBody(Id3v2UnsynchronizedLyricsBody *body);
+Id3v2UnsynchronizedLyricsBody *id3v2ParseUnsynchronizedLyricsBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
+Id3v2UnsynchronizedLyricsBody *id3v2NewUnsynchronizedLyricsBody(unsigned char encoding, unsigned char *language, unsigned char *descriptor, unsigned char *lyrics);
 void id3v2FreeUnsynchronizedLyricsFrame(Id3v2Frame *toDelete);
 
 //synced lyrics frame functions
-Id3v2Frame *id3v2ParseSynchronisedLyricsFrame(unsigned char *buffer, Id3v2Header *header);
-Id3v2SynchronisedLyricsBody *id3v2ParseSynchronisedLyricsBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
-Id3v2SynchronisedLyricsBody *id3v2NewSynchronisedLyricsBody(unsigned char encoding, unsigned char *language, unsigned int timeStampFormat, unsigned int contentType, unsigned char *descriptor, List *lyrics);
+Id3v2Frame *id3v2ParseSynchronizedLyricsFrame(unsigned char *buffer, Id3v2Header *header);
+Id3v2Frame *id3v2CopySynchronizedLyricsFrame(Id3v2Frame *frame);
+Id3v2SynchronizedLyricsBody *id3v2CopySynchronizedLyricsBody(Id3v2SynchronizedLyricsBody *body);
+Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
+Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(unsigned char encoding, unsigned char *language, unsigned int timeStampFormat, unsigned int contentType, unsigned char *descriptor, List *lyrics);
 Id3v2StampedLyric *id3v2NewStampedLyric(unsigned char* text, long timeStamp);
-void id3v2FreeSynchronisedLyricsFrame(Id3v2Frame *toDelete);
+void id3v2FreeSynchronizedLyricsFrame(Id3v2Frame *toDelete);
+void *id3v2CopyStampedLyric(void *toCopy);
 void id3v2FreeStampedLyric(void *toDelete);
 
 //comment frame functions
@@ -242,7 +261,7 @@ void id3v2FreeEncryptionMethodRegistrationFrame(Id3v2Frame *toDelete);
 
 //group id registration frame functions ^2.3
 Id3v2Frame *id3v2ParseGroupIDRegistrationFrame(unsigned char *buffer, Id3v2Header *header);
-Id3v2Frame *id3v2CopyGroupIDDRegistrationFrame(Id3v2Frame *frame);
+Id3v2Frame *id3v2CopyGroupIDRegistrationFrame(Id3v2Frame *frame);
 Id3v2GroupIDRegistrationBody *id3v2CopyGroupIDRegistrationBody(Id3v2GroupIDRegistrationBody *body);
 Id3v2GroupIDRegistrationBody *id3v2ParseGroupIDRegistrationBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
 Id3v2GroupIDRegistrationBody *id3v2NewGroupIDRegistrationBody(unsigned char *ownerIdentifier, unsigned char groupSymbol, unsigned char *groupDependentData, unsigned int groupDependentDataLen);

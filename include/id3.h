@@ -6,9 +6,9 @@ extern "C"{
 #endif
 
 #include <stdbool.h>
+#include "id3Types.h"
 #include "id3v2.h"
 #include "id3v1.h"
-
 
 Id3Metadata *id3NewMetadataFromFile(const char *filePath);
 Id3Metadata *id3NewMetadataFromBuffer(unsigned char *buffer, int size);

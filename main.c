@@ -11,7 +11,7 @@ int main(int argc, char *argv[]){
     if(hasId3v1(data)){
 
         printf("ID3V1 tag information\n");
-        Id3v1Tag *tag = (Id3v1Tag *)data->version1->head->data;
+        Id3v1Tag *tag = data->version1;
 
         printf("artist | [%s]\n",tag->artist);
         printf("album  | [%s]\n",tag->albumTitle);
@@ -25,44 +25,39 @@ int main(int argc, char *argv[]){
     printf("ID3V2 tag information\n");
     if(hasId3v2(data)){
         
-        Node *tmp = data->version2->head;
-        while(tmp != NULL){
+        Id3v2Tag *tag = data->version2;
 
-            Id3v2Tag *tag = (Id3v2Tag *)tmp->data;
+        if(tag->header == NULL){
+            printf("[*]no header\n");
+        }else{
+            printf("ver. %d.%d\n",tag->header->versionMajor, tag->header->versionMinor);
+            printf("flags. %d%d%d%d\n",tag->header->unsynchronisation, 
+                                    (tag->header->extendedHeader != NULL) ? true: false, 
+                                    tag->header->experimentalIndicator, 
+                                    tag->header->footer);
+            printf("frame size. %d\n",tag->header->size);
 
-            if(tag->header == NULL){
-                printf("[*]no header\n");
-                continue;
+            if(tag->header->extendedHeader != NULL){
+                printf("ext size. %d\n",tag->header->extendedHeader->size);
+                printf("padding. %d\n",tag->header->extendedHeader->padding);
+                printf("crc. %s\n",tag->header->extendedHeader->crc);
+                printf("update. %d\n",tag->header->extendedHeader->update);
+                printf("tag size restriction %x\n",tag->header->extendedHeader->tagSizeRestriction);
+                printf("tag encoding restriction %x\n",tag->header->extendedHeader->encodingRestriction);
+                printf("text size restriction %x\n",tag->header->extendedHeader->textSizeRestriction);
+                printf("image encoding restriction %x\n",tag->header->extendedHeader->imageEncodingRestriction);
+                printf("image size restriction %x\n",tag->header->extendedHeader->imageSizeRestriction);
+                
             }else{
-                printf("ver. %d.%d\n",tag->header->versionMajor, tag->header->versionMinor);
-                printf("flags. %d%d%d%d\n",tag->header->unsynchronisation, 
-                                        (tag->header->extendedHeader != NULL) ? true: false, 
-                                        tag->header->experimentalIndicator, 
-                                        tag->header->footer);
-                printf("frame size. %d\n",tag->header->size);
-
-                if(tag->header->extendedHeader != NULL){
-                    printf("ext size. %d\n",tag->header->extendedHeader->size);
-                    printf("padding. %d\n",tag->header->extendedHeader->padding);
-                    printf("crc. %s\n",tag->header->extendedHeader->crc);
-                    printf("update. %d\n",tag->header->extendedHeader->update);
-                    printf("tag size restriction %x\n",tag->header->extendedHeader->tagSizeRestriction);
-                    printf("tag encoding restriction %x\n",tag->header->extendedHeader->encodingRestriction);
-                    printf("text size restriction %x\n",tag->header->extendedHeader->textSizeRestriction);
-                    printf("image encoding restriction %x\n",tag->header->extendedHeader->imageEncodingRestriction);
-                    printf("image size restriction %x\n",tag->header->extendedHeader->imageSizeRestriction);
-                    
-                }else{
-                    printf("[*]no extended header\n");
-                }
-
+                printf("[*]no extended header\n");
             }
 
-            if(tag->frames == NULL){
-                printf("[*]no frames\n");
-                continue;
-            }            
+        }
 
+        if(tag->frames == NULL){
+            printf("[*]no frames\n");
+
+        }else{
             Node *curr = tag->frames->head; 
             
             while(curr != NULL){
@@ -196,9 +191,10 @@ int main(int argc, char *argv[]){
                 printf("\n");
                 curr = curr->next;
             }
+        }            
 
-            tmp = tmp->next;
-        }
+
+    
 
     }
     id3FreeMetadata(data);
