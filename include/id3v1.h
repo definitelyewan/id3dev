@@ -16,6 +16,7 @@ extern "C"{
 
 Id3v1Tag *id3v1TagFromFile(const char* filePath);
 Id3v1Tag *id3v1TagFromBuffer(unsigned char *buffer);
+Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy);
 Id3v1Tag *id3v1NewTag(unsigned char *title, unsigned char *artist, unsigned char *albumTitle, int year, int trackNumber, unsigned char *comment, Genre genre);
 void id3v1FreeTag(void *toDelete);
 bool containsId3v1(unsigned char *buffer);

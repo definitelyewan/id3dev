@@ -88,6 +88,15 @@ Id3v2Header *id3v2NewHeader(int versionMinor, int versionMajor, bool unsynchroni
     return header;
 }
 
+Id3v2Header *id3v2CopyHeader(Id3v2Header *toCopy){
+
+    if(toCopy == NULL){
+        return NULL;
+    }
+
+    return id3v2NewHeader(toCopy->versionMinor, toCopy->versionMajor, toCopy->unsynchronisation, toCopy->experimentalIndicator, toCopy->footer, toCopy->size, id3v2CopyExtendedHeader(toCopy->extendedHeader));
+}
+
 void id3v2FreeHeader(Id3v2Header *header){
 
     if(header == NULL){
@@ -209,8 +218,6 @@ Id3v2ExtHeader *id3v2ParseExtendedHeader(unsigned char *buffer, Id3v2HeaderVersi
         padding = stream->bufferSize - stream->cursor;
 
         id3FreeReader(stream);
-    }else{
-        memset(crc, '\0', ID3V2_CRC_LEN + 1);
     }
 
 
@@ -233,6 +240,39 @@ Id3v2ExtHeader *id3v2NewExtendedHeader(int size, int padding, unsigned char upda
     extHeader->update = update;
 
     return extHeader;
+}
+
+Id3v2ExtHeader *id3v2CopyExtendedHeader(Id3v2ExtHeader *toCopy){
+
+    if(toCopy == NULL){
+        return NULL;
+    }
+
+    int size = 0;
+    int padding = 0;
+    unsigned char update = 0x00;
+    unsigned char tagSizeRestriction = 0x00;
+    unsigned char encodingRestriction = 0x00;
+    unsigned char textSizeRestriction = 0x00;
+    unsigned char imageEncodingRestriction = 0x00;
+    unsigned char imageSizeRestriction = 0x00;
+    unsigned char *crc = NULL;
+
+    size = toCopy->size;
+    padding = toCopy->padding;
+    update = toCopy->update;
+    tagSizeRestriction = toCopy->tagSizeRestriction;
+    encodingRestriction = toCopy->encodingRestriction;
+    textSizeRestriction = toCopy->textSizeRestriction;
+    imageEncodingRestriction = toCopy->imageEncodingRestriction;
+    imageSizeRestriction = toCopy->imageSizeRestriction;
+
+    if(toCopy->crc != NULL){
+        crc = calloc(sizeof(unsigned char), toCopy->crcLen + 1);
+        memcpy(crc, toCopy->crc, toCopy->crcLen);
+    }
+
+    return id3v2NewExtendedHeader(size, padding, update, crc, tagSizeRestriction, encodingRestriction, textSizeRestriction, imageEncodingRestriction, imageSizeRestriction);
 }
 
 void id3v2FreeExtHeader(Id3v2ExtHeader *extHeader){

@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "id3v2.h"
+#include "id3Reader.h"
+#include "id3v2Frames.h"
+#include "id3v2Header.h"
+#include "id3v2Helpers.h"
 
 Id3v2Tag *id3v2ParseTagFromFile(const char *filePath){
     
@@ -78,6 +82,10 @@ Id3v2Tag *id3v2ParseTagFromBuffer(unsigned char *buffer, int tagSize){
     free(buffer);
 
     return id3v2NewTag(headerInfo, frameList);
+}
+
+Id3v2Tag *id3v2CopyTag(Id3v2Tag *toCopy){
+    return (toCopy == NULL) ? NULL : id3v2NewTag(id3v2CopyHeader(toCopy->header), copyList(toCopy->frames));
 }
 
 Id3v2Tag *id3v2NewTag(Id3v2Header *header, List *frames){

@@ -298,10 +298,6 @@ typedef struct _Id3v2header{
 */
 
 typedef struct _Id3v2Tag{
-    
-    //function readable version
-    unsigned char id3Version;
-    
     Id3v2Header *header;
     List *frames;
 
@@ -546,6 +542,7 @@ typedef struct _Id3v2SynchronizedLyricsBody{
 typedef struct _Id3v2StampedLyric{
     unsigned char *text;
     long timeStamp;
+    size_t lyricLen;
 
 }Id3v2StampedLyric;
 

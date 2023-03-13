@@ -3,8 +3,6 @@
 #include <string.h>
 #include "id3v2Helpers.h"
 
-
-
 int getBits8(unsigned char *bytes, int byteNum){
     
     int byteAsInt = 0x00;
@@ -38,6 +36,7 @@ List *newList(void (*deleteFunction)(void* toDelete), void *(*copyFunction)(void
     list->head = NULL;
     list->size = 0;
     list->deleteData = deleteFunction;
+    list->copyData = copyFunction;
 
     return list;
 }
@@ -123,21 +122,21 @@ void *listRemove(List *list, int pos){
     Node *temp = list->head;
     Node *prev = list->head;
     void *toReturn;
-    for (int i = 0; i < pos; i++) {
-        if (i == 0 && pos == 1) {
+    for(int i = 0; i < pos; i++) {
+        if(i == 0 && pos == 1) {
             toReturn = list->head->data;
             list->head = list->head->next;
             free(temp);
             return toReturn;
         }else{
-            if (i == pos - 1 && temp) {
+            if(i == pos - 1 && temp) {
                 toReturn = temp->data;
                 prev->next = temp->next;
                 free(temp);
             }else {
                 prev = temp;
 
-                if (prev == NULL){
+                if(prev == NULL){
                     break;
                 }
                     
@@ -166,5 +165,5 @@ List *copyList(List *list){
         n = n->next;
     }
 
-    return list;
+    return ret;
 }

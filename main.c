@@ -3,11 +3,7 @@
 #include <string.h>
 #include "id3.h"
 
-
-int main(int argc, char *argv[]){
-
-    Id3Metadata *data = id3NewMetadataFromFile("01. Paprika.mp3");
-    
+void metadataPrint(Id3Metadata *data){
     if(hasId3v1(data)){
 
         printf("ID3V1 tag information\n");
@@ -197,7 +193,21 @@ int main(int argc, char *argv[]){
     
 
     }
+
+}
+
+
+int main(int argc, char *argv[]){
+
+    Id3Metadata *data = id3NewMetadataFromFile("01. Paprika.mp3");
+    metadataPrint(data);
+    
+    printf("[Make A Copy]\n");
+    Id3Metadata *data2 = id3CopyMetadata(data);
+    metadataPrint(data2);
+
     id3FreeMetadata(data);
+    id3FreeMetadata(data2);
         
     return 0;
 }

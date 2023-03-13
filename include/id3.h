@@ -12,7 +12,8 @@ extern "C"{
 
 Id3Metadata *id3NewMetadataFromFile(const char *filePath);
 Id3Metadata *id3NewMetadataFromBuffer(unsigned char *buffer, int size);
-
+Id3Metadata *id3CopyMetadata(Id3Metadata *toCopy);
+Id3Metadata *id3NewMetadata(Id3v1Tag *v1, Id3v2Tag *v2);
 bool hasId3v1(Id3Metadata *metadata);
 bool hasId3v2(Id3Metadata *metadata);
 

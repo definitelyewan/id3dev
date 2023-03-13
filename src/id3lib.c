@@ -46,7 +46,6 @@ Id3Metadata *id3NewMetadataFromBuffer(unsigned char *buffer, int size){
     }
 
     bool first = true;
-    Id3Metadata *metadata = malloc(sizeof(Id3Metadata));
     Id3v1Tag *version1 = NULL;
     Id3v2Tag *version2 = NULL;
     Id3Reader *stream = id3NewReader(buffer, size);
@@ -76,7 +75,7 @@ Id3Metadata *id3NewMetadataFromBuffer(unsigned char *buffer, int size){
                     first = false;
                 }
 
-                if(tag->id3Version == ID3V24 && tag->header->extendedHeader != NULL){
+                if(tag->header->versionMinor == ID3V24 && tag->header->extendedHeader != NULL){
                     if(tag->header->extendedHeader->update){
                         id3v2FreeTag(version2);
                         version2 = tag;
@@ -88,19 +87,29 @@ Id3Metadata *id3NewMetadataFromBuffer(unsigned char *buffer, int size){
                 id3ReaderSeek(stream, 1, SEEK_CUR);
             }
 
-            
         }else{
             id3ReaderSeek(stream, 1, SEEK_CUR);
         }
-        
-    
     }
 
     free(stream);
+    //bug! figure out why this causes a memory error at a later time
+    //works with no errors if commented out
     //id3FreeReader(stream);
 
-    metadata->version1 = version1;
-    metadata->version2 = version2;
+    return id3NewMetadata(version1, version2);
+}
+
+Id3Metadata *id3CopyMetadata(Id3Metadata *toCopy){
+    return (toCopy == NULL) ? NULL : id3NewMetadata(id3v1CopyTag(toCopy->version1), id3v2CopyTag(toCopy->version2));
+}
+
+Id3Metadata *id3NewMetadata(Id3v1Tag *v1, Id3v2Tag *v2){
+
+    Id3Metadata *metadata = malloc(sizeof(Id3Metadata));
+
+    metadata->version1 = v1;
+    metadata->version2 = v2;
 
     return metadata;
 }

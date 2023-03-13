@@ -90,6 +90,48 @@ Id3v1Tag *id3v1TagFromBuffer(unsigned char *buffer){
     return id3v1NewTag(holdTitle, holdArtist, holdAlbum, atoi((char *)year), trackno, holdComment, genre);
 }
 
+Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy){
+
+    if(toCopy == NULL){
+        return NULL;
+    }
+
+    unsigned char *title = NULL;
+    unsigned char *artist = NULL;
+    unsigned char *albumTitle = NULL;
+    int year = 0;
+    int trackNumber = 0;
+    unsigned char *comment = NULL;
+    Genre genre;
+
+    year = toCopy->year;
+    trackNumber = toCopy->trackNumber;
+    genre = toCopy->genre;
+
+    if(toCopy->title != NULL){
+        title = calloc(sizeof(unsigned char), strlen((char *)toCopy->title) + 1);
+        memcpy(title, toCopy->title, strlen((char *)toCopy->title));
+    }
+
+    if(toCopy->artist != NULL){
+        artist = calloc(sizeof(unsigned char), strlen((char *)toCopy->artist) + 1);
+        memcpy(artist, toCopy->artist, strlen((char *)toCopy->artist));
+    }
+
+    if(toCopy->albumTitle != NULL){
+        albumTitle = calloc(sizeof(unsigned char), strlen((char *)toCopy->albumTitle) + 1);
+        memcpy(albumTitle, toCopy->albumTitle, strlen((char *)toCopy->albumTitle));
+    }
+
+    if(toCopy->comment != NULL){
+        comment = calloc(sizeof(unsigned char), strlen((char *)toCopy->comment) + 1);
+        memcpy(comment, toCopy->comment, strlen((char *)toCopy->comment));
+    }
+
+    return id3v1NewTag(title, artist, albumTitle, year, trackNumber, comment, genre);
+}
+
+
 Id3v1Tag *id3v1NewTag(unsigned char *title, unsigned char *artist, unsigned char *albumTitle, int year, int trackNumber, unsigned char *comment, Genre genre){
 
     Id3v1Tag *tag = malloc(sizeof(Id3v1Tag));

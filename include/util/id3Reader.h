@@ -42,7 +42,7 @@ bool hasBOM(unsigned char *buffer);
 size_t strlenUTF16(unsigned char *buffer);
 size_t strlenUTF16BE(unsigned char *buffer);
 size_t strlenUTF8(unsigned char *buffer);
-size_t id3strlen(unsigned char *buffer);
+size_t id3strlen(unsigned char *buffer, unsigned char encoding);
 
 //extra
 void id3ReaderPrintf(Id3Reader *reader);

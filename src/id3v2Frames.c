@@ -552,14 +552,16 @@ Id3v2TextBody *id3v2CopyTextBody(Id3v2TextBody *body){
     unsigned char *value = NULL;
     unsigned char encoding = 0;
 
+    encoding = body->encoding;
+
     if(body->description != NULL){
-        description = calloc(sizeof(unsigned char), id3strlen(body->description) + id3ReaderAllocationAdd(encoding));
-        memcpy(description, body->description, id3strlen(body->description));
+        description = calloc(sizeof(unsigned char), id3strlen(body->description, encoding) + id3ReaderAllocationAdd(encoding));
+        memcpy(description, body->description, id3strlen(body->description, encoding));
     }
 
     if(body->value != NULL){
-        value = calloc(sizeof(unsigned char), id3strlen(body->value) + id3ReaderAllocationAdd(encoding));
-        memcpy(value, body->value, id3strlen(body->value));
+        value = calloc(sizeof(unsigned char), id3strlen(body->value, encoding) + id3ReaderAllocationAdd(encoding));
+        memcpy(value, body->value, id3strlen(body->value, encoding));
     }
 
     return id3v2NewTextBody(encoding, value, description);
@@ -713,8 +715,8 @@ Id3v2URLBody *id3v2CopyURLBody(Id3v2URLBody *body){
     }
 
     if(body->description != NULL){
-        description = calloc(sizeof(unsigned char), id3strlen(body->description) + id3ReaderAllocationAdd(encoding));
-        memcpy(description, body->description, id3strlen(body->description));
+        description = calloc(sizeof(unsigned char), id3strlen(body->description, encoding) + id3ReaderAllocationAdd(encoding));
+        memcpy(description, body->description, id3strlen(body->description, encoding));
     }
 
     return id3v2NewURLBody(encoding, url, description);
@@ -864,8 +866,8 @@ Id3v2InvolvedPeopleListBody *id3v2CopyInvolvedPeopleListBody(Id3v2InvolvedPeople
     encoding = body->encoding;
 
     if(body->peopleListStrings != NULL){
-        text = calloc(sizeof(unsigned char), id3strlen(body->peopleListStrings) + id3ReaderAllocationAdd(encoding));
-        memcpy(text, body->peopleListStrings, id3strlen(body->peopleListStrings));
+        text = calloc(sizeof(unsigned char), id3strlen(body->peopleListStrings, encoding) + id3ReaderAllocationAdd(encoding));
+        memcpy(text, body->peopleListStrings, id3strlen(body->peopleListStrings, encoding));
     }
 
     return id3v2NewInvolvedPeopleListBody(encoding, text);
@@ -1436,8 +1438,8 @@ Id3v2UnsynchronizedLyricsBody *id3v2CopyUnsynchronizedLyricsBody(Id3v2Unsynchron
     encoding = body->encoding;
 
     if(body->descriptor != NULL){
-        descriptor = calloc(sizeof(unsigned char), id3strlen(body->descriptor) + id3ReaderAllocationAdd(encoding));
-        memcpy(descriptor, body->descriptor, id3strlen(body->descriptor));
+        descriptor = calloc(sizeof(unsigned char), id3strlen(body->descriptor, encoding) + id3ReaderAllocationAdd(encoding));
+        memcpy(descriptor, body->descriptor, id3strlen(body->descriptor, encoding));
     }
 
     if(language != NULL){
@@ -1446,8 +1448,8 @@ Id3v2UnsynchronizedLyricsBody *id3v2CopyUnsynchronizedLyricsBody(Id3v2Unsynchron
     }
 
     if(body->lyrics != NULL){
-        lyrics = calloc(sizeof(unsigned char), id3strlen(body->lyrics) + id3ReaderAllocationAdd(encoding));
-        memcpy(lyrics, body->lyrics, id3strlen(body->lyrics));
+        lyrics = calloc(sizeof(unsigned char), id3strlen(body->lyrics, encoding) + id3ReaderAllocationAdd(encoding));
+        memcpy(lyrics, body->lyrics, id3strlen(body->lyrics, encoding));
     }
 
     return id3v2NewUnsynchronizedLyricsBody(encoding, language, descriptor, lyrics);
@@ -1615,8 +1617,8 @@ Id3v2SynchronizedLyricsBody *id3v2CopySynchronizedLyricsBody(Id3v2SynchronizedLy
     contentType = body->contentType;
 
     if(body->descriptor != NULL){
-        descriptor = calloc(sizeof(unsigned char), id3strlen(body->descriptor) + id3ReaderAllocationAdd(encoding));
-        memcpy(descriptor, body->descriptor, id3strlen(body->descriptor));
+        descriptor = calloc(sizeof(unsigned char), id3strlen(body->descriptor, encoding) + id3ReaderAllocationAdd(encoding));
+        memcpy(descriptor, body->descriptor, id3strlen(body->descriptor, encoding));
     }
 
     if(body->language != NULL){
@@ -1678,17 +1680,19 @@ Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(unsigned char *buf
 
         unsigned char *text = NULL;
         long timeStamp = 0;
+        size_t lyricLen = 0;
         Id3v2StampedLyric *lyric = NULL;
 
         text = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
         id3ReaderRead(stream, text, id3ReaderReadEncodedSize(stream, encoding));
+        lyricLen = id3strlen(text, encoding);
 
         id3ReaderSeek(stream, id3ReaderAllocationAdd(encoding), SEEK_CUR);
 
         timeStamp = getBits8(id3ReaderCursor(stream), ID3V2_TIME_STAMP_LEN);
         id3ReaderSeek(stream, ID3V2_TIME_STAMP_LEN, SEEK_CUR);
 
-        lyric = id3v2NewStampedLyric(text, timeStamp);
+        lyric = id3v2NewStampedLyric(text, timeStamp, lyricLen);
         listPush(lyrics, lyric);
         
     }
@@ -1712,12 +1716,13 @@ Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(unsigned char encodi
     return synchronizedLyricsBody;
 }
 
-Id3v2StampedLyric *id3v2NewStampedLyric(unsigned char *text, long timeStamp){
+Id3v2StampedLyric *id3v2NewStampedLyric(unsigned char *text, long timeStamp, size_t lyricLen){
 
     Id3v2StampedLyric *newLyric = malloc(sizeof(Id3v2StampedLyric));
 
     newLyric->text = text;
     newLyric->timeStamp = timeStamp;
+    newLyric->lyricLen = lyricLen;
 
     return newLyric;
 }
@@ -1760,14 +1765,15 @@ void *id3v2CopyStampedLyric(void *toCopy){
 
     Id3v2StampedLyric *lyric = (Id3v2StampedLyric *)toCopy;
     unsigned char *text = NULL;
+    size_t lyricLen = lyric->lyricLen;
     
     if(lyric->text != NULL){
         //+1 always iso?
-        text = calloc(sizeof(unsigned char), id3strlen(lyric->text) + 1);
-        memcpy(text, lyric->text, id3strlen(lyric->text));
+        text = calloc(sizeof(unsigned char), lyricLen + 1);
+        memcpy(text, lyric->text, lyricLen);
     }
     
-    return id3v2NewStampedLyric(text, lyric->timeStamp);
+    return id3v2NewStampedLyric(text, lyric->timeStamp, lyricLen);
 }
 
 void id3v2FreeStampedLyric(void *toDelete){
@@ -1865,8 +1871,8 @@ Id3v2CommentBody *id3v2CopyCommentBody(Id3v2CommentBody *body){
     }
 
     if(body->description != NULL){
-        description = calloc(sizeof(unsigned char), id3strlen(body->description) + id3ReaderAllocationAdd(encoding));
-        memcpy(description, body->description, id3strlen(body->description));
+        description = calloc(sizeof(unsigned char), id3strlen(body->description, encoding) + id3ReaderAllocationAdd(encoding));
+        memcpy(description, body->description, id3strlen(body->description, encoding));
     }
 
     return id3v2NewCommentBody(encoding, language, description, text);
@@ -2262,8 +2268,8 @@ Id3v2PictureBody *id3v2CopyPictureBody(Id3v2PictureBody *body){
     }
 
     if(body->description != NULL){
-        description = calloc(sizeof(unsigned char), id3strlen(body->description) + id3ReaderAllocationAdd(encoding));
-        memcpy(description, body->description, id3strlen(body->description));
+        description = calloc(sizeof(unsigned char), id3strlen(body->description, encoding) + id3ReaderAllocationAdd(encoding));
+        memcpy(description, body->description, id3strlen(body->description, encoding));
     }
 
     if(body->pictureData != NULL){
@@ -2472,13 +2478,13 @@ Id3v2GeneralEncapsulatedObjectBody *id3v2CopyGeneralEncapsulatedObjectBody(Id3v2
     }
 
     if(body->filename != NULL){
-        filename = calloc(sizeof(unsigned char), id3strlen(body->filename) + id3ReaderAllocationAdd(encoding));
-        memcpy(filename, body->filename, id3strlen(body->filename));
+        filename = calloc(sizeof(unsigned char), id3strlen(body->filename, encoding) + id3ReaderAllocationAdd(encoding));
+        memcpy(filename, body->filename, id3strlen(body->filename, encoding));
     }
 
     if(body->contentDescription != NULL){
-        contentDescription = calloc(sizeof(unsigned char), id3strlen(body->contentDescription) + id3ReaderAllocationAdd(encoding));
-        memcpy(contentDescription, body->contentDescription, id3strlen(body->contentDescription));
+        contentDescription = calloc(sizeof(unsigned char), id3strlen(body->contentDescription, encoding) + id3ReaderAllocationAdd(encoding));
+        memcpy(contentDescription, body->contentDescription, id3strlen(body->contentDescription, encoding));
     }
 
     if(body->encapsulatedObject != NULL){
@@ -3578,8 +3584,8 @@ Id3v2TermsOfUseBody *id3v2CopyTermsOfUseBody(Id3v2TermsOfUseBody *body){
     }
 
     if(body->text != NULL){
-        text = calloc(sizeof(unsigned char), id3strlen(body->text));
-        memcpy(text, body->text, id3strlen(body->text));
+        text = calloc(sizeof(unsigned char), id3strlen(body->text, encoding));
+        memcpy(text, body->text, id3strlen(body->text, encoding));
     }
 
     return id3v2NewTermsOfUseBody(encoding, language, text);
@@ -3739,8 +3745,8 @@ Id3v2OwnershipBody *id3v2CopyOwnershipBody(Id3v2OwnershipBody *body){
     }
 
     if(body->seller != NULL){
-        seller = calloc(sizeof(unsigned char), id3strlen(body->seller) + id3ReaderAllocationAdd(encoding));
-        memcpy(seller, body->seller, id3strlen(body->seller));
+        seller = calloc(sizeof(unsigned char), id3strlen(body->seller, encoding) + id3ReaderAllocationAdd(encoding));
+        memcpy(seller, body->seller, id3strlen(body->seller, encoding));
     }
 
     return id3v2NewOwnershipBody(encoding, pricePayed, dateOfPunch, seller);
@@ -3926,13 +3932,13 @@ Id3v2CommercialBody *id3v2CopyCommercialBody(Id3v2CommercialBody *body){
     }
 
     if(body->nameOfSeller != NULL){
-        nameOfSeller = calloc(sizeof(unsigned char), id3strlen(body->nameOfSeller) + id3ReaderAllocationAdd(encoding));
-        memcpy(nameOfSeller, body->nameOfSeller, id3strlen(body->nameOfSeller));
+        nameOfSeller = calloc(sizeof(unsigned char), id3strlen(body->nameOfSeller, encoding) + id3ReaderAllocationAdd(encoding));
+        memcpy(nameOfSeller, body->nameOfSeller, id3strlen(body->nameOfSeller, encoding));
     }
 
     if(body->description != NULL){
-        description = calloc(sizeof(unsigned char), id3strlen(body->description) + id3ReaderAllocationAdd(encoding));
-        memcpy(description, body->description, id3strlen(body->description));
+        description = calloc(sizeof(unsigned char), id3strlen(body->description, encoding) + id3ReaderAllocationAdd(encoding));
+        memcpy(description, body->description, id3strlen(body->description, encoding));
     }
 
     if(body->mimeType != NULL){
@@ -4967,7 +4973,7 @@ Id3v2FrameHeader *id3v2CopyFrameHeader(Id3v2FrameHeader *header){
     }
 
     int idLen = strlen(header->id);
-    char *id = calloc(sizeof(char), idLen);
+    char *id = calloc(sizeof(char), idLen + 1);
     unsigned int frameSize = header->frameSize;
     unsigned int headerSize = header->headerSize;
     Id3v2FlagContent *flagContent = id3v2CopyFlagContent(header->flagContent);

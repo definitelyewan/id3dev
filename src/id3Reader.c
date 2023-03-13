@@ -224,6 +224,10 @@ size_t strlenUTF16BE(unsigned char *buffer){
     if(buffer == NULL){
         return len;
     }
+
+    if(hasBOM(buffer)){
+        return len;
+    }
     
     while(true){
         //0x00 0x00 means the end of utf
@@ -242,25 +246,30 @@ size_t strlenUTF8(unsigned char *buffer){
     return strlen((char *)buffer);
 }
 
-size_t id3strlen(unsigned char *buffer){
+size_t id3strlen(unsigned char *buffer, unsigned char encoding){
 
     if(buffer == NULL){
         return 0;
     }
-
-    //marker is exclusive to utf16
-    if(hasBOM(buffer)){
-        return strlenUTF16(buffer);
-    
-    }else{
-        //strlen for utf16be accounts for 0x00 utf8s does not
-        if(strlenUTF16BE(buffer) > strlenUTF8(buffer)){
-            return strlenUTF16BE(buffer);
-        }
+    size_t len = 0;
+    switch(encoding){
+        case ISO_8859_1:
+            len = strlen((char *)buffer);
+            break;
+        case UTF16:
+            len = strlenUTF16(buffer);
+            break;
+        case UTF16BE:
+            len = strlenUTF16BE(buffer);
+            break;
+        case UTF8:
+            len = strlenUTF8(buffer);
+            break;
+        default:
+            return len;
     }
 
-    //ISO_8859_1 and utf 8 are compatible
-    return strlenUTF8(buffer);
+    return len;
 }
 
 

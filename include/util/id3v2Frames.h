@@ -118,7 +118,7 @@ Id3v2Frame *id3v2CopySynchronizedLyricsFrame(Id3v2Frame *frame);
 Id3v2SynchronizedLyricsBody *id3v2CopySynchronizedLyricsBody(Id3v2SynchronizedLyricsBody *body);
 Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
 Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(unsigned char encoding, unsigned char *language, unsigned int timeStampFormat, unsigned int contentType, unsigned char *descriptor, List *lyrics);
-Id3v2StampedLyric *id3v2NewStampedLyric(unsigned char* text, long timeStamp);
+Id3v2StampedLyric *id3v2NewStampedLyric(unsigned char* text, long timeStamp, size_t lyricLen);
 void id3v2FreeSynchronizedLyricsFrame(Id3v2Frame *toDelete);
 void *id3v2CopyStampedLyric(void *toCopy);
 void id3v2FreeStampedLyric(void *toDelete);
