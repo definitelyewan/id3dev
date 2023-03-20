@@ -5,32 +5,8 @@
 extern "C"{
 #endif
 
-#include "id3v2Helpers.h"
 #include "id3Types.h"
 #include <stdbool.h>
-
-//ID title sizes
-#define ID3V22_ID_SIZE 3
-#define ID3V23_ID_SIZE 4
-#define ID3V24_ID_SIZE 4
-
-//size description for frames
-#define ID3V22_SIZE_OF_SIZE_BYTES 3
-#define ID3V23_SIZE_OF_SIZE_BYTES 4
-#define ID3V24_SIZE_OF_SIZE_BYTES 4
-
-//flag size defines
-#define ID3V2_FLAG_SIZE_OF_BYTES 2
-
-//set size lengths
-#define ID3V2_PICTURE_FORMATE_LEN 3
-#define ID3V2_LANGUAGE_LEN 3
-#define ID3V2_TIME_STAMP_LEN 4
-
-//static lengths within frames
-#define ID3V2_EVENT_CODE_LEN 5
-#define ID3V2_BASE_DATE_FORMAT_LEN 8
-#define ID3V24_DATE_FORMAT_LEN 19
 
 //frame functions
 List *id3v2ExtractFrames(unsigned char *buffer, Id3v2Header *header);

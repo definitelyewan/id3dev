@@ -18,9 +18,10 @@ void metadataPrint(Id3Metadata *data){
         printf("year   | [%d]\n",tag->year);
     }
 
-    printf("ID3V2 tag information\n");
+    
     if(hasId3v2(data)){
-        
+        printf("ID3V2 tag information\n");
+
         Id3v2Tag *tag = data->version2;
 
         if(tag->header == NULL){
@@ -105,18 +106,26 @@ void metadataPrint(Id3Metadata *data){
 
                     printf("formate[%s]",body->format);
                     printf(" picture type[%x]",body->pictureType);
-                    if(body->encoding == 0){
+                    if(body->encoding == ISO_8859_1  || body->encoding == UTF8){
                         printf(" desc:[%s]",body->description);
                     }
 
-                    if(body->encoding == 1){
+                    if(body->encoding == UTF16){
                         printf(" desc:[");
                         for(int i = 0; i < strlenUTF16(body->description); i++){
                             printf("[%x]",body->description[i]);
                         }
                         printf("]");
                     }
-                    
+
+                    if(body->encoding == UTF16BE){
+                        printf(" desc:[");
+                        for(int i = 0; i < strlenUTF16BE(body->description); i++){
+                            printf("[%x]",body->description[i]);
+                        }
+                        printf("]");
+                    }
+
                     char *test = calloc(sizeof(char), 100);
                     
                     sprintf(test,"%s%d%s","img",body->picSize,".jpg");
@@ -188,10 +197,6 @@ void metadataPrint(Id3Metadata *data){
                 curr = curr->next;
             }
         }            
-
-
-    
-
     }
 
 }
@@ -199,12 +204,30 @@ void metadataPrint(Id3Metadata *data){
 
 int main(int argc, char *argv[]){
 
-    Id3Metadata *data = id3NewMetadataFromFile("01. Paprika.mp3");
+    if(argc != 2){
+        exit(EXIT_FAILURE);
+    }
+
+    Id3Metadata *data = id3NewMetadataFromFile(argv[1]);
     metadataPrint(data);
     
     printf("[Make A Copy]\n");
     Id3Metadata *data2 = id3CopyMetadata(data);
+    printf("Exact copy| %s\n", id3v1CompareTag(data->version1, data2->version1) == 0 ? "false" : "true");
+    id3v1SetTitle("this is a different title", data2->version1);
+    id3v1SetArtist("I changed the artist", data2->version1);
+    id3v1SetAlbum("I changed the album title", data2->version1);
+    id3v1SetYear(1990, data2->version1);
+    id3v1SetComment("I changed the comment again", data2->version1);
+    id3v1SetGenre(255, data2->version1);
+    id3v1SetTrack(255, data2->version1); 
+    //id3v1ClearTagInformation(data2->version1);
     metadataPrint(data2);
+    char *json = id3v1ToJSON(data->version1);
+    printf("%s\n",json);
+    free(json);
+    printf("Exact copy| %s\n", id3v1CompareTag(data->version1, data2->version1) == 0 ? "false" : "true");
+    id3v1WriteTag("emptyb.mp3", data2->version1);
 
     id3FreeMetadata(data);
     id3FreeMetadata(data2);

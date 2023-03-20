@@ -4,7 +4,8 @@
 #include "id3Reader.h"
 #include "id3v2Frames.h"
 #include "id3v2Header.h"
-#include "id3v2Helpers.h"
+#include "id3Helpers.h"
+#include "id3Defines.h"
 
 Id3v2Tag *id3v2ParseTagFromFile(const char *filePath){
     
@@ -59,13 +60,13 @@ Id3v2Tag *id3v2ParseTagFromBuffer(unsigned char *buffer, int tagSize){
 
     //read header information
     if((headerInfo = id3v2ParseHeader(buffer, tagSize)) == NULL){
-        free(buffer);
+        //free(buffer);
         return NULL;
     }
 
     //unsynchronisation is not supported
     if(headerInfo->unsynchronisation == true){
-        free(buffer);
+        //free(buffer);
         return id3v2NewTag(headerInfo, NULL);
     }
 
@@ -79,7 +80,7 @@ Id3v2Tag *id3v2ParseTagFromBuffer(unsigned char *buffer, int tagSize){
     //extract frames from the file
     frameList = id3v2ExtractFrames(frames, headerInfo);
     
-    free(buffer);
+    //free(buffer);
 
     return id3v2NewTag(headerInfo, frameList);
 }

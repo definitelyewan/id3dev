@@ -3,6 +3,7 @@
 #include "id3.h"
 #include "id3v2.h"
 #include "id3v1.h"
+#include "id3Defines.h"
 
 Id3Metadata *id3NewMetadataFromFile(const char *filePath){
 
@@ -45,7 +46,7 @@ Id3Metadata *id3NewMetadataFromBuffer(unsigned char *buffer, int size){
         return NULL;
     }
 
-    bool first = true;
+    bool setVersion2Flag = true;
     Id3v1Tag *version1 = NULL;
     Id3v2Tag *version2 = NULL;
     Id3Reader *stream = id3NewReader(buffer, size);
@@ -70,9 +71,9 @@ Id3Metadata *id3NewMetadataFromBuffer(unsigned char *buffer, int size){
             
             if(tag != NULL){
                 
-                if(first == true){
+                if(setVersion2Flag == true){
                     version2 = tag;
-                    first = false;
+                    setVersion2Flag = false;
                 }
 
                 if(tag->header->versionMinor == ID3V24 && tag->header->extendedHeader != NULL){
@@ -84,18 +85,16 @@ Id3Metadata *id3NewMetadataFromBuffer(unsigned char *buffer, int size){
 
                 id3ReaderSeek(stream, stream->bufferSize - stream->cursor, SEEK_CUR);
             }else{
-                id3ReaderSeek(stream, 1, SEEK_CUR);
+                id3ReaderSeek(stream, 3, SEEK_CUR);
             }
 
         }else{
-            id3ReaderSeek(stream, 1, SEEK_CUR);
+            id3ReaderSeek(stream, 3, SEEK_CUR);
         }
     }
 
-    free(stream);
-    //bug! figure out why this causes a memory error at a later time
-    //works with no errors if commented out
-    //id3FreeReader(stream);
+    //free(stream);
+    id3FreeReader(stream);
 
     return id3NewMetadata(version1, version2);
 }

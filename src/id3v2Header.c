@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "id3v2Header.h"
-#include "id3v2Helpers.h"
+#include "id3Helpers.h"
 #include "id3Reader.h"
+#include "id3Defines.h"
 
 /*
     Header functions

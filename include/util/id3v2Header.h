@@ -5,14 +5,6 @@
 extern "C"{
 #endif
 
-#define ID3V2_HEADER_SIZE_LEN 4
-#define ID3V2_CRC_LEN 4
-#define ID3V2_PADDING_SIZE 4
-#define ID3V2_HEADER_SIZE 10
-
-//includes ext header, header, and crc for id3v2.2 & id3v2.3
-#define ID3V2_FULL_HEADER_LEN 24
-
 #include "id3Types.h"
 #include <stdbool.h>
 

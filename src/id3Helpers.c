@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "id3v2Helpers.h"
+#include <math.h>
+#include "id3Helpers.h"
 
 int getBits8(unsigned char *bytes, int byteNum){
     
@@ -27,6 +28,26 @@ unsigned int syncint_decode(int value){
     result = result | (d << 21);
 
     return result;
+}
+
+char *integerToCharPointer(int value){
+
+    int n = log10(value) + 1;
+    char *numberArray = calloc(n, sizeof(char));
+
+    for(int i = n-1; i >= 0; --i, value /= 10){
+        numberArray[i] = (value % 10) + '0';
+    }
+
+    return numberArray;
+}
+
+void addressFree(void **pptr){
+    if(pptr && *pptr){
+        free(*pptr);
+        *pptr = NULL;
+        pptr = NULL;
+    }
 }
 
 List *newList(void (*deleteFunction)(void* toDelete), void *(*copyFunction)(void* toCopy)){

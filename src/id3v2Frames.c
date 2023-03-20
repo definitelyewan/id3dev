@@ -3,8 +3,9 @@
 #include <string.h>
 #include "id3v2Frames.h"
 #include "id3v2Header.h"
-#include "id3v2Helpers.h"
+#include "id3Helpers.h"
 #include "id3Reader.h"
+#include "id3Defines.h"
 
 /*
     FRAME FUNCTIONS
@@ -1875,6 +1876,11 @@ Id3v2CommentBody *id3v2CopyCommentBody(Id3v2CommentBody *body){
         memcpy(description, body->description, id3strlen(body->description, encoding));
     }
 
+    if(body->text != NULL){
+        text = calloc(sizeof(unsigned char), id3strlen(body->text, encoding) + id3ReaderAllocationAdd(encoding));
+        memcpy(text, body->text, id3strlen(body->text, encoding));
+    }
+
     return id3v2NewCommentBody(encoding, language, description, text);
 }
 
@@ -2304,8 +2310,8 @@ Id3v2PictureBody *id3v2ParsePictureBody(unsigned char *buffer, Id3v2FrameHeader 
     // copy format
     // 2.2
     if(frameHeader->idNum == PIC){
-        format = calloc(sizeof(unsigned char), ID3V2_PICTURE_FORMATE_LEN + 1);
-        id3ReaderRead(stream, format, ID3V2_PICTURE_FORMATE_LEN);
+        format = calloc(sizeof(unsigned char), ID3V2_PICTURE_FORMAT_LEN + 1);
+        id3ReaderRead(stream, format, ID3V2_PICTURE_FORMAT_LEN);
     
     }
     // 2.3 or 4

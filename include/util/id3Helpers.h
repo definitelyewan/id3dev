@@ -12,6 +12,9 @@ extern "C"{
 //byte functions
 int getBits8(unsigned char *bytes, int byteNum);
 unsigned int syncint_decode(int value);
+void addressFree(void **pptr);
+char *integerToCharPointer(int value);
+
 
 //list functions
 List *newList(void (*deleteFunction)(void* toDelete), void *(*copyFunction)(void* toCopy));
