@@ -5,3 +5,4 @@ main
 *.so
 *.png
 vgcore.*
+*.exe
