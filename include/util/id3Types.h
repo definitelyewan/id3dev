@@ -19,6 +19,11 @@ typedef struct _List{
     struct _node *head;
 }List;
 
+typedef struct _ListIter{
+    List *l;
+    struct _node *curr;
+}ListIter;
+
 typedef struct _node{
     void *data;
     struct _node *next;
@@ -287,7 +292,7 @@ typedef struct _Id3v2header{
     bool experimentalIndicator;
     bool footer;
     
-    int size;
+    size_t size;
     Id3v2ExtHeader *extendedHeader;
 
 }Id3v2Header;
@@ -300,6 +305,7 @@ typedef struct _Id3v2header{
 typedef struct _Id3v2Tag{
     Id3v2Header *header;
     List *frames;
+    ListIter *iter;
 
 }Id3v2Tag;
 
@@ -308,6 +314,7 @@ typedef struct _Id3v2Tag{
 */
 
 typedef enum _Id3v2FrameId{
+    HUH = -1,  // got no idea man huh?
     BUF,  // Recommended buffer size
     CNT,  // Play counter
     COM,  // Comments
@@ -371,7 +378,6 @@ typedef enum _Id3v2FrameId{
     WCP,  // Copyright/Legal information
     WPB,  // Publishers official webpage
     WXX,  // User defined URL link frame
-    HUH,  // got no idea man huh?
     AENC, // Audio encryption
     APIC, // Attached picture
     COMM, // Comments
@@ -459,7 +465,7 @@ typedef struct _Id3v2FlagContent{
     bool tagAlterPreservation;
     bool fileAlterPreservation;
     bool readOnly;
-    bool unsynchronisation;
+    bool unsynchronization;
     bool dataLengthIndicator;
     unsigned int decompressedSize;
     unsigned char encryption;

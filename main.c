@@ -3,6 +3,29 @@
 #include <string.h>
 #include "id3.h"
 
+void encodedprintf(unsigned char *str, int encoding){
+    if(str == NULL){
+        return;
+    }
+
+    if(encoding == ISO_8859_1 || encoding == UTF8){
+        printf("%s",(char *)str);
+    }
+    
+    if(encoding == UTF16){
+        for(int i = 0; i < strlenUTF16(str); i++){
+            printf("%x",str[i]);
+        }
+    }
+
+    if(encoding == UTF16BE){
+        for(int i = 0; i < strlenUTF16BE(str); i++){
+            printf("%x",str[i]);
+        }
+    }
+
+}
+
 void metadataPrint(Id3Metadata *data){
     if(hasId3v1(data)){
 
@@ -27,90 +50,117 @@ void metadataPrint(Id3Metadata *data){
         if(tag->header == NULL){
             printf("[*]no header\n");
         }else{
-            printf("ver. %d.%d\n",tag->header->versionMajor, tag->header->versionMinor);
-            printf("flags. %d%d%d%d\n",tag->header->unsynchronisation, 
-                                    (tag->header->extendedHeader != NULL) ? true: false, 
-                                    tag->header->experimentalIndicator, 
-                                    tag->header->footer);
-            printf("frame size. %d\n",tag->header->size);
+            printf("ver. %d\n",id3v2GetVersion(tag));
+            printf("flags. %d%d%d%d\n",id3v2UnsynchronizedIndicator(tag), 
+                                    id3v2ExtendedIndicator(tag), 
+                                    id3v2ExperimentalIndicator(tag), 
+                                    id3v2FooterIndicator(tag));
+            printf("tag size. %ld\n",id3v2GetTagSize(tag));
 
-            if(tag->header->extendedHeader != NULL){
+            if(id3v2ExtendedIndicator(tag) == true){
                 printf("ext size. %d\n",tag->header->extendedHeader->size);
                 printf("padding. %d\n",tag->header->extendedHeader->padding);
-                printf("crc. %s\n",tag->header->extendedHeader->crc);
+                printf("crc. %s\n",(char *)id3v2GetCrc(tag));
                 printf("update. %d\n",tag->header->extendedHeader->update);
-                printf("tag size restriction %x\n",tag->header->extendedHeader->tagSizeRestriction);
-                printf("tag encoding restriction %x\n",tag->header->extendedHeader->encodingRestriction);
-                printf("text size restriction %x\n",tag->header->extendedHeader->textSizeRestriction);
-                printf("image encoding restriction %x\n",tag->header->extendedHeader->imageEncodingRestriction);
-                printf("image size restriction %x\n",tag->header->extendedHeader->imageSizeRestriction);
+                printf("tag size restriction %x\n",id3v2GetTagSizeRestriction(tag));
+                printf("tag encoding restriction %x\n",id3v2GetEncodingRestriction(tag));
+                printf("text size restriction %x\n",id3v2GetTextSizeRestriction(tag));
+                printf("image encoding restriction %x\n",id3v2GetEncodingRestriction(tag));
+                printf("image size restriction %x\n",id3v2GetTagSizeRestriction(tag));
                 
             }else{
                 printf("[*]no extended header\n");
             }
 
         }
-
+        
         if(tag->frames == NULL){
             printf("[*]no frames\n");
 
         }else{
-            Node *curr = tag->frames->head; 
+            Id3v2Frame *currFrame = NULL;
             
-            while(curr != NULL){
-                Id3v2Frame *currFrame = (Id3v2Frame *)curr->data;
-                printf("%s|",currFrame->header->id);
+            while((currFrame = id3v2IterTag(tag)) != NULL){
 
-                if(currFrame->header->id[0] == 'T'){
-                    Id3v2TextBody *body = (Id3v2TextBody *)currFrame->frame;
+                //header info
+                printf("%s|",id3v2GetFrameStrID(currFrame));
+                printf("FS:%ld HS:%ld ID:%d|",id3v2GetFrameSize(currFrame),
+                                            id3v2GetFrameHeaderSize(currFrame),
+                                            id3v2GetFrameID(currFrame));
 
-                    if(body->encoding == ISO_8859_1 || body->encoding == UTF8){
-                        if(body->description != NULL){
-                            printf("desc:[%s] ",body->description);
-                        }
-                        printf("value:[%s] ",body->value);
-                    }
-
-                    if(body->encoding == UTF16){
-                        if(body->description != NULL){
-                            printf("desc:[");
-                            for(int i = 0; i < strlenUTF16(body->description); i++){
-                                printf("[%x]",body->description[i]);
-                            }
-                            printf("] ");
-                        }
+                //print flag content
+                printf("F:%d%d%d%d C:%ld E:%x G:%x|",id3v2FrameAlterPreservationIndicator(currFrame),
+                                                    id3v2FrameFileAlterPreservationIndicator(currFrame),
+                                                    id3v2FrameReadOnlyIndicator(currFrame),
+                                                    id3v2FrameUnsynchronizationIndicator(currFrame),
+                                                    id3v2GetFrameDataLengthSize(currFrame),
+                                                    id3v2GetFrameEncryptionMethod(currFrame),
+                                                    id3v2GetFrameGroup(currFrame));
+                
+                int encoding = id3v2GetFrameEncoding(currFrame);
+                
+                switch(encoding){
+                    case ISO_8859_1:
+                        printf("ISO_8859_1|");
+                        break;
+                    case UTF16:
+                        printf("UTF16|");
+                        break;
+                    case UTF16BE:
+                        printf("UTF16BE|");
+                        break;
+                    case UTF8:
+                        printf("UTF8|");
+                    default:
+                        printf("None|");
+                }
+                
+                if(id3v2GetFrameStrID(currFrame)[0] == 'T'){
+                    
+                        unsigned char *desc = id3v2GetFrameDescription(currFrame);
+                        unsigned char *value = id3v2GetTextFrameValue(currFrame);
                         
+                        printf("desc:[");
+                        encodedprintf(desc, id3v2GetFrameEncoding(currFrame));
+                        printf("] ");
                         printf("value:[");
-                        for(int i = 0; i < strlenUTF16(body->value); i++){
-                            printf("[%x]",body->value[i]);
-                        }
+                        encodedprintf(value, id3v2GetFrameEncoding(currFrame));
                         printf("]");
-                    }
 
-                    if(body->encoding == UTF16BE){
-                        if(body->description != NULL){
-                            printf("desc:[");
-                            for(int i = 0; i < strlenUTF16BE(body->description); i++){
-                                printf("[%x]",body->description[i]);
-                            }
-                            printf("] ");
+                        if(desc != NULL){
+                            free(desc);
                         }
-                        printf("value:[");
-                        for(int i = 0; i < strlenUTF16BE(body->value); i++){
-                            printf("[%x]",body->value[i]);
+                        if(value != NULL){
+                            free(value);
                         }
-                        printf("]");
-                    }
+                
+                }else if(id3v2GetFrameStrID(currFrame)[0] == 'W' && id3v2GetFrameID(currFrame) != WCOM){
+
+                        unsigned char *desc = id3v2GetFrameDescription(currFrame);
+                        unsigned char *url = id3v2GetURLFrameValue(currFrame);
+                        
+                        printf("desc:[");
+                        encodedprintf(desc, id3v2GetFrameEncoding(currFrame));
+                        printf("] ");
+                        printf("url:[%s]",url);
+
+                        if(desc != NULL){
+                            free(desc);
+                        }
+                        if(url != NULL){
+                            free(url);
+                        }     
+
                 }else if(currFrame->header->idNum == PIC || currFrame->header->idNum == APIC){
                     Id3v2PictureBody *body = (Id3v2PictureBody *)currFrame->frame;
 
                     printf("formate[%s]",body->format);
                     printf(" picture type[%x]",body->pictureType);
-                    if(body->encoding == ISO_8859_1  || body->encoding == UTF8){
+                    if(encoding == ISO_8859_1  || encoding == UTF8){
                         printf(" desc:[%s]",body->description);
                     }
 
-                    if(body->encoding == UTF16){
+                    if(encoding == UTF16){
                         printf(" desc:[");
                         for(int i = 0; i < strlenUTF16(body->description); i++){
                             printf("[%x]",body->description[i]);
@@ -118,7 +168,7 @@ void metadataPrint(Id3Metadata *data){
                         printf("]");
                     }
 
-                    if(body->encoding == UTF16BE){
+                    if(encoding == UTF16BE){
                         printf(" desc:[");
                         for(int i = 0; i < strlenUTF16BE(body->description); i++){
                             printf("[%x]",body->description[i]);
@@ -138,7 +188,7 @@ void metadataPrint(Id3Metadata *data){
                 }else if(currFrame->header->idNum == COM || currFrame->header->idNum == COMM){
                     Id3v2CommentBody *body = (Id3v2CommentBody *)currFrame->frame;                
 
-                    if(body->encoding == ISO_8859_1 || body->encoding == UTF8){
+                    if(encoding == ISO_8859_1 || encoding == UTF8){
                         
                         printf("language:[%s]",body->language);
 
@@ -149,7 +199,7 @@ void metadataPrint(Id3Metadata *data){
                         printf(" value:[%s]",body->text);
                     }
 
-                    if(body->encoding == UTF16){
+                    if(encoding == UTF16){
 
                         printf("language:[%s]",body->language);
 
@@ -169,7 +219,7 @@ void metadataPrint(Id3Metadata *data){
                         }
                         printf("]");
                     }
-                    if(body->encoding == UTF16BE){
+                    if(encoding == UTF16BE){
 
                         printf("language:[%s]",body->language);
 
@@ -194,7 +244,6 @@ void metadataPrint(Id3Metadata *data){
                 }
 
                 printf("\n");
-                curr = curr->next;
             }
         }            
     }
@@ -211,26 +260,26 @@ int main(int argc, char *argv[]){
     Id3Metadata *data = id3NewMetadataFromFile(argv[1]);
     metadataPrint(data);
     
-    printf("[Make A Copy]\n");
-    Id3Metadata *data2 = id3CopyMetadata(data);
-    printf("Exact copy| %s\n", id3v1CompareTag(data->version1, data2->version1) == 0 ? "false" : "true");
-    id3v1SetTitle("this is a different title", data2->version1);
-    id3v1SetArtist("I changed the artist", data2->version1);
-    id3v1SetAlbum("I changed the album title", data2->version1);
-    id3v1SetYear(1990, data2->version1);
-    id3v1SetComment("I changed the comment again", data2->version1);
-    id3v1SetGenre(255, data2->version1);
-    id3v1SetTrack(255, data2->version1); 
-    //id3v1ClearTagInformation(data2->version1);
-    metadataPrint(data2);
-    char *json = id3v1ToJSON(data->version1);
-    printf("%s\n",json);
-    free(json);
-    printf("Exact copy| %s\n", id3v1CompareTag(data->version1, data2->version1) == 0 ? "false" : "true");
-    id3v1WriteTag("emptyb.mp3", data2->version1);
+    //printf("[Make A Copy]\n");
+    //Id3Metadata *data2 = id3CopyMetadata(data);
+    //printf("Exact copy| %s\n", id3v1CompareTag(data->version1, data2->version1) == 0 ? "false" : "true");
+    //id3v1SetTitle("this is a different title", data2->version1);
+    //id3v1SetArtist("I changed the artist", data2->version1);
+    //id3v1SetAlbum("I changed the album title", data2->version1);
+    //id3v1SetYear(1990, data2->version1);
+    //id3v1SetComment("I changed the comment again", data2->version1);
+    //id3v1SetGenre(255, data2->version1);
+    //id3v1SetTrack(255, data2->version1); 
+    ////id3v1ClearTagInformation(data2->version1);
+    //metadataPrint(data2);
+    //char *json = id3v1ToJSON(data->version1);
+    //printf("%s\n",json);
+    //free(json);
+    //printf("Exact copy| %s\n", id3v1CompareTag(data->version1, data2->version1) == 0 ? "false" : "true");
+    //id3v1WriteTag("emptyb.mp3", data2->version1);
 
     id3FreeMetadata(data);
-    id3FreeMetadata(data2);
+    //id3FreeMetadata(data2);
         
     return 0;
 }

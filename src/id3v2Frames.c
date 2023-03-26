@@ -4758,7 +4758,7 @@ void id3v2FreeSeekFrame(Id3v2Frame *toDelete){
     FLAG FUNCTIONS
 */
 
-Id3v2FlagContent *id3v2NewFlagContent(bool tagAlterPreservation, bool fileAlterPreservation, bool readOnly, bool unsynchronisation, bool dataLengthIndicator, unsigned int decompressedSize, unsigned char encryption, unsigned char grouping){
+Id3v2FlagContent *id3v2NewFlagContent(bool tagAlterPreservation, bool fileAlterPreservation, bool readOnly, bool unsynchronization, bool dataLengthIndicator, unsigned int decompressedSize, unsigned char encryption, unsigned char grouping){
 
     Id3v2FlagContent *newContent = malloc(sizeof(Id3v2FlagContent));
 
@@ -4768,7 +4768,7 @@ Id3v2FlagContent *id3v2NewFlagContent(bool tagAlterPreservation, bool fileAlterP
     newContent->decompressedSize = decompressedSize;
     newContent->encryption = encryption;
     newContent->grouping = grouping;
-    newContent->unsynchronisation = unsynchronisation;
+    newContent->unsynchronization = unsynchronization;
     newContent->dataLengthIndicator = dataLengthIndicator;
 
     return newContent;
@@ -4867,13 +4867,13 @@ Id3v2FlagContent *id3v2CopyFlagContent(Id3v2FlagContent *flagContent){
     bool tagAlterPreservation = flagContent->tagAlterPreservation;
     bool fileAlterPreservation = flagContent->fileAlterPreservation;
     bool readOnly = flagContent->readOnly;
-    bool unsynchronisation = flagContent->unsynchronisation;
+    bool unsynchronization = flagContent->unsynchronization;
     bool dataLengthIndicator = flagContent->dataLengthIndicator;
     unsigned int decompressedSize = flagContent->decompressedSize;
     unsigned char encryption = flagContent->encryption;
     unsigned char grouping = flagContent->grouping;
 
-    return id3v2NewFlagContent(tagAlterPreservation, fileAlterPreservation, readOnly, unsynchronisation, dataLengthIndicator, decompressedSize, encryption, grouping);
+    return id3v2NewFlagContent(tagAlterPreservation, fileAlterPreservation, readOnly, unsynchronization, dataLengthIndicator, decompressedSize, encryption, grouping);
 }
 
 void id3v2FreeFlagContent(Id3v2FlagContent *toDelete){
@@ -5016,11 +5016,11 @@ int id3v2IdAndSizeOffset(Id3v2Header *header){
         return versionOffset;
 
     }else if(header->versionMajor == ID3V22){
-        versionOffset = ID3V22_ID_SIZE;
+        versionOffset = ID3V22_SIZE_OF_SIZE_BYTES;
     
     }else{
         // 2.3 and 2.4 have the same size and frame ids
-        versionOffset = ID3V23_ID_SIZE;
+        versionOffset = ID3V23_SIZE_OF_SIZE_BYTES;
     }
 
     return versionOffset;
@@ -5224,7 +5224,7 @@ Id3v2FrameId id3v2FrameIdFromStr(char *str){
                 return WXX;
             }
         // 2.3 and 2.4 frames
-        case ID3V23_ID_SIZE:
+        case ID3V23_SIZE_OF_SIZE_BYTES:
             if(strncmp("AENC", str, offset) == 0){
                 return AENC;
             }

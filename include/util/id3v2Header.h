@@ -9,8 +9,8 @@ extern "C"{
 #include <stdbool.h>
 
 //header functions
-Id3v2Header *id3v2ParseHeader(unsigned char *buffer, unsigned int bufferSiz);
-Id3v2Header *id3v2NewHeader(int versionMinor, int versionMajor, bool unsynchronisation, bool experimentalIndicator, bool footer, int size, Id3v2ExtHeader *extendedHeader);
+Id3v2Header *id3v2ParseHeader(unsigned char *buffer, unsigned int bufferSize);
+Id3v2Header *id3v2NewHeader(int versionMinor, int versionMajor, bool unsynchronisation, bool experimentalIndicator, bool footer, size_t size, Id3v2ExtHeader *extendedHeader);
 Id3v2Header *id3v2CopyHeader(Id3v2Header *toCopy);
 void id3v2FreeHeader(Id3v2Header *header);
 

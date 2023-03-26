@@ -188,3 +188,57 @@ List *copyList(List *list){
 
     return ret;
 }
+
+ListIter *newListIter(List *list){
+
+    if(list == NULL){
+        return NULL;
+    }
+
+    ListIter *li = malloc(sizeof(ListIter));
+
+    li->l = list;
+    li->curr = list->head;
+
+    return li;
+}
+ListIter *copyListIter(ListIter *li){
+
+    if(li == NULL){
+        return NULL;
+    }
+
+    ListIter *liCopy = malloc(sizeof(ListIter)); 
+
+    liCopy->l = li->l;
+    liCopy->curr = li->curr;
+
+    return liCopy;
+
+}
+void *nextListIter(ListIter *li){
+    
+    if(li == NULL){
+        return NULL;
+    }
+    
+    void *data = NULL;
+
+    if(li->curr){
+        data = li->curr->data;
+        li->curr = li->curr->next;
+    }
+
+    return data;
+}
+
+
+bool hasNextListIter(ListIter *li){
+    return (li->curr != NULL) ? true : false;
+
+}
+void freeListIter(ListIter *li){
+    if(li != NULL){
+        free(li);
+    }
+}

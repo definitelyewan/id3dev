@@ -25,6 +25,12 @@ void *listRemove(List *list, int pos);
 void freeList(List *list);
 void destroyList(List *list);
 
+ListIter *newListIter(List *list);
+ListIter *copyListIter(ListIter *li);
+void *nextListIter(ListIter *li);
+bool hasNextListIter(ListIter *li);
+void freeListIter(ListIter *li);
+
 #ifdef __cplusplus
 } //extern c end
 #endif

@@ -96,6 +96,10 @@ Id3v2Tag *id3v2NewTag(Id3v2Header *header, List *frames){
     tag->header = header;
     tag->frames = frames;
 
+    ListIter *iter = newListIter(frames);
+
+    tag->iter = iter;
+
     return tag;
 }
 
@@ -109,5 +113,29 @@ void id3v2FreeTag(void *toDelete){
 
     destroyList(tag->frames);
     id3v2FreeHeader(tag->header);
+    freeListIter(tag->iter);
     free(tag);
+}
+
+Id3v2Frame *id3v2IterTag(Id3v2Tag *tag){
+
+    if(tag == NULL){
+        return NULL;
+    }
+
+    if(hasNextListIter(tag->iter)){
+        return  (Id3v2Frame *)nextListIter(tag->iter);
+    }
+
+    return NULL;
+}
+void id3v2ResetIterTag(Id3v2Tag *tag){
+    
+    if(tag == NULL){
+        return;
+    }
+    
+    ListIter *iterN = newListIter(tag->frames);
+    freeListIter(tag->iter);
+    tag->iter = iterN;
 }

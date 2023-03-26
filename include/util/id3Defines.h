@@ -38,15 +38,6 @@ extern "C"{
 //Length of bytes found in ID3v2s header
 #define ID3V2_HEADER_SIZE 10
 
-//The number of bytes making up the ID3v2.2 identifier 'ID3' 
-#define ID3V22_ID_SIZE 3
-
-//The number of bytes making up the ID3v2.3 identifier 'ID3' 
-#define ID3V23_ID_SIZE 4
-
-//The number of bytes making up the ID3v2.4 identifier 'ID3' 
-#define ID3V24_ID_SIZE 4
-
 //The length of the size bytes found within the ID3v2.2 frame header
 #define ID3V22_SIZE_OF_SIZE_BYTES 3
 
@@ -58,6 +49,9 @@ extern "C"{
 
 //The number of bytes dedicated to flags in an ID3v2 frame header
 #define ID3V2_FLAG_SIZE_OF_BYTES 2
+
+//The number of bytes dedicated to the ID3v2 tags verion
+#define ID3V2_VERSION_SIZE_OF_BYTES 2
 
 //The number of bytes dedicated to an ID3v2 pictures format
 #define ID3V2_PICTURE_FORMAT_LEN 3

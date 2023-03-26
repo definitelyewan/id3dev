@@ -20,7 +20,7 @@ Id3v2Header *id3v2ParseHeader(unsigned char *buffer, unsigned int bufferSize){
     bool unsynchronisation = false;
     bool experimentalIndicator = false;
     bool footer = false;
-    int size = 0;
+    size_t size = 0;
     Id3v2ExtHeader *extendedHeader = NULL;
 
     Id3Reader *stream = id3NewReader(buffer, bufferSize);
@@ -74,7 +74,7 @@ Id3v2Header *id3v2ParseHeader(unsigned char *buffer, unsigned int bufferSize){
     return id3v2NewHeader((int)version[1], (int)version[0], unsynchronisation, experimentalIndicator, footer, size, extendedHeader);
 }
 
-Id3v2Header *id3v2NewHeader(int versionMinor, int versionMajor, bool unsynchronisation, bool experimentalIndicator, bool footer, int size, Id3v2ExtHeader *extendedHeader){
+Id3v2Header *id3v2NewHeader(int versionMinor, int versionMajor, bool unsynchronisation, bool experimentalIndicator, bool footer, size_t size, Id3v2ExtHeader *extendedHeader){
     
     Id3v2Header *header = malloc(sizeof(Id3v2Header));
 
@@ -90,12 +90,7 @@ Id3v2Header *id3v2NewHeader(int versionMinor, int versionMajor, bool unsynchroni
 }
 
 Id3v2Header *id3v2CopyHeader(Id3v2Header *toCopy){
-
-    if(toCopy == NULL){
-        return NULL;
-    }
-
-    return id3v2NewHeader(toCopy->versionMinor, toCopy->versionMajor, toCopy->unsynchronisation, toCopy->experimentalIndicator, toCopy->footer, toCopy->size, id3v2CopyExtendedHeader(toCopy->extendedHeader));
+    return (toCopy == NULL) ? NULL : id3v2NewHeader(toCopy->versionMinor, toCopy->versionMajor, toCopy->unsynchronisation, toCopy->experimentalIndicator, toCopy->footer, toCopy->size, id3v2CopyExtendedHeader(toCopy->extendedHeader));
 }
 
 void id3v2FreeHeader(Id3v2Header *header){
