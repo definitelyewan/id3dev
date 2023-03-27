@@ -55,7 +55,10 @@ int id3v2GetFrameEncoding(Id3v2Frame *frame);
 unsigned char *id3v2GetFrameDescription(Id3v2Frame *frame);
 unsigned char *id3v2GetTextFrameValue(Id3v2Frame *frame);
 unsigned char *id3v2GetURLFrameValue(Id3v2Frame *frame);
-unsigned char *id3v2GetInvolvedPeopleListFrameValue();
+unsigned char *id3v2GetInvolvedPeopleListFrameValue(Id3v2Frame *frame);
+unsigned char *id3v2GetCDIDFrameValue(Id3v2Frame *frame);
+int id3v2GetFrameTimeStampFormat(Id3v2Frame *frame);
+Id3v2EventTimesCodeEvent *id3v2GetFrame
 /*
 //functions to change values within a id3v1 structure
 void id3v1SetTitle(char *title, Id3v1Tag *tag);
