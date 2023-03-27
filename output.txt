@@ -17,7 +17,7 @@ SYLT|FS:64 HS:10 ID:84|F:0000 C:0 E:0 G:0|UTF16|parsed and present
 SYLT|FS:35 HS:10 ID:84|F:0000 C:0 E:0 G:0|ISO_8859_1|parsed and present
 USLT|FS:36 HS:10 ID:127|F:0000 C:0 E:0 G:0|UTF16|parsed and present
 USLT|FS:49 HS:10 ID:127|F:0000 C:0 E:0 G:0|ISO_8859_1|parsed and present
-ETCO|FS:16 HS:10 ID:69|F:0000 C:0 E:0 G:0|None|parsed and present
+ETCO|FS:16 HS:10 ID:69|F:0000 C:0 E:0 G:0|None|format:[2] 
 WCOM|FS:6 HS:10 ID:128|F:0000 C:0 E:0 G:0|None|parsed and present
 TRCK|FS:7 HS:10 ID:116|F:0000 C:0 E:0 G:0|UTF16|desc:[] value:[fffe300320]
 TALB|FS:13 HS:10 ID:86|F:0000 C:0 E:0 G:0|UTF16|desc:[] value:[fffe6106c06207506d0]

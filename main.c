@@ -9,7 +9,7 @@ void encodedprintf(unsigned char *str, int encoding){
     }
 
     if(encoding == ISO_8859_1 || encoding == UTF8){
-        printf("%s",(char *)str);
+        printf("%s",str);
     }
     
     if(encoding == UTF16){
@@ -150,6 +150,32 @@ void metadataPrint(Id3Metadata *data){
                         if(url != NULL){
                             free(url);
                         }     
+
+                }else if(id3v2GetFrameID(currFrame) == IPL || id3v2GetFrameID(currFrame) == IPLS){
+                    
+                    unsigned char *people = id3v2GetInvolvedPeopleListFrameValue(currFrame);
+                    
+                    printf("people:[");
+                    encodedprintf(people, id3v2GetFrameEncoding(currFrame));
+                    printf("] ");
+
+                    if(people != NULL){
+                        free(people);
+                    }  
+
+                }else if(id3v2GetFrameID(currFrame) == MCI || id3v2GetFrameID(currFrame) == MCDI){
+
+                    unsigned char *cdtoc = id3v2GetCDIDFrameValue(currFrame);
+                    printf("cdtoc[%s]",cdtoc);
+
+                    if(cdtoc != NULL){
+                        free(cdtoc);
+                    }
+
+                }else if(id3v2GetFrameID(currFrame) == ETC || id3v2GetFrameID(currFrame) == ETCO){
+
+                    printf("format:[%d] ",id3v2GetFrameTimeStampFormat(currFrame));
+
 
                 }else if(currFrame->header->idNum == PIC || currFrame->header->idNum == APIC){
                     Id3v2PictureBody *body = (Id3v2PictureBody *)currFrame->frame;

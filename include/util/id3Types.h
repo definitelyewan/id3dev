@@ -517,6 +517,7 @@ typedef struct _Id3v2EventTimeCodesEvent{
 typedef struct _Id3v2EventTimeCodesBody{
     unsigned int timeStampFormat;
     List *eventTimeCodes;
+    ListIter *eventsTimeCodesIter;
 
 }Id3v2EventTimeCodesBody;
 

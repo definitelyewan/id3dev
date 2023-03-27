@@ -204,6 +204,7 @@ int id3v2GetFrameEncoding(Id3v2Frame *frame){
         id = frame->header->idNum;
     }
 
+    //only these frames use an encoding
     switch(id){
         case COM:
             return (int)((Id3v2CommentBody *)frame->frame)->encoding;
@@ -267,6 +268,7 @@ unsigned char *id3v2GetFrameDescription(Id3v2Frame *frame){
     unsigned char *ret = NULL;
     int encoding = id3v2GetFrameEncoding(frame);
     
+    //only these frames use a description of descriptor
     switch(frame->header->idNum){
         case TXX:
             ptr = ((Id3v2TextBody *)frame->frame)->description;
@@ -370,6 +372,76 @@ unsigned char *id3v2GetURLFrameValue(Id3v2Frame *frame){
     memcpy(ret, body->url, id3strlen(body->url, ISO_8859_1));
 
     return ret;
+}
+
+unsigned char *id3v2GetInvolvedPeopleListFrameValue(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return NULL;
+    }
+
+    if(frame->frame == NULL){
+        return NULL;
+    }
+
+    Id3v2InvolvedPeopleListBody *body = (Id3v2InvolvedPeopleListBody *)frame->frame; 
+    int encoding = body->encoding;
+    unsigned char *ret = calloc(sizeof(unsigned char), id3strlen(body->peopleListStrings, encoding) + id3ReaderAllocationAdd(encoding));
+    memcpy(ret, body->peopleListStrings, id3strlen(body->peopleListStrings, encoding));
+
+    return ret;
+}
+
+unsigned char *id3v2GetCDIDFrameValue(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return NULL;
+    }
+
+    if(frame->frame == NULL){
+        return NULL;
+    }
+
+    Id3v2MusicCDIdentifierBody *body = (Id3v2MusicCDIdentifierBody *)frame->frame; 
+    unsigned char *ret = calloc(sizeof(unsigned char), id3strlen(body->cdtoc, ISO_8859_1) + 1);
+    memcpy(ret, body->cdtoc, id3strlen(body->cdtoc, ISO_8859_1));
+
+    return ret;   
+}
+
+int id3v2GetFrameTimeStampFormat(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return 0;
+    }
+
+    if(frame->frame == NULL){
+        return 0;
+    }
+
+    if(frame->header == NULL){
+        return 0;
+    }
+
+    //only these frames use time stamp format
+    switch(frame->header->idNum){
+        case ETC:
+            return (int)((Id3v2EventTimeCodesBody *)frame->frame)->timeStampFormat;
+        case ETCO:
+            return (int)((Id3v2EventTimeCodesBody *)frame->frame)->timeStampFormat;
+        case STC:
+            return (int)((Id3v2SyncedTempoCodesBody *)frame->frame)->timeStampFormat;
+        case SYTC:
+            return (int)((Id3v2SyncedTempoCodesBody *)frame->frame)->timeStampFormat;
+        case SLT:
+            return (int)((Id3v2SynchronizedLyricsBody *)frame->frame)->timeStampFormat;
+        case SYLT:
+            return (int)((Id3v2SynchronizedLyricsBody *)frame->frame)->timeStampFormat;
+        case POSS:
+            return (int)((Id3v2PositionSynchronisationBody *)frame->frame)->timeStampFormat;
+        default:
+            return 0;
+    }
 }
 
 

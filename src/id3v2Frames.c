@@ -1179,6 +1179,10 @@ Id3v2EventTimeCodesBody *id3v2NewEventTimeCodesBody(unsigned int timeStampFormat
     // copy data
     eventTimeCodesBody->timeStampFormat = timeStampFormat;
     eventTimeCodesBody->eventTimeCodes = events;
+    
+    ListIter *iter = newListIter(events);
+
+    eventTimeCodesBody->eventsTimeCodesIter = iter;
 
     return eventTimeCodesBody;
 }
@@ -1212,6 +1216,7 @@ void id3v2FreeEventTimeCodesFrame(Id3v2Frame *toDelete){
 
     destroyList(body->eventTimeCodes);
     free(body);
+    freeListIter(body->eventsTimeCodesIter);
     free(toDelete);
 }
 
