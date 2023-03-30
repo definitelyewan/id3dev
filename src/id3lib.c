@@ -29,6 +29,7 @@ Id3Metadata *id3NewMetadataFromFile(const char *filePath){
     buffer = calloc(sizeof(unsigned char), fileSize + 1);
     if((fread(buffer, sizeof(unsigned char), fileSize, fp)) == 0){
         fclose(fp);
+        free(buffer);
         return NULL;
     }
     fclose(fp);

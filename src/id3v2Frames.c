@@ -1215,8 +1215,8 @@ void id3v2FreeEventTimeCodesFrame(Id3v2Frame *toDelete){
     Id3v2EventTimeCodesBody *body = (Id3v2EventTimeCodesBody *)toDelete->frame;
 
     destroyList(body->eventTimeCodes);
-    free(body);
     freeListIter(body->eventsTimeCodesIter);
+    free(body);
     free(toDelete);
 }
 

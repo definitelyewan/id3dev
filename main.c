@@ -174,8 +174,49 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == ETC || id3v2GetFrameID(currFrame) == ETCO){
 
-                    printf("format:[%d] ",id3v2GetFrameTimeStampFormat(currFrame));
+                    unsigned char type = 0x00;
+                    long time = 0;
 
+                    printf("format:[%d] ",id3v2GetFrameTimeStampFormat(currFrame));
+                    
+                    printf("types:[");
+                    while((type = id3v2GetEventTimeCodeType(currFrame)) != 0x00){
+                        printf("[%x]",type);
+                    }
+                    printf("] ");
+
+                    id3v2ResetEventTimeCodeIter(currFrame);
+
+                    printf("stamps:[");
+                    while((time = id3v2GetEventTimeCodeTimeStamp(currFrame)) != -1){
+                        printf("[%ld]",time);
+                    }
+                    printf("]");
+
+                }else if(id3v2GetFrameID(currFrame) == ULT || id3v2GetFrameID(currFrame) == USLT){
+
+                    unsigned char *language = id3v2GetFrameLanguage(currFrame);
+                    unsigned char *description = id3v2GetFrameDescription(currFrame);
+                    unsigned char *lyrics = id3v2GetFrameUnsynchronizedLyrics(currFrame);
+
+                    if(language != NULL){
+                        printf("language:[%s] ",language);
+                        free(language);
+                    }
+
+                    if(description != NULL){
+                        printf("desc:[");
+                        encodedprintf(description, encoding);
+                        printf("] ");
+                        free(description);
+                    }
+
+                    if(lyrics != NULL){
+                        printf("lyircs:[");
+                        encodedprintf(lyrics, encoding);
+                        printf("]");
+                        free(lyrics);
+                    }
 
                 }else if(currFrame->header->idNum == PIC || currFrame->header->idNum == APIC){
                     Id3v2PictureBody *body = (Id3v2PictureBody *)currFrame->frame;

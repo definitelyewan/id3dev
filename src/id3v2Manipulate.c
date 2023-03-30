@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "id3v2Manipulate.h"
+#include "id3Helpers.h"
 #include "id3Defines.h"
 #include "id3Reader.h" 
 
@@ -56,6 +57,19 @@ bool id3v2ManipFrameHeaderErrorChecks(Id3v2Frame *frame){
     }
 
     if(frame->header == NULL){
+        return true;
+    }
+
+    return false;
+}
+
+bool id3v2ManipFullFrameErrorChecks(Id3v2Frame *frame){
+
+    if(id3v2ManipFrameHeaderErrorChecks(frame) == true){
+        return true;
+    }
+
+    if(frame->frame == NULL){
         return true;
     }
 
@@ -384,6 +398,15 @@ unsigned char *id3v2GetInvolvedPeopleListFrameValue(Id3v2Frame *frame){
         return NULL;
     }
 
+    switch(id3v2GetFrameID(frame)){
+        case IPL:
+            break;
+        case IPLS:
+            break;
+        default:
+            return NULL;
+    }  
+
     Id3v2InvolvedPeopleListBody *body = (Id3v2InvolvedPeopleListBody *)frame->frame; 
     int encoding = body->encoding;
     unsigned char *ret = calloc(sizeof(unsigned char), id3strlen(body->peopleListStrings, encoding) + id3ReaderAllocationAdd(encoding));
@@ -394,13 +417,18 @@ unsigned char *id3v2GetInvolvedPeopleListFrameValue(Id3v2Frame *frame){
 
 unsigned char *id3v2GetCDIDFrameValue(Id3v2Frame *frame){
 
-    if(frame == NULL){
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
 
-    if(frame->frame == NULL){
-        return NULL;
-    }
+    switch(id3v2GetFrameID(frame)){
+        case MCI:
+            break;
+        case MCDI:
+            break;
+        default:
+            return NULL;
+    }   
 
     Id3v2MusicCDIdentifierBody *body = (Id3v2MusicCDIdentifierBody *)frame->frame; 
     unsigned char *ret = calloc(sizeof(unsigned char), id3strlen(body->cdtoc, ISO_8859_1) + 1);
@@ -411,15 +439,7 @@ unsigned char *id3v2GetCDIDFrameValue(Id3v2Frame *frame){
 
 int id3v2GetFrameTimeStampFormat(Id3v2Frame *frame){
 
-    if(frame == NULL){
-        return 0;
-    }
-
-    if(frame->frame == NULL){
-        return 0;
-    }
-
-    if(frame->header == NULL){
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return 0;
     }
 
@@ -444,4 +464,165 @@ int id3v2GetFrameTimeStampFormat(Id3v2Frame *frame){
     }
 }
 
+unsigned char id3v2GetEventTimeCodeType(Id3v2Frame *frame){
 
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return 0x00;
+    }
+
+    switch(id3v2GetFrameID(frame)){
+        case ETC:
+            break;
+        case ETCO:
+            break;
+        default:
+            return 0x00;
+    }  
+
+    Id3v2EventTimeCodesBody *body = (Id3v2EventTimeCodesBody *)frame->frame;
+
+    if(hasNextListIter(body->eventsTimeCodesIter)){
+        Id3v2EventTimesCodeEvent *event = (Id3v2EventTimesCodeEvent *)nextListIter(body->eventsTimeCodesIter);
+
+        return event->typeOfEvent;
+    }
+
+    return 0x00;
+}
+long id3v2GetEventTimeCodeTimeStamp(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return -1;
+    }
+
+    switch(id3v2GetFrameID(frame)){
+        case ETC:
+            break;
+        case ETCO:
+            break;
+        default:
+            return -1;
+    }  
+
+    Id3v2EventTimeCodesBody *body = (Id3v2EventTimeCodesBody *)frame->frame;
+
+    if(hasNextListIter(body->eventsTimeCodesIter)){
+        Id3v2EventTimesCodeEvent *event = (Id3v2EventTimesCodeEvent *)nextListIter(body->eventsTimeCodesIter);
+
+        return event->timeStamp;
+    }
+
+    return -1;
+}
+
+
+void id3v2ResetEventTimeCodeIter(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return;
+    }
+
+    switch(id3v2GetFrameID(frame)){
+        case ETC:
+            break;
+        case ETCO:
+            break;
+        default:
+            return;
+    }  
+
+    Id3v2EventTimeCodesBody *body = (Id3v2EventTimeCodesBody *)frame->frame;
+
+    freeListIter(body->eventsTimeCodesIter);
+
+    ListIter *li = newListIter(body->eventTimeCodes);
+
+    body->eventsTimeCodesIter = li;
+
+}
+
+
+
+unsigned char *id3v2GetSyncedTempoCodesFrameValue(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    Id3v2SyncedTempoCodesBody *body = (Id3v2SyncedTempoCodesBody *)frame->frame;
+    unsigned char *data = malloc((sizeof(unsigned char)*body->tempoDataLen)+1);
+    memcpy(data, body->tempoData, body->tempoDataLen);
+    
+    return data;
+}
+
+
+
+
+unsigned char *id3v2GetFrameLanguage(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+    
+    unsigned char *lang = NULL;
+    unsigned char *ret = NULL;
+    switch(id3v2GetFrameID(frame)){
+        case ULT:
+            lang = ((Id3v2UnsynchronizedLyricsBody *)frame->frame)->language;
+            break;
+        case USLT:
+            lang = ((Id3v2UnsynchronizedLyricsBody *)frame->frame)->language;
+            break;
+        case SLT:
+            lang = ((Id3v2SynchronizedLyricsBody *)frame->frame)->language;
+            break;
+        case SYLT:
+            lang = ((Id3v2SynchronizedLyricsBody *)frame->frame)->language;
+            break;
+        case COM:
+            lang = ((Id3v2CommentBody *)frame->frame)->language;
+            break;
+        case COMM:
+            lang = ((Id3v2CommentBody *)frame->frame)->language;
+            break;
+        case USER:
+            lang = ((Id3v2TermsOfUseBody *)frame->frame)->language;
+            break;
+        default:
+            return NULL;
+    }
+
+    ret = calloc(sizeof(unsigned char), ID3V2_LANGUAGE_LEN+1);
+    memcpy(ret, lang, ID3V2_LANGUAGE_LEN);
+
+    return ret;
+}
+
+unsigned char *id3v2GetFrameUnsynchronizedLyrics(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    unsigned char *ptr = NULL;
+    unsigned char *ret = NULL;
+    int encoding = 0;
+
+    switch(id3v2GetFrameID(frame)){
+        case ULT:
+            ptr = ((Id3v2UnsynchronizedLyricsBody *)frame->frame)->lyrics;
+            break;
+        case USLT:
+            ptr = ((Id3v2UnsynchronizedLyricsBody *)frame->frame)->lyrics;
+            break;
+        default:
+            return NULL;
+    }
+
+    encoding = id3v2GetFrameEncoding(frame);
+    ret = calloc(sizeof(unsigned char), id3strlen(ptr, encoding) + id3ReaderAllocationAdd(encoding));
+    memcpy(ret, ptr, id3strlen(ptr, encoding));
+
+    return ret;
+}
