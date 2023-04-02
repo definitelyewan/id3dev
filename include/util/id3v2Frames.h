@@ -160,7 +160,7 @@ Id3v2Frame *id3v2ParsePlayCounterFrame(unsigned char *buffer, Id3v2Header *heade
 Id3v2Frame *id3v2CopyPlayCounterFrame(Id3v2Frame *frame);
 Id3v2PlayCounterBody *id3v2CopyPlayCounterBody(Id3v2PlayCounterBody *body);
 Id3v2PlayCounterBody *id3v2ParsePlayCounterBody(unsigned char *buffer, Id3v2FrameHeader *fhrameHeader);
-Id3v2PlayCounterBody *id3v2NewPlayCounterBody(unsigned char *counter);
+Id3v2PlayCounterBody *id3v2NewPlayCounterBody(long counter);
 void id3v2FreePlayCounterFrame(Id3v2Frame *toDelete);
 
 //popularmeter frame functions

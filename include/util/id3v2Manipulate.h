@@ -19,7 +19,9 @@ extern "C"{
 
 //frame content functions
 
-
+//util
+void id3v2SavePicture(const char *fileName, Id3v2Frame *frame);
+void id3v2SaveEncapsulatedObject(Id3v2Frame *frame);
 
 //compatability functions a.k.a getters
 
@@ -51,20 +53,38 @@ size_t id3v2GetFrameSize(Id3v2Frame *frame);
 size_t id3v2GetFrameHeaderSize(Id3v2Frame *frame);
 Id3v2FrameId id3v2GetFrameID(Id3v2Frame *frame);
 
-int id3v2GetFrameEncoding(Id3v2Frame *frame);
-unsigned char *id3v2GetFrameDescription(Id3v2Frame *frame);
-unsigned char *id3v2GetTextFrameValue(Id3v2Frame *frame);
-unsigned char *id3v2GetURLFrameValue(Id3v2Frame *frame);
-unsigned char *id3v2GetInvolvedPeopleListFrameValue(Id3v2Frame *frame);
-unsigned char *id3v2GetCDIDFrameValue(Id3v2Frame *frame);
-int id3v2GetFrameTimeStampFormat(Id3v2Frame *frame);
+int id3v2GetEncoding(Id3v2Frame *frame);
+unsigned char *id3v2GetDescription(Id3v2Frame *frame);
+unsigned char *id3v2GetTextValue(Id3v2Frame *frame);
+unsigned char *id3v2GetURLValue(Id3v2Frame *frame);
+unsigned char *id3v2GetInvolvedPeopleListValue(Id3v2Frame *frame);
+unsigned char *id3v2GetCDIDValue(Id3v2Frame *frame);
+int id3v2GetTimeStampFormat(Id3v2Frame *frame);
 unsigned char id3v2GetEventTimeCodeType(Id3v2Frame *frame);
 long id3v2GetEventTimeCodeTimeStamp(Id3v2Frame *frame);
 void id3v2ResetEventTimeCodeIter(Id3v2Frame *frame);
 unsigned char *id3v2GetSyncedTempoCodesFrameValue(Id3v2Frame *frame);
-
-unsigned char *id3v2GetFrameLanguage(Id3v2Frame *frame);
-unsigned char *id3v2GetFrameUnsynchronizedLyrics(Id3v2Frame *frame);
+unsigned char *id3v2GetLanguage(Id3v2Frame *frame);
+unsigned char *id3v2GetUnsynchronizedLyrics(Id3v2Frame *frame);
+int id3v2GetSynchronizedLyricsContentType(Id3v2Frame *frame);
+unsigned char *id3v2GetSynchronizedLyricsValue(Id3v2Frame *frame);
+long id3v2GetSynchronizedLyricsTimeStamp(Id3v2Frame *frame);
+void id3v2ResetSynchronizedLyricsIter(Id3v2Frame *frame);
+unsigned char *id3v2GetCommentValue(Id3v2Frame *frame);
+unsigned char *id3v2GetSubjectiveValue(Id3v2Frame *frame);
+unsigned char *id3v2GetRelativeVolumeAdjustmentValue(Id3v2Frame *frame);
+unsigned char *id3v2GetEqualisationValue(Id3v2Frame *frame);
+unsigned char *id3v2GetReverbValue(Id3v2Frame *frame);
+unsigned char *id3v2GetMIMEType(Id3v2Frame *frame);
+int id3v2GetPictureType(Id3v2Frame *frame);
+unsigned char *id3v2GetPictureValue(Id3v2Frame *frame);
+unsigned char *id3v2GetObjectFileName(Id3v2Frame *frame);
+unsigned char *id3v2GetGeneralEncapsulatedObjectValue(Id3v2Frame *frame);
+int id3v2GetPlayCount(Id3v2Frame *frame);
+unsigned char *id3v2GetEmail(Id3v2Frame *frame);
+int id3v2GetRating(Id3v2Frame *frame);
+unsigned char *id3v2GetOwnerIdentifier(Id3v2Frame *frame);
+unsigned char *id3v2GetEncryptedMetaValue(Id3v2Frame *frame);
 /*
 //functions to change values within a id3v1 structure
 void id3v1SetTitle(char *title, Id3v1Tag *tag);

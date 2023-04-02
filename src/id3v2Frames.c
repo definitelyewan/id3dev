@@ -1719,6 +1719,10 @@ Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(unsigned char encodi
     synchronizedLyricsBody->descriptor = descriptor;
     synchronizedLyricsBody->lyrics = lyrics;
 
+    ListIter *iter = newListIter(lyrics);
+
+    synchronizedLyricsBody->lyricsIter = iter;
+
     return synchronizedLyricsBody;
 }
 
@@ -1759,6 +1763,7 @@ void id3v2FreeSynchronizedLyricsFrame(Id3v2Frame *toDelete){
     }
 
     destroyList(body->lyrics);
+    freeListIter(body->lyricsIter);
     free(body);
     free(toDelete);
 }
@@ -2677,14 +2682,7 @@ Id3v2PlayCounterBody *id3v2CopyPlayCounterBody(Id3v2PlayCounterBody *body){
         return NULL;
     }
 
-    unsigned char *counter = NULL;
-
-    if(body->counter != NULL){
-        counter = calloc(sizeof(unsigned char), strlen((char *)body->counter) + 1);
-        memcpy(counter, body->counter, strlen((char *)body->counter));
-    }
-
-    return id3v2NewPlayCounterBody(counter);
+    return id3v2NewPlayCounterBody(body->counter);
 }
 
 Id3v2PlayCounterBody *id3v2ParsePlayCounterBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
@@ -2693,17 +2691,16 @@ Id3v2PlayCounterBody *id3v2ParsePlayCounterBody(unsigned char *buffer, Id3v2Fram
         return NULL;
     }
 
-    unsigned char *counter = NULL;
+    long counter = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
-    // copy counter
-    counter = id3ReaderEncodedRemainder(stream, ISO_8859_1);
+    counter = getBits8(id3ReaderCursor(stream),stream->bufferSize);
     
     id3FreeReader(stream);
     return id3v2NewPlayCounterBody(counter);
 }
 
-Id3v2PlayCounterBody *id3v2NewPlayCounterBody(unsigned char *counter){
+Id3v2PlayCounterBody *id3v2NewPlayCounterBody(long counter){
 
     Id3v2PlayCounterBody *body = malloc(sizeof(Id3v2PlayCounterBody));
 
@@ -2728,10 +2725,6 @@ void id3v2FreePlayCounterFrame(Id3v2Frame *toDelete){
     }
 
     Id3v2PlayCounterBody *body = (Id3v2PlayCounterBody *)toDelete->frame;
-
-    if(body->counter != NULL){
-        free(body->counter);
-    }
 
     free(body);
     free(toDelete);

@@ -71,6 +71,9 @@ extern "C"{
 //The offset to the tag size header in an ID3v2 tag
 #define ID3V2_TAG_SIZE_OFFSET 6
 
+//The length of the 'image/' MIME type prefix
+#define ID3V2_MIME_IMG_LEN 6
+
 #ifdef __cplusplus
 } //extern c end
 #endif

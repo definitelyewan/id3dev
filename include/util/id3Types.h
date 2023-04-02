@@ -543,6 +543,7 @@ typedef struct _Id3v2SynchronizedLyricsBody{
     unsigned int contentType;
     unsigned char *descriptor;
     List *lyrics;
+    ListIter *lyricsIter;
     
 }Id3v2SynchronizedLyricsBody;
 
@@ -592,7 +593,7 @@ typedef struct _Id3v2GeneralEncapsulatedObjectBody{
 }Id3v2GeneralEncapsulatedObjectBody;
 
 typedef struct _Id3v2PlayCounterBody{
-    unsigned char *counter;
+    long counter;
 
 }Id3v2PlayCounterBody;
 

@@ -97,7 +97,7 @@ void metadataPrint(Id3Metadata *data){
                                                     id3v2GetFrameEncryptionMethod(currFrame),
                                                     id3v2GetFrameGroup(currFrame));
                 
-                int encoding = id3v2GetFrameEncoding(currFrame);
+                int encoding = id3v2GetEncoding(currFrame);
                 
                 switch(encoding){
                     case ISO_8859_1:
@@ -117,14 +117,14 @@ void metadataPrint(Id3Metadata *data){
                 
                 if(id3v2GetFrameStrID(currFrame)[0] == 'T'){
                     
-                        unsigned char *desc = id3v2GetFrameDescription(currFrame);
-                        unsigned char *value = id3v2GetTextFrameValue(currFrame);
+                        unsigned char *desc = id3v2GetDescription(currFrame);
+                        unsigned char *value = id3v2GetTextValue(currFrame);
                         
                         printf("desc:[");
-                        encodedprintf(desc, id3v2GetFrameEncoding(currFrame));
+                        encodedprintf(desc, encoding);
                         printf("] ");
                         printf("value:[");
-                        encodedprintf(value, id3v2GetFrameEncoding(currFrame));
+                        encodedprintf(value, encoding);
                         printf("]");
 
                         if(desc != NULL){
@@ -136,11 +136,11 @@ void metadataPrint(Id3Metadata *data){
                 
                 }else if(id3v2GetFrameStrID(currFrame)[0] == 'W' && id3v2GetFrameID(currFrame) != WCOM){
 
-                        unsigned char *desc = id3v2GetFrameDescription(currFrame);
-                        unsigned char *url = id3v2GetURLFrameValue(currFrame);
+                        unsigned char *desc = id3v2GetDescription(currFrame);
+                        unsigned char *url = id3v2GetURLValue(currFrame);
                         
                         printf("desc:[");
-                        encodedprintf(desc, id3v2GetFrameEncoding(currFrame));
+                        encodedprintf(desc, encoding);
                         printf("] ");
                         printf("url:[%s]",url);
 
@@ -153,10 +153,10 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == IPL || id3v2GetFrameID(currFrame) == IPLS){
                     
-                    unsigned char *people = id3v2GetInvolvedPeopleListFrameValue(currFrame);
+                    unsigned char *people = id3v2GetInvolvedPeopleListValue(currFrame);
                     
                     printf("people:[");
-                    encodedprintf(people, id3v2GetFrameEncoding(currFrame));
+                    encodedprintf(people, encoding);
                     printf("] ");
 
                     if(people != NULL){
@@ -165,7 +165,7 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == MCI || id3v2GetFrameID(currFrame) == MCDI){
 
-                    unsigned char *cdtoc = id3v2GetCDIDFrameValue(currFrame);
+                    unsigned char *cdtoc = id3v2GetCDIDValue(currFrame);
                     printf("cdtoc[%s]",cdtoc);
 
                     if(cdtoc != NULL){
@@ -177,7 +177,7 @@ void metadataPrint(Id3Metadata *data){
                     unsigned char type = 0x00;
                     long time = 0;
 
-                    printf("format:[%d] ",id3v2GetFrameTimeStampFormat(currFrame));
+                    printf("format:[%d] ",id3v2GetTimeStampFormat(currFrame));
                     
                     printf("types:[");
                     while((type = id3v2GetEventTimeCodeType(currFrame)) != 0x00){
@@ -195,9 +195,9 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == ULT || id3v2GetFrameID(currFrame) == USLT){
 
-                    unsigned char *language = id3v2GetFrameLanguage(currFrame);
-                    unsigned char *description = id3v2GetFrameDescription(currFrame);
-                    unsigned char *lyrics = id3v2GetFrameUnsynchronizedLyrics(currFrame);
+                    unsigned char *language = id3v2GetLanguage(currFrame);
+                    unsigned char *description = id3v2GetDescription(currFrame);
+                    unsigned char *lyrics = id3v2GetUnsynchronizedLyrics(currFrame);
 
                     if(language != NULL){
                         printf("language:[%s] ",language);
@@ -218,94 +218,205 @@ void metadataPrint(Id3Metadata *data){
                         free(lyrics);
                     }
 
-                }else if(currFrame->header->idNum == PIC || currFrame->header->idNum == APIC){
-                    Id3v2PictureBody *body = (Id3v2PictureBody *)currFrame->frame;
+                }else if(id3v2GetFrameID(currFrame) == SLT || id3v2GetFrameID(currFrame) == SYLT){
 
-                    printf("formate[%s]",body->format);
-                    printf(" picture type[%x]",body->pictureType);
-                    if(encoding == ISO_8859_1  || encoding == UTF8){
-                        printf(" desc:[%s]",body->description);
+                    unsigned char *language = id3v2GetLanguage(currFrame);
+                    unsigned char *description = id3v2GetDescription(currFrame);
+                    int format = id3v2GetTimeStampFormat(currFrame);
+                    int contentType = id3v2GetSynchronizedLyricsContentType(currFrame);
+                    unsigned char *text = NULL;
+                    long stamp = 0;
+
+                    if(language != NULL){
+                        printf("language:[%s] ",language);
+                        free(language);
                     }
 
-                    if(encoding == UTF16){
-                        printf(" desc:[");
-                        for(int i = 0; i < strlenUTF16(body->description); i++){
-                            printf("[%x]",body->description[i]);
-                        }
+                    printf("format:[%d] ",format);
+                    printf("type:[%d] ",contentType);
+
+                    if(description != NULL){
+                        printf("desc:[");
+                        encodedprintf(description, encoding);
+                        printf("] ");
+                        free(description);
+                    }
+
+                    printf("lyrics:[");
+                    while((text = id3v2GetSynchronizedLyricsValue(currFrame)) != NULL){
+                        printf("[");
+                        encodedprintf(text,encoding);
                         printf("]");
+                        free(text);
+                    }
+                    printf("] ");
+
+                    id3v2ResetSynchronizedLyricsIter(currFrame);
+
+                    printf("stamp:[");
+                    while((stamp = id3v2GetSynchronizedLyricsTimeStamp(currFrame)) != -1){
+                        printf("[%ld]",stamp);
+                    }
+                    printf("] ");
+
+                }else if(id3v2GetFrameID(currFrame) == COM || id3v2GetFrameID(currFrame) == COMM){
+
+                    unsigned char *language = id3v2GetLanguage(currFrame);
+                    unsigned char *description = id3v2GetDescription(currFrame);
+                    unsigned char *value = id3v2GetCommentValue(currFrame);
+
+                    if(language != NULL){
+                        printf("language:[%s] ",language);
+                        free(language);
                     }
 
-                    if(encoding == UTF16BE){
-                        printf(" desc:[");
-                        for(int i = 0; i < strlenUTF16BE(body->description); i++){
-                            printf("[%x]",body->description[i]);
-                        }
+                    if(description != NULL){
+                        printf("desc:[");
+                        encodedprintf(description,encoding);
+                        printf("] ");
+                        free(description);
+                    }
+
+                    if(value != NULL){
+                        printf("value:[");
+                        encodedprintf(value, encoding);
                         printf("]");
+                        free(value);
                     }
 
-                    char *test = calloc(sizeof(char), 100);
+                }else if(id3v2GetFrameID(currFrame) == REV || id3v2GetFrameID(currFrame) == RVA || id3v2GetFrameID(currFrame) == EQU ||
+                        id3v2GetFrameID(currFrame) == EQUA || id3v2GetFrameID(currFrame) == RVAD || id3v2GetFrameID(currFrame) == RVRB ||
+                        id3v2GetFrameID(currFrame) == RVA2 || id3v2GetFrameID(currFrame) == EQU2){
                     
-                    sprintf(test,"%s%d%s","img",body->picSize,".jpg");
-                    FILE *fp = fopen(test,"wb");
+                    unsigned char *value = id3v2GetSubjectiveValue(currFrame);
+
+                    if(value != NULL){
+                        printf("value:[%p]",value);
+                        free(value);
+                    }
+
+                }else if(id3v2GetFrameID(currFrame) == PIC || id3v2GetFrameID(currFrame) == APIC){
                     
-                    fwrite(body->pictureData,1,body->picSize,fp);
-                    free(test);
-                    fclose(fp);
+                    unsigned char *format = id3v2GetMIMEType(currFrame);
+                    int pictureType = id3v2GetPictureType(currFrame);
+                    unsigned char *desc = id3v2GetDescription(currFrame);
+                    unsigned char *picData = id3v2GetPictureValue(currFrame);
 
-                }else if(currFrame->header->idNum == COM || currFrame->header->idNum == COMM){
-                    Id3v2CommentBody *body = (Id3v2CommentBody *)currFrame->frame;                
-
-                    if(encoding == ISO_8859_1 || encoding == UTF8){
+                    if(format != NULL){
+                        printf("mime:[%s] ",format);
+                        free(format);
                         
-                        printf("language:[%s]",body->language);
+                    }
+                    
+                    if(pictureType != -1){
+                        printf("type:[%d] ",pictureType);
 
-                        if(body->description != NULL){
-                            printf(" desc:[%s]",body->description);
-                        }
+                    }
+
+                    if(desc != NULL){
+                        printf("desc:[");
+                        encodedprintf(desc, encoding);
+                        free(desc);
+                        printf("] ");
+                    }
+
+                    if(picData != NULL){
+                        printf("picData:[%p] ",picData);
+                        free(picData);
+
+                        char fileName[100];
+                        sprintf(fileName,"%s%d%s","img",pictureType,".jpg");
+                        id3v2SavePicture(fileName,currFrame);
+                    }
+
+                }else if(id3v2GetFrameID(currFrame) == GEO || id3v2GetFrameID(currFrame) == GEOB){
+                    
+                    unsigned char *mime = id3v2GetMIMEType(currFrame);
+                    unsigned char *fileName = id3v2GetObjectFileName(currFrame);
+                    unsigned char *desc = id3v2GetDescription(currFrame);
+                    unsigned char *obj = id3v2GetGeneralEncapsulatedObjectValue(currFrame);
+
+                    if(mime != NULL){
+                        printf("mime:[%s] ",mime);
+                    }   
+
+                    if(fileName != NULL){
+                        printf("fileName:[");
+                        encodedprintf(fileName,encoding);
+                        printf("] ");
+                    }
+
+                    if(desc != NULL){
+                        printf("desc:[");
+                        encodedprintf(desc,encoding);
+                        printf("] ");
+                        free(desc);
+                    }
+
+                    if(obj != NULL){
+                        printf("object:[%p] ",obj);
+                        free(obj);
                         
-                        printf(" value:[%s]",body->text);
+                        id3v2SaveEncapsulatedObject(currFrame);
                     }
 
-                    if(encoding == UTF16){
-
-                        printf("language:[%s]",body->language);
-
-                        printf(" desc:[");
-                        if(body->description != NULL){
-                            for(int i = 0; i < strlenUTF16(body->description); i++){
-                                printf("[%x]",body->description[i]);
-                            }
-                        }
-                        printf("]");
-
-                        printf(" text:[");
-                        if(body->text != NULL){
-                            for(int i = 0; i < strlenUTF16(body->text); i++){
-                                printf("[%x]",body->text[i]);
-                            }
-                        }
-                        printf("]");
+                    if(fileName != NULL){
+                        free(fileName);
                     }
-                    if(encoding == UTF16BE){
 
-                        printf("language:[%s]",body->language);
-
-                        printf(" desc:[");
-                        if(body->description != NULL){
-                            for(int i = 0; i < strlenUTF16BE(body->description); i++){
-                                printf("[%x]",body->description[i]);
-                            }
-                        }
-                        printf("]");
-
-                        printf(" text:[");
-                        if(body->text != NULL){
-                            for(int i = 0; i < strlenUTF16BE(body->text); i++){
-                                printf("[%x]",body->text[i]);
-                            }
-                        }
-                        printf("]");
+                    if(mime != NULL){
+                        free(mime);
                     }
+
+
+                }else if(id3v2GetFrameID(currFrame) == CNT || id3v2GetFrameID(currFrame) == PCNT){
+                    printf("plays:[%d] ",id3v2GetPlayCount(currFrame));
+
+                }else if(id3v2GetFrameID(currFrame) == POP || id3v2GetFrameID(currFrame) == POPM){
+                    
+                    unsigned char *email = id3v2GetEmail(currFrame);
+                    int rating = id3v2GetRating(currFrame);
+                    int counter = id3v2GetPlayCount(currFrame);
+
+                    if(email != NULL){
+                        printf("email:[%s] ",email);
+                        free(email);
+                    }
+
+                    if(rating != -1){
+                        printf("rating:[%d] ",rating);
+                    }
+
+                    if(counter != -1){
+                        printf("counter:[%d] ",counter);
+                    }
+
+                }else if(id3v2GetFrameID(currFrame) == CRM){
+                    unsigned char *owner = id3v2GetOwnerIdentifier(currFrame);
+                    unsigned char *desc = id3v2GetDescription(currFrame);
+                    unsigned char *encryptedBlock = id3v2GetEncryptedMetaValue(currFrame);
+
+                    if(owner != NULL){
+                        printf("owner:[%s] ",owner);
+                        free(desc);
+                    }
+
+                    if(desc != NULL){
+                        printf("desc:[%s] ",desc);
+                        free(desc);
+                    }
+
+                    if(encryptedBlock != NULL){
+                        printf("encryptedBlock:[%p] ",encryptedBlock);
+                        free(encryptedBlock);
+                    }
+
+                }else if(id3v2GetFrameID(currFrame) == AENC){
+                    unsigned char *owner = id3v2GetOwnerIdentifier(currFrame);
+                    void *start = NULL;
+                    int previewlength = 0;
+                    unsigned char *info = NULL;
+
                 }else{
                     printf("parsed and present");
                 }
