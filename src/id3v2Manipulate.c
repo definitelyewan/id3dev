@@ -1171,7 +1171,6 @@ unsigned char *id3v2GetOwnerIdentifier(Id3v2Frame *frame){
     ret = calloc(sizeof(unsigned char), strlen((char *)ptr) + 1);
     memcpy(ret, ptr, strlen((char *)ptr));
     return ret;
-
 }
 
 unsigned char *id3v2GetEncryptedMetaValue(Id3v2Frame *frame){
@@ -1196,3 +1195,114 @@ unsigned char *id3v2GetEncryptedMetaValue(Id3v2Frame *frame){
     return ret;
 }
 
+unsigned char *id3v2GetPreviewStart(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    if(id3v2GetFrameID(frame) != AENC){
+        return NULL;
+    }
+
+    return ((Id3v2AudioEncryptionBody *)frame->frame)->previewStart;
+}
+
+int id3v2GetPreviewLength(Id3v2Frame *frame){
+    
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return -1;
+    }
+
+    if(id3v2GetFrameID(frame) != AENC){
+        return -1;
+    }
+
+    return ((Id3v2AudioEncryptionBody *)frame->frame)->previewLength;
+}
+
+unsigned char *id3v2GetAudioEncryptionValue(Id3v2Frame *frame){
+    
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    if(id3v2GetFrameID(frame) != AENC){
+        return NULL;
+    }
+
+    unsigned char *value = NULL;
+
+    if(((Id3v2AudioEncryptionBody *)frame->frame)->encryptionInfo == NULL){
+        return NULL;
+    }
+
+    value = malloc(sizeof(unsigned char) * (((Id3v2AudioEncryptionBody *)frame->frame)->encryptionInfoLen + 1));
+    memcpy(value, ((Id3v2AudioEncryptionBody *)frame->frame)->encryptionInfo, ((Id3v2AudioEncryptionBody *)frame->frame)->encryptionInfoLen);
+
+    return value;
+
+}
+
+unsigned char *id3v2GetUniqueFileIdentifierValue(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    switch(id3v2GetFrameID(frame)){
+        case UFI:
+            break;
+        case UFID:
+            break;
+        default:
+            return NULL;
+    }
+
+    Id3v2UniqueFileIdentifierBody *body = (Id3v2UniqueFileIdentifierBody *)frame->frame;
+
+    if(body->identifier == NULL){
+        return NULL;
+    }
+
+    unsigned char *value = calloc(sizeof(unsigned char), strlen((char *)body->identifier) + 1);
+    memcpy(value, body->identifier, strlen((char *)body->identifier));
+    
+    return value;
+}
+
+long id3v2GetPositionSynchronisationValue(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return -1;
+    }
+
+    if(id3v2GetFrameID(frame) != POSS){
+        return -1;
+    }
+
+    return ((Id3v2PositionSynchronisationBody *)frame->frame)->pos;
+}
+
+unsigned char *id3v2GetTermsOfUseValue(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    if(id3v2GetFrameID(frame) != USER){
+        return NULL;
+    }
+
+    Id3v2TermsOfUseBody *body = (Id3v2TermsOfUseBody *)frame->frame;
+    unsigned char *value = NULL;
+    int encoding = id3v2GetEncoding(frame);
+    if(body->text == NULL){
+        return NULL;
+    }
+
+    value = calloc(sizeof(unsigned char), id3strlen(body->text, encoding) + id3ReaderAllocationAdd(encoding));
+    memcpy(value, body->text, id3strlen(body->text, encoding)); 
+
+    return value;
+}

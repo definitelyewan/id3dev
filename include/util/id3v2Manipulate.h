@@ -85,6 +85,12 @@ unsigned char *id3v2GetEmail(Id3v2Frame *frame);
 int id3v2GetRating(Id3v2Frame *frame);
 unsigned char *id3v2GetOwnerIdentifier(Id3v2Frame *frame);
 unsigned char *id3v2GetEncryptedMetaValue(Id3v2Frame *frame);
+unsigned char *id3v2GetPreviewStart(Id3v2Frame *frame);
+int id3v2GetPreviewLength(Id3v2Frame *frame);
+unsigned char *id3v2GetAudioEncryptionValue(Id3v2Frame *frame);
+unsigned char *id3v2GetUniqueFileIdentifierValue(Id3v2Frame *frame);
+long id3v2GetPositionSynchronisationValue(Id3v2Frame *frame);
+unsigned char *id3v2GetTermsOfUseValue(Id3v2Frame *frame);
 /*
 //functions to change values within a id3v1 structure
 void id3v1SetTitle(char *title, Id3v1Tag *tag);

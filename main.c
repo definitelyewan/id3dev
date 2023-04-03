@@ -413,9 +413,63 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == AENC){
                     unsigned char *owner = id3v2GetOwnerIdentifier(currFrame);
-                    void *start = NULL;
-                    int previewlength = 0;
-                    unsigned char *info = NULL;
+                    void *start = id3v2GetPreviewStart(currFrame);
+                    int previewlength = id3v2GetPreviewLength(currFrame);
+                    unsigned char *info = id3v2GetAudioEncryptionValue(currFrame);
+
+                    if(owner != NULL){
+                        printf("owner:[%s] ",owner);
+                        free(owner);
+                    }
+
+                    if(start != NULL){
+                        printf("preview:[%p] ",start);
+                    }
+
+                    if(previewlength  != -1){
+                        printf("length:[%d] ",previewlength);
+                    }
+
+                    if(info != NULL){
+                        printf("info:[%p] ",info);
+                        free(info);
+                    }
+
+                }else if(id3v2GetFrameID(currFrame) == UFI || id3v2GetFrameID(currFrame) == UFID){
+                    unsigned char *owner = id3v2GetOwnerIdentifier(currFrame);
+                    unsigned char *identifier = id3v2GetUniqueFileIdentifierValue(currFrame);
+
+                    if(owner != NULL){
+                        printf("owner:[%s] ",owner);
+                        free(owner);
+                    }
+
+                    if(identifier != NULL){
+                        printf("identifier:[%s] ",identifier);
+                        free(identifier);
+                    }
+
+                }else if(id3v2GetFrameID(currFrame) == POSS){
+                    int format = id3v2GetTimeStampFormat(currFrame);
+                    long pos = id3v2GetPositionSynchronisationValue(currFrame);
+
+                    printf("fomat:[%d] pos:[%ld] ",format,pos);
+
+                }else if(id3v2GetFrameID(currFrame) == USER){
+                    unsigned char *language = id3v2GetLanguage(currFrame);
+                    unsigned char *text = id3v2GetTermsOfUseValue(currFrame);
+                    
+                    if(language != NULL){
+                        printf("language:[%s] ",language);
+                        free(language);
+                    }
+
+                    if(text != NULL){
+                        printf("terms:[");
+                        encodedprintf(text, encoding);
+                        free(text);
+                        printf("] ");
+                    }
 
                 }else{
                     printf("parsed and present");

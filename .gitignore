@@ -6,3 +6,5 @@ main
 *.png
 vgcore.*
 *.exe
+.vscode
+*.json
