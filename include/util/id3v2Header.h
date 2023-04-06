@@ -9,20 +9,20 @@ extern "C"{
 #include <stdbool.h>
 
 //header functions
-Id3v2Header *id3v2ParseHeader(unsigned char *buffer, unsigned int bufferSize);
+Id3v2Header *id3v2ParseHeader(id3buf buffer, unsigned int bufferSize);
 Id3v2Header *id3v2NewHeader(int versionMinor, int versionMajor, bool unsynchronisation, bool experimentalIndicator, bool footer, size_t size, Id3v2ExtHeader *extendedHeader);
 Id3v2Header *id3v2CopyHeader(Id3v2Header *toCopy);
 void id3v2FreeHeader(Id3v2Header *header);
 
 //extended header functions
-Id3v2ExtHeader *id3v2ParseExtendedHeader(unsigned char *buffer, Id3v2HeaderVersion version);
-Id3v2ExtHeader *id3v2NewExtendedHeader(int size, int padding, unsigned char update, unsigned char *crc, unsigned char tagSizeRestriction, unsigned char encodingRestriction, unsigned char textSizeRestriction, unsigned char imageEncodingRestriction, unsigned char imageSizeRestriction);
+Id3v2ExtHeader *id3v2ParseExtendedHeader(id3buf buffer, Id3v2HeaderVersion version);
+Id3v2ExtHeader *id3v2NewExtendedHeader(int size, int padding, id3byte update, id3buf crc, id3byte tagSizeRestriction, id3byte encodingRestriction, id3byte textSizeRestriction, id3byte imageEncodingRestriction, id3byte imageSizeRestriction);
 Id3v2ExtHeader *id3v2CopyExtendedHeader(Id3v2ExtHeader *toCopy);
 void id3v2FreeExtHeader(Id3v2ExtHeader *extHeader);
 
 //utils
 Id3v2HeaderVersion id3v2TagVersion(Id3v2Header *tag);
-bool containsId3v2(unsigned char *buffer);
+bool containsId3v2(id3buf buffer);
 
 #ifdef __cplusplus
 } //extern c end

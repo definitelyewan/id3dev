@@ -126,13 +126,13 @@ void id3v2SaveEncapsulatedObject(Id3v2Frame *frame){
     Id3v2GeneralEncapsulatedObjectBody *body = (Id3v2GeneralEncapsulatedObjectBody *)frame->frame;
 
     char *name = NULL;
-    unsigned char *mime = id3v2GetMIMEType(frame);
-    unsigned char *fileName = id3v2GetObjectFileName(frame);
+    id3buf mime = id3v2GetMIMEType(frame);
+    id3buf fileName = id3v2GetObjectFileName(frame);
     int nameLen = id3strlen(fileName, id3v2GetEncoding(frame));
     int mimeLen = strlen((char *)mime);
 
     int mark = 0;
-    name = calloc(sizeof(unsigned char), nameLen + mimeLen + 1);
+    name = calloc(sizeof(id3byte), nameLen + mimeLen + 1);
     for(int i = 0; i < nameLen; i++){
         
         if(!(fileName[i] == 0x00 || fileName[i] == 0xFF || fileName[i] == 0xFE)){
@@ -183,7 +183,7 @@ int id3v2GetImageSizeRestriction(Id3v2Tag *tag){
     return (id3v2ManipExtErrorChecks(tag) == true) ? 0 : tag->header->extendedHeader->imageSizeRestriction;
 }
 
-unsigned char *id3v2GetCrc(Id3v2Tag *tag){
+id3buf id3v2GetCrc(Id3v2Tag *tag){
     return (id3v2ManipExtErrorChecks(tag) == true) ? NULL : tag->header->extendedHeader->crc;
 
 }
@@ -254,11 +254,11 @@ size_t id3v2GetFrameDataLengthSize(Id3v2Frame *frame){
     return (id3v2ManipFlagContentErrorChecks(frame) == true) ? false : (frame->header->flagContent->dataLengthIndicator == false) ? 0 : frame->header->flagContent->decompressedSize;
 }
 
-unsigned char id3v2GetFrameEncryptionMethod(Id3v2Frame *frame){
+id3byte id3v2GetFrameEncryptionMethod(Id3v2Frame *frame){
     return (id3v2ManipFlagContentErrorChecks(frame) == true) ? 0x00 : frame->header->flagContent->encryption;
 }
 
-unsigned char id3v2GetFrameGroup(Id3v2Frame *frame){
+id3byte id3v2GetFrameGroup(Id3v2Frame *frame){
     return (id3v2ManipFlagContentErrorChecks(frame) == true) ? 0x00 : frame->header->flagContent->grouping;
 }
 
@@ -351,7 +351,7 @@ int id3v2GetEncoding(Id3v2Frame *frame){
     return -1;
 }
 
-unsigned char *id3v2GetDescription(Id3v2Frame *frame){
+id3buf id3v2GetDescription(Id3v2Frame *frame){
 
     if(frame == NULL){
         return NULL;
@@ -365,8 +365,8 @@ unsigned char *id3v2GetDescription(Id3v2Frame *frame){
         return NULL;
     }
 
-    unsigned char *ptr = NULL;
-    unsigned char *ret = NULL;
+    id3buf ptr = NULL;
+    id3buf ret = NULL;
     int encoding = id3v2GetEncoding(frame);
     
     //only these frames use a description of descriptor
@@ -421,7 +421,7 @@ unsigned char *id3v2GetDescription(Id3v2Frame *frame){
             if(ptr == NULL){
                 return NULL;
             }
-            ret = calloc(sizeof(unsigned char), strlen((char *)ptr) + 1);
+            ret = calloc(sizeof(id3byte), strlen((char *)ptr) + 1);
             memcpy(ret, ptr, strlen((char *)ptr));
             return ret;
         }
@@ -440,7 +440,7 @@ unsigned char *id3v2GetDescription(Id3v2Frame *frame){
     return ret;
 }
 
-unsigned char *id3v2GetTextValue(Id3v2Frame *frame){
+id3buf id3v2GetTextValue(Id3v2Frame *frame){
 
     if(frame == NULL){
         return NULL;
@@ -456,13 +456,13 @@ unsigned char *id3v2GetTextValue(Id3v2Frame *frame){
         return NULL;
     }
     
-    unsigned char *ret = calloc(sizeof(unsigned char), id3strlen(body->value, body->encoding) + id3ReaderAllocationAdd(body->encoding));
+    id3buf ret = calloc(sizeof(id3byte), id3strlen(body->value, body->encoding) + id3ReaderAllocationAdd(body->encoding));
     memcpy(ret, body->value, id3strlen(body->value, body->encoding));
 
     return ret;
 }   
 
-unsigned char *id3v2GetURLValue(Id3v2Frame *frame){
+id3buf id3v2GetURLValue(Id3v2Frame *frame){
     
     if(frame == NULL){
         return NULL;
@@ -478,13 +478,13 @@ unsigned char *id3v2GetURLValue(Id3v2Frame *frame){
         return NULL;
     }
 
-    unsigned char *ret = calloc(sizeof(unsigned char), id3strlen(body->url, ISO_8859_1) + 1);
+    id3buf ret = calloc(sizeof(id3byte), id3strlen(body->url, ISO_8859_1) + 1);
     memcpy(ret, body->url, id3strlen(body->url, ISO_8859_1));
 
     return ret;
 }
 
-unsigned char *id3v2GetInvolvedPeopleListValue(Id3v2Frame *frame){
+id3buf id3v2GetInvolvedPeopleListValue(Id3v2Frame *frame){
 
     if(frame == NULL){
         return NULL;
@@ -505,13 +505,13 @@ unsigned char *id3v2GetInvolvedPeopleListValue(Id3v2Frame *frame){
 
     Id3v2InvolvedPeopleListBody *body = (Id3v2InvolvedPeopleListBody *)frame->frame; 
     int encoding = body->encoding;
-    unsigned char *ret = calloc(sizeof(unsigned char), id3strlen(body->peopleListStrings, encoding) + id3ReaderAllocationAdd(encoding));
+    id3buf ret = calloc(sizeof(id3byte), id3strlen(body->peopleListStrings, encoding) + id3ReaderAllocationAdd(encoding));
     memcpy(ret, body->peopleListStrings, id3strlen(body->peopleListStrings, encoding));
 
     return ret;
 }
 
-unsigned char *id3v2GetCDIDValue(Id3v2Frame *frame){
+id3buf id3v2GetCDIDValue(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
@@ -527,7 +527,7 @@ unsigned char *id3v2GetCDIDValue(Id3v2Frame *frame){
     }   
 
     Id3v2MusicCDIdentifierBody *body = (Id3v2MusicCDIdentifierBody *)frame->frame; 
-    unsigned char *ret = calloc(sizeof(unsigned char), id3strlen(body->cdtoc, ISO_8859_1) + 1);
+    id3buf ret = calloc(sizeof(id3byte), id3strlen(body->cdtoc, ISO_8859_1) + 1);
     memcpy(ret, body->cdtoc, id3strlen(body->cdtoc, ISO_8859_1));
 
     return ret;   
@@ -560,7 +560,7 @@ int id3v2GetTimeStampFormat(Id3v2Frame *frame){
     }
 }
 
-unsigned char id3v2GetEventTimeCodeType(Id3v2Frame *frame){
+id3byte id3v2GetEventTimeCodeType(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return 0x00;
@@ -636,27 +636,27 @@ void id3v2ResetEventTimeCodeIter(Id3v2Frame *frame){
     body->eventsTimeCodesIter = li;
 }
 
-unsigned char *id3v2GetSyncedTempoCodesFrameValue(Id3v2Frame *frame){
+id3buf id3v2GetSyncedTempoCodesFrameValue(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
 
     Id3v2SyncedTempoCodesBody *body = (Id3v2SyncedTempoCodesBody *)frame->frame;
-    unsigned char *data = malloc((sizeof(unsigned char)*body->tempoDataLen)+1);
+    id3buf data = malloc((sizeof(id3byte)*body->tempoDataLen)+1);
     memcpy(data, body->tempoData, body->tempoDataLen);
     
     return data;
 }
 
-unsigned char *id3v2GetLanguage(Id3v2Frame *frame){
+id3buf id3v2GetLanguage(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
     
-    unsigned char *lang = NULL;
-    unsigned char *ret = NULL;
+    id3buf lang = NULL;
+    id3buf ret = NULL;
     switch(id3v2GetFrameID(frame)){
         case ULT:
             lang = ((Id3v2UnsynchronizedLyricsBody *)frame->frame)->language;
@@ -683,20 +683,20 @@ unsigned char *id3v2GetLanguage(Id3v2Frame *frame){
             return NULL;
     }
 
-    ret = calloc(sizeof(unsigned char), ID3V2_LANGUAGE_LEN+1);
+    ret = calloc(sizeof(id3byte), ID3V2_LANGUAGE_LEN+1);
     memcpy(ret, lang, ID3V2_LANGUAGE_LEN);
 
     return ret;
 }
 
-unsigned char *id3v2GetUnsynchronizedLyrics(Id3v2Frame *frame){
+id3buf id3v2GetUnsynchronizedLyrics(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
 
-    unsigned char *ptr = NULL;
-    unsigned char *ret = NULL;
+    id3buf ptr = NULL;
+    id3buf ret = NULL;
     int encoding = 0;
 
     switch(id3v2GetFrameID(frame)){
@@ -711,7 +711,7 @@ unsigned char *id3v2GetUnsynchronizedLyrics(Id3v2Frame *frame){
     }
 
     encoding = id3v2GetEncoding(frame);
-    ret = calloc(sizeof(unsigned char), id3strlen(ptr, encoding) + id3ReaderAllocationAdd(encoding));
+    ret = calloc(sizeof(id3byte), id3strlen(ptr, encoding) + id3ReaderAllocationAdd(encoding));
     memcpy(ret, ptr, id3strlen(ptr, encoding));
 
     return ret;
@@ -733,7 +733,7 @@ int id3v2GetSynchronizedLyricsContentType(Id3v2Frame *frame){
     }
 }
 
-unsigned char *id3v2GetSynchronizedLyricsValue(Id3v2Frame *frame){
+id3buf id3v2GetSynchronizedLyricsValue(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
@@ -750,7 +750,7 @@ unsigned char *id3v2GetSynchronizedLyricsValue(Id3v2Frame *frame){
 
     Id3v2SynchronizedLyricsBody *body = (Id3v2SynchronizedLyricsBody *)frame->frame;
     int encoding = id3v2GetEncoding(frame);
-    unsigned char *text = NULL;
+    id3buf text = NULL;
 
     if(hasNextListIter(body->lyricsIter)){
         Id3v2StampedLyric *stamp = (Id3v2StampedLyric *)nextListIter(body->lyricsIter);
@@ -759,7 +759,7 @@ unsigned char *id3v2GetSynchronizedLyricsValue(Id3v2Frame *frame){
             return NULL;
         }
 
-        text = calloc(sizeof(unsigned char), stamp->lyricLen + id3ReaderAllocationAdd(encoding));
+        text = calloc(sizeof(id3byte), stamp->lyricLen + id3ReaderAllocationAdd(encoding));
         memcpy(text, stamp->text, stamp->lyricLen);
     
         return text;
@@ -818,7 +818,7 @@ void id3v2ResetSynchronizedLyricsIter(Id3v2Frame *frame){
     body->lyricsIter = li;
 }
 
-unsigned char *id3v2GetCommentValue(Id3v2Frame *frame){
+id3buf id3v2GetCommentValue(Id3v2Frame *frame){
 
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
@@ -835,17 +835,17 @@ unsigned char *id3v2GetCommentValue(Id3v2Frame *frame){
     }
 
     int encoding = id3v2GetEncoding(frame);
-    unsigned char *text = NULL;
+    id3buf text = NULL;
     Id3v2CommentBody *body = (Id3v2CommentBody *)frame->frame;
 
-    text = calloc(sizeof(unsigned char), id3strlen(body->text, encoding) + id3ReaderAllocationAdd(encoding));
+    text = calloc(sizeof(id3byte), id3strlen(body->text, encoding) + id3ReaderAllocationAdd(encoding));
     memcpy(text, body->text, id3strlen(body->text, encoding));
 
     return text;
 }
 
 
-unsigned char *id3v2GetSubjectiveValue(Id3v2Frame *frame){
+id3buf id3v2GetSubjectiveValue(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
@@ -874,39 +874,39 @@ unsigned char *id3v2GetSubjectiveValue(Id3v2Frame *frame){
 
 
     Id3v2SubjectiveBody *body = (Id3v2SubjectiveBody *)frame->frame;
-    unsigned char *value = NULL;
+    id3buf value = NULL;
 
     if(body->valueSize <= 0){
         return NULL;
     }
 
-    value = calloc(sizeof(unsigned char), body->valueSize + 1);
+    value = calloc(sizeof(id3byte), body->valueSize + 1);
     memcpy(value, body->value, body->valueSize);
 
     return value;
 }
 
-unsigned char *id3v2GetRelativeVolumeAdjustmentValue(Id3v2Frame *frame){
+id3buf id3v2GetRelativeVolumeAdjustmentValue(Id3v2Frame *frame){
     return id3v2GetSubjectiveValue(frame); 
 }
 
-unsigned char *id3v2GetEqualisationValue(Id3v2Frame *frame){
+id3buf id3v2GetEqualisationValue(Id3v2Frame *frame){
     return id3v2GetSubjectiveValue(frame); 
 }
 
-unsigned char *id3v2GetReverbValue(Id3v2Frame *frame){
+id3buf id3v2GetReverbValue(Id3v2Frame *frame){
     return id3v2GetSubjectiveValue(frame); 
 }
 
-unsigned char *id3v2GetMIMEType(Id3v2Frame *frame){
+id3buf id3v2GetMIMEType(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
 
-    unsigned char *buildMIME = NULL;
-    unsigned char *tmp = NULL;
-    unsigned char *mime = NULL;
+    id3buf buildMIME = NULL;
+    id3buf tmp = NULL;
+    id3buf mime = NULL;
 
     switch(id3v2GetFrameID(frame)){
         case PIC:{
@@ -919,7 +919,7 @@ unsigned char *id3v2GetMIMEType(Id3v2Frame *frame){
             }
 
             mimeLen = strlen((char *)body->format);
-            buildMIME = calloc(sizeof(unsigned char), ID3V2_MIME_IMG_LEN + mimeLen + 1);
+            buildMIME = calloc(sizeof(id3byte), ID3V2_MIME_IMG_LEN + mimeLen + 1);
             
             memcpy(buildMIME,"image/",ID3V2_MIME_IMG_LEN);
             tmp = buildMIME + ID3V2_MIME_IMG_LEN;
@@ -947,7 +947,7 @@ unsigned char *id3v2GetMIMEType(Id3v2Frame *frame){
         return NULL;
     }
 
-    buildMIME = calloc(sizeof(unsigned char), strlen((char *)mime) + 1);
+    buildMIME = calloc(sizeof(id3byte), strlen((char *)mime) + 1);
     memcpy(buildMIME, mime, strlen((char *)mime) + 1);
 
     return buildMIME;
@@ -974,14 +974,14 @@ int id3v2GetPictureType(Id3v2Frame *frame){
     return -1;
 }
 
-unsigned char *id3v2GetPictureValue(Id3v2Frame *frame){
+id3buf id3v2GetPictureValue(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
     
     Id3v2PictureBody *body = (Id3v2PictureBody *)frame->frame;
-    unsigned char *value = NULL;
+    id3buf value = NULL;
     
     switch(id3v2GetFrameID(frame)){
         case PIC:
@@ -996,20 +996,20 @@ unsigned char *id3v2GetPictureValue(Id3v2Frame *frame){
         return NULL;
     }
     
-    value = calloc(sizeof(unsigned char), body->picSize + 1);
+    value = calloc(sizeof(id3byte), body->picSize + 1);
     memcpy(value, body->pictureData, body->picSize);
     
     return value;
 }
 
-unsigned char *id3v2GetObjectFileName(Id3v2Frame *frame){
+id3buf id3v2GetObjectFileName(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
 
     int encoding = id3v2GetEncoding(frame);
-    unsigned char *name = NULL;
+    id3buf name = NULL;
 
     switch(id3v2GetFrameID(frame)){
         case GEO:
@@ -1026,19 +1026,19 @@ unsigned char *id3v2GetObjectFileName(Id3v2Frame *frame){
         return NULL;
     }
 
-    name = calloc(sizeof(unsigned char), id3strlen(body->filename, encoding) + id3ReaderAllocationAdd(encoding));
+    name = calloc(sizeof(id3byte), id3strlen(body->filename, encoding) + id3ReaderAllocationAdd(encoding));
     memcpy(name, body->filename, id3strlen(body->filename, encoding));
 
     return name;
 }
 
-unsigned char *id3v2GetGeneralEncapsulatedObjectValue(Id3v2Frame *frame){
+id3buf id3v2GetGeneralEncapsulatedObjectValue(Id3v2Frame *frame){
   
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
 
-    unsigned char *value = NULL;
+    id3buf value = NULL;
 
     switch(id3v2GetFrameID(frame)){
         case GEO:
@@ -1055,7 +1055,7 @@ unsigned char *id3v2GetGeneralEncapsulatedObjectValue(Id3v2Frame *frame){
         return NULL;
     }
 
-    value = malloc(sizeof(unsigned char)*(body->encapsulatedObjectLen + 1));
+    value = malloc(sizeof(id3byte)*(body->encapsulatedObjectLen + 1));
     memcpy(value, body->encapsulatedObject, body->encapsulatedObjectLen);
 
     return value;
@@ -1082,7 +1082,7 @@ int id3v2GetPlayCount(Id3v2Frame *frame){
     }
 }
 
-unsigned char *id3v2GetEmail(Id3v2Frame *frame){
+id3buf id3v2GetEmail(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
@@ -1099,13 +1099,13 @@ unsigned char *id3v2GetEmail(Id3v2Frame *frame){
     }
 
     Id3v2PopularBody *body = (Id3v2PopularBody *)frame->frame;
-    unsigned char *email = NULL;
+    id3buf email = NULL;
 
     if(body->email == NULL){
         return NULL;
     }
 
-    email = calloc(sizeof(unsigned char), strlen((char *)body->email) + 1);
+    email = calloc(sizeof(id3byte), strlen((char *)body->email) + 1);
     memcpy(email, body->email, strlen((char *)body->email));
     
     return email;
@@ -1132,14 +1132,14 @@ int id3v2GetRating(Id3v2Frame *frame){
     return (int)body->rating;
 }
 
-unsigned char *id3v2GetOwnerIdentifier(Id3v2Frame *frame){
+id3buf id3v2GetOwnerIdentifier(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
 
-    unsigned char *ptr = NULL;
-    unsigned char *ret = NULL;
+    id3buf ptr = NULL;
+    id3buf ret = NULL;
 
     switch(id3v2GetFrameID(frame)){
         case UFI:
@@ -1171,12 +1171,12 @@ unsigned char *id3v2GetOwnerIdentifier(Id3v2Frame *frame){
         return NULL;
     }
 
-    ret = calloc(sizeof(unsigned char), strlen((char *)ptr) + 1);
+    ret = calloc(sizeof(id3byte), strlen((char *)ptr) + 1);
     memcpy(ret, ptr, strlen((char *)ptr));
     return ret;
 }
 
-unsigned char *id3v2GetEncryptedMetaValue(Id3v2Frame *frame){
+id3buf id3v2GetEncryptedMetaValue(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
@@ -1186,19 +1186,19 @@ unsigned char *id3v2GetEncryptedMetaValue(Id3v2Frame *frame){
         return NULL;
     }
 
-    unsigned char *ptr = ((Id3v2EncryptedMetaBody *)frame->frame)->encryptedDatablock;
-    unsigned char *ret = NULL;
+    id3buf ptr = ((Id3v2EncryptedMetaBody *)frame->frame)->encryptedDatablock;
+    id3buf ret = NULL;
 
     if(ptr == NULL){
         return NULL;
     }
 
-    ret = calloc(sizeof(unsigned char), ((Id3v2EncryptedMetaBody *)frame->frame)->encryptedDatablockLen + 1);
+    ret = calloc(sizeof(id3byte), ((Id3v2EncryptedMetaBody *)frame->frame)->encryptedDatablockLen + 1);
     memcpy(ret, ptr, ((Id3v2EncryptedMetaBody *)frame->frame)->encryptedDatablockLen);
     return ret;
 }
 
-unsigned char *id3v2GetPreviewStart(Id3v2Frame *frame){
+id3buf id3v2GetPreviewStart(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
@@ -1224,7 +1224,7 @@ int id3v2GetPreviewLength(Id3v2Frame *frame){
     return ((Id3v2AudioEncryptionBody *)frame->frame)->previewLength;
 }
 
-unsigned char *id3v2GetAudioEncryptionValue(Id3v2Frame *frame){
+id3buf id3v2GetAudioEncryptionValue(Id3v2Frame *frame){
     
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
@@ -1234,20 +1234,20 @@ unsigned char *id3v2GetAudioEncryptionValue(Id3v2Frame *frame){
         return NULL;
     }
 
-    unsigned char *value = NULL;
+    id3buf value = NULL;
 
     if(((Id3v2AudioEncryptionBody *)frame->frame)->encryptionInfo == NULL){
         return NULL;
     }
 
-    value = malloc(sizeof(unsigned char) * (((Id3v2AudioEncryptionBody *)frame->frame)->encryptionInfoLen + 1));
+    value = malloc(sizeof(id3byte) * (((Id3v2AudioEncryptionBody *)frame->frame)->encryptionInfoLen + 1));
     memcpy(value, ((Id3v2AudioEncryptionBody *)frame->frame)->encryptionInfo, ((Id3v2AudioEncryptionBody *)frame->frame)->encryptionInfoLen);
 
     return value;
 
 }
 
-unsigned char *id3v2GetUniqueFileIdentifierValue(Id3v2Frame *frame){
+id3buf id3v2GetUniqueFileIdentifierValue(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
@@ -1268,7 +1268,7 @@ unsigned char *id3v2GetUniqueFileIdentifierValue(Id3v2Frame *frame){
         return NULL;
     }
 
-    unsigned char *value = calloc(sizeof(unsigned char), strlen((char *)body->identifier) + 1);
+    id3buf value = calloc(sizeof(id3byte), strlen((char *)body->identifier) + 1);
     memcpy(value, body->identifier, strlen((char *)body->identifier));
     
     return value;
@@ -1287,7 +1287,7 @@ long id3v2GetPositionSynchronisationValue(Id3v2Frame *frame){
     return ((Id3v2PositionSynchronisationBody *)frame->frame)->pos;
 }
 
-unsigned char *id3v2GetTermsOfUseValue(Id3v2Frame *frame){
+id3buf id3v2GetTermsOfUseValue(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
@@ -1298,26 +1298,26 @@ unsigned char *id3v2GetTermsOfUseValue(Id3v2Frame *frame){
     }
 
     Id3v2TermsOfUseBody *body = (Id3v2TermsOfUseBody *)frame->frame;
-    unsigned char *value = NULL;
+    id3buf value = NULL;
     int encoding = id3v2GetEncoding(frame);
     if(body->text == NULL){
         return NULL;
     }
 
-    value = calloc(sizeof(unsigned char), id3strlen(body->text, encoding) + id3ReaderAllocationAdd(encoding));
+    value = calloc(sizeof(id3byte), id3strlen(body->text, encoding) + id3ReaderAllocationAdd(encoding));
     memcpy(value, body->text, id3strlen(body->text, encoding)); 
 
     return value;
 }
 
-unsigned char *id3v2GetPrice(Id3v2Frame *frame){
+id3buf id3v2GetPrice(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
 
-    unsigned char *ptr = NULL;
-    unsigned char *ret = NULL;
+    id3buf ptr = NULL;
+    id3buf ret = NULL;
 
     switch(id3v2GetFrameID(frame)){
         case OWNE:
@@ -1334,20 +1334,20 @@ unsigned char *id3v2GetPrice(Id3v2Frame *frame){
         return NULL;
     }
     
-    ret = calloc(sizeof(unsigned char), strlen((char *)ptr) + 1);
+    ret = calloc(sizeof(id3byte), strlen((char *)ptr) + 1);
     memcpy(ret, ptr, strlen((char *)ptr));
 
     return ret;
 }
 
-unsigned char *id3v2GetPunchDate(Id3v2Frame *frame){
+id3buf id3v2GetPunchDate(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
 
-    unsigned char *ptr = NULL;
-    unsigned char *ret = NULL;
+    id3buf ptr = NULL;
+    id3buf ret = NULL;
 
     if(id3v2GetFrameID(frame) != OWNE){
         return NULL;
@@ -1360,20 +1360,20 @@ unsigned char *id3v2GetPunchDate(Id3v2Frame *frame){
         return NULL;
     }
     
-    ret = calloc(sizeof(unsigned char), strlen((char *)ptr) + 1);
+    ret = calloc(sizeof(id3byte), strlen((char *)ptr) + 1);
     memcpy(ret, ptr, strlen((char *)ptr));
 
     return ret;
 }
 
-unsigned char *id3v2GetSeller(Id3v2Frame *frame){
+id3buf id3v2GetSeller(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
 
-    unsigned char *ptr = NULL;
-    unsigned char *ret = NULL;
+    id3buf ptr = NULL;
+    id3buf ret = NULL;
     int encoding = 0;
 
     switch(id3v2GetFrameID(frame)){
@@ -1392,20 +1392,20 @@ unsigned char *id3v2GetSeller(Id3v2Frame *frame){
         return NULL;
     }
     
-    ret = calloc(sizeof(unsigned char), id3strlen(ptr,encoding) + id3ReaderAllocationAdd(encoding));
+    ret = calloc(sizeof(id3byte), id3strlen(ptr,encoding) + id3ReaderAllocationAdd(encoding));
     memcpy(ret, ptr, id3strlen(ptr,encoding));
 
     return ret;
 }
 
-unsigned char *id3v2GetValidDate(Id3v2Frame *frame){
+id3buf id3v2GetValidDate(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
 
-    unsigned char *ptr = NULL;
-    unsigned char *ret = NULL;
+    id3buf ptr = NULL;
+    id3buf ret = NULL;
 
     if(id3v2GetFrameID(frame) != COMR){
         return NULL;
@@ -1413,20 +1413,20 @@ unsigned char *id3v2GetValidDate(Id3v2Frame *frame){
 
     ptr = ((Id3v2CommercialBody *)frame->frame)->validUntil;
 
-    ret = calloc(sizeof(unsigned char), strlen((char *)ptr) + 1);
+    ret = calloc(sizeof(id3byte), strlen((char *)ptr) + 1);
     memcpy(ret, ptr, strlen((char *)ptr));
 
     return ret;
 }
 
-unsigned char *id3v2GetContractURL(Id3v2Frame *frame){
+id3buf id3v2GetContractURL(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
 
-    unsigned char *ptr = NULL;
-    unsigned char *ret = NULL;
+    id3buf ptr = NULL;
+    id3buf ret = NULL;
 
     if(id3v2GetFrameID(frame) != COMR){
         return NULL;
@@ -1438,7 +1438,7 @@ unsigned char *id3v2GetContractURL(Id3v2Frame *frame){
         return NULL;
     }
 
-    ret = calloc(sizeof(unsigned char), strlen((char *)ptr) + 1);
+    ret = calloc(sizeof(id3byte), strlen((char *)ptr) + 1);
     memcpy(ret, ptr, strlen((char *)ptr));
 
     return ret;
@@ -1458,7 +1458,7 @@ int id3v2GetCommecialDeliveryMethod(Id3v2Frame *frame){
 }
 
 
-unsigned char *id3v2GetCommercialSellerLogo(Id3v2Frame *frame){
+id3buf id3v2GetCommercialSellerLogo(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
@@ -1474,13 +1474,13 @@ unsigned char *id3v2GetCommercialSellerLogo(Id3v2Frame *frame){
         return NULL;
     }
 
-    unsigned char *value = calloc(sizeof(unsigned char), body->sellerLogoLen + 1);
+    id3buf value = calloc(sizeof(id3byte), body->sellerLogoLen + 1);
     memcpy(value, body->sellerLogo, body->sellerLogoLen);
 
     return value;
 }
 
-unsigned char id3v2GetSymbol(Id3v2Frame *frame){
+id3byte id3v2GetSymbol(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return 0x00;
@@ -1498,7 +1498,7 @@ unsigned char id3v2GetSymbol(Id3v2Frame *frame){
     }
 }
 
-unsigned char *id3v2GetEncryptionRegistrationValue(Id3v2Frame *frame){
+id3buf id3v2GetEncryptionRegistrationValue(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
@@ -1509,13 +1509,13 @@ unsigned char *id3v2GetEncryptionRegistrationValue(Id3v2Frame *frame){
     }
 
     Id3v2EncryptionMethodRegistrationBody *body = (Id3v2EncryptionMethodRegistrationBody *)frame->frame;
-    unsigned char *value = calloc(sizeof(unsigned char), body->encryptionDataLen + 1);
+    id3buf value = calloc(sizeof(id3byte), body->encryptionDataLen + 1);
     memcpy(value, body->encryptionData, body->encryptionDataLen);
 
     return value;
 }
 
-unsigned char *id3v2GetGroupIDValue(Id3v2Frame *frame){
+id3buf id3v2GetGroupIDValue(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
@@ -1526,13 +1526,13 @@ unsigned char *id3v2GetGroupIDValue(Id3v2Frame *frame){
     }
 
     Id3v2GroupIDRegistrationBody *body = (Id3v2GroupIDRegistrationBody *)frame->frame;
-    unsigned char *value = calloc(sizeof(unsigned char), body->groupDependentDataLen + 1);
+    id3buf value = calloc(sizeof(id3byte), body->groupDependentDataLen + 1);
     memcpy(value, body->groupDependentData, body->groupDependentDataLen);
 
     return value;
 }
 
-unsigned char *id3v2GetPrivateValue(Id3v2Frame *frame){
+id3buf id3v2GetPrivateValue(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
@@ -1543,13 +1543,13 @@ unsigned char *id3v2GetPrivateValue(Id3v2Frame *frame){
     }
 
     Id3v2PrivateBody *body = (Id3v2PrivateBody *)frame->frame;
-    unsigned char *value = calloc(sizeof(unsigned char), body->privateDataLen + 1);
+    id3buf value = calloc(sizeof(id3byte), body->privateDataLen + 1);
     memcpy(value, body->privateData, body->privateDataLen);
 
     return value;
 }
 
-unsigned char *id3v2GetSignatureValue(Id3v2Frame *frame){
+id3buf id3v2GetSignatureValue(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
@@ -1560,7 +1560,7 @@ unsigned char *id3v2GetSignatureValue(Id3v2Frame *frame){
     }
 
     Id3v2SignatureBody *body = (Id3v2SignatureBody *)frame->frame;
-    unsigned char *value = calloc(sizeof(unsigned char),body->sigLen + 1);
+    id3buf value = calloc(sizeof(id3byte),body->sigLen + 1);
     memcpy(value, body->signature, body->sigLen);
 
     return value;

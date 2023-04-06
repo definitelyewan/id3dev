@@ -6,6 +6,7 @@ extern "C"{
 #endif
 
 #include <stdbool.h>
+#include "id3Defines.h"
 
 /*
     Id3v2 helpers
@@ -28,6 +29,17 @@ typedef struct _node{
     void *data;
     struct _node *next;
 }Node;
+
+/*
+    reader types
+*/
+
+typedef struct _Id3Reader{
+    id3buf buffer;
+    size_t bufferSize;
+    size_t cursor;
+
+}Id3Reader; 
 
 /*
     Id3v1 types
@@ -236,12 +248,12 @@ typedef enum _Genre{
 //structs
 typedef struct _Id3v1Tag{
     
-    unsigned char *title;
-    unsigned char *artist;
-    unsigned char *albumTitle;
+    id3buf title;
+    id3buf artist;
+    id3buf albumTitle;
     int year;
     int trackNumber;
-    unsigned char *comment;
+    id3buf comment;
     Genre genre;
 
 }Id3v1Tag;
@@ -265,18 +277,18 @@ typedef struct _Id3v2ExtHeader{
     int padding;
 
     //update flag values
-    unsigned char update;
+    id3byte update;
 
     //crc flag values
-    unsigned char *crc;
+    id3buf crc;
     unsigned int crcLen;
     
     //tag restrictions values
-    unsigned char tagSizeRestriction;
-    unsigned char encodingRestriction;
-    unsigned char textSizeRestriction;
-    unsigned char imageEncodingRestriction;
-    unsigned char imageSizeRestriction;
+    id3byte tagSizeRestriction;
+    id3byte encodingRestriction;
+    id3byte textSizeRestriction;
+    id3byte imageEncodingRestriction;
+    id3byte imageSizeRestriction;
 
 }Id3v2ExtHeader;
 
@@ -468,8 +480,8 @@ typedef struct _Id3v2FlagContent{
     bool unsynchronization;
     bool dataLengthIndicator;
     unsigned int decompressedSize;
-    unsigned char encryption;
-    unsigned char grouping;
+    id3byte encryption;
+    id3byte grouping;
 
 }Id3v2FlagContent;
 
@@ -484,32 +496,32 @@ typedef struct _Id3v2FrameHeader{
 
 //for all text frames including user generated ones(TXX)
 typedef struct _Id3v2TextBody{
-    unsigned char encoding;
-    unsigned char *description;
-    unsigned char *value;
+    id3byte encoding;
+    id3buf description;
+    id3buf value;
 
 }Id3v2TextBody;
 
 //for all url frames including user generated ones (WXX)
 typedef struct _Id3v2URLBody{
-    unsigned char encoding;
-    unsigned char *description;
-    unsigned char *url;
+    id3byte encoding;
+    id3buf description;
+    id3buf url;
 
 }Id3v2URLBody;
 
 typedef struct _Id3v2InvolvedPeopleListBody{
-    unsigned char encoding;
-    unsigned char *peopleListStrings;
+    id3byte encoding;
+    id3buf peopleListStrings;
 
 }Id3v2InvolvedPeopleListBody;
 
 typedef struct _Id3v2MusicCDIdentifierBody{
-    unsigned char *cdtoc;
+    id3buf cdtoc;
 }Id3v2MusicCDIdentifierBody;
 
 typedef struct _Id3v2EventTimeCodesEvent{
-    unsigned char typeOfEvent;
+    id3byte typeOfEvent;
     long timeStamp;
 
 }Id3v2EventTimesCodeEvent;
@@ -522,48 +534,48 @@ typedef struct _Id3v2EventTimeCodesBody{
 }Id3v2EventTimeCodesBody;
 
 typedef struct _Id3v2SyncedTempoCodesBody{
-    unsigned char timeStampFormat;
-    unsigned char *tempoData;
+    id3byte timeStampFormat;
+    id3buf tempoData;
     unsigned int tempoDataLen;
 
 }Id3v2SyncedTempoCodesBody;
 
 typedef struct _Id3v2UnsynchronizedLyricsBody{
-    unsigned char encoding;
-    unsigned char *language;
-    unsigned char *descriptor;
-    unsigned char *lyrics;
+    id3byte encoding;
+    id3buf language;
+    id3buf descriptor;
+    id3buf lyrics;
 
 }Id3v2UnsynchronizedLyricsBody;
 
 typedef struct _Id3v2SynchronizedLyricsBody{
-    unsigned char encoding;
-    unsigned char *language;
+    id3byte encoding;
+    id3buf language;
     unsigned int timeStampFormat;
     unsigned int contentType;
-    unsigned char *descriptor;
+    id3buf descriptor;
     List *lyrics;
     ListIter *lyricsIter;
     
 }Id3v2SynchronizedLyricsBody;
 
 typedef struct _Id3v2StampedLyric{
-    unsigned char *text;
+    id3buf text;
     long timeStamp;
     size_t lyricLen;
 
 }Id3v2StampedLyric;
 
 typedef struct _Id3v2CommentBody{
-    unsigned char encoding;
-    unsigned char *language;
-    unsigned char *description;
-    unsigned char *text;
+    id3byte encoding;
+    id3buf language;
+    id3buf description;
+    id3buf text;
 
 }Id3v2CommentBody;
 
 typedef struct _Id3v2SubjectiveBody{
-    unsigned char *value;
+    id3buf value;
     int valueSize;
 
 }Id3v2SubjectiveBody;
@@ -573,21 +585,21 @@ typedef struct _Id3v2SubjectiveBody Id3v2EqualisationBody;
 typedef struct _Id3v2SubjectiveBody Id3v2ReverbBody;
 
 typedef struct _Id3v2PictureBody{
-    unsigned char encoding;
-    unsigned char *format;
-    unsigned char pictureType;
-    unsigned char *description;
-    unsigned char *pictureData;
+    id3byte encoding;
+    id3buf format;
+    id3byte pictureType;
+    id3buf description;
+    id3buf pictureData;
     int picSize;
 
 }Id3v2PictureBody;
 
 typedef struct _Id3v2GeneralEncapsulatedObjectBody{
-    unsigned char encoding;
-    unsigned char *mimeType;
-    unsigned char *filename;
-    unsigned char *contentDescription;
-    unsigned char *encapsulatedObject;
+    id3byte encoding;
+    id3buf mimeType;
+    id3buf filename;
+    id3buf contentDescription;
+    id3buf encapsulatedObject;
     unsigned int encapsulatedObjectLen;
 
 }Id3v2GeneralEncapsulatedObjectBody;
@@ -598,97 +610,97 @@ typedef struct _Id3v2PlayCounterBody{
 }Id3v2PlayCounterBody;
 
 typedef struct _Id3v2PopularBody{
-    unsigned char *email;
+    id3buf email;
     unsigned int rating;
     long counter;
 
 }Id3v2PopularBody;
 
 typedef struct _Id3v2EncryptedMetaBody{
-    unsigned char *ownerIdentifier;
-    unsigned char *content;
-    unsigned char *encryptedDatablock;
+    id3buf ownerIdentifier;
+    id3buf content;
+    id3buf encryptedDatablock;
     unsigned int encryptedDatablockLen;
 
 }Id3v2EncryptedMetaBody;
 
 typedef struct _Id3v2AudioEncryptionBody{
-    unsigned char *ownerIdentifier;
+    id3buf ownerIdentifier;
     void *previewStart;
     unsigned int previewLength;
-    unsigned char *encryptionInfo;
+    id3buf encryptionInfo;
     unsigned int encryptionInfoLen;
 
 }Id3v2AudioEncryptionBody;
 
 typedef struct _Id3v2UniqueFileIdentifierBody{
-    unsigned char *ownerIdentifier;
-    unsigned char *identifier;
+    id3buf ownerIdentifier;
+    id3buf identifier;
 
 }Id3v2UniqueFileIdentifierBody;
 
 typedef struct _Id3v2PositionSynchronisationBody{
-    unsigned char timeStampFormat;
+    id3byte timeStampFormat;
     long pos;
 
 }Id3v2PositionSynchronisationBody;
 
 typedef struct _Id3v2TermsOfUseBody{
-    unsigned char encoding;
-    unsigned char *language;
-    unsigned char *text;
+    id3byte encoding;
+    id3buf language;
+    id3buf text;
 
 }Id3v2TermsOfUseBody;
 
 typedef struct _Id3v2OwnershipBody{
-    unsigned char encoding;
-    unsigned char *pricePayed;
-    unsigned char *dateOfPunch;
-    unsigned char *seller;
+    id3byte encoding;
+    id3buf pricePayed;
+    id3buf dateOfPunch;
+    id3buf seller;
 
 }Id3v2OwnershipBody;
 
 typedef struct _Id3v2CommercialBody{
-    unsigned char encoding;
-    unsigned char *priceString;
-    unsigned char *validUntil;
-    unsigned char *contractURL;
+    id3byte encoding;
+    id3buf priceString;
+    id3buf validUntil;
+    id3buf contractURL;
     unsigned int receivedAs;
-    unsigned char *nameOfSeller;
-    unsigned char *description;
-    unsigned char *mimeType;
-    unsigned char *sellerLogo;
+    id3buf nameOfSeller;
+    id3buf description;
+    id3buf mimeType;
+    id3buf sellerLogo;
     unsigned int sellerLogoLen;
 
 }Id3v2CommercialBody;
 
 typedef struct _Id3v2EncryptionMethodRegistrationBody{
-    unsigned char *ownerIdentifier;
-    unsigned char methodSymbol;
-    unsigned char *encryptionData;
+    id3buf ownerIdentifier;
+    id3byte methodSymbol;
+    id3buf encryptionData;
     unsigned int encryptionDataLen;
 
 }Id3v2EncryptionMethodRegistrationBody;
 
 
 typedef struct _Id3v2GroupIDRegistrationBody{
-    unsigned char *ownerIdentifier;
-    unsigned char groupSymbol;
-    unsigned char *groupDependentData;
+    id3buf ownerIdentifier;
+    id3byte groupSymbol;
+    id3buf groupDependentData;
     unsigned int groupDependentDataLen;
 
 }Id3v2GroupIDRegistrationBody;
 
 typedef struct _Id3v2PrivateBody{
-    unsigned char *ownerIdentifier;
-    unsigned char *privateData;
+    id3buf ownerIdentifier;
+    id3buf privateData;
     unsigned int privateDataLen;
 
 }Id3v2PrivateBody;
 
 typedef struct _Id3v2SignatureBody{
-    unsigned char groupSymbol;
-    unsigned char *signature;
+    id3byte groupSymbol;
+    id3buf signature;
     unsigned int sigLen;
 
 }Id3v2SignatureBody;

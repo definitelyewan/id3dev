@@ -9,7 +9,7 @@
     setters
 */
 
-void id3v1SetTitle(char *title, Id3v1Tag *tag){
+void id3v1SetTitle(id3buf title, Id3v1Tag *tag){
 
     if(tag == NULL){
         return;
@@ -19,15 +19,15 @@ void id3v1SetTitle(char *title, Id3v1Tag *tag){
         return;
     }
 
-    size_t len = strlen(title);
+    size_t len = strlen((char *)title);
 
-    unsigned char *tmp = calloc(sizeof(unsigned char), ID3V1_TAG_LEN + 1);
+    id3buf tmp = calloc(sizeof(id3byte), ID3V1_TAG_LEN + 1);
 
     if(len > ID3V1_TAG_LEN){
-        memcpy(tmp, (unsigned char *)title, ID3V1_TAG_LEN);
+        memcpy(tmp, title, ID3V1_TAG_LEN);
 
     }else{
-        memcpy(tmp, (unsigned char *)title, len);
+        memcpy(tmp, title, len);
     }
 
     free(tag->title);
@@ -35,7 +35,7 @@ void id3v1SetTitle(char *title, Id3v1Tag *tag){
     
 }
 
-void id3v1SetArtist(char *artist, Id3v1Tag *tag){
+void id3v1SetArtist(id3buf artist, Id3v1Tag *tag){
     
     if(tag == NULL){
         return;
@@ -45,22 +45,22 @@ void id3v1SetArtist(char *artist, Id3v1Tag *tag){
         return;
     }
 
-    size_t len = strlen(artist);
+    size_t len = strlen((char *)artist);
 
-    unsigned char *tmp = calloc(sizeof(unsigned char), ID3V1_TAG_LEN + 1);
+    id3buf tmp = calloc(sizeof(id3byte), ID3V1_TAG_LEN + 1);
 
     if(len > ID3V1_TAG_LEN){
-        memcpy(tmp, (unsigned char *)artist, ID3V1_TAG_LEN);
+        memcpy(tmp, artist, ID3V1_TAG_LEN);
 
     }else{
-        memcpy(tmp, (unsigned char *)artist, len);
+        memcpy(tmp, artist, len);
     }
 
     free(tag->artist);
     tag->artist = tmp;
 }
 
-void id3v1SetAlbum(char *album, Id3v1Tag *tag){
+void id3v1SetAlbum(id3buf album, Id3v1Tag *tag){
 
     if(tag == NULL){
         return;
@@ -70,15 +70,15 @@ void id3v1SetAlbum(char *album, Id3v1Tag *tag){
         return;
     }
 
-    size_t len = strlen(album);
+    size_t len = strlen((char *)album);
 
-    unsigned char *tmp = calloc(sizeof(unsigned char), ID3V1_TAG_LEN + 1);
+    id3buf tmp = calloc(sizeof(id3byte), ID3V1_TAG_LEN + 1);
 
     if(len > ID3V1_TAG_LEN){
-        memcpy(tmp, (unsigned char *)album, ID3V1_TAG_LEN);
+        memcpy(tmp, album, ID3V1_TAG_LEN);
 
     }else{
-        memcpy(tmp, (unsigned char *)album, len);
+        memcpy(tmp, album, len);
     }
 
     free(tag->albumTitle);
@@ -94,7 +94,7 @@ void id3v1SetYear(int year, Id3v1Tag *tag){
     tag->year = year;
 }
 
-void id3v1SetComment(char *comment, Id3v1Tag *tag){
+void id3v1SetComment(id3buf comment, Id3v1Tag *tag){
     
     if(tag == NULL){
         return;
@@ -104,15 +104,15 @@ void id3v1SetComment(char *comment, Id3v1Tag *tag){
         return;
     }   
 
-    size_t len = strlen(comment);
+    size_t len = strlen((char *)comment);
 
-    unsigned char *tmp = calloc(sizeof(unsigned char), ID3V1_TAG_LEN + 1);
+    id3buf tmp = calloc(sizeof(id3byte), ID3V1_TAG_LEN + 1);
 
     if(len > ID3V1_TAG_LEN){
-        memcpy(tmp, (unsigned char *)comment, ID3V1_TAG_LEN);
+        memcpy(tmp, comment, ID3V1_TAG_LEN);
 
     }else{
-        memcpy(tmp, (unsigned char *)comment, len);
+        memcpy(tmp, comment, len);
     }
 
     free(tag->comment);
@@ -218,7 +218,7 @@ bool id3v1CompareTag(Id3v1Tag *tag1, Id3v1Tag *tag2){
     compatability getters
 */
 
-unsigned char *id3v1GetTitle(Id3v1Tag *tag){
+id3buf id3v1GetTitle(Id3v1Tag *tag){
     if(tag == NULL){
         return NULL;
     }
@@ -227,12 +227,12 @@ unsigned char *id3v1GetTitle(Id3v1Tag *tag){
         return NULL;
     }
 
-    unsigned char *value = calloc(sizeof(unsigned char), strlen((char *)tag->title) + 1);
+    id3buf value = calloc(sizeof(id3byte), strlen((char *)tag->title) + 1);
     memcpy(value, tag->title, strlen((char *)tag->title));
     return value;
 }
 
-unsigned char *id3v1GetArtist(Id3v1Tag *tag){
+id3buf id3v1GetArtist(Id3v1Tag *tag){
     if(tag == NULL){
         return NULL;
     }
@@ -241,12 +241,12 @@ unsigned char *id3v1GetArtist(Id3v1Tag *tag){
         return NULL;
     }
 
-    unsigned char *value = calloc(sizeof(unsigned char), strlen((char *)tag->artist) + 1);
+    id3buf value = calloc(sizeof(id3byte), strlen((char *)tag->artist) + 1);
     memcpy(value, tag->artist, strlen((char *)tag->artist));
     return value;
 }
 
-unsigned char *id3v1GetAlbum(Id3v1Tag *tag){
+id3buf id3v1GetAlbum(Id3v1Tag *tag){
     if(tag == NULL){
         return NULL;
     }
@@ -255,7 +255,7 @@ unsigned char *id3v1GetAlbum(Id3v1Tag *tag){
         return NULL;
     }
 
-    unsigned char *value = calloc(sizeof(unsigned char), strlen((char *)tag->albumTitle) + 1);
+    id3buf value = calloc(sizeof(id3byte), strlen((char *)tag->albumTitle) + 1);
     memcpy(value, tag->albumTitle, strlen((char *)tag->albumTitle));
     return value;
 }
@@ -264,7 +264,7 @@ int id3v1GetYear(Id3v1Tag *tag){
     return (tag == NULL) ? 0 : tag->year;
 }
 
-unsigned char *id3v1GetComment(Id3v1Tag *tag){
+id3buf id3v1GetComment(Id3v1Tag *tag){
     if(tag == NULL){
         return NULL;
     }
@@ -273,7 +273,7 @@ unsigned char *id3v1GetComment(Id3v1Tag *tag){
         return NULL;
     }
 
-    unsigned char *value = calloc(sizeof(unsigned char), strlen((char *)tag->comment) + 1);
+    id3buf value = calloc(sizeof(id3byte), strlen((char *)tag->comment) + 1);
     memcpy(value, tag->comment, strlen((char *)tag->comment));
     return value;
 }

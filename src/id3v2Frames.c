@@ -5,7 +5,6 @@
 #include "id3v2Header.h"
 #include "id3Helpers.h"
 #include "id3Reader.h"
-#include "id3Defines.h"
 
 /*
     FRAME FUNCTIONS
@@ -148,7 +147,7 @@ Id3v2Frame *id3v2NewFrame(Id3v2FrameHeader *header, void *bodyContent){
     return frame;
 }
 
-List *id3v2ExtractFrames(unsigned char *buffer, Id3v2Header *header){
+List *id3v2ExtractFrames(id3buf buffer, Id3v2Header *header){
 
     int saveSize = header->size - ID3V2_HEADER_SIZE;
     int extHeaderOffset = 0;
@@ -205,7 +204,7 @@ List *id3v2ExtractFrames(unsigned char *buffer, Id3v2Header *header){
     return list;
 }
 
-Id3v2Frame *id3v2ParseFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -490,7 +489,7 @@ Id3v2Frame *id3v2SearchFrame(Id3v2Tag *tag, Id3v2FrameId id){
     Text frame functions
 */
 
-Id3v2Frame *id3v2ParseTextFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseTextFrame(id3buf buffer, Id3v2Header *header){
 
     if (buffer == NULL){
         return NULL;
@@ -549,26 +548,26 @@ Id3v2TextBody *id3v2CopyTextBody(Id3v2TextBody *body){
         return NULL;
     }
 
-    unsigned char *description = NULL;
-    unsigned char *value = NULL;
-    unsigned char encoding = 0;
+    id3buf description = NULL;
+    id3buf value = NULL;
+    id3byte encoding = 0;
 
     encoding = body->encoding;
 
     if(body->description != NULL){
-        description = calloc(sizeof(unsigned char), id3strlen(body->description, encoding) + id3ReaderAllocationAdd(encoding));
+        description = calloc(sizeof(id3byte), id3strlen(body->description, encoding) + id3ReaderAllocationAdd(encoding));
         memcpy(description, body->description, id3strlen(body->description, encoding));
     }
 
     if(body->value != NULL){
-        value = calloc(sizeof(unsigned char), id3strlen(body->value, encoding) + id3ReaderAllocationAdd(encoding));
+        value = calloc(sizeof(id3byte), id3strlen(body->value, encoding) + id3ReaderAllocationAdd(encoding));
         memcpy(value, body->value, id3strlen(body->value, encoding));
     }
 
     return id3v2NewTextBody(encoding, value, description);
 }
 
-Id3v2TextBody *id3v2ParseTextBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2TextBody *id3v2ParseTextBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -578,9 +577,9 @@ Id3v2TextBody *id3v2ParseTextBody(unsigned char *buffer, Id3v2FrameHeader *frame
         return NULL;
     }
 
-    unsigned char *description = NULL;
-    unsigned char *value = NULL;
-    unsigned char encoding = 0;
+    id3buf description = NULL;
+    id3buf value = NULL;
+    id3byte encoding = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
     // set encoding
@@ -589,7 +588,7 @@ Id3v2TextBody *id3v2ParseTextBody(unsigned char *buffer, Id3v2FrameHeader *frame
 
     if(frameHeader->idNum == TXX || frameHeader->idNum == TXXX){
         // copy description and skip spacer
-        description = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
+        description = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
         id3ReaderRead(stream, description, id3ReaderReadEncodedSize(stream, encoding));
         id3ReaderSeek(stream, id3ReaderAllocationAdd(encoding), SEEK_CUR);
     }
@@ -601,7 +600,7 @@ Id3v2TextBody *id3v2ParseTextBody(unsigned char *buffer, Id3v2FrameHeader *frame
     return id3v2NewTextBody(encoding, value, description);
 }
 
-Id3v2TextBody *id3v2NewTextBody(unsigned char encoding, unsigned char *value, unsigned char *description){
+Id3v2TextBody *id3v2NewTextBody(id3byte encoding, id3buf value, id3buf description){
 
     Id3v2TextBody *newTextBody = malloc(sizeof(Id3v2TextBody));
 
@@ -645,7 +644,7 @@ void id3v2FreeTextFrame(Id3v2Frame *toDelete){
     URL frame functions
 */
 
-Id3v2Frame *id3v2ParseURLFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseURLFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -704,26 +703,26 @@ Id3v2URLBody *id3v2CopyURLBody(Id3v2URLBody *body){
         return NULL;
     }
 
-    unsigned char *description = NULL;
-    unsigned char *url = NULL;
-    unsigned char encoding = ISO_8859_1;
+    id3buf description = NULL;
+    id3buf url = NULL;
+    id3byte encoding = ISO_8859_1;
 
     encoding = body->encoding;
 
     if(url != NULL){
-        url = calloc(sizeof(unsigned char), strlen((char *)body->url) + 1);
+        url = calloc(sizeof(id3byte), strlen((char *)body->url) + 1);
         memcpy(url, body->url, strlen((char *)body->url));
     }
 
     if(body->description != NULL){
-        description = calloc(sizeof(unsigned char), id3strlen(body->description, encoding) + id3ReaderAllocationAdd(encoding));
+        description = calloc(sizeof(id3byte), id3strlen(body->description, encoding) + id3ReaderAllocationAdd(encoding));
         memcpy(description, body->description, id3strlen(body->description, encoding));
     }
 
     return id3v2NewURLBody(encoding, url, description);
 }
 
-Id3v2URLBody *id3v2ParseURLBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2URLBody *id3v2ParseURLBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -733,9 +732,9 @@ Id3v2URLBody *id3v2ParseURLBody(unsigned char *buffer, Id3v2FrameHeader *frameHe
         return NULL;
     }
 
-    unsigned char *description = NULL;
-    unsigned char *url = NULL;
-    unsigned char encoding = ISO_8859_1; //will only ever change if wxx(x)
+    id3buf description = NULL;
+    id3buf url = NULL;
+    id3byte encoding = ISO_8859_1; //will only ever change if wxx(x)
 
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
@@ -746,7 +745,7 @@ Id3v2URLBody *id3v2ParseURLBody(unsigned char *buffer, Id3v2FrameHeader *frameHe
         id3ReaderSeek(stream, 1, SEEK_CUR);
 
         // user defined url frame parse description and skip space
-        description = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
+        description = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
         id3ReaderRead(stream, description, id3ReaderReadEncodedSize(stream, encoding));
         id3ReaderSeek(stream, id3ReaderAllocationAdd(encoding), SEEK_CUR);
     }
@@ -758,7 +757,7 @@ Id3v2URLBody *id3v2ParseURLBody(unsigned char *buffer, Id3v2FrameHeader *frameHe
     return id3v2NewURLBody(encoding, url, description);
 }
 
-Id3v2URLBody *id3v2NewURLBody(unsigned char encoding, unsigned char *url, unsigned char *description){
+Id3v2URLBody *id3v2NewURLBody(id3byte encoding, id3buf url, id3buf description){
 
     Id3v2URLBody *new2URLBody = malloc(sizeof(Id3v2URLBody));
 
@@ -802,7 +801,7 @@ void id3v2FreeURLFrame(Id3v2Frame *toDelete){
     Involved persons list frame functions
 */
 
-Id3v2Frame *id3v2ParseInvolvedPeopleListFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseInvolvedPeopleListFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -860,21 +859,21 @@ Id3v2InvolvedPeopleListBody *id3v2CopyInvolvedPeopleListBody(Id3v2InvolvedPeople
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *text = NULL;
+    id3byte encoding = 0x00;
+    id3buf text = NULL;
 
 
     encoding = body->encoding;
 
     if(body->peopleListStrings != NULL){
-        text = calloc(sizeof(unsigned char), id3strlen(body->peopleListStrings, encoding) + id3ReaderAllocationAdd(encoding));
+        text = calloc(sizeof(id3byte), id3strlen(body->peopleListStrings, encoding) + id3ReaderAllocationAdd(encoding));
         memcpy(text, body->peopleListStrings, id3strlen(body->peopleListStrings, encoding));
     }
 
     return id3v2NewInvolvedPeopleListBody(encoding, text);
 }
 
-Id3v2InvolvedPeopleListBody *id3v2ParseInvolvedPeopleListBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2InvolvedPeopleListBody *id3v2ParseInvolvedPeopleListBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -884,8 +883,8 @@ Id3v2InvolvedPeopleListBody *id3v2ParseInvolvedPeopleListBody(unsigned char *buf
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *text = NULL;
+    id3byte encoding = 0x00;
+    id3buf text = NULL;
 
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
@@ -900,7 +899,7 @@ Id3v2InvolvedPeopleListBody *id3v2ParseInvolvedPeopleListBody(unsigned char *buf
     return id3v2NewInvolvedPeopleListBody(encoding, text);
 }
 
-Id3v2InvolvedPeopleListBody *id3v2NewInvolvedPeopleListBody(unsigned char encoding, unsigned char *peopleListStrings){
+Id3v2InvolvedPeopleListBody *id3v2NewInvolvedPeopleListBody(id3byte encoding, id3buf peopleListStrings){
 
     Id3v2InvolvedPeopleListBody *involvedPeopleListBody = malloc(sizeof(Id3v2InvolvedPeopleListBody));
 
@@ -940,7 +939,7 @@ void id3v2FreeInvolvedPeopleListFrame(Id3v2Frame *toDelete){
     Music CD identifier frame functions
 */
 
-Id3v2Frame *id3v2ParseMusicCDIdentifierFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseMusicCDIdentifierFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -999,17 +998,17 @@ Id3v2MusicCDIdentifierBody *id3v2CopyMusicCDIdentifierBody(Id3v2MusicCDIdentifie
         return NULL;
     }
 
-    unsigned char *cdtoc = NULL;
+    id3buf cdtoc = NULL;
 
     if(body->cdtoc != NULL){
-        cdtoc = calloc(sizeof(unsigned char), sizeof(body) - sizeof(Id3v2MusicCDIdentifierBody) + 1);
+        cdtoc = calloc(sizeof(id3byte), sizeof(body) - sizeof(Id3v2MusicCDIdentifierBody) + 1);
         memcpy(cdtoc, body->cdtoc, sizeof(body) - sizeof(Id3v2MusicCDIdentifierBody));
     }
 
     return id3v2NewMusicCDIdentifierBody(cdtoc);
 }
 
-Id3v2MusicCDIdentifierBody *id3v2ParseMusicCDIdentifierBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2MusicCDIdentifierBody *id3v2ParseMusicCDIdentifierBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -1019,17 +1018,17 @@ Id3v2MusicCDIdentifierBody *id3v2ParseMusicCDIdentifierBody(unsigned char *buffe
         return NULL;
     }
 
-    unsigned char *cdtoc = NULL;
+    id3buf cdtoc = NULL;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
     // copy cd toc
-    cdtoc = calloc(sizeof(unsigned char), frameHeader->frameSize + 1);
+    cdtoc = calloc(sizeof(id3byte), frameHeader->frameSize + 1);
     id3ReaderRead(stream, cdtoc, frameHeader->frameSize);
 
     return id3v2NewMusicCDIdentifierBody(cdtoc);
 }
 
-Id3v2MusicCDIdentifierBody *id3v2NewMusicCDIdentifierBody(unsigned char *cdtoc){
+Id3v2MusicCDIdentifierBody *id3v2NewMusicCDIdentifierBody(id3buf cdtoc){
 
     Id3v2MusicCDIdentifierBody *musicCdIdentifierBody = malloc(sizeof(Id3v2MusicCDIdentifierBody));
 
@@ -1068,7 +1067,7 @@ void id3v2FreeMusicCDIdentifierFrame(Id3v2Frame *toDelete){
     Event time codes frame functions
 */
 
-Id3v2Frame *id3v2ParseEventTimeCodesFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseEventTimeCodesFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -1124,7 +1123,7 @@ Id3v2EventTimeCodesBody *id3v2CopyEventTimeCodesBody(Id3v2EventTimeCodesBody *bo
     return (body == NULL) ? NULL : id3v2NewEventTimeCodesBody(body->timeStampFormat, copyList(body->eventTimeCodes));
 }
 
-Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -1150,7 +1149,7 @@ Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(unsigned char *buffer, Id3
     while(saveSize > 0){
 
         long stamp = 0;
-        unsigned char typeOfEvent = 0x00;
+        id3byte typeOfEvent = 0x00;
         Id3v2EventTimesCodeEvent *newEvent = NULL;
 
         // set event code
@@ -1187,7 +1186,7 @@ Id3v2EventTimeCodesBody *id3v2NewEventTimeCodesBody(unsigned int timeStampFormat
     return eventTimeCodesBody;
 }
 
-Id3v2EventTimesCodeEvent *id3v2NewEventCodeEvent(unsigned char typeOfEvent, long timeStamp){
+Id3v2EventTimesCodeEvent *id3v2NewEventCodeEvent(id3byte typeOfEvent, long timeStamp){
 
     Id3v2EventTimesCodeEvent *eventCode = malloc(sizeof(Id3v2EventTimesCodeEvent));
 
@@ -1244,7 +1243,7 @@ void id3v2FreeEventCode(void *toDelete){
     Synced tempo codes frame functions
 */
 
-Id3v2Frame *id3v2ParseSyncedTempoCodesFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseSyncedTempoCodesFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -1299,29 +1298,29 @@ Id3v2Frame *id3v2CopySyncedTempoCodesFrame(Id3v2Frame *frame){
 
 Id3v2SyncedTempoCodesBody *id3v2CopySyncedTempoCodesBody(Id3v2SyncedTempoCodesBody *body){
 
-    unsigned char timeStampFormat = 0x00;
-    unsigned char *tempoData = NULL;
+    id3byte timeStampFormat = 0x00;
+    id3buf tempoData = NULL;
     unsigned int tempoDataLen = 0;
 
     timeStampFormat = body->timeStampFormat;
     tempoDataLen = body->tempoDataLen;
 
     if(tempoData != NULL){
-        tempoData = calloc(sizeof(unsigned char), tempoDataLen + 1);
+        tempoData = calloc(sizeof(id3byte), tempoDataLen + 1);
         memcpy(tempoData, body->tempoData, body->tempoDataLen);
     }
 
     return id3v2NewSyncedTempoCodesBody(timeStampFormat, tempoData, tempoDataLen);
 }
 
-Id3v2SyncedTempoCodesBody *id3v2ParseSyncedTempoCodesBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2SyncedTempoCodesBody *id3v2ParseSyncedTempoCodesBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
     }
 
-    unsigned char timeStampFormat = 0x00;
-    unsigned char *tempoData = NULL;
+    id3byte timeStampFormat = 0x00;
+    id3buf tempoData = NULL;
     unsigned int tempoDataLen = frameHeader->headerSize - 1;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
@@ -1330,14 +1329,14 @@ Id3v2SyncedTempoCodesBody *id3v2ParseSyncedTempoCodesBody(unsigned char *buffer,
     id3ReaderSeek(stream, 1, SEEK_CUR);
 
     // copy data
-    tempoData = calloc(sizeof(unsigned char), frameHeader->headerSize);
+    tempoData = calloc(sizeof(id3byte), frameHeader->headerSize);
     id3ReaderRead(stream, tempoData, tempoDataLen);
 
     id3FreeReader(stream);
     return id3v2NewSyncedTempoCodesBody(timeStampFormat, tempoData, tempoDataLen);
 }
 
-Id3v2SyncedTempoCodesBody *id3v2NewSyncedTempoCodesBody(unsigned char timeStampFormat, unsigned char *tempoData, unsigned int tempoDataLen){
+Id3v2SyncedTempoCodesBody *id3v2NewSyncedTempoCodesBody(id3byte timeStampFormat, id3buf tempoData, unsigned int tempoDataLen){
 
     Id3v2SyncedTempoCodesBody *syncedTempoCode = malloc(sizeof(Id3v2SyncedTempoCodesBody));
 
@@ -1377,7 +1376,7 @@ void id3v2FreeSyncedTempoCodesFrame(Id3v2Frame *toDelete){
     unsynced lyrics frame functions
 */
 
-Id3v2Frame *id3v2ParseUnsynchronizedLyricsFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseUnsynchronizedLyricsFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -1436,32 +1435,32 @@ Id3v2UnsynchronizedLyricsBody *id3v2CopyUnsynchronizedLyricsBody(Id3v2Unsynchron
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *language = NULL;
-    unsigned char *descriptor = NULL;
-    unsigned char *lyrics = NULL;
+    id3byte encoding = 0x00;
+    id3buf language = NULL;
+    id3buf descriptor = NULL;
+    id3buf lyrics = NULL;
 
     encoding = body->encoding;
 
     if(body->descriptor != NULL){
-        descriptor = calloc(sizeof(unsigned char), id3strlen(body->descriptor, encoding) + id3ReaderAllocationAdd(encoding));
+        descriptor = calloc(sizeof(id3byte), id3strlen(body->descriptor, encoding) + id3ReaderAllocationAdd(encoding));
         memcpy(descriptor, body->descriptor, id3strlen(body->descriptor, encoding));
     }
 
     if(language != NULL){
-        language = calloc(sizeof(unsigned char), ID3V2_LANGUAGE_LEN + 1);
+        language = calloc(sizeof(id3byte), ID3V2_LANGUAGE_LEN + 1);
         memcpy(language, body->language, ID3V2_LANGUAGE_LEN);
     }
 
     if(body->lyrics != NULL){
-        lyrics = calloc(sizeof(unsigned char), id3strlen(body->lyrics, encoding) + id3ReaderAllocationAdd(encoding));
+        lyrics = calloc(sizeof(id3byte), id3strlen(body->lyrics, encoding) + id3ReaderAllocationAdd(encoding));
         memcpy(lyrics, body->lyrics, id3strlen(body->lyrics, encoding));
     }
 
     return id3v2NewUnsynchronizedLyricsBody(encoding, language, descriptor, lyrics);
 }
 
-Id3v2UnsynchronizedLyricsBody *id3v2ParseUnsynchronizedLyricsBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2UnsynchronizedLyricsBody *id3v2ParseUnsynchronizedLyricsBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -1471,10 +1470,10 @@ Id3v2UnsynchronizedLyricsBody *id3v2ParseUnsynchronizedLyricsBody(unsigned char 
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *language = NULL;
-    unsigned char *descriptor = NULL;
-    unsigned char *lyrics = NULL;
+    id3byte encoding = 0x00;
+    id3buf language = NULL;
+    id3buf descriptor = NULL;
+    id3buf lyrics = NULL;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
     // copy encoding
@@ -1482,12 +1481,12 @@ Id3v2UnsynchronizedLyricsBody *id3v2ParseUnsynchronizedLyricsBody(unsigned char 
     id3ReaderSeek(stream, 1, SEEK_CUR);
 
     // copy language
-    language = calloc(sizeof(unsigned char), ID3V2_LANGUAGE_LEN + 1);
+    language = calloc(sizeof(id3byte), ID3V2_LANGUAGE_LEN + 1);
     id3ReaderRead(stream, language, ID3V2_LANGUAGE_LEN);
 
     // copy descriptor
     if(!(id3ReaderCursor(stream)[0] == 0x00)){
-        descriptor = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
+        descriptor = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
         id3ReaderRead(stream, descriptor, id3ReaderReadEncodedSize(stream, encoding));
     }
 
@@ -1501,7 +1500,7 @@ Id3v2UnsynchronizedLyricsBody *id3v2ParseUnsynchronizedLyricsBody(unsigned char 
     return id3v2NewUnsynchronizedLyricsBody(encoding, language, descriptor, lyrics);
 }
 
-Id3v2UnsynchronizedLyricsBody *id3v2NewUnsynchronizedLyricsBody(unsigned char encoding, unsigned char *language, unsigned char *descriptor, unsigned char *lyrics){
+Id3v2UnsynchronizedLyricsBody *id3v2NewUnsynchronizedLyricsBody(id3byte encoding, id3buf language, id3buf descriptor, id3buf lyrics){
 
     Id3v2UnsynchronizedLyricsBody *unsynchronizedLyricsBody = malloc(sizeof(Id3v2UnsynchronizedLyricsBody));
 
@@ -1551,7 +1550,7 @@ void id3v2FreeUnsynchronizedLyricsFrame(Id3v2Frame *toDelete){
     Synced lyrics frame functions
 */
 
-Id3v2Frame *id3v2ParseSynchronizedLyricsFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseSynchronizedLyricsFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -1610,9 +1609,9 @@ Id3v2SynchronizedLyricsBody *id3v2CopySynchronizedLyricsBody(Id3v2SynchronizedLy
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *descriptor = NULL;
-    unsigned char *language = NULL;
+    id3byte encoding = 0x00;
+    id3buf descriptor = NULL;
+    id3buf language = NULL;
     unsigned int timeStampFormat = 0;
     unsigned int contentType = 0;
     List *lyrics = NULL;
@@ -1623,12 +1622,12 @@ Id3v2SynchronizedLyricsBody *id3v2CopySynchronizedLyricsBody(Id3v2SynchronizedLy
     contentType = body->contentType;
 
     if(body->descriptor != NULL){
-        descriptor = calloc(sizeof(unsigned char), id3strlen(body->descriptor, encoding) + id3ReaderAllocationAdd(encoding));
+        descriptor = calloc(sizeof(id3byte), id3strlen(body->descriptor, encoding) + id3ReaderAllocationAdd(encoding));
         memcpy(descriptor, body->descriptor, id3strlen(body->descriptor, encoding));
     }
 
     if(body->language != NULL){
-        language = calloc(sizeof(unsigned char), ID3V2_LANGUAGE_LEN + 1);
+        language = calloc(sizeof(id3byte), ID3V2_LANGUAGE_LEN + 1);
         memcpy(language, body->language, ID3V2_LANGUAGE_LEN);
     }
 
@@ -1639,15 +1638,15 @@ Id3v2SynchronizedLyricsBody *id3v2CopySynchronizedLyricsBody(Id3v2SynchronizedLy
     return id3v2NewSynchronizedLyricsBody(encoding, language, timeStampFormat, contentType, descriptor, lyrics);
 }
 
-Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *descriptor = NULL;
-    unsigned char *language = NULL;
+    id3byte encoding = 0x00;
+    id3buf descriptor = NULL;
+    id3buf language = NULL;
     unsigned int timeStampFormat = 0;
     unsigned int contentType = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
@@ -1659,7 +1658,7 @@ Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(unsigned char *buf
     id3ReaderSeek(stream, 1, SEEK_CUR);
 
     // read language
-    language = calloc(sizeof(unsigned char), ID3V2_LANGUAGE_LEN + 1);
+    language = calloc(sizeof(id3byte), ID3V2_LANGUAGE_LEN + 1);
     id3ReaderRead(stream, language, ID3V2_LANGUAGE_LEN);
 
     // read time format
@@ -1672,7 +1671,7 @@ Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(unsigned char *buf
 
     // does a description exist?
     if(!(id3ReaderCursor(stream)[0] == 0x00)){
-        descriptor = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
+        descriptor = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
         id3ReaderRead(stream, descriptor, id3ReaderReadEncodedSize(stream, encoding));
     }
 
@@ -1684,12 +1683,12 @@ Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(unsigned char *buf
 
     while(id3ReaderGetCh(stream) != EOF){
 
-        unsigned char *text = NULL;
+        id3buf text = NULL;
         long timeStamp = 0;
         size_t lyricLen = 0;
         Id3v2StampedLyric *lyric = NULL;
 
-        text = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
+        text = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
         id3ReaderRead(stream, text, id3ReaderReadEncodedSize(stream, encoding));
         lyricLen = id3strlen(text, encoding);
 
@@ -1707,7 +1706,7 @@ Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(unsigned char *buf
     return id3v2NewSynchronizedLyricsBody(encoding, language, timeStampFormat, contentType, descriptor, lyrics);
 }
 
-Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(unsigned char encoding, unsigned char *language, unsigned int timeStampFormat, unsigned int contentType, unsigned char *descriptor, List *lyrics){
+Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(id3byte encoding, id3buf language, unsigned int timeStampFormat, unsigned int contentType, id3buf descriptor, List *lyrics){
 
     Id3v2SynchronizedLyricsBody *synchronizedLyricsBody = malloc(sizeof(Id3v2SynchronizedLyricsBody));
 
@@ -1726,7 +1725,7 @@ Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(unsigned char encodi
     return synchronizedLyricsBody;
 }
 
-Id3v2StampedLyric *id3v2NewStampedLyric(unsigned char *text, long timeStamp, size_t lyricLen){
+Id3v2StampedLyric *id3v2NewStampedLyric(id3buf text, long timeStamp, size_t lyricLen){
 
     Id3v2StampedLyric *newLyric = malloc(sizeof(Id3v2StampedLyric));
 
@@ -1775,12 +1774,12 @@ void *id3v2CopyStampedLyric(void *toCopy){
     }
 
     Id3v2StampedLyric *lyric = (Id3v2StampedLyric *)toCopy;
-    unsigned char *text = NULL;
+    id3buf text = NULL;
     size_t lyricLen = lyric->lyricLen;
     
     if(lyric->text != NULL){
         //+1 always iso?
-        text = calloc(sizeof(unsigned char), lyricLen + 1);
+        text = calloc(sizeof(id3byte), lyricLen + 1);
         memcpy(text, lyric->text, lyricLen);
     }
     
@@ -1806,7 +1805,7 @@ void id3v2FreeStampedLyric(void *toDelete){
     comment frame functions
 */
 
-Id3v2Frame *id3v2ParseCommentFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseCommentFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -1869,32 +1868,32 @@ Id3v2CommentBody *id3v2CopyCommentBody(Id3v2CommentBody *body){
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *language = NULL;
-    unsigned char *description = NULL;
-    unsigned char *text = NULL;
+    id3byte encoding = 0x00;
+    id3buf language = NULL;
+    id3buf description = NULL;
+    id3buf text = NULL;
 
     encoding = body->encoding;
 
     if(body->language != NULL){
-        language = calloc(sizeof(unsigned char), ID3V2_LANGUAGE_LEN + 1);
+        language = calloc(sizeof(id3byte), ID3V2_LANGUAGE_LEN + 1);
         memcpy(language, body->language, ID3V2_LANGUAGE_LEN);
     }
 
     if(body->description != NULL){
-        description = calloc(sizeof(unsigned char), id3strlen(body->description, encoding) + id3ReaderAllocationAdd(encoding));
+        description = calloc(sizeof(id3byte), id3strlen(body->description, encoding) + id3ReaderAllocationAdd(encoding));
         memcpy(description, body->description, id3strlen(body->description, encoding));
     }
 
     if(body->text != NULL){
-        text = calloc(sizeof(unsigned char), id3strlen(body->text, encoding) + id3ReaderAllocationAdd(encoding));
+        text = calloc(sizeof(id3byte), id3strlen(body->text, encoding) + id3ReaderAllocationAdd(encoding));
         memcpy(text, body->text, id3strlen(body->text, encoding));
     }
 
     return id3v2NewCommentBody(encoding, language, description, text);
 }
 
-Id3v2CommentBody *id3v2ParseCommentBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2CommentBody *id3v2ParseCommentBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -1904,10 +1903,10 @@ Id3v2CommentBody *id3v2ParseCommentBody(unsigned char *buffer, Id3v2FrameHeader 
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *language = NULL;
-    unsigned char *description = NULL;
-    unsigned char *text = NULL;
+    id3byte encoding = 0x00;
+    id3buf language = NULL;
+    id3buf description = NULL;
+    id3buf text = NULL;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
     // copy encoding
@@ -1915,11 +1914,11 @@ Id3v2CommentBody *id3v2ParseCommentBody(unsigned char *buffer, Id3v2FrameHeader 
     id3ReaderSeek(stream, 1, SEEK_CUR);
 
     // copy language
-    language = calloc(sizeof(unsigned char), ID3V2_LANGUAGE_LEN + 1);
+    language = calloc(sizeof(id3byte), ID3V2_LANGUAGE_LEN + 1);
     id3ReaderRead(stream, language, ID3V2_LANGUAGE_LEN);
 
     if(!(id3ReaderCursor(stream)[0] == 0x00)){
-        description = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
+        description = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
         id3ReaderRead(stream, description, id3ReaderReadEncodedSize(stream, encoding));
     }
 
@@ -1932,7 +1931,7 @@ Id3v2CommentBody *id3v2ParseCommentBody(unsigned char *buffer, Id3v2FrameHeader 
     return id3v2NewCommentBody(encoding, language, description, text);
 }
 
-Id3v2CommentBody *id3v2NewCommentBody(unsigned char encoding, unsigned char *language, unsigned char *description, unsigned char *text){
+Id3v2CommentBody *id3v2NewCommentBody(id3byte encoding, id3buf language, id3buf description, id3buf text){
 
     Id3v2CommentBody *commentBody = malloc(sizeof(Id3v2CommentBody));
 
@@ -1982,7 +1981,7 @@ void id3v2FreeCommentFrame(Id3v2Frame *toDelete){
     Subjective frame functions
 */
 
-Id3v2Frame *id3v2ParseSubjectiveFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseSubjectiveFrame(id3buf buffer, Id3v2Header *header){
     
     if(buffer == NULL){
         return NULL;
@@ -2039,20 +2038,20 @@ Id3v2SubjectiveBody *id3v2CopySubjectiveBody(Id3v2SubjectiveBody *body){
         return NULL;
     }
 
-    unsigned char *value = NULL;
+    id3buf value = NULL;
     int valueSize = 0;
 
     valueSize = body->valueSize;
 
     if(body->value != NULL){
-        value = calloc(sizeof(unsigned char), body->valueSize + 1);
+        value = calloc(sizeof(id3byte), body->valueSize + 1);
         memcpy(value, body->value, valueSize);
     }
 
     return id3v2NewSubjectiveBody(value, valueSize);
 }
 
-Id3v2SubjectiveBody *id3v2ParseSubjectiveBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2SubjectiveBody *id3v2ParseSubjectiveBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -2062,7 +2061,7 @@ Id3v2SubjectiveBody *id3v2ParseSubjectiveBody(unsigned char *buffer, Id3v2FrameH
         return NULL;
     }
 
-    unsigned char *value = NULL;
+    id3buf value = NULL;
     int valueSize = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
@@ -2073,7 +2072,7 @@ Id3v2SubjectiveBody *id3v2ParseSubjectiveBody(unsigned char *buffer, Id3v2FrameH
     return id3v2NewSubjectiveBody(value, valueSize);
 }
 
-Id3v2SubjectiveBody *id3v2NewSubjectiveBody(unsigned char *value, int valueSize){
+Id3v2SubjectiveBody *id3v2NewSubjectiveBody(id3buf value, int valueSize){
 
     Id3v2SubjectiveBody *body = malloc(sizeof(Id3v2SubjectiveBody));
     
@@ -2111,7 +2110,7 @@ void id3v2FreeSubjectiveFrame(Id3v2Frame *toDelete){
     Relative volume adjustment frame functions
 */
 
-Id3v2Frame *id3v2ParseRelativeVolumeAdjustmentFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseRelativeVolumeAdjustmentFrame(id3buf buffer, Id3v2Header *header){
     return id3v2ParseSubjectiveFrame(buffer, header);
 }
 
@@ -2123,11 +2122,11 @@ Id3v2RelativeVolumeAdjustmentBody *id3v2CopyRelativeVolumeAdjustmentBody(Id3v2Su
     return (Id3v2RelativeVolumeAdjustmentBody *) id3v2CopySubjectiveBody(body);
 }
 
-Id3v2RelativeVolumeAdjustmentBody *id3v2ParseRelativeVolumeAdjustmentBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2RelativeVolumeAdjustmentBody *id3v2ParseRelativeVolumeAdjustmentBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
     return (Id3v2RelativeVolumeAdjustmentBody *) id3v2ParseSubjectiveBody(buffer, frameHeader);
 }
 
-Id3v2RelativeVolumeAdjustmentBody *id3v2NewRelativeVolumeAdjustmentBody(unsigned char *value, int valueSize){
+Id3v2RelativeVolumeAdjustmentBody *id3v2NewRelativeVolumeAdjustmentBody(id3buf value, int valueSize){
     return (Id3v2RelativeVolumeAdjustmentBody *) id3v2NewSubjectiveBody(value, valueSize);
 }
 
@@ -2139,7 +2138,7 @@ void id3v2FreeRelativeVolumeAdjustmentFrame(Id3v2Frame *toDelete){
     Equalization frame functions
 */
 
-Id3v2Frame *id3v2ParseEqualisationFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseEqualisationFrame(id3buf buffer, Id3v2Header *header){
     return id3v2ParseSubjectiveFrame(buffer, header);
 }
 
@@ -2151,11 +2150,11 @@ Id3v2EqualisationBody *id3v2CopyEqualisationBody(Id3v2EqualisationBody *body){
     return (Id3v2EqualisationBody *) id3v2CopySubjectiveBody(body);
 }
 
-Id3v2EqualisationBody *id3v2ParseEqualisationBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2EqualisationBody *id3v2ParseEqualisationBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
     return (Id3v2EqualisationBody *) id3v2ParseSubjectiveBody(buffer, frameHeader);
 }
 
-Id3v2EqualisationBody *id3v2NewEqualisationBody(unsigned char *value, int valueSize){
+Id3v2EqualisationBody *id3v2NewEqualisationBody(id3buf value, int valueSize){
     return (Id3v2EqualisationBody *) id3v2NewSubjectiveBody(value, valueSize);
 }
 
@@ -2167,7 +2166,7 @@ void id3v2FreeEqualisationFrame(Id3v2Frame *toDelete){
     Reverb frame functions
 */
 
-Id3v2Frame *id3v2ParseReverbFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseReverbFrame(id3buf buffer, Id3v2Header *header){
     return id3v2ParseSubjectiveFrame(buffer, header);
 }
 
@@ -2179,11 +2178,11 @@ Id3v2ReverbBody *id3v2CopyReverbBody(Id3v2ReverbBody *body){
     return (Id3v2ReverbBody *) id3v2CopySubjectiveBody(body);
 }
 
-Id3v2ReverbBody *id3v2ParseReverbBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2ReverbBody *id3v2ParseReverbBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
     return (Id3v2ReverbBody *) id3v2ParseSubjectiveBody(buffer, frameHeader);
 }
 
-Id3v2ReverbBody *id3v2NewReverbBody(unsigned char *value, int valueSize){
+Id3v2ReverbBody *id3v2NewReverbBody(id3buf value, int valueSize){
     return (Id3v2ReverbBody *) id3v2NewSubjectiveBody(value, valueSize);
 }
 
@@ -2195,7 +2194,7 @@ void id3v2FreeReverbFrame(Id3v2Frame *toDelete){
     Picture frame functions
 */
 
-Id3v2Frame *id3v2ParsePictureFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParsePictureFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -2267,11 +2266,11 @@ Id3v2PictureBody *id3v2CopyPictureBody(Id3v2PictureBody *body){
         return NULL;
     }
 
-    unsigned char encoding = 0;
-    unsigned char *format = NULL;
-    unsigned char pictureType = 0x00;
-    unsigned char *description = NULL;
-    unsigned char *pictureData = NULL;
+    id3byte encoding = 0;
+    id3buf format = NULL;
+    id3byte pictureType = 0x00;
+    id3buf description = NULL;
+    id3buf pictureData = NULL;
     int picSize = 0;
 
     encoding = body->encoding;
@@ -2279,24 +2278,24 @@ Id3v2PictureBody *id3v2CopyPictureBody(Id3v2PictureBody *body){
     picSize = body->picSize;
 
     if(body->format != NULL){
-        format = calloc(sizeof(unsigned char), strlen((char *)body->format) + 1);
+        format = calloc(sizeof(id3byte), strlen((char *)body->format) + 1);
         memcpy(format, body->format, strlen((char *)body->format));
     }
 
     if(body->description != NULL){
-        description = calloc(sizeof(unsigned char), id3strlen(body->description, encoding) + id3ReaderAllocationAdd(encoding));
+        description = calloc(sizeof(id3byte), id3strlen(body->description, encoding) + id3ReaderAllocationAdd(encoding));
         memcpy(description, body->description, id3strlen(body->description, encoding));
     }
 
     if(body->pictureData != NULL){
-        pictureData = calloc(sizeof(unsigned char), body->picSize + 1);
+        pictureData = calloc(sizeof(id3byte), body->picSize + 1);
         memcpy(pictureData, body->pictureData, body->picSize);
     }
 
     return id3v2NewPictureBody(encoding, format, pictureType, description, pictureData, picSize);
 }
 
-Id3v2PictureBody *id3v2ParsePictureBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2PictureBody *id3v2ParsePictureBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
     
     if(buffer == NULL){
         return NULL;
@@ -2306,11 +2305,11 @@ Id3v2PictureBody *id3v2ParsePictureBody(unsigned char *buffer, Id3v2FrameHeader 
         return NULL;
     }
 
-    unsigned char encoding = 0;
-    unsigned char *format = NULL;
-    unsigned char pictureType = 0x00;
-    unsigned char *description = NULL;
-    unsigned char *pictureData = NULL;
+    id3byte encoding = 0;
+    id3buf format = NULL;
+    id3byte pictureType = 0x00;
+    id3buf description = NULL;
+    id3buf pictureData = NULL;
     int picSize = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
@@ -2320,14 +2319,14 @@ Id3v2PictureBody *id3v2ParsePictureBody(unsigned char *buffer, Id3v2FrameHeader 
     // copy format
     // 2.2
     if(frameHeader->idNum == PIC){
-        format = calloc(sizeof(unsigned char), ID3V2_PICTURE_FORMAT_LEN + 1);
+        format = calloc(sizeof(id3byte), ID3V2_PICTURE_FORMAT_LEN + 1);
         id3ReaderRead(stream, format, ID3V2_PICTURE_FORMAT_LEN);
     
     }
     // 2.3 or 4
     if(frameHeader->idNum == APIC){
         //encoding is fixed at ISO_8859_1
-        format = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
+        format = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
         id3ReaderRead(stream, format, id3ReaderReadEncodedSize(stream, ISO_8859_1));
         
         //skip spacer
@@ -2342,7 +2341,7 @@ Id3v2PictureBody *id3v2ParsePictureBody(unsigned char *buffer, Id3v2FrameHeader 
 
     //copy description
     if(id3ReaderCursor(stream)[0] != 0x00){
-        description = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
+        description = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
         id3ReaderRead(stream, description, id3ReaderReadEncodedSize(stream, encoding));
     }
 
@@ -2358,7 +2357,7 @@ Id3v2PictureBody *id3v2ParsePictureBody(unsigned char *buffer, Id3v2FrameHeader 
     return id3v2NewPictureBody(encoding, format, pictureType, description, pictureData, picSize);
 }
 
-Id3v2PictureBody *id3v2NewPictureBody(unsigned char encoding, unsigned char *format, unsigned char pictureType, unsigned char *description, unsigned char *pictureData, int picSize){
+Id3v2PictureBody *id3v2NewPictureBody(id3byte encoding, id3buf format, id3byte pictureType, id3buf description, id3buf pictureData, int picSize){
 
     Id3v2PictureBody *pictureBody = malloc(sizeof(Id3v2PictureBody));
 
@@ -2410,7 +2409,7 @@ void id3v2FreePictureFrame(Id3v2Frame *toDelete){
     General encapsulated object frame functions
 */
 
-Id3v2Frame *id3v2ParseGeneralEncapsulatedObjectFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseGeneralEncapsulatedObjectFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -2477,11 +2476,11 @@ Id3v2GeneralEncapsulatedObjectBody *id3v2CopyGeneralEncapsulatedObjectBody(Id3v2
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *mimeType = NULL;
-    unsigned char *filename = NULL;
-    unsigned char *contentDescription = NULL;
-    unsigned char *encapsulatedObject = NULL;
+    id3byte encoding = 0x00;
+    id3buf mimeType = NULL;
+    id3buf filename = NULL;
+    id3buf contentDescription = NULL;
+    id3buf encapsulatedObject = NULL;
     unsigned int encapsulatedObjectLen = 0;
 
     encoding = body->encoding;
@@ -2489,29 +2488,29 @@ Id3v2GeneralEncapsulatedObjectBody *id3v2CopyGeneralEncapsulatedObjectBody(Id3v2
 
 
     if(body->mimeType != NULL){
-        mimeType = calloc(sizeof(unsigned char), strlen((char *)body->mimeType) + 1);
+        mimeType = calloc(sizeof(id3byte), strlen((char *)body->mimeType) + 1);
         memcpy(mimeType, body->mimeType, strlen((char *)body->mimeType));
     }
 
     if(body->filename != NULL){
-        filename = calloc(sizeof(unsigned char), id3strlen(body->filename, encoding) + id3ReaderAllocationAdd(encoding));
+        filename = calloc(sizeof(id3byte), id3strlen(body->filename, encoding) + id3ReaderAllocationAdd(encoding));
         memcpy(filename, body->filename, id3strlen(body->filename, encoding));
     }
 
     if(body->contentDescription != NULL){
-        contentDescription = calloc(sizeof(unsigned char), id3strlen(body->contentDescription, encoding) + id3ReaderAllocationAdd(encoding));
+        contentDescription = calloc(sizeof(id3byte), id3strlen(body->contentDescription, encoding) + id3ReaderAllocationAdd(encoding));
         memcpy(contentDescription, body->contentDescription, id3strlen(body->contentDescription, encoding));
     }
 
     if(body->encapsulatedObject != NULL){
-        encapsulatedObject = calloc(sizeof(unsigned char), body->encapsulatedObjectLen + 1);
+        encapsulatedObject = calloc(sizeof(id3byte), body->encapsulatedObjectLen + 1);
         memcpy(encapsulatedObject, body->encapsulatedObject, body->encapsulatedObjectLen);
     }
 
     return id3v2NewGeneralEncapsulatedObjectBody(encoding, mimeType, filename, contentDescription, encapsulatedObject, encapsulatedObjectLen);
 }
 
-Id3v2GeneralEncapsulatedObjectBody *id3v2NewGeneralEncapsulatedObjectBody(unsigned char encoding, unsigned char *mimeType, unsigned char *filename, unsigned char *contentDescription, unsigned char *encapsulatedObject, unsigned int encapsulatedObjectLen){
+Id3v2GeneralEncapsulatedObjectBody *id3v2NewGeneralEncapsulatedObjectBody(id3byte encoding, id3buf mimeType, id3buf filename, id3buf contentDescription, id3buf encapsulatedObject, unsigned int encapsulatedObjectLen){
 
     Id3v2GeneralEncapsulatedObjectBody *generalEncapsulatedObjectBody = malloc(sizeof(Id3v2GeneralEncapsulatedObjectBody));
 
@@ -2526,17 +2525,17 @@ Id3v2GeneralEncapsulatedObjectBody *id3v2NewGeneralEncapsulatedObjectBody(unsign
     return generalEncapsulatedObjectBody;
 }
 
-Id3v2GeneralEncapsulatedObjectBody *id3v2ParseGeneralEncapsulatedObjectBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2GeneralEncapsulatedObjectBody *id3v2ParseGeneralEncapsulatedObjectBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *mimeType = NULL;
-    unsigned char *filename = NULL;
-    unsigned char *contentDescription = NULL;
-    unsigned char *encapsulatedObject = NULL;
+    id3byte encoding = 0x00;
+    id3buf mimeType = NULL;
+    id3buf filename = NULL;
+    id3buf contentDescription = NULL;
+    id3buf encapsulatedObject = NULL;
     unsigned int encapsulatedObjectLen = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
@@ -2545,13 +2544,13 @@ Id3v2GeneralEncapsulatedObjectBody *id3v2ParseGeneralEncapsulatedObjectBody(unsi
     id3ReaderSeek(stream, 1, SEEK_CUR);
 
     // does mime type exist
-    mimeType = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
+    mimeType = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
     id3ReaderRead(stream, mimeType, id3ReaderReadEncodedSize(stream, ISO_8859_1));
     id3ReaderSeek(stream,1, SEEK_CUR);
 
     //get filename
     if(id3ReaderCursor(stream)[0] != 0x00){
-        filename = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
+        filename = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
         id3ReaderRead(stream, filename, id3ReaderReadEncodedSize(stream, encoding));
 
     }
@@ -2559,7 +2558,7 @@ Id3v2GeneralEncapsulatedObjectBody *id3v2ParseGeneralEncapsulatedObjectBody(unsi
 
     //get content desc
     if(id3ReaderCursor(stream)[0] != 0x00){
-        contentDescription = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
+        contentDescription = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
         id3ReaderRead(stream, contentDescription, id3ReaderReadEncodedSize(stream, encoding));
     }
     id3ReaderSeek(stream, id3ReaderAllocationAdd(encoding), SEEK_CUR);
@@ -2567,7 +2566,7 @@ Id3v2GeneralEncapsulatedObjectBody *id3v2ParseGeneralEncapsulatedObjectBody(unsi
 
     // copy encapsulated object
     encapsulatedObjectLen = stream->bufferSize - stream->cursor;
-    encapsulatedObject = calloc(sizeof(unsigned char), encapsulatedObjectLen + 1);
+    encapsulatedObject = calloc(sizeof(id3byte), encapsulatedObjectLen + 1);
     id3ReaderRead(stream, encapsulatedObject, encapsulatedObjectLen);
 
     id3FreeReader(stream);
@@ -2615,7 +2614,7 @@ void id3v2FreeGeneralEncapsulatedObjectFrame(Id3v2Frame *toDelete){
     play counter frame functions
 */
 
-Id3v2Frame *id3v2ParsePlayCounterFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParsePlayCounterFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -2685,7 +2684,7 @@ Id3v2PlayCounterBody *id3v2CopyPlayCounterBody(Id3v2PlayCounterBody *body){
     return id3v2NewPlayCounterBody(body->counter);
 }
 
-Id3v2PlayCounterBody *id3v2ParsePlayCounterBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2PlayCounterBody *id3v2ParsePlayCounterBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -2734,7 +2733,7 @@ void id3v2FreePlayCounterFrame(Id3v2Frame *toDelete){
     popularmeter frame functions
 */
 
-Id3v2Frame *id3v2ParsePopularFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParsePopularFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -2801,7 +2800,7 @@ Id3v2PopularBody *id3v2CopyPopularBody(Id3v2PopularBody *body){
         return NULL;
     }
 
-    unsigned char *email = NULL;
+    id3buf email = NULL;
     long counter = 0;
     unsigned int rating = 0;
 
@@ -2809,14 +2808,14 @@ Id3v2PopularBody *id3v2CopyPopularBody(Id3v2PopularBody *body){
     counter = body->counter;
 
     if(body->email != NULL){
-        email = calloc(sizeof(unsigned char), strlen((char *)body->email) + 1);
+        email = calloc(sizeof(id3byte), strlen((char *)body->email) + 1);
         memcpy(email, body->email, strlen((char *)body->email));
     }
 
     return id3v2NewPopularBody(email, rating, counter);
 }
 
-Id3v2PopularBody *id3v2NewPopularBody(unsigned char *email, unsigned int rating, long counter){
+Id3v2PopularBody *id3v2NewPopularBody(id3buf email, unsigned int rating, long counter){
 
     Id3v2PopularBody *popularBody = malloc(sizeof(Id3v2PopularBody));
 
@@ -2828,7 +2827,7 @@ Id3v2PopularBody *id3v2NewPopularBody(unsigned char *email, unsigned int rating,
     return popularBody;
 }
 
-Id3v2PopularBody *id3v2ParsePopularBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2PopularBody *id3v2ParsePopularBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -2838,14 +2837,14 @@ Id3v2PopularBody *id3v2ParsePopularBody(unsigned char *buffer, Id3v2FrameHeader 
         return NULL;
     }
 
-    unsigned char *email = NULL;
+    id3buf email = NULL;
     long counter = 0;
     unsigned int rating = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
     // check for an email
     if(id3ReaderCursor(stream)[0] != 0x00){
-        email = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
+        email = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
         id3ReaderRead(stream, email, id3ReaderReadEncodedSize(stream, ISO_8859_1));
     }
     id3ReaderSeek(stream, 1, SEEK_CUR);
@@ -2890,7 +2889,7 @@ void id3v2FreePopularFrame(Id3v2Frame *toDelete){
     encrypted meta frame
 */
 
-Id3v2Frame *id3v2ParseEncryptedMetaFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseEncryptedMetaFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -2952,25 +2951,25 @@ Id3v2EncryptedMetaBody *id3v2CopyEncryptedMetaBody(Id3v2EncryptedMetaBody *body)
         return NULL;
     }
 
-    unsigned char *ownerIdentifier = NULL;
-    unsigned char *content = NULL;
-    unsigned char *encryptedDatablock = NULL;
+    id3buf ownerIdentifier = NULL;
+    id3buf content = NULL;
+    id3buf encryptedDatablock = NULL;
     unsigned int encryptedDatablockLen = 0;
 
     encryptedDatablockLen = body->encryptedDatablockLen;
 
     if(body->ownerIdentifier != NULL){
-        ownerIdentifier = calloc(sizeof(unsigned char), strlen((char *)body->ownerIdentifier) + 1);
+        ownerIdentifier = calloc(sizeof(id3byte), strlen((char *)body->ownerIdentifier) + 1);
         memcpy(ownerIdentifier, body->ownerIdentifier, strlen((char *)body->ownerIdentifier));
     }
 
     if(body->content != NULL){
-        content = calloc(sizeof(unsigned char), strlen((char *)body->content) + 1);
+        content = calloc(sizeof(id3byte), strlen((char *)body->content) + 1);
         memcpy(content, body->content, strlen((char *)body->content));
     }
 
     if(body->encryptedDatablock != NULL){
-        encryptedDatablock = calloc(sizeof(unsigned char), body->encryptedDatablockLen + 1);
+        encryptedDatablock = calloc(sizeof(id3byte), body->encryptedDatablockLen + 1);
         memcpy(encryptedDatablock, body->encryptedDatablock, body->encryptedDatablockLen);    
     }
 
@@ -2978,7 +2977,7 @@ Id3v2EncryptedMetaBody *id3v2CopyEncryptedMetaBody(Id3v2EncryptedMetaBody *body)
     
 }
 
-Id3v2EncryptedMetaBody *id3v2NewEncryptedMetaBody(unsigned char *ownerIdentifier, unsigned char *content, unsigned char *encryptedDatablock, unsigned int encryptedDatablockLen){
+Id3v2EncryptedMetaBody *id3v2NewEncryptedMetaBody(id3buf ownerIdentifier, id3buf content, id3buf encryptedDatablock, unsigned int encryptedDatablockLen){
 
     Id3v2EncryptedMetaBody *encryptedMetaBody = malloc(sizeof(Id3v2EncryptedMetaBody));
 
@@ -2991,7 +2990,7 @@ Id3v2EncryptedMetaBody *id3v2NewEncryptedMetaBody(unsigned char *ownerIdentifier
     return encryptedMetaBody;
 }
 
-Id3v2EncryptedMetaBody *id3v2ParseEncryptedMetaBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2EncryptedMetaBody *id3v2ParseEncryptedMetaBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -3001,22 +3000,22 @@ Id3v2EncryptedMetaBody *id3v2ParseEncryptedMetaBody(unsigned char *buffer, Id3v2
         return NULL;
     }
 
-    unsigned char *ownerIdentifier = NULL;
-    unsigned char *content = NULL;
-    unsigned char *encryptedDatablock = NULL;
+    id3buf ownerIdentifier = NULL;
+    id3buf content = NULL;
+    id3buf encryptedDatablock = NULL;
     unsigned int encryptedDatablockLen = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
     
     // get owner identifier
     if(id3ReaderCursor(stream)[0] != 0x00){
-        ownerIdentifier = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
+        ownerIdentifier = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
         id3ReaderRead(stream, ownerIdentifier, id3ReaderReadEncodedSize(stream, ISO_8859_1));
     }
     id3ReaderSeek(stream, 1, SEEK_CUR);
     
     // get content/explination
     if(id3ReaderCursor(stream)[0] != 0x00){
-        content = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
+        content = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
         id3ReaderRead(stream, content, id3ReaderReadEncodedSize(stream, ISO_8859_1));
     }
     id3ReaderSeek(stream, 1, SEEK_CUR);
@@ -3066,7 +3065,7 @@ void id3v2FreeEncryptedMetaFrame(Id3v2Frame *toDelete){
     audio encryption frame functions
 */
 
-Id3v2Frame *id3v2ParseAudioEncryptionFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseAudioEncryptionFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -3133,10 +3132,10 @@ Id3v2AudioEncryptionBody *id3v2CopyAudioEncryptionBody(Id3v2AudioEncryptionBody 
         return NULL;
     }
 
-    unsigned char *ownerIdentifier = NULL;
+    id3buf ownerIdentifier = NULL;
     void *previewStart = NULL;
     unsigned int previewLength = 0;
-    unsigned char *encryptionInfo = NULL;
+    id3buf encryptionInfo = NULL;
     unsigned int encryptionInfoLen = 0;
 
     previewStart = body->previewStart;
@@ -3144,19 +3143,19 @@ Id3v2AudioEncryptionBody *id3v2CopyAudioEncryptionBody(Id3v2AudioEncryptionBody 
     encryptionInfoLen = body->encryptionInfoLen;
 
     if(body->ownerIdentifier != NULL){
-        ownerIdentifier = calloc(sizeof(unsigned char), strlen((char *)body->ownerIdentifier) + 1);
+        ownerIdentifier = calloc(sizeof(id3byte), strlen((char *)body->ownerIdentifier) + 1);
         memcpy(ownerIdentifier, body->ownerIdentifier, strlen((char *)body->ownerIdentifier));
     }
 
     if(body->encryptionInfo != NULL){
-        encryptionInfo = calloc(sizeof(unsigned char), body->encryptionInfoLen + 1);
+        encryptionInfo = calloc(sizeof(id3byte), body->encryptionInfoLen + 1);
         memcpy(encryptionInfo, body->encryptionInfo, body->encryptionInfoLen);
     }
 
     return id3v2NewAudioEncryptionBody(ownerIdentifier, previewStart, previewLength, encryptionInfo, encryptionInfoLen);
 }
 
-Id3v2AudioEncryptionBody *id3v2ParseAudioEncryptionBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2AudioEncryptionBody *id3v2ParseAudioEncryptionBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -3166,16 +3165,16 @@ Id3v2AudioEncryptionBody *id3v2ParseAudioEncryptionBody(unsigned char *buffer, I
         return NULL;
     }
 
-    unsigned char *ownerIdentifier = NULL;
+    id3buf ownerIdentifier = NULL;
     void *previewStart = NULL;
     unsigned int previewLength = 0;
-    unsigned char *encryptionInfo = NULL;
+    id3buf encryptionInfo = NULL;
     unsigned int encryptionInfoLen = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
     //copy owner identifier
     if(id3ReaderCursor(stream)[0] != 0x00){
-        ownerIdentifier = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream,ISO_8859_1) + 1);
+        ownerIdentifier = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream,ISO_8859_1) + 1);
         id3ReaderRead(stream, ownerIdentifier, id3ReaderReadEncodedSize(stream,ISO_8859_1));
     }
     id3ReaderSeek(stream, 1, SEEK_CUR);
@@ -3197,7 +3196,7 @@ Id3v2AudioEncryptionBody *id3v2ParseAudioEncryptionBody(unsigned char *buffer, I
     return id3v2NewAudioEncryptionBody(ownerIdentifier, previewStart, previewLength, encryptionInfo, encryptionInfoLen);
 }
 
-Id3v2AudioEncryptionBody *id3v2NewAudioEncryptionBody(unsigned char *ownerIdentifier, void *previewStart, unsigned int previewLength, unsigned char *encryptionInfo, unsigned int encryptionInfoLen){
+Id3v2AudioEncryptionBody *id3v2NewAudioEncryptionBody(id3buf ownerIdentifier, void *previewStart, unsigned int previewLength, id3buf encryptionInfo, unsigned int encryptionInfoLen){
 
     Id3v2AudioEncryptionBody *audioEncryptionBody = malloc(sizeof(Id3v2AudioEncryptionBody));
 
@@ -3244,7 +3243,7 @@ void id3v2FreeAudioEncryptionFrame(Id3v2Frame *toDelete){
     Unique file identifier frame functions
 */
 
-Id3v2Frame *id3v2ParseUniqueFileIdentiferFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseUniqueFileIdentiferFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -3311,23 +3310,23 @@ Id3v2UniqueFileIdentifierBody *id3v2CopyUniqueFileIdentifierBody(Id3v2UniqueFile
         return NULL;
     }
 
-    unsigned char *ownerIdentifier = NULL;
-    unsigned char *identifier = NULL;
+    id3buf ownerIdentifier = NULL;
+    id3buf identifier = NULL;
 
     if(body->ownerIdentifier != NULL){
-        ownerIdentifier = calloc(sizeof(unsigned char), strlen((char *)body->ownerIdentifier) + 1);
+        ownerIdentifier = calloc(sizeof(id3byte), strlen((char *)body->ownerIdentifier) + 1);
         memcpy(ownerIdentifier, body->ownerIdentifier, strlen((char *)body->ownerIdentifier));
     }
 
     if(body->identifier != NULL){
-        identifier = calloc(sizeof(unsigned char), strlen((char *)body->identifier) + 1);
+        identifier = calloc(sizeof(id3byte), strlen((char *)body->identifier) + 1);
         memcpy(identifier, body->identifier, strlen((char *)body->identifier));
     }
 
     return id3v2NewUniqueFileIdentifierBody(ownerIdentifier, identifier);
 }
 
-Id3v2UniqueFileIdentifierBody *id3v2ParseUniqueFileIdentiferBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2UniqueFileIdentifierBody *id3v2ParseUniqueFileIdentiferBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
     
     if(buffer == NULL){
         return NULL;
@@ -3337,13 +3336,13 @@ Id3v2UniqueFileIdentifierBody *id3v2ParseUniqueFileIdentiferBody(unsigned char *
         return NULL;
     }
 
-    unsigned char *ownerIdentifier = NULL;
-    unsigned char *identifier = NULL;
+    id3buf ownerIdentifier = NULL;
+    id3buf identifier = NULL;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
     // does owner id exist
     if(id3ReaderCursor(stream)[0] != 0x00){
-        ownerIdentifier = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
+        ownerIdentifier = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
         id3ReaderRead(stream, ownerIdentifier, id3ReaderReadEncodedSize(stream, ISO_8859_1));
     }
     id3ReaderSeek(stream, 1, SEEK_CUR);
@@ -3355,7 +3354,7 @@ Id3v2UniqueFileIdentifierBody *id3v2ParseUniqueFileIdentiferBody(unsigned char *
     return id3v2NewUniqueFileIdentifierBody(ownerIdentifier, identifier);
 }
 
-Id3v2UniqueFileIdentifierBody *id3v2NewUniqueFileIdentifierBody(unsigned char *ownerIdentifier, unsigned char *identifier){
+Id3v2UniqueFileIdentifierBody *id3v2NewUniqueFileIdentifierBody(id3buf ownerIdentifier, id3buf identifier){
 
     Id3v2UniqueFileIdentifierBody *uniqueFileIdentifierBody = malloc(sizeof(Id3v2UniqueFileIdentifierBody));
 
@@ -3399,7 +3398,7 @@ void id3v2FreeUniqueFileIdentifierFrame(Id3v2Frame *toDelete){
     Position synchronisation frame
 */
 
-Id3v2Frame *id3v2ParsePositionSynchronisationFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParsePositionSynchronisationFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -3459,7 +3458,7 @@ Id3v2PositionSynchronisationBody *id3v2CopyPositionSynchronisationBody(Id3v2Posi
     return (body == NULL) ? NULL : id3v2NewPositionSynchronisationBody(body->timeStampFormat, body->pos);
 }
 
-Id3v2PositionSynchronisationBody *id3v2ParsePositionSynchronisationBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2PositionSynchronisationBody *id3v2ParsePositionSynchronisationBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -3469,7 +3468,7 @@ Id3v2PositionSynchronisationBody *id3v2ParsePositionSynchronisationBody(unsigned
         return NULL;
     }
 
-    unsigned char timeStampFormat = 0x00;
+    id3byte timeStampFormat = 0x00;
     long pos = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
     timeStampFormat = id3ReaderCursor(stream)[0];
@@ -3482,7 +3481,7 @@ Id3v2PositionSynchronisationBody *id3v2ParsePositionSynchronisationBody(unsigned
     return id3v2NewPositionSynchronisationBody(timeStampFormat, pos);
 }
 
-Id3v2PositionSynchronisationBody *id3v2NewPositionSynchronisationBody(unsigned char timeStampFormat, long pos){
+Id3v2PositionSynchronisationBody *id3v2NewPositionSynchronisationBody(id3byte timeStampFormat, long pos){
 
     Id3v2PositionSynchronisationBody *body = malloc(sizeof(Id3v2PositionSynchronisationBody));
 
@@ -3513,7 +3512,7 @@ void id3v2FreePositionSynchronisationFrame(Id3v2Frame *toDelete){
     terms of service frame functions
 */
 
-Id3v2Frame *id3v2ParseTermsOfUseFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseTermsOfUseFrame(id3buf buffer, Id3v2Header *header){
     
     if(buffer == NULL){
         return NULL;
@@ -3576,26 +3575,26 @@ Id3v2TermsOfUseBody *id3v2CopyTermsOfUseBody(Id3v2TermsOfUseBody *body){
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *language = NULL;
-    unsigned char *text = NULL;
+    id3byte encoding = 0x00;
+    id3buf language = NULL;
+    id3buf text = NULL;
 
     encoding = body->encoding;
 
     if(body->language != NULL){
-        language = calloc(sizeof(unsigned char), ID3V2_LANGUAGE_LEN + 1);
+        language = calloc(sizeof(id3byte), ID3V2_LANGUAGE_LEN + 1);
         memcpy(language, body->language, ID3V2_LANGUAGE_LEN);
     }
 
     if(body->text != NULL){
-        text = calloc(sizeof(unsigned char), id3strlen(body->text, encoding));
+        text = calloc(sizeof(id3byte), id3strlen(body->text, encoding));
         memcpy(text, body->text, id3strlen(body->text, encoding));
     }
 
     return id3v2NewTermsOfUseBody(encoding, language, text);
 }
 
-Id3v2TermsOfUseBody *id3v2ParseTermsOfUseBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2TermsOfUseBody *id3v2ParseTermsOfUseBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -3605,16 +3604,16 @@ Id3v2TermsOfUseBody *id3v2ParseTermsOfUseBody(unsigned char *buffer, Id3v2FrameH
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *language = NULL;
-    unsigned char *text = NULL;
+    id3byte encoding = 0x00;
+    id3buf language = NULL;
+    id3buf text = NULL;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
     // get encoding
     encoding = id3ReaderCursor(stream)[0];
     id3ReaderSeek(stream, 1, SEEK_CUR);
 
-    language = calloc(sizeof(unsigned char), ID3V2_LANGUAGE_LEN + 1);
+    language = calloc(sizeof(id3byte), ID3V2_LANGUAGE_LEN + 1);
     id3ReaderRead(stream, language, ID3V2_LANGUAGE_LEN);
 
     // check to see if text is there
@@ -3624,7 +3623,7 @@ Id3v2TermsOfUseBody *id3v2ParseTermsOfUseBody(unsigned char *buffer, Id3v2FrameH
     return id3v2NewTermsOfUseBody(encoding, language, text);
 }
 
-Id3v2TermsOfUseBody *id3v2NewTermsOfUseBody(unsigned char encoding, unsigned char *language, unsigned char *text){
+Id3v2TermsOfUseBody *id3v2NewTermsOfUseBody(id3byte encoding, id3buf language, id3buf text){
 
     Id3v2TermsOfUseBody *body = malloc(sizeof(Id3v2TermsOfUseBody));
 
@@ -3668,7 +3667,7 @@ void id3v2FreeTermsOfUseFrame(Id3v2Frame *toDelete){
     ownership functions
 */
 
-Id3v2Frame *id3v2ParseOwnershipFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseOwnershipFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -3731,32 +3730,32 @@ Id3v2OwnershipBody *id3v2CopyOwnershipBody(Id3v2OwnershipBody *body){
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *pricePayed = NULL;
-    unsigned char *dateOfPunch = NULL;
-    unsigned char *seller = NULL;
+    id3byte encoding = 0x00;
+    id3buf pricePayed = NULL;
+    id3buf dateOfPunch = NULL;
+    id3buf seller = NULL;
 
     encoding = body->encoding;
 
     if(body->pricePayed != NULL){
-        pricePayed = calloc(sizeof(unsigned char), strlen((char *)body->pricePayed) + 1);
+        pricePayed = calloc(sizeof(id3byte), strlen((char *)body->pricePayed) + 1);
         memcpy(pricePayed, body->pricePayed, strlen((char *)body->pricePayed));
     }
 
     if(body->dateOfPunch != NULL){
-        dateOfPunch = calloc(sizeof(unsigned char), ID3V2_BASE_DATE_FORMAT_LEN + 1);
+        dateOfPunch = calloc(sizeof(id3byte), ID3V2_BASE_DATE_FORMAT_LEN + 1);
         memcpy(dateOfPunch, body->dateOfPunch, ID3V2_BASE_DATE_FORMAT_LEN);
     }
 
     if(body->seller != NULL){
-        seller = calloc(sizeof(unsigned char), id3strlen(body->seller, encoding) + id3ReaderAllocationAdd(encoding));
+        seller = calloc(sizeof(id3byte), id3strlen(body->seller, encoding) + id3ReaderAllocationAdd(encoding));
         memcpy(seller, body->seller, id3strlen(body->seller, encoding));
     }
 
     return id3v2NewOwnershipBody(encoding, pricePayed, dateOfPunch, seller);
 }
 
-Id3v2OwnershipBody *id3v2ParseOwnershipBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2OwnershipBody *id3v2ParseOwnershipBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -3766,10 +3765,10 @@ Id3v2OwnershipBody *id3v2ParseOwnershipBody(unsigned char *buffer, Id3v2FrameHea
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *pricePayed = NULL;
-    unsigned char *dateOfPunch = NULL;
-    unsigned char *seller = NULL;
+    id3byte encoding = 0x00;
+    id3buf pricePayed = NULL;
+    id3buf dateOfPunch = NULL;
+    id3buf seller = NULL;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
     // copy encoding
@@ -3778,13 +3777,13 @@ Id3v2OwnershipBody *id3v2ParseOwnershipBody(unsigned char *buffer, Id3v2FrameHea
 
     // get amount payed for the file
     if(id3ReaderCursor(stream)[0] != 0x00){
-        pricePayed = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream,ISO_8859_1) + 1);
+        pricePayed = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream,ISO_8859_1) + 1);
         id3ReaderRead(stream, pricePayed, id3ReaderReadEncodedSize(stream, ISO_8859_1));
     }
     id3ReaderSeek(stream, 1, SEEK_CUR);
 
     // get punched for the file
-    dateOfPunch = calloc(sizeof(unsigned char), ID3V2_BASE_DATE_FORMAT_LEN + 1);
+    dateOfPunch = calloc(sizeof(id3byte), ID3V2_BASE_DATE_FORMAT_LEN + 1);
     id3ReaderRead(stream, dateOfPunch, ID3V2_BASE_DATE_FORMAT_LEN);
 
     // check to see if there is a seller
@@ -3794,7 +3793,7 @@ Id3v2OwnershipBody *id3v2ParseOwnershipBody(unsigned char *buffer, Id3v2FrameHea
     return id3v2NewOwnershipBody(encoding, pricePayed, dateOfPunch, seller);
 }
 
-Id3v2OwnershipBody *id3v2NewOwnershipBody(unsigned char encoding, unsigned char *pricePayed, unsigned char *dateOfPunch, unsigned char *seller){
+Id3v2OwnershipBody *id3v2NewOwnershipBody(id3byte encoding, id3buf pricePayed, id3buf dateOfPunch, id3buf seller){
 
     Id3v2OwnershipBody *body = malloc(sizeof(Id3v2OwnershipBody));
 
@@ -3843,7 +3842,7 @@ void id3v2FreeOwnershipFrame(Id3v2Frame *toDelete){
     commercial frame
 */
 
-Id3v2Frame *id3v2ParseCommercialFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseCommercialFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -3905,15 +3904,15 @@ Id3v2CommercialBody *id3v2CopyCommercialBody(Id3v2CommercialBody *body){
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *priceString = NULL;
-    unsigned char *validUntil = NULL;
-    unsigned char *contractURL = NULL;
+    id3byte encoding = 0x00;
+    id3buf priceString = NULL;
+    id3buf validUntil = NULL;
+    id3buf contractURL = NULL;
     unsigned int receivedAs = 0;
-    unsigned char *nameOfSeller = NULL; //encoded
-    unsigned char *description = NULL; //encoded
-    unsigned char *mimeType = NULL;
-    unsigned char *sellerLogo = NULL;
+    id3buf nameOfSeller = NULL; //encoded
+    id3buf description = NULL; //encoded
+    id3buf mimeType = NULL;
+    id3buf sellerLogo = NULL;
     unsigned int sellerLogoLen = 0;
 
     encoding = body->encoding;
@@ -3921,37 +3920,37 @@ Id3v2CommercialBody *id3v2CopyCommercialBody(Id3v2CommercialBody *body){
     sellerLogoLen = body->sellerLogoLen;
 
     if(body->priceString != NULL){
-        priceString = calloc(sizeof(unsigned char), strlen((char *)body->priceString) + 1);
+        priceString = calloc(sizeof(id3byte), strlen((char *)body->priceString) + 1);
         memcpy(priceString, body->priceString, strlen((char *)body->priceString));
     }
 
     if(body->validUntil != NULL){
-        validUntil = calloc(sizeof(unsigned char), ID3V2_BASE_DATE_FORMAT_LEN + 1);
+        validUntil = calloc(sizeof(id3byte), ID3V2_BASE_DATE_FORMAT_LEN + 1);
         memcpy(validUntil, body->validUntil, ID3V2_BASE_DATE_FORMAT_LEN);
     }
 
     if(body->contractURL != NULL){
-        contractURL = calloc(sizeof(unsigned char), strlen((char *)body->contractURL) + 1);
+        contractURL = calloc(sizeof(id3byte), strlen((char *)body->contractURL) + 1);
         memcpy(contractURL, body->contractURL, strlen((char *)body->contractURL));
     }
 
     if(body->nameOfSeller != NULL){
-        nameOfSeller = calloc(sizeof(unsigned char), id3strlen(body->nameOfSeller, encoding) + id3ReaderAllocationAdd(encoding));
+        nameOfSeller = calloc(sizeof(id3byte), id3strlen(body->nameOfSeller, encoding) + id3ReaderAllocationAdd(encoding));
         memcpy(nameOfSeller, body->nameOfSeller, id3strlen(body->nameOfSeller, encoding));
     }
 
     if(body->description != NULL){
-        description = calloc(sizeof(unsigned char), id3strlen(body->description, encoding) + id3ReaderAllocationAdd(encoding));
+        description = calloc(sizeof(id3byte), id3strlen(body->description, encoding) + id3ReaderAllocationAdd(encoding));
         memcpy(description, body->description, id3strlen(body->description, encoding));
     }
 
     if(body->mimeType != NULL){
-        mimeType = calloc(sizeof(unsigned char), strlen((char *)body->mimeType) + 1);
+        mimeType = calloc(sizeof(id3byte), strlen((char *)body->mimeType) + 1);
         memcpy(mimeType, body->mimeType, strlen((char *)body->mimeType));        
     }
 
     if(body->sellerLogo != NULL){
-        sellerLogo = calloc(sizeof(unsigned char), body->sellerLogoLen + 1);
+        sellerLogo = calloc(sizeof(id3byte), body->sellerLogoLen + 1);
         memcpy(sellerLogo, body->sellerLogo, body->sellerLogoLen);
     }
 
@@ -3959,7 +3958,7 @@ Id3v2CommercialBody *id3v2CopyCommercialBody(Id3v2CommercialBody *body){
     
 }
 
-Id3v2CommercialBody *id3v2ParseCommercialBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2CommercialBody *id3v2ParseCommercialBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -3969,15 +3968,15 @@ Id3v2CommercialBody *id3v2ParseCommercialBody(unsigned char *buffer, Id3v2FrameH
         return NULL;
     }
 
-    unsigned char encoding = 0x00;
-    unsigned char *priceString = NULL;
-    unsigned char *validUntil = NULL;
-    unsigned char *contractURL = NULL;
+    id3byte encoding = 0x00;
+    id3buf priceString = NULL;
+    id3buf validUntil = NULL;
+    id3buf contractURL = NULL;
     unsigned int receivedAs = 0x00;
-    unsigned char *nameOfSeller = NULL;
-    unsigned char *description = NULL;
-    unsigned char *mimeType = NULL;
-    unsigned char *sellerLogo = NULL;
+    id3buf nameOfSeller = NULL;
+    id3buf description = NULL;
+    id3buf mimeType = NULL;
+    id3buf sellerLogo = NULL;
     unsigned int sellerLogoLen = 0;
 
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
@@ -3987,18 +3986,18 @@ Id3v2CommercialBody *id3v2ParseCommercialBody(unsigned char *buffer, Id3v2FrameH
 
     // get price string for the file
     if(id3ReaderCursor(stream)[0] != 0x00){
-        priceString = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
+        priceString = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
         id3ReaderRead(stream, priceString, id3ReaderReadEncodedSize(stream, ISO_8859_1));
     }
     id3ReaderSeek(stream, 1, SEEK_CUR);
     
     // get valid
-    validUntil = calloc(sizeof(unsigned char), ID3V2_BASE_DATE_FORMAT_LEN + 1);
+    validUntil = calloc(sizeof(id3byte), ID3V2_BASE_DATE_FORMAT_LEN + 1);
     id3ReaderRead(stream, validUntil, ID3V2_BASE_DATE_FORMAT_LEN);
 
     // get contract URL for the file
     if(id3ReaderCursor(stream)[0] != 0x00){
-        contractURL = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
+        contractURL = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
         id3ReaderRead(stream, contractURL, id3ReaderReadEncodedSize(stream, ISO_8859_1));
     }
     id3ReaderSeek(stream, 1, SEEK_CUR);
@@ -4009,21 +4008,21 @@ Id3v2CommercialBody *id3v2ParseCommercialBody(unsigned char *buffer, Id3v2FrameH
 
     // read the name of the seller
     if(id3ReaderCursor(stream)[0] != 0x00){
-        nameOfSeller = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
+        nameOfSeller = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
         id3ReaderRead(stream, nameOfSeller, id3ReaderReadEncodedSize(stream, encoding));
     }
     id3ReaderSeek(stream, id3ReaderAllocationAdd(encoding), SEEK_CUR);
 
     // copy description
     if(id3ReaderCursor(stream)[0] != 0x00){
-        description = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
+        description = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, encoding) + id3ReaderAllocationAdd(encoding));
         id3ReaderRead(stream, description,  id3ReaderReadEncodedSize(stream, encoding));
     }
     id3ReaderSeek(stream, id3ReaderAllocationAdd(encoding), SEEK_CUR);
 
     //read file type
     if(id3ReaderCursor(stream)[0] != 0x00){
-        mimeType = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
+        mimeType = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
         id3ReaderRead(stream, description,  id3ReaderReadEncodedSize(stream, ISO_8859_1));
     }
     id3ReaderSeek(stream, 1, SEEK_CUR);
@@ -4036,7 +4035,7 @@ Id3v2CommercialBody *id3v2ParseCommercialBody(unsigned char *buffer, Id3v2FrameH
     return id3v2NewCommercialBody(encoding, priceString, validUntil, contractURL, receivedAs, nameOfSeller, description, mimeType, sellerLogo, sellerLogoLen);
 }
 
-Id3v2CommercialBody *id3v2NewCommercialBody(unsigned char encoding, unsigned char *priceString, unsigned char *validUntil, unsigned char *contractURL, unsigned char receivedAs, unsigned char *nameOfSeller, unsigned char *description, unsigned char *mimeType, unsigned char *sellerLogo, unsigned int sellerLogoLen){
+Id3v2CommercialBody *id3v2NewCommercialBody(id3byte encoding, id3buf priceString, id3buf validUntil, id3buf contractURL, id3byte receivedAs, id3buf nameOfSeller, id3buf description, id3buf mimeType, id3buf sellerLogo, unsigned int sellerLogoLen){
 
     Id3v2CommercialBody *body = malloc(sizeof(Id3v2CommercialBody));
 
@@ -4107,7 +4106,7 @@ void id3v2FreeCommercialFrame(Id3v2Frame *toDelete){
     encryption method regitration frame
 */
 
-Id3v2Frame *id3v2ParseEncryptionMethodRegistrationFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseEncryptionMethodRegistrationFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -4169,23 +4168,23 @@ Id3v2EncryptionMethodRegistrationBody *id3v2CopyEncryptionMethodRegistrationBody
         return NULL;
     }
 
-    unsigned char *ownerIdentifier = NULL;
-    unsigned char methodSymbol = body->methodSymbol;
-    unsigned char *encryptionData = NULL;
+    id3buf ownerIdentifier = NULL;
+    id3byte methodSymbol = body->methodSymbol;
+    id3buf encryptionData = NULL;
     unsigned int encryptionDataLen = body->encryptionDataLen;
 
     if(body->ownerIdentifier != NULL){
-        ownerIdentifier = calloc(sizeof(unsigned char), strlen((char *)body->ownerIdentifier) + 1);
+        ownerIdentifier = calloc(sizeof(id3byte), strlen((char *)body->ownerIdentifier) + 1);
         memcpy(ownerIdentifier, body->ownerIdentifier, strlen((char *)body->ownerIdentifier));
     }
     
-    encryptionData = calloc(sizeof(unsigned char), encryptionDataLen + 1);
+    encryptionData = calloc(sizeof(id3byte), encryptionDataLen + 1);
     memcpy(encryptionData, body->encryptionData, encryptionDataLen);
 
     return id3v2NewEncryptionMethodRegistrationBody(ownerIdentifier, methodSymbol, encryptionData, encryptionDataLen);
 }
 
-Id3v2EncryptionMethodRegistrationBody *id3v2ParseEncryptionMethodRegistrationBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2EncryptionMethodRegistrationBody *id3v2ParseEncryptionMethodRegistrationBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -4195,15 +4194,15 @@ Id3v2EncryptionMethodRegistrationBody *id3v2ParseEncryptionMethodRegistrationBod
         return NULL;
     }
 
-    unsigned char *ownerIdentifier = NULL;
-    unsigned char methodSymbol = 0x00;
-    unsigned char *encryptionData = NULL;
+    id3buf ownerIdentifier = NULL;
+    id3byte methodSymbol = 0x00;
+    id3buf encryptionData = NULL;
     unsigned int encryptionDataLen = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
     // get owner id for the file
     if(id3ReaderCursor(stream)[0] != 0x00){
-        ownerIdentifier = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
+        ownerIdentifier = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
         id3ReaderRead(stream, ownerIdentifier, id3ReaderReadEncodedSize(stream, ISO_8859_1));
     }
     id3ReaderSeek(stream, 1, SEEK_CUR);
@@ -4223,7 +4222,7 @@ Id3v2EncryptionMethodRegistrationBody *id3v2ParseEncryptionMethodRegistrationBod
     return id3v2NewEncryptionMethodRegistrationBody(ownerIdentifier, methodSymbol, encryptionData, encryptionDataLen);
 }
 
-Id3v2EncryptionMethodRegistrationBody *id3v2NewEncryptionMethodRegistrationBody(unsigned char *ownerIdentifier, unsigned char methodSymbol, unsigned char *encryptionData, unsigned int encryptionDataLen){
+Id3v2EncryptionMethodRegistrationBody *id3v2NewEncryptionMethodRegistrationBody(id3buf ownerIdentifier, id3byte methodSymbol, id3buf encryptionData, unsigned int encryptionDataLen){
 
     Id3v2EncryptionMethodRegistrationBody *body = malloc(sizeof(Id3v2EncryptionMethodRegistrationBody));
 
@@ -4268,7 +4267,7 @@ void id3v2FreeEncryptionMethodRegistrationFrame(Id3v2Frame *toDelete){
     group id registration frame
 */
 
-Id3v2Frame *id3v2ParseGroupIDRegistrationFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseGroupIDRegistrationFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -4328,11 +4327,11 @@ Id3v2GroupIDRegistrationBody *id3v2CopyGroupIDRegistrationBody(Id3v2GroupIDRegis
     return (Id3v2GroupIDRegistrationBody *)id3v2CopyEncryptionMethodRegistrationBody((Id3v2EncryptionMethodRegistrationBody *)body);
 }
 
-Id3v2GroupIDRegistrationBody *id3v2ParseGroupIDRegistrationBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2GroupIDRegistrationBody *id3v2ParseGroupIDRegistrationBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
     return (Id3v2GroupIDRegistrationBody *)id3v2ParseEncryptionMethodRegistrationBody(buffer, frameHeader);
 }
 
-Id3v2GroupIDRegistrationBody *id3v2NewGroupIDRegistrationBody(unsigned char *ownerIdentifier, unsigned char groupSymbol, unsigned char *groupDependentData, unsigned int groupDependentDataLen){
+Id3v2GroupIDRegistrationBody *id3v2NewGroupIDRegistrationBody(id3buf ownerIdentifier, id3byte groupSymbol, id3buf groupDependentData, unsigned int groupDependentDataLen){
     return (Id3v2GroupIDRegistrationBody *)id3v2NewEncryptionMethodRegistrationBody(ownerIdentifier, groupSymbol, groupDependentData, groupDependentDataLen);
 }
 
@@ -4344,7 +4343,7 @@ void id3v2FreeGroupIDRegistrationFrame(Id3v2Frame *toDelete){
     private frame
 */
 
-Id3v2Frame *id3v2ParsePrivateFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParsePrivateFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -4406,16 +4405,16 @@ Id3v2PrivateBody *id3v2CopyPrivateBody(Id3v2PrivateBody *body){
         return NULL;
     }
 
-    unsigned char *ownerIdentifier = NULL;
-    unsigned char *privateData = NULL;
+    id3buf ownerIdentifier = NULL;
+    id3buf privateData = NULL;
     unsigned int privateDataLen = body->privateDataLen;
 
     if(body->ownerIdentifier != NULL){
-        ownerIdentifier = calloc(sizeof(unsigned char), strlen((char *)body->ownerIdentifier) + 1);
+        ownerIdentifier = calloc(sizeof(id3byte), strlen((char *)body->ownerIdentifier) + 1);
         memcpy(ownerIdentifier, body->ownerIdentifier, strlen((char *)body->ownerIdentifier));
     }
     if(body->privateData != NULL){
-        privateData = calloc(sizeof(unsigned char), privateDataLen + 1);
+        privateData = calloc(sizeof(id3byte), privateDataLen + 1);
         memcpy(privateData, body->privateData, privateDataLen);
     }
 
@@ -4424,7 +4423,7 @@ Id3v2PrivateBody *id3v2CopyPrivateBody(Id3v2PrivateBody *body){
 
 }
 
-Id3v2PrivateBody *id3v2ParsePrivateBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2PrivateBody *id3v2ParsePrivateBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -4434,14 +4433,14 @@ Id3v2PrivateBody *id3v2ParsePrivateBody(unsigned char *buffer, Id3v2FrameHeader 
         return NULL;
     }
 
-    unsigned char *ownerIdentifier = NULL;
-    unsigned char *privateData = NULL;
+    id3buf ownerIdentifier = NULL;
+    id3buf privateData = NULL;
     unsigned int privateDataLen = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
     //read owner identifier
     if(id3ReaderCursor(stream)[0] != 0x00){
-        ownerIdentifier = calloc(sizeof(unsigned char), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
+        ownerIdentifier = calloc(sizeof(id3byte), id3ReaderReadEncodedSize(stream, ISO_8859_1) + 1);
         id3ReaderRead(stream, ownerIdentifier, id3ReaderReadEncodedSize(stream, ISO_8859_1));
     }
     id3ReaderSeek(stream, 1, SEEK_CUR);
@@ -4457,7 +4456,7 @@ Id3v2PrivateBody *id3v2ParsePrivateBody(unsigned char *buffer, Id3v2FrameHeader 
     return id3v2NewPrivateBody(ownerIdentifier, privateData, privateDataLen);
 }
 
-Id3v2PrivateBody *id3v2NewPrivateBody(unsigned char *ownerIdentifier, unsigned char *privateData, unsigned int privateDataLen){
+Id3v2PrivateBody *id3v2NewPrivateBody(id3buf ownerIdentifier, id3buf privateData, unsigned int privateDataLen){
 
     Id3v2PrivateBody *body = malloc(sizeof(Id3v2PrivateBody));
 
@@ -4501,7 +4500,7 @@ void id3v2FreePrivateFrame(Id3v2Frame *toDelete){
     signature frame functions
 */
 
-Id3v2Frame *id3v2ParseSignatureFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseSignatureFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -4565,8 +4564,8 @@ Id3v2SignatureBody *id3v2CopySignatureBody(Id3v2SignatureBody *body){
         return NULL;
     }
 
-    unsigned char groupSymbol = body->groupSymbol;
-    unsigned char *signature = calloc(sizeof(unsigned char), strlen((char *)body->signature) + 1);
+    id3byte groupSymbol = body->groupSymbol;
+    id3buf signature = calloc(sizeof(id3byte), strlen((char *)body->signature) + 1);
 
     memcpy(signature, body->signature, strlen((char *)body->signature));
 
@@ -4574,7 +4573,7 @@ Id3v2SignatureBody *id3v2CopySignatureBody(Id3v2SignatureBody *body){
 
 }
 
-Id3v2SignatureBody *id3v2ParseSignatureBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2SignatureBody *id3v2ParseSignatureBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -4584,8 +4583,8 @@ Id3v2SignatureBody *id3v2ParseSignatureBody(unsigned char *buffer, Id3v2FrameHea
         return NULL;
     }
 
-    unsigned char groupSymbol = 0x00;
-    unsigned char *signature = NULL; 
+    id3byte groupSymbol = 0x00;
+    id3buf signature = NULL; 
     unsigned int signatureDataLen = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
@@ -4603,7 +4602,7 @@ Id3v2SignatureBody *id3v2ParseSignatureBody(unsigned char *buffer, Id3v2FrameHea
 
 }
 
-Id3v2SignatureBody *id3v2NewSignatureBody(unsigned char groupSymbol, unsigned char *signature, unsigned int sigLen){
+Id3v2SignatureBody *id3v2NewSignatureBody(id3byte groupSymbol, id3buf signature, unsigned int sigLen){
 
     Id3v2SignatureBody *body = malloc(sizeof(Id3v2SignatureBody));
 
@@ -4644,7 +4643,7 @@ void id3v2FreeSignatureFrame(Id3v2Frame *toDelete){
     seek frame functions
 */
 
-Id3v2Frame *id3v2ParseSeekFrame(unsigned char *buffer, Id3v2Header *header){
+Id3v2Frame *id3v2ParseSeekFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -4706,7 +4705,7 @@ Id3v2SeekBody *id3v2CopySeekBody(Id3v2SeekBody *body){
     return (body == NULL) ? NULL : id3v2NewSeekBody(body->minimumOffsetToNextTag);
 }
 
-Id3v2SeekBody *id3v2ParseSeekBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader){
+Id3v2SeekBody *id3v2ParseSeekBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
 
     if(buffer == NULL){
         return NULL;
@@ -4757,7 +4756,7 @@ void id3v2FreeSeekFrame(Id3v2Frame *toDelete){
     FLAG FUNCTIONS
 */
 
-Id3v2FlagContent *id3v2NewFlagContent(bool tagAlterPreservation, bool fileAlterPreservation, bool readOnly, bool unsynchronization, bool dataLengthIndicator, unsigned int decompressedSize, unsigned char encryption, unsigned char grouping){
+Id3v2FlagContent *id3v2NewFlagContent(bool tagAlterPreservation, bool fileAlterPreservation, bool readOnly, bool unsynchronization, bool dataLengthIndicator, unsigned int decompressedSize, id3byte encryption, id3byte grouping){
 
     Id3v2FlagContent *newContent = malloc(sizeof(Id3v2FlagContent));
 
@@ -4773,7 +4772,7 @@ Id3v2FlagContent *id3v2NewFlagContent(bool tagAlterPreservation, bool fileAlterP
     return newContent;
 }
 
-Id3v2FlagContent *id3v2ParseFlagContent(unsigned char *buffer, Id3v2HeaderVersion version){
+Id3v2FlagContent *id3v2ParseFlagContent(id3buf buffer, Id3v2HeaderVersion version){
 
     if(buffer == NULL){
         return NULL;
@@ -4789,8 +4788,8 @@ Id3v2FlagContent *id3v2ParseFlagContent(unsigned char *buffer, Id3v2HeaderVersio
     bool unsynchronisation = false;
     bool dataLengthIndicator = false;
     unsigned int decompressedSize = 0;
-    unsigned char encryption = 0x00;
-    unsigned char grouping = 0x00;
+    id3byte encryption = 0x00;
+    id3byte grouping = 0x00;
 
 
     // read flags
@@ -4807,7 +4806,7 @@ Id3v2FlagContent *id3v2ParseFlagContent(unsigned char *buffer, Id3v2HeaderVersio
     
         // read the extra bits after the flags
         if(decompressedSize == true){
-            decompressedSize = getBits8((unsigned char *)buffer, 4);
+            decompressedSize = getBits8(buffer, 4);
             buffer = buffer + 4;
 
         }
@@ -4842,7 +4841,7 @@ Id3v2FlagContent *id3v2ParseFlagContent(unsigned char *buffer, Id3v2HeaderVersio
         }
 
         if(decompressedSize == true){
-            decompressedSize = getBits8((unsigned char *)buffer, 4);
+            decompressedSize = getBits8(buffer, 4);
             buffer = buffer + 4;
 
         }
@@ -4869,8 +4868,8 @@ Id3v2FlagContent *id3v2CopyFlagContent(Id3v2FlagContent *flagContent){
     bool unsynchronization = flagContent->unsynchronization;
     bool dataLengthIndicator = flagContent->dataLengthIndicator;
     unsigned int decompressedSize = flagContent->decompressedSize;
-    unsigned char encryption = flagContent->encryption;
-    unsigned char grouping = flagContent->grouping;
+    id3byte encryption = flagContent->encryption;
+    id3byte grouping = flagContent->grouping;
 
     return id3v2NewFlagContent(tagAlterPreservation, fileAlterPreservation, readOnly, unsynchronization, dataLengthIndicator, decompressedSize, encryption, grouping);
 }
@@ -4910,7 +4909,7 @@ unsigned int id3v2SizeOfFlagContent(Id3v2FlagContent *content){
     FRAME HEADER FUNCTIONS
 */
 
-Id3v2FrameHeader *id3v2ParseFrameHeader(unsigned char *buffer, Id3v2Header *header){
+Id3v2FrameHeader *id3v2ParseFrameHeader(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
         return NULL;
@@ -4919,7 +4918,7 @@ Id3v2FrameHeader *id3v2ParseFrameHeader(unsigned char *buffer, Id3v2Header *head
     char *id = NULL;
     unsigned int frameSize = 0;
     unsigned int headerSize = 0;
-    unsigned char *frameSizeOffset = NULL;
+    id3buf frameSizeOffset = NULL;
     Id3v2FlagContent *flagContent = NULL;
     
     int versionOffset = 0;

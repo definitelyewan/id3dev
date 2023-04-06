@@ -5,6 +5,38 @@
 extern "C"{
 #endif
 
+/*
+    ID3 DATA TYPES
+*/
+//A buffer of n bytes consisting of raw data from parsed metadata
+#define id3buf _id3buf
+typedef unsigned char * _id3buf;
+
+//A single byte of raw metadata
+#define id3byte _id3byte
+typedef unsigned char _id3byte;
+
+/*
+    READER
+*/
+
+//ISO_8859_1 encoding
+#define ISO_8859_1 0x00
+
+//utf16 encoding
+#define UTF16 0x01
+
+//utf16be encoding
+#define UTF16BE 0x02
+
+//utf8 encoding
+#define UTF8 0x03
+
+//unknown encoding
+#define UNKNOWN_ENCODING 0x04
+
+//utf16 bom size
+#define UNICODE_BOM_SIZE 2
 
 /*
     ID3V1

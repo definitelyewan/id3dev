@@ -16,7 +16,7 @@ Id3Reader *id3NewReader(unsigned char *buffer,  size_t bufferSize){
 
     Id3Reader *reader = malloc(sizeof(Id3Reader));
 
-    reader->buffer = calloc(sizeof(unsigned char), bufferSize);
+    reader->buffer = calloc(sizeof(id3byte), bufferSize);
     reader->bufferSize = bufferSize;
     reader->cursor = 0;
 
@@ -37,7 +37,7 @@ void id3FreeReader(Id3Reader *toDelete){
     free(toDelete);
 }
 
-unsigned int id3ReaderAllocationAdd(unsigned char encoding){
+unsigned int id3ReaderAllocationAdd(id3byte encoding){
     
     switch(encoding){
         case ISO_8859_1:
@@ -53,7 +53,7 @@ unsigned int id3ReaderAllocationAdd(unsigned char encoding){
     return 0;
 }
 
-void id3ReaderRead(Id3Reader *reader, unsigned char *dest, unsigned int size){
+void id3ReaderRead(Id3Reader *reader, id3buf dest, unsigned int size){
     
     if(reader == NULL){
         dest = NULL;
@@ -73,7 +73,7 @@ void id3ReaderRead(Id3Reader *reader, unsigned char *dest, unsigned int size){
     reader->cursor = reader->cursor + size;
 }
 
-unsigned char *id3ReaderEncodedRemainder(Id3Reader *reader, unsigned char encoding){
+id3buf id3ReaderEncodedRemainder(Id3Reader *reader, id3byte encoding){
     
     if(reader == NULL){
         return NULL;
@@ -89,12 +89,12 @@ unsigned char *id3ReaderEncodedRemainder(Id3Reader *reader, unsigned char encodi
         return NULL;
     }    
 
-    unsigned char *remainder = calloc(sizeof(unsigned char), size + id3ReaderAllocationAdd(encoding));
+    id3buf remainder = calloc(sizeof(id3byte), size + id3ReaderAllocationAdd(encoding));
     id3ReaderRead(reader, remainder, size);
     return remainder;
 }
 
-size_t id3ReaderReadEncodedSize(Id3Reader *reader, unsigned char encoding){
+size_t id3ReaderReadEncodedSize(Id3Reader *reader, id3byte encoding){
 
     size_t readSize = 0;
 
@@ -159,7 +159,7 @@ void id3ReaderSeek(Id3Reader *reader, size_t dest, const int seekOption){
     }
 }
 
-unsigned char *id3ReaderCursor(Id3Reader *reader){
+id3buf id3ReaderCursor(Id3Reader *reader){
     if(reader == NULL){
         return NULL;
     }
@@ -182,7 +182,7 @@ int id3ReaderGetCh(Id3Reader *reader){
 }
 
 
-bool hasBOM(unsigned char *buffer){
+bool hasBOM(id3buf buffer){
 
     if(buffer == NULL){
         return false;
@@ -192,7 +192,7 @@ bool hasBOM(unsigned char *buffer){
             memcmp("\xFE\xFF", buffer, UNICODE_BOM_SIZE) == 0) ? true : false;
 }
 
-size_t strlenUTF16(unsigned char *buffer){
+size_t strlenUTF16(id3buf buffer){
 
     size_t len = 0;
 
@@ -217,7 +217,7 @@ size_t strlenUTF16(unsigned char *buffer){
     return len;
 }
 
-size_t strlenUTF16BE(unsigned char *buffer){
+size_t strlenUTF16BE(id3buf buffer){
 
     size_t len = 0;
 
@@ -241,12 +241,12 @@ size_t strlenUTF16BE(unsigned char *buffer){
     return len;
 }
 
-size_t strlenUTF8(unsigned char *buffer){
+size_t strlenUTF8(id3buf buffer){
     //utf8 is variable length and will have no null bytes until the end
     return strlen((char *)buffer);
 }
 
-size_t id3strlen(unsigned char *buffer, unsigned char encoding){
+size_t id3strlen(id3buf buffer, id3byte encoding){
 
     if(buffer == NULL){
         return 0;

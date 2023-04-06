@@ -28,7 +28,6 @@ void encodedprintf(unsigned char *str, int encoding){
             }
         }
     }
-
 }
 
 void metadataPrint(Id3Metadata *data){

@@ -4,17 +4,16 @@
 #include "id3v2Header.h"
 #include "id3Helpers.h"
 #include "id3Reader.h"
-#include "id3Defines.h"
 
 /*
     Header functions
 */
 
-Id3v2Header *id3v2ParseHeader(unsigned char *buffer, unsigned int bufferSize){
+Id3v2Header *id3v2ParseHeader(id3buf buffer, unsigned int bufferSize){
 
-    unsigned char version[3];
-    unsigned char flags[2];
-    unsigned char tmpHeaderSize[ID3V2_HEADER_SIZE_LEN + 1]; 
+    id3byte version[3];
+    id3byte flags[2];
+    id3byte tmpHeaderSize[ID3V2_HEADER_SIZE_LEN + 1]; 
     bool extFlag = false;
 
     bool unsynchronisation = false;
@@ -110,7 +109,7 @@ void id3v2FreeHeader(Id3v2Header *header){
     Extended header functions
 */
 
-Id3v2ExtHeader *id3v2ParseExtendedHeader(unsigned char *buffer, Id3v2HeaderVersion version){
+Id3v2ExtHeader *id3v2ParseExtendedHeader(id3buf buffer, Id3v2HeaderVersion version){
 
     if(buffer == NULL){
         return NULL;
@@ -118,14 +117,14 @@ Id3v2ExtHeader *id3v2ParseExtendedHeader(unsigned char *buffer, Id3v2HeaderVersi
     
     int size = 0;
     int padding = 0;
-    unsigned char update = 0x00;
-    unsigned char tagSizeRestriction = 0x00;
-    unsigned char encodingRestriction = 0x00;
-    unsigned char textSizeRestriction = 0x00;
-    unsigned char imageEncodingRestriction = 0x00;
-    unsigned char imageSizeRestriction = 0x00;
-    unsigned char *crc = NULL;
-    unsigned char tmpPaddingSize[ID3V2_PADDING_SIZE+1];
+    id3byte update = 0x00;
+    id3byte tagSizeRestriction = 0x00;
+    id3byte encodingRestriction = 0x00;
+    id3byte textSizeRestriction = 0x00;
+    id3byte imageEncodingRestriction = 0x00;
+    id3byte imageSizeRestriction = 0x00;
+    id3buf crc = NULL;
+    id3byte tmpPaddingSize[ID3V2_PADDING_SIZE+1];
     bool crcFlag = false;
     bool updateFlag = false;
     bool restrictionsFlag = false;
@@ -150,7 +149,7 @@ Id3v2ExtHeader *id3v2ParseExtendedHeader(unsigned char *buffer, Id3v2HeaderVersi
 
         //get crc
         if(crcFlag){
-            crc = calloc(sizeof(unsigned char), ID3V2_CRC_LEN + 1);
+            crc = calloc(sizeof(id3byte), ID3V2_CRC_LEN + 1);
             id3ReaderRead(stream, crc, ID3V2_CRC_LEN);
         }
 
@@ -188,7 +187,7 @@ Id3v2ExtHeader *id3v2ParseExtendedHeader(unsigned char *buffer, Id3v2HeaderVersi
         //read crc
         if(crcFlag){
             id3ReaderSeek(stream, 1, SEEK_CUR);
-            crc = calloc(sizeof(unsigned char), ID3V2_CRC_LEN + 1);
+            crc = calloc(sizeof(id3byte), ID3V2_CRC_LEN + 1);
             id3ReaderRead(stream, crc, ID3V2_CRC_LEN+1);
         }
 
@@ -220,7 +219,7 @@ Id3v2ExtHeader *id3v2ParseExtendedHeader(unsigned char *buffer, Id3v2HeaderVersi
     return id3v2NewExtendedHeader(size, padding, update, crc, tagSizeRestriction, encodingRestriction, textSizeRestriction, imageEncodingRestriction, imageSizeRestriction);
 }
 
-Id3v2ExtHeader *id3v2NewExtendedHeader(int size, int padding, unsigned char update, unsigned char *crc, unsigned char tagSizeRestriction, unsigned char encodingRestriction, unsigned char textSizeRestriction, unsigned char imageEncodingRestriction, unsigned char imageSizeRestriction){
+Id3v2ExtHeader *id3v2NewExtendedHeader(int size, int padding, id3byte update, id3buf crc, id3byte tagSizeRestriction, id3byte encodingRestriction, id3byte textSizeRestriction, id3byte imageEncodingRestriction, id3byte imageSizeRestriction){
 
     Id3v2ExtHeader *extHeader = malloc(sizeof(Id3v2ExtHeader));
 
@@ -246,13 +245,13 @@ Id3v2ExtHeader *id3v2CopyExtendedHeader(Id3v2ExtHeader *toCopy){
 
     int size = 0;
     int padding = 0;
-    unsigned char update = 0x00;
-    unsigned char tagSizeRestriction = 0x00;
-    unsigned char encodingRestriction = 0x00;
-    unsigned char textSizeRestriction = 0x00;
-    unsigned char imageEncodingRestriction = 0x00;
-    unsigned char imageSizeRestriction = 0x00;
-    unsigned char *crc = NULL;
+    id3byte update = 0x00;
+    id3byte tagSizeRestriction = 0x00;
+    id3byte encodingRestriction = 0x00;
+    id3byte textSizeRestriction = 0x00;
+    id3byte imageEncodingRestriction = 0x00;
+    id3byte imageSizeRestriction = 0x00;
+    id3buf crc = NULL;
 
     size = toCopy->size;
     padding = toCopy->padding;
@@ -264,7 +263,7 @@ Id3v2ExtHeader *id3v2CopyExtendedHeader(Id3v2ExtHeader *toCopy){
     imageSizeRestriction = toCopy->imageSizeRestriction;
 
     if(toCopy->crc != NULL){
-        crc = calloc(sizeof(unsigned char), toCopy->crcLen + 1);
+        crc = calloc(sizeof(id3byte), toCopy->crcLen + 1);
         memcpy(crc, toCopy->crc, toCopy->crcLen);
     }
 
@@ -284,6 +283,6 @@ void id3v2FreeExtHeader(Id3v2ExtHeader *extHeader){
     free(extHeader);
 }
 
-bool containsId3v2(unsigned char *buffer){
+bool containsId3v2(id3buf buffer){
     return (memcmp("ID3",buffer,3) == 0) ? true: false;
 }

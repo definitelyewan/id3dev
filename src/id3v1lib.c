@@ -7,7 +7,7 @@
 Id3v1Tag *Id3v1TagFromFile(const char* filePath){
     
     FILE *fp = NULL;
-    unsigned char id3Bytes[ID3V1_MAX_BYTES];
+    id3byte id3Bytes[ID3V1_MAX_BYTES];
     
     //make sure the file can really be read
     if((fp = fopen(filePath, "rb")) == NULL){
@@ -32,11 +32,11 @@ Id3v1Tag *Id3v1TagFromFile(const char* filePath){
 Id3v1Tag *id3v1TagFromBuffer(unsigned char *buffer){
 
     int trackno = 0;
-    unsigned char *holdTitle = NULL;
-    unsigned char *holdArtist = NULL;
-    unsigned char *holdAlbum = NULL;
-    unsigned char *holdComment = NULL;
-    unsigned char year[ID3V1_YEAR_LEN];
+    id3buf holdTitle = NULL;
+    id3buf holdArtist = NULL;
+    id3buf holdAlbum = NULL;
+    id3buf holdComment = NULL;
+    id3byte year[ID3V1_YEAR_LEN];
     Genre genre;
     Id3Reader *stream = id3NewReader(buffer, ID3V1_MAX_BYTES);
 
@@ -47,16 +47,16 @@ Id3v1Tag *id3v1TagFromBuffer(unsigned char *buffer){
     id3ReaderSeek(stream, ID3V1_ID_LEN, SEEK_CUR);
     
     //get song title and set index for next tag
-    holdTitle = calloc(sizeof(unsigned char), ID3V1_TAG_LEN + 1);    
+    holdTitle = calloc(sizeof(id3byte), ID3V1_TAG_LEN + 1);    
     id3ReaderRead(stream, holdTitle, ID3V1_TAG_LEN);
     
     //get artist and set index for next tag
-    holdArtist = calloc(sizeof(unsigned char), ID3V1_TAG_LEN + 1);
+    holdArtist = calloc(sizeof(id3byte), ID3V1_TAG_LEN + 1);
     id3ReaderRead(stream, holdArtist, ID3V1_TAG_LEN);
 
 
     //get album title and set index for next tag
-    holdAlbum = calloc(sizeof(unsigned char), ID3V1_TAG_LEN + 1);
+    holdAlbum = calloc(sizeof(id3byte), ID3V1_TAG_LEN + 1);
     id3ReaderRead(stream, holdAlbum, ID3V1_TAG_LEN);
 
     //get year and set index for next tag
@@ -72,7 +72,7 @@ Id3v1Tag *id3v1TagFromBuffer(unsigned char *buffer){
     id3ReaderSeek(stream, -(ID3V1_TAG_LEN - 2), SEEK_CUR);
 
     //get comment and set index for next tag
-    holdComment = calloc(sizeof(unsigned char), ID3V1_TAG_LEN + 1);
+    holdComment = calloc(sizeof(id3byte), ID3V1_TAG_LEN + 1);
     id3ReaderRead(stream, holdComment, ID3V1_TAG_LEN - trackno);
 
     //read and set track number + move index
@@ -96,12 +96,12 @@ Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy){
         return NULL;
     }
 
-    unsigned char *title = NULL;
-    unsigned char *artist = NULL;
-    unsigned char *albumTitle = NULL;
+    id3buf title = NULL;
+    id3buf artist = NULL;
+    id3buf albumTitle = NULL;
     int year = 0;
     int trackNumber = 0;
-    unsigned char *comment = NULL;
+    id3buf comment = NULL;
     Genre genre;
 
     year = toCopy->year;
@@ -109,22 +109,22 @@ Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy){
     genre = toCopy->genre;
 
     if(toCopy->title != NULL){
-        title = calloc(sizeof(unsigned char), strlen((char *)toCopy->title) + 1);
+        title = calloc(sizeof(id3byte), strlen((char *)toCopy->title) + 1);
         memcpy(title, toCopy->title, strlen((char *)toCopy->title));
     }
 
     if(toCopy->artist != NULL){
-        artist = calloc(sizeof(unsigned char), strlen((char *)toCopy->artist) + 1);
+        artist = calloc(sizeof(id3byte), strlen((char *)toCopy->artist) + 1);
         memcpy(artist, toCopy->artist, strlen((char *)toCopy->artist));
     }
 
     if(toCopy->albumTitle != NULL){
-        albumTitle = calloc(sizeof(unsigned char), strlen((char *)toCopy->albumTitle) + 1);
+        albumTitle = calloc(sizeof(id3byte), strlen((char *)toCopy->albumTitle) + 1);
         memcpy(albumTitle, toCopy->albumTitle, strlen((char *)toCopy->albumTitle));
     }
 
     if(toCopy->comment != NULL){
-        comment = calloc(sizeof(unsigned char), strlen((char *)toCopy->comment) + 1);
+        comment = calloc(sizeof(id3byte), strlen((char *)toCopy->comment) + 1);
         memcpy(comment, toCopy->comment, strlen((char *)toCopy->comment));
     }
 
@@ -132,7 +132,7 @@ Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy){
 }
 
 
-Id3v1Tag *id3v1NewTag(unsigned char *title, unsigned char *artist, unsigned char *albumTitle, int year, int trackNumber, unsigned char *comment, Genre genre){
+Id3v1Tag *id3v1NewTag(id3buf title, id3buf artist, id3buf albumTitle, int year, int trackNumber, id3buf comment, Genre genre){
 
     Id3v1Tag *tag = malloc(sizeof(Id3v1Tag));
 

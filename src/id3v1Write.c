@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "id3v1Write.h"
-#include "id3Defines.h"
 #include "id3Helpers.h"
 #include "id3v1.h"
 
@@ -21,8 +20,8 @@ void id3v1WriteTag(const char *filePath, Id3v1Tag *tag){
         return;
     }
 
-    unsigned char isTag[ID3V1_ID_LEN+1];
-    unsigned char bytes[ID3V1_MAX_BYTES+1];
+    id3byte isTag[ID3V1_ID_LEN+1];
+    id3byte bytes[ID3V1_MAX_BYTES+1];
     int index = 0;
     FILE *fp = NULL;
     
@@ -76,7 +75,7 @@ void id3v1WriteTag(const char *filePath, Id3v1Tag *tag){
             return;
         }
         
-        if((fwrite(bytes, sizeof(unsigned char),ID3V1_MAX_BYTES, fp)) == 0){
+        if((fwrite(bytes, sizeof(id3byte),ID3V1_MAX_BYTES, fp)) == 0){
             fclose(fp);
             return;
         }
@@ -93,7 +92,7 @@ void id3v1WriteTag(const char *filePath, Id3v1Tag *tag){
         }
         
         //check to see if the file has ID3 metadata
-        if(fread(isTag, sizeof(unsigned char), ID3V1_ID_LEN, fp) == 0){
+        if(fread(isTag, sizeof(id3byte), ID3V1_ID_LEN, fp) == 0){
             fclose(fp);
             return;
         }
@@ -113,7 +112,7 @@ void id3v1WriteTag(const char *filePath, Id3v1Tag *tag){
         }
 
         //write bytes to the file at the right position
-        if((fwrite(bytes, sizeof(unsigned char), ID3V1_MAX_BYTES, fp)) == 0){
+        if((fwrite(bytes, sizeof(id3byte), ID3V1_MAX_BYTES, fp)) == 0){
             fclose(fp);
             return;
         }
