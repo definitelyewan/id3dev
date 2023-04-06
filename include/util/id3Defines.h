@@ -65,7 +65,7 @@ extern "C"{
 //The number of bytes dedicated to an Id3v2 event code
 #define ID3V2_EVENT_CODE_LEN 5
 
-//The number of bytes dedicated to a date in an ID3v2 commercial frame
+//The number of bytes dedicated to a date in an ID3v2 commercial or ownership frame
 #define ID3V2_BASE_DATE_FORMAT_LEN 8
 
 //The offset to the tag size header in an ID3v2 tag

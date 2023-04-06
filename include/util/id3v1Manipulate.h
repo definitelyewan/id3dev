@@ -22,11 +22,11 @@ void id3v1ClearTagInformation(Id3v1Tag *tag);
 bool id3v1CompareTag(Id3v1Tag *tag1, Id3v1Tag *tag2);
 
 //compatability functions a.k.a getters
-char *id3v1GetTitle(Id3v1Tag *tag);
-char *id3v1GetArtist(Id3v1Tag *tag);
-char *id3v1GetAlbum(Id3v1Tag *tag);
+unsigned char *id3v1GetTitle(Id3v1Tag *tag);
+unsigned char *id3v1GetArtist(Id3v1Tag *tag);
+unsigned char *id3v1GetAlbum(Id3v1Tag *tag);
 int id3v1GetYear(Id3v1Tag *tag);
-char *id3v1GetComment(Id3v1Tag *tag);
+unsigned char *id3v1GetComment(Id3v1Tag *tag);
 Genre id3v1GetGenre(Id3v1Tag *tag);
 int id3v1GetTrack(Id3v1Tag *tag);
 

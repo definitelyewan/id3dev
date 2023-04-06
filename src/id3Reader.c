@@ -242,7 +242,7 @@ size_t strlenUTF16BE(unsigned char *buffer){
 }
 
 size_t strlenUTF8(unsigned char *buffer){
-    //utf8 does is variable length and will have no null bytes until the end
+    //utf8 is variable length and will have no null bytes until the end
     return strlen((char *)buffer);
 }
 

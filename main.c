@@ -14,13 +14,18 @@ void encodedprintf(unsigned char *str, int encoding){
     
     if(encoding == UTF16){
         for(int i = 0; i < strlenUTF16(str); i++){
-            printf("%x",str[i]);
+            if(!(str[i] == 0xff || str[i] == 0xfe || str[i] == 0x00)){
+                printf("%c",str[i]);
+            }
+            
         }
     }
 
     if(encoding == UTF16BE){
         for(int i = 0; i < strlenUTF16BE(str); i++){
-            printf("%x",str[i]);
+            if(!(str[i] == 0xff || str[i] == 0xfe || str[i] == 0x00)){
+                printf("%c",str[i]);
+            }
         }
     }
 
@@ -471,6 +476,146 @@ void metadataPrint(Id3Metadata *data){
                         printf("] ");
                     }
 
+                }else if(id3v2GetFrameID(currFrame) == OWNE){
+                    unsigned char *price = id3v2GetPrice(currFrame);
+                    unsigned char *date = id3v2GetPunchDate(currFrame);
+                    unsigned char *seller = id3v2GetSeller(currFrame);
+
+                    if(price != NULL){
+                        printf("price:[%s] ",price);
+                        free(price);
+                    }
+
+                    if(date != NULL){
+                        printf("date:[%s] ",date);
+                        free(date);
+                    }
+
+                    if(seller != NULL){
+                        printf("seller:[");
+                        encodedprintf(seller,encoding);
+                        printf("]");
+                        free(seller);
+                    }
+
+
+                }else if(id3v2GetFrameID(currFrame) == COMR){
+                    unsigned char *price = id3v2GetPrice(currFrame);
+                    unsigned char *validUntil = id3v2GetValidDate(currFrame);
+                    unsigned char *contract = id3v2GetContractURL(currFrame);
+                    int as = id3v2GetCommecialDeliveryMethod(currFrame);
+                    unsigned char *seller = id3v2GetSeller(currFrame);
+                    unsigned char *desc = id3v2GetDescription(currFrame);
+                    unsigned char *mime = id3v2GetMIMEType(currFrame);
+                    unsigned char *logo = id3v2GetCommercialSellerLogo(currFrame);
+
+                    if(price != NULL){
+                        printf("price:[%s] ",price);
+                        free(price);
+                    }   
+
+                    if(validUntil != NULL){
+                        printf("validUntil:[%s] ",validUntil);
+                        free(validUntil);
+                    }
+                    if(contract != NULL){
+                        printf("contractURL:[%s] ",contract);
+                        free(contract);
+                    }   
+                    if(as != -1){
+                        printf("receivedAs:[%d] ",as);
+                    }
+                    if(seller != NULL){
+                        printf("seller:[");
+                        encodedprintf(seller, encoding);
+                        printf("] ");
+                        free(seller);
+                    }      
+                    if(desc != NULL){
+                        printf("desc:[");
+                        encodedprintf(desc, encoding);
+                        printf("] ");
+                        free(desc);
+                    }
+                    if(mime != NULL){
+                        printf("mime:[%s] ",mime);
+                    }
+
+                    if(logo != NULL){
+                        printf("logo:[%p] ",logo);
+                        free(logo);
+                    }   
+
+                }else if(id3v2GetFrameID(currFrame) == ENCR){
+                    unsigned char *owner = id3v2GetOwnerIdentifier(currFrame);
+                    unsigned char methodSymbol = id3v2GetSymbol(currFrame);
+                    unsigned char *encryptionData = id3v2GetEncryptionRegistrationValue(currFrame);
+
+                    if(owner != NULL){
+                        printf("owner:[%s] ",owner);
+                        free(owner);
+                    }
+
+                    if(methodSymbol != 0x00){
+                        printf("methodSymbol:[%x] ",methodSymbol);
+                    }
+
+                    if(encryptionData != NULL){
+                        printf("data:[%p] ",encryptionData);
+                        free(encryptionData);
+                    }
+                }else if(id3v2GetFrameID(currFrame) == GRID){
+                    unsigned char *owner = id3v2GetOwnerIdentifier(currFrame);
+                    unsigned char groupSymbol = id3v2GetSymbol(currFrame);
+                    unsigned char *groupData = id3v2GetGroupIDValue(currFrame);
+
+                    if(owner != NULL){
+                        printf("owner:[%s] ",owner);
+                        free(owner);
+                    }
+
+                    if(groupSymbol != 0x00){
+                        printf("symbol:[%x] ",groupSymbol);
+                    }
+
+                    if(groupData != NULL){
+                        printf("data:[%p] ",groupData);
+                        free(groupData);
+                    }
+
+
+                }else if(id3v2GetFrameID(currFrame) == PRIV){
+                    unsigned char *owner = id3v2GetOwnerIdentifier(currFrame);
+                    unsigned char *privateData = id3v2GetPrivateValue(currFrame);
+
+                    if(owner != NULL){
+                        printf("owner:[%s] ",owner);
+                        free(owner);
+                    }
+
+                    if(privateData != NULL){
+                        printf("data:[%p] ",privateData);
+                        free(privateData);
+                    }
+                    
+                }else if(id3v2GetFrameID(currFrame) == SIGN){
+                    unsigned char groupSymbol = id3v2GetSymbol(currFrame);
+                    unsigned char *signature = NULL;
+
+                    if(groupSymbol != 0x00){
+                        printf("symbol:[%x] ",groupSymbol);
+                    }
+
+                    if(signature != NULL){
+                        printf("signature:[%p] ",signature);
+                        free(signature);
+                    }
+
+
+                }else if(id3v2GetFrameID(currFrame) == SEEK){
+                    int seek = 0;
+
+                    printf("seek:[%d] ", seek);
                 }else{
                     printf("parsed and present");
                 }

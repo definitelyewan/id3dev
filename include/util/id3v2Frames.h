@@ -256,7 +256,7 @@ Id3v2Frame *id3v2ParseSignatureFrame(unsigned char *buffer, Id3v2Header *header)
 Id3v2Frame *id3v2CopySignatureFrame(Id3v2Frame *frame);
 Id3v2SignatureBody *id3v2CopySignatureBody(Id3v2SignatureBody *body);
 Id3v2SignatureBody *id3v2ParseSignatureBody(unsigned char *buffer, Id3v2FrameHeader *frameHeader);
-Id3v2SignatureBody *id3v2NewSignatureBody(unsigned char groupSymbol, unsigned char *signature);
+Id3v2SignatureBody *id3v2NewSignatureBody(unsigned char groupSymbol, unsigned char *signature, unsigned int sigLen);
 void id3v2FreeSignatureFrame(Id3v2Frame *toDelete);
 
 //Seek frame functions

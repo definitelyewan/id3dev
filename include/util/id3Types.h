@@ -653,7 +653,7 @@ typedef struct _Id3v2CommercialBody{
     unsigned char *priceString;
     unsigned char *validUntil;
     unsigned char *contractURL;
-    unsigned char receivedAs;
+    unsigned int receivedAs;
     unsigned char *nameOfSeller;
     unsigned char *description;
     unsigned char *mimeType;
@@ -689,6 +689,7 @@ typedef struct _Id3v2PrivateBody{
 typedef struct _Id3v2SignatureBody{
     unsigned char groupSymbol;
     unsigned char *signature;
+    unsigned int sigLen;
 
 }Id3v2SignatureBody;
 

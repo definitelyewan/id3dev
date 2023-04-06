@@ -413,7 +413,7 @@ unsigned char *id3v2GetDescription(Id3v2Frame *frame){
         case GEOB:
             ptr = ((Id3v2GeneralEncapsulatedObjectBody *)frame->frame)->contentDescription;
             break;
-        case WCOM:
+        case COMR:
             ptr = ((Id3v2CommercialBody *)frame->frame)->description;
             break;
         case CRM:{
@@ -936,6 +936,9 @@ unsigned char *id3v2GetMIMEType(Id3v2Frame *frame){
         case GEOB:
             mime = ((Id3v2GeneralEncapsulatedObjectBody *)frame->frame)->mimeType;
             break;
+        case COMR:
+            mime = ((Id3v2CommercialBody *)frame->frame)->mimeType;
+            break;
         default:
             return NULL;
     }
@@ -1305,4 +1308,273 @@ unsigned char *id3v2GetTermsOfUseValue(Id3v2Frame *frame){
     memcpy(value, body->text, id3strlen(body->text, encoding)); 
 
     return value;
+}
+
+unsigned char *id3v2GetPrice(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    unsigned char *ptr = NULL;
+    unsigned char *ret = NULL;
+
+    switch(id3v2GetFrameID(frame)){
+        case OWNE:
+            ptr = ((Id3v2OwnershipBody *)frame->frame)->pricePayed;
+            break;
+        case COMR:
+            ptr = ((Id3v2CommercialBody *)frame->frame)->priceString;
+            break;
+        default:
+            return NULL;
+    }
+
+    if(ptr == NULL){
+        return NULL;
+    }
+    
+    ret = calloc(sizeof(unsigned char), strlen((char *)ptr) + 1);
+    memcpy(ret, ptr, strlen((char *)ptr));
+
+    return ret;
+}
+
+unsigned char *id3v2GetPunchDate(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    unsigned char *ptr = NULL;
+    unsigned char *ret = NULL;
+
+    if(id3v2GetFrameID(frame) != OWNE){
+        return NULL;
+    }
+
+
+    ptr = ((Id3v2OwnershipBody *)frame->frame)->dateOfPunch;
+
+    if(ptr == NULL){
+        return NULL;
+    }
+    
+    ret = calloc(sizeof(unsigned char), strlen((char *)ptr) + 1);
+    memcpy(ret, ptr, strlen((char *)ptr));
+
+    return ret;
+}
+
+unsigned char *id3v2GetSeller(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    unsigned char *ptr = NULL;
+    unsigned char *ret = NULL;
+    int encoding = 0;
+
+    switch(id3v2GetFrameID(frame)){
+        case OWNE:
+            ptr = ((Id3v2OwnershipBody *)frame->frame)->seller;
+            break;
+        case COMR:
+            ptr = ((Id3v2CommercialBody *)frame->frame)->nameOfSeller;
+            break;
+        default:
+            return NULL;
+    }
+    encoding = id3v2GetEncoding(frame);
+
+    if(ptr == NULL){
+        return NULL;
+    }
+    
+    ret = calloc(sizeof(unsigned char), id3strlen(ptr,encoding) + id3ReaderAllocationAdd(encoding));
+    memcpy(ret, ptr, id3strlen(ptr,encoding));
+
+    return ret;
+}
+
+unsigned char *id3v2GetValidDate(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    unsigned char *ptr = NULL;
+    unsigned char *ret = NULL;
+
+    if(id3v2GetFrameID(frame) != COMR){
+        return NULL;
+    }
+
+    ptr = ((Id3v2CommercialBody *)frame->frame)->validUntil;
+
+    ret = calloc(sizeof(unsigned char), strlen((char *)ptr) + 1);
+    memcpy(ret, ptr, strlen((char *)ptr));
+
+    return ret;
+}
+
+unsigned char *id3v2GetContractURL(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    unsigned char *ptr = NULL;
+    unsigned char *ret = NULL;
+
+    if(id3v2GetFrameID(frame) != COMR){
+        return NULL;
+    }
+
+    ptr = ((Id3v2CommercialBody *)frame->frame)->contractURL;
+
+    if(ptr == NULL){
+        return NULL;
+    }
+
+    ret = calloc(sizeof(unsigned char), strlen((char *)ptr) + 1);
+    memcpy(ret, ptr, strlen((char *)ptr));
+
+    return ret;
+}
+
+int id3v2GetCommecialDeliveryMethod(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return -1;
+    }
+
+    if(id3v2GetFrameID(frame) != COMR){
+        return -1;
+    }
+
+    return (int)((Id3v2CommercialBody *)frame->frame)->receivedAs;
+}
+
+
+unsigned char *id3v2GetCommercialSellerLogo(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    if(id3v2GetFrameID(frame) != COMR){
+        return NULL;
+    }
+
+    Id3v2CommercialBody *body = (Id3v2CommercialBody *)frame->frame;
+
+    if(body->sellerLogo == NULL){
+        return NULL;
+    }
+
+    unsigned char *value = calloc(sizeof(unsigned char), body->sellerLogoLen + 1);
+    memcpy(value, body->sellerLogo, body->sellerLogoLen);
+
+    return value;
+}
+
+unsigned char id3v2GetSymbol(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return 0x00;
+    }
+
+    switch(id3v2GetFrameID(frame)){
+        case ENCR:
+            return ((Id3v2EncryptionMethodRegistrationBody *)frame->frame)->methodSymbol;
+        case GRID:
+            return ((Id3v2GroupIDRegistrationBody *)frame->frame)->groupSymbol;
+        case SIGN:
+            return ((Id3v2SignatureBody *)frame->frame)->groupSymbol;
+        default:
+            return 0x00;
+    }
+}
+
+unsigned char *id3v2GetEncryptionRegistrationValue(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    if(id3v2GetFrameID(frame) != ENCR){
+        return NULL;
+    }
+
+    Id3v2EncryptionMethodRegistrationBody *body = (Id3v2EncryptionMethodRegistrationBody *)frame->frame;
+    unsigned char *value = calloc(sizeof(unsigned char), body->encryptionDataLen + 1);
+    memcpy(value, body->encryptionData, body->encryptionDataLen);
+
+    return value;
+}
+
+unsigned char *id3v2GetGroupIDValue(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    if(id3v2GetFrameID(frame) != GRID){
+        return NULL;
+    }
+
+    Id3v2GroupIDRegistrationBody *body = (Id3v2GroupIDRegistrationBody *)frame->frame;
+    unsigned char *value = calloc(sizeof(unsigned char), body->groupDependentDataLen + 1);
+    memcpy(value, body->groupDependentData, body->groupDependentDataLen);
+
+    return value;
+}
+
+unsigned char *id3v2GetPrivateValue(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    if(id3v2GetFrameID(frame) != PRIV){
+        return NULL;
+    }
+
+    Id3v2PrivateBody *body = (Id3v2PrivateBody *)frame->frame;
+    unsigned char *value = calloc(sizeof(unsigned char), body->privateDataLen + 1);
+    memcpy(value, body->privateData, body->privateDataLen);
+
+    return value;
+}
+
+unsigned char *id3v2GetSignatureValue(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return NULL;
+    }
+
+    if(id3v2GetFrameID(frame) != SIGN){
+        return NULL;
+    }
+
+    Id3v2SignatureBody *body = (Id3v2SignatureBody *)frame->frame;
+    unsigned char *value = calloc(sizeof(unsigned char),body->sigLen + 1);
+    memcpy(value, body->signature, body->sigLen);
+
+    return value;
+}
+
+int id3v2GetOffsetToNextTag(Id3v2Frame *frame){
+
+    if(id3v2ManipFullFrameErrorChecks(frame) == true){
+        return 0;
+    }
+
+    if(id3v2GetFrameID(frame) != SEEK){
+        return 0;
+    }
+
+    return ((Id3v2SeekBody *)frame->frame)->minimumOffsetToNextTag;
 }

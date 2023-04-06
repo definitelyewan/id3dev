@@ -91,6 +91,20 @@ unsigned char *id3v2GetAudioEncryptionValue(Id3v2Frame *frame);
 unsigned char *id3v2GetUniqueFileIdentifierValue(Id3v2Frame *frame);
 long id3v2GetPositionSynchronisationValue(Id3v2Frame *frame);
 unsigned char *id3v2GetTermsOfUseValue(Id3v2Frame *frame);
+unsigned char *id3v2GetPrice(Id3v2Frame *frame);
+unsigned char *id3v2GetPunchDate(Id3v2Frame *frame);
+unsigned char *id3v2GetSeller(Id3v2Frame *frame);
+unsigned char *id3v2GetValidDate(Id3v2Frame *frame);
+unsigned char *id3v2GetContractURL(Id3v2Frame *frame);
+int id3v2GetCommecialDeliveryMethod(Id3v2Frame *frame);
+unsigned char *id3v2GetCommercialSellerLogo(Id3v2Frame *frame);
+unsigned char id3v2GetSymbol(Id3v2Frame *frame);
+unsigned char *id3v2GetEncryptionRegistrationValue(Id3v2Frame *frame);
+unsigned char *id3v2GetGroupIDValue(Id3v2Frame *frame);
+unsigned char *id3v2GetPrivateValue(Id3v2Frame *frame);
+unsigned char *id3v2GetSignatureValue(Id3v2Frame *frame);
+int id3v2GetOffsetToNextTag(Id3v2Frame *frame);
+
 /*
 //functions to change values within a id3v1 structure
 void id3v1SetTitle(char *title, Id3v1Tag *tag);

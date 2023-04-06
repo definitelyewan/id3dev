@@ -3909,7 +3909,7 @@ Id3v2CommercialBody *id3v2CopyCommercialBody(Id3v2CommercialBody *body){
     unsigned char *priceString = NULL;
     unsigned char *validUntil = NULL;
     unsigned char *contractURL = NULL;
-    unsigned char receivedAs = 0x00;
+    unsigned int receivedAs = 0;
     unsigned char *nameOfSeller = NULL; //encoded
     unsigned char *description = NULL; //encoded
     unsigned char *mimeType = NULL;
@@ -3973,7 +3973,7 @@ Id3v2CommercialBody *id3v2ParseCommercialBody(unsigned char *buffer, Id3v2FrameH
     unsigned char *priceString = NULL;
     unsigned char *validUntil = NULL;
     unsigned char *contractURL = NULL;
-    unsigned char receivedAs = 0x00;
+    unsigned int receivedAs = 0x00;
     unsigned char *nameOfSeller = NULL;
     unsigned char *description = NULL;
     unsigned char *mimeType = NULL;
@@ -4570,7 +4570,7 @@ Id3v2SignatureBody *id3v2CopySignatureBody(Id3v2SignatureBody *body){
 
     memcpy(signature, body->signature, strlen((char *)body->signature));
 
-    return id3v2NewSignatureBody(groupSymbol, signature);    
+    return id3v2NewSignatureBody(groupSymbol, signature, body->sigLen);    
 
 }
 
@@ -4599,16 +4599,17 @@ Id3v2SignatureBody *id3v2ParseSignatureBody(unsigned char *buffer, Id3v2FrameHea
     }
 
     id3FreeReader(stream);
-    return id3v2NewSignatureBody(groupSymbol, signature);
+    return id3v2NewSignatureBody(groupSymbol, signature, signatureDataLen);
 
 }
 
-Id3v2SignatureBody *id3v2NewSignatureBody(unsigned char groupSymbol, unsigned char *signature){
+Id3v2SignatureBody *id3v2NewSignatureBody(unsigned char groupSymbol, unsigned char *signature, unsigned int sigLen){
 
     Id3v2SignatureBody *body = malloc(sizeof(Id3v2SignatureBody));
 
     body->groupSymbol = groupSymbol;
     body->signature = signature;
+    body->sigLen = sigLen;
 
     return body;
 }
