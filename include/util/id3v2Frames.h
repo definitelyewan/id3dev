@@ -9,10 +9,9 @@ extern "C"{
 #include <stdbool.h>
 
 //frame functions
-List *id3v2ExtractFrames(id3buf buffer, Id3v2Header *header);
+Id3List *id3v2ExtractFrames(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2NewFrame(Id3v2FrameHeader *header, void *bodyContent);
 Id3v2Frame *id3v2ParseFrame(id3buf buffer, Id3v2Header *header);
-Id3v2Frame *id3v2SearchFrame(Id3v2Tag *tag, Id3v2FrameId id);
 void *id3v2CopyFrame(void *toCopy);
 void id3v2FreeFrame(void *toDelete);
 
@@ -30,6 +29,7 @@ Id3v2FlagContent *id3v2CopyFlagContent(Id3v2FlagContent *flagcon);
 void id3v2FreeFlagContent(Id3v2FlagContent *toDelete);
 
 //text frame functions
+Id3v2Frame *id3v2CreateTextFrame(Id3v2FrameId id, id3byte encoding, id3buf value, id3buf description);
 Id3v2Frame *id3v2ParseTextFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyTextFrame(Id3v2Frame *frame);
 Id3v2TextBody *id3v2CopyTextBody(Id3v2TextBody *body);
@@ -66,7 +66,7 @@ Id3v2Frame *id3v2ParseEventTimeCodesFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyEventTimeCodesFrame(Id3v2Frame *frame);
 Id3v2EventTimeCodesBody *id3v2CopyEventTimeCodesBody(Id3v2EventTimeCodesBody *body);
 Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(id3buf buffer, Id3v2FrameHeader *frameHeader);
-Id3v2EventTimeCodesBody *id3v2NewEventTimeCodesBody(unsigned int timeStampFormat, List *events);
+Id3v2EventTimeCodesBody *id3v2NewEventTimeCodesBody(unsigned int timeStampFormat, Id3List *events);
 Id3v2EventTimesCodeEvent *id3v2NewEventCodeEvent(id3byte typeOfEvent, long timeStamp);
 void id3v2FreeEventTimeCodesFrame(Id3v2Frame *toDelete);
 void *id3v2CopyEventCodeEvent(void *toCopy);
@@ -93,7 +93,7 @@ Id3v2Frame *id3v2ParseSynchronizedLyricsFrame(id3buf buffer, Id3v2Header *header
 Id3v2Frame *id3v2CopySynchronizedLyricsFrame(Id3v2Frame *frame);
 Id3v2SynchronizedLyricsBody *id3v2CopySynchronizedLyricsBody(Id3v2SynchronizedLyricsBody *body);
 Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(id3buf buffer, Id3v2FrameHeader *frameHeader);
-Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(id3byte encoding, id3buf language, unsigned int timeStampFormat, unsigned int contentType, id3buf descriptor, List *lyrics);
+Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(id3byte encoding, id3buf language, unsigned int timeStampFormat, unsigned int contentType, id3buf descriptor, Id3List *lyrics);
 Id3v2StampedLyric *id3v2NewStampedLyric(id3buf text, long timeStamp, size_t lyricLen);
 void id3v2FreeSynchronizedLyricsFrame(Id3v2Frame *toDelete);
 void *id3v2CopyStampedLyric(void *toCopy);
@@ -269,6 +269,7 @@ void id3v2FreeSeekFrame(Id3v2Frame *toDelete);
 
 //other functions
 Id3v2FrameId id3v2FrameIdFromStr(char *str);
+char *id3v2FrameIdStrFromId(Id3v2FrameId id);
 int id3v2IdAndSizeOffset(Id3v2Header *header);
 
 #ifdef __cplusplus

@@ -3,7 +3,7 @@
 #include <string.h>
 #include "id3.h"
 
-void encodedprintf(unsigned char *str, int encoding){
+void encodedprintf(id3buf str, int encoding){
     if(str == NULL){
         return;
     }
@@ -55,13 +55,13 @@ void metadataPrint(Id3Metadata *data){
             printf("[*]no header\n");
         }else{
             printf("ver. %d\n",id3v2GetVersion(tag));
-            printf("flags. %d%d%d%d\n",id3v2UnsynchronizedIndicator(tag), 
-                                    id3v2ExtendedIndicator(tag), 
-                                    id3v2ExperimentalIndicator(tag), 
-                                    id3v2FooterIndicator(tag));
+            printf("flags. %d%d%d%d\n",id3v2GetUnsynchronizedIndicator(tag), 
+                                    id3v2GetExtendedIndicator(tag), 
+                                    id3v2GetExperimentalIndicator(tag), 
+                                    id3v2GetFooterIndicator(tag));
             printf("tag size. %ld\n",id3v2GetTagSize(tag));
 
-            if(id3v2ExtendedIndicator(tag) == true){
+            if(id3v2GetExtendedIndicator(tag) == true){
                 printf("ext size. %d\n",tag->header->extendedHeader->size);
                 printf("padding. %d\n",tag->header->extendedHeader->padding);
                 printf("crc. %s\n",(char *)id3v2GetCrc(tag));
@@ -93,10 +93,10 @@ void metadataPrint(Id3Metadata *data){
                                             id3v2GetFrameID(currFrame));
 
                 //print flag content
-                printf("F:%d%d%d%d C:%ld E:%x G:%x|",id3v2FrameAlterPreservationIndicator(currFrame),
-                                                    id3v2FrameFileAlterPreservationIndicator(currFrame),
-                                                    id3v2FrameReadOnlyIndicator(currFrame),
-                                                    id3v2FrameUnsynchronizationIndicator(currFrame),
+                printf("F:%d%d%d%d C:%ld E:%x G:%x|",id3v2GetFrameAlterPreservationIndicator(currFrame),
+                                                    id3v2GetFrameFileAlterPreservationIndicator(currFrame),
+                                                    id3v2GetFrameReadOnlyIndicator(currFrame),
+                                                    id3v2GetFrameUnsynchronizationIndicator(currFrame),
                                                     id3v2GetFrameDataLengthSize(currFrame),
                                                     id3v2GetFrameEncryptionMethod(currFrame),
                                                     id3v2GetFrameGroup(currFrame));
@@ -121,8 +121,8 @@ void metadataPrint(Id3Metadata *data){
                 
                 if(id3v2GetFrameStrID(currFrame)[0] == 'T'){
                     
-                        unsigned char *desc = id3v2GetDescription(currFrame);
-                        unsigned char *value = id3v2GetTextValue(currFrame);
+                        id3buf desc = id3v2GetDescription(currFrame);
+                        id3buf value = id3v2GetTextValue(currFrame);
                         
                         printf("desc:[");
                         encodedprintf(desc, encoding);
@@ -140,8 +140,8 @@ void metadataPrint(Id3Metadata *data){
                 
                 }else if(id3v2GetFrameStrID(currFrame)[0] == 'W' && id3v2GetFrameID(currFrame) != WCOM){
 
-                        unsigned char *desc = id3v2GetDescription(currFrame);
-                        unsigned char *url = id3v2GetURLValue(currFrame);
+                        id3buf desc = id3v2GetDescription(currFrame);
+                        id3buf url = id3v2GetURLValue(currFrame);
                         
                         printf("desc:[");
                         encodedprintf(desc, encoding);
@@ -157,7 +157,7 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == IPL || id3v2GetFrameID(currFrame) == IPLS){
                     
-                    unsigned char *people = id3v2GetInvolvedPeopleListValue(currFrame);
+                    id3buf people = id3v2GetInvolvedPeopleListValue(currFrame);
                     
                     printf("people:[");
                     encodedprintf(people, encoding);
@@ -169,7 +169,7 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == MCI || id3v2GetFrameID(currFrame) == MCDI){
 
-                    unsigned char *cdtoc = id3v2GetCDIDValue(currFrame);
+                    id3buf cdtoc = id3v2GetCDIDValue(currFrame);
                     printf("cdtoc[%s]",cdtoc);
 
                     if(cdtoc != NULL){
@@ -178,7 +178,7 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == ETC || id3v2GetFrameID(currFrame) == ETCO){
 
-                    unsigned char type = 0x00;
+                    id3byte type = 0x00;
                     long time = 0;
 
                     printf("format:[%d] ",id3v2GetTimeStampFormat(currFrame));
@@ -199,9 +199,9 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == ULT || id3v2GetFrameID(currFrame) == USLT){
 
-                    unsigned char *language = id3v2GetLanguage(currFrame);
-                    unsigned char *description = id3v2GetDescription(currFrame);
-                    unsigned char *lyrics = id3v2GetUnsynchronizedLyrics(currFrame);
+                    id3buf language = id3v2GetLanguage(currFrame);
+                    id3buf description = id3v2GetDescription(currFrame);
+                    id3buf lyrics = id3v2GetUnsynchronizedLyrics(currFrame);
 
                     if(language != NULL){
                         printf("language:[%s] ",language);
@@ -224,11 +224,11 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == SLT || id3v2GetFrameID(currFrame) == SYLT){
 
-                    unsigned char *language = id3v2GetLanguage(currFrame);
-                    unsigned char *description = id3v2GetDescription(currFrame);
+                    id3buf language = id3v2GetLanguage(currFrame);
+                    id3buf description = id3v2GetDescription(currFrame);
                     int format = id3v2GetTimeStampFormat(currFrame);
                     int contentType = id3v2GetSynchronizedLyricsContentType(currFrame);
-                    unsigned char *text = NULL;
+                    id3buf text = NULL;
                     long stamp = 0;
 
                     if(language != NULL){
@@ -265,9 +265,9 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == COM || id3v2GetFrameID(currFrame) == COMM){
 
-                    unsigned char *language = id3v2GetLanguage(currFrame);
-                    unsigned char *description = id3v2GetDescription(currFrame);
-                    unsigned char *value = id3v2GetCommentValue(currFrame);
+                    id3buf language = id3v2GetLanguage(currFrame);
+                    id3buf description = id3v2GetDescription(currFrame);
+                    id3buf value = id3v2GetCommentValue(currFrame);
 
                     if(language != NULL){
                         printf("language:[%s] ",language);
@@ -292,7 +292,7 @@ void metadataPrint(Id3Metadata *data){
                         id3v2GetFrameID(currFrame) == EQUA || id3v2GetFrameID(currFrame) == RVAD || id3v2GetFrameID(currFrame) == RVRB ||
                         id3v2GetFrameID(currFrame) == RVA2 || id3v2GetFrameID(currFrame) == EQU2){
                     
-                    unsigned char *value = id3v2GetSubjectiveValue(currFrame);
+                    id3buf value = id3v2GetSubjectiveValue(currFrame);
 
                     if(value != NULL){
                         printf("value:[%p]",value);
@@ -301,10 +301,10 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == PIC || id3v2GetFrameID(currFrame) == APIC){
                     
-                    unsigned char *format = id3v2GetMIMEType(currFrame);
+                    id3buf format = id3v2GetMIMEType(currFrame);
                     int pictureType = id3v2GetPictureType(currFrame);
-                    unsigned char *desc = id3v2GetDescription(currFrame);
-                    unsigned char *picData = id3v2GetPictureValue(currFrame);
+                    id3buf desc = id3v2GetDescription(currFrame);
+                    id3buf picData = id3v2GetPictureValue(currFrame);
 
                     if(format != NULL){
                         printf("mime:[%s] ",format);
@@ -335,10 +335,10 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == GEO || id3v2GetFrameID(currFrame) == GEOB){
                     
-                    unsigned char *mime = id3v2GetMIMEType(currFrame);
-                    unsigned char *fileName = id3v2GetObjectFileName(currFrame);
-                    unsigned char *desc = id3v2GetDescription(currFrame);
-                    unsigned char *obj = id3v2GetGeneralEncapsulatedObjectValue(currFrame);
+                    id3buf mime = id3v2GetMIMEType(currFrame);
+                    id3buf fileName = id3v2GetObjectFileName(currFrame);
+                    id3buf desc = id3v2GetDescription(currFrame);
+                    id3buf obj = id3v2GetGeneralEncapsulatedObjectValue(currFrame);
 
                     if(mime != NULL){
                         printf("mime:[%s] ",mime);
@@ -378,7 +378,7 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == POP || id3v2GetFrameID(currFrame) == POPM){
                     
-                    unsigned char *email = id3v2GetEmail(currFrame);
+                    id3buf email = id3v2GetEmail(currFrame);
                     int rating = id3v2GetRating(currFrame);
                     int counter = id3v2GetPlayCount(currFrame);
 
@@ -396,9 +396,9 @@ void metadataPrint(Id3Metadata *data){
                     }
 
                 }else if(id3v2GetFrameID(currFrame) == CRM){
-                    unsigned char *owner = id3v2GetOwnerIdentifier(currFrame);
-                    unsigned char *desc = id3v2GetDescription(currFrame);
-                    unsigned char *encryptedBlock = id3v2GetEncryptedMetaValue(currFrame);
+                    id3buf owner = id3v2GetOwnerIdentifier(currFrame);
+                    id3buf desc = id3v2GetDescription(currFrame);
+                    id3buf encryptedBlock = id3v2GetEncryptedMetaValue(currFrame);
 
                     if(owner != NULL){
                         printf("owner:[%s] ",owner);
@@ -416,10 +416,10 @@ void metadataPrint(Id3Metadata *data){
                     }
 
                 }else if(id3v2GetFrameID(currFrame) == AENC){
-                    unsigned char *owner = id3v2GetOwnerIdentifier(currFrame);
+                    id3buf owner = id3v2GetOwnerIdentifier(currFrame);
                     void *start = id3v2GetPreviewStart(currFrame);
                     int previewlength = id3v2GetPreviewLength(currFrame);
-                    unsigned char *info = id3v2GetAudioEncryptionValue(currFrame);
+                    id3buf info = id3v2GetAudioEncryptionValue(currFrame);
 
                     if(owner != NULL){
                         printf("owner:[%s] ",owner);
@@ -440,8 +440,8 @@ void metadataPrint(Id3Metadata *data){
                     }
 
                 }else if(id3v2GetFrameID(currFrame) == UFI || id3v2GetFrameID(currFrame) == UFID){
-                    unsigned char *owner = id3v2GetOwnerIdentifier(currFrame);
-                    unsigned char *identifier = id3v2GetUniqueFileIdentifierValue(currFrame);
+                    id3buf owner = id3v2GetOwnerIdentifier(currFrame);
+                    id3buf identifier = id3v2GetUniqueFileIdentifierValue(currFrame);
 
                     if(owner != NULL){
                         printf("owner:[%s] ",owner);
@@ -460,8 +460,8 @@ void metadataPrint(Id3Metadata *data){
                     printf("fomat:[%d] pos:[%ld] ",format,pos);
 
                 }else if(id3v2GetFrameID(currFrame) == USER){
-                    unsigned char *language = id3v2GetLanguage(currFrame);
-                    unsigned char *text = id3v2GetTermsOfUseValue(currFrame);
+                    id3buf language = id3v2GetLanguage(currFrame);
+                    id3buf text = id3v2GetTermsOfUseValue(currFrame);
                     
                     if(language != NULL){
                         printf("language:[%s] ",language);
@@ -476,9 +476,9 @@ void metadataPrint(Id3Metadata *data){
                     }
 
                 }else if(id3v2GetFrameID(currFrame) == OWNE){
-                    unsigned char *price = id3v2GetPrice(currFrame);
-                    unsigned char *date = id3v2GetPunchDate(currFrame);
-                    unsigned char *seller = id3v2GetSeller(currFrame);
+                    id3buf price = id3v2GetPrice(currFrame);
+                    id3buf date = id3v2GetPunchDate(currFrame);
+                    id3buf seller = id3v2GetSeller(currFrame);
 
                     if(price != NULL){
                         printf("price:[%s] ",price);
@@ -499,14 +499,14 @@ void metadataPrint(Id3Metadata *data){
 
 
                 }else if(id3v2GetFrameID(currFrame) == COMR){
-                    unsigned char *price = id3v2GetPrice(currFrame);
-                    unsigned char *validUntil = id3v2GetValidDate(currFrame);
-                    unsigned char *contract = id3v2GetContractURL(currFrame);
+                    id3buf price = id3v2GetPrice(currFrame);
+                    id3buf validUntil = id3v2GetValidDate(currFrame);
+                    id3buf contract = id3v2GetContractURL(currFrame);
                     int as = id3v2GetCommecialDeliveryMethod(currFrame);
-                    unsigned char *seller = id3v2GetSeller(currFrame);
-                    unsigned char *desc = id3v2GetDescription(currFrame);
-                    unsigned char *mime = id3v2GetMIMEType(currFrame);
-                    unsigned char *logo = id3v2GetCommercialSellerLogo(currFrame);
+                    id3buf seller = id3v2GetSeller(currFrame);
+                    id3buf desc = id3v2GetDescription(currFrame);
+                    id3buf mime = id3v2GetMIMEType(currFrame);
+                    id3buf logo = id3v2GetCommercialSellerLogo(currFrame);
 
                     if(price != NULL){
                         printf("price:[%s] ",price);
@@ -546,9 +546,9 @@ void metadataPrint(Id3Metadata *data){
                     }   
 
                 }else if(id3v2GetFrameID(currFrame) == ENCR){
-                    unsigned char *owner = id3v2GetOwnerIdentifier(currFrame);
-                    unsigned char methodSymbol = id3v2GetSymbol(currFrame);
-                    unsigned char *encryptionData = id3v2GetEncryptionRegistrationValue(currFrame);
+                    id3buf owner = id3v2GetOwnerIdentifier(currFrame);
+                    id3byte methodSymbol = id3v2GetSymbol(currFrame);
+                    id3buf encryptionData = id3v2GetEncryptionRegistrationValue(currFrame);
 
                     if(owner != NULL){
                         printf("owner:[%s] ",owner);
@@ -564,9 +564,9 @@ void metadataPrint(Id3Metadata *data){
                         free(encryptionData);
                     }
                 }else if(id3v2GetFrameID(currFrame) == GRID){
-                    unsigned char *owner = id3v2GetOwnerIdentifier(currFrame);
-                    unsigned char groupSymbol = id3v2GetSymbol(currFrame);
-                    unsigned char *groupData = id3v2GetGroupIDValue(currFrame);
+                    id3buf owner = id3v2GetOwnerIdentifier(currFrame);
+                    id3byte groupSymbol = id3v2GetSymbol(currFrame);
+                    id3buf groupData = id3v2GetGroupIDValue(currFrame);
 
                     if(owner != NULL){
                         printf("owner:[%s] ",owner);
@@ -584,8 +584,8 @@ void metadataPrint(Id3Metadata *data){
 
 
                 }else if(id3v2GetFrameID(currFrame) == PRIV){
-                    unsigned char *owner = id3v2GetOwnerIdentifier(currFrame);
-                    unsigned char *privateData = id3v2GetPrivateValue(currFrame);
+                    id3buf owner = id3v2GetOwnerIdentifier(currFrame);
+                    id3buf privateData = id3v2GetPrivateValue(currFrame);
 
                     if(owner != NULL){
                         printf("owner:[%s] ",owner);
@@ -598,8 +598,8 @@ void metadataPrint(Id3Metadata *data){
                     }
                     
                 }else if(id3v2GetFrameID(currFrame) == SIGN){
-                    unsigned char groupSymbol = id3v2GetSymbol(currFrame);
-                    unsigned char *signature = NULL;
+                    id3byte groupSymbol = id3v2GetSymbol(currFrame);
+                    id3buf signature = NULL;
 
                     if(groupSymbol != 0x00){
                         printf("symbol:[%x] ",groupSymbol);
@@ -623,7 +623,7 @@ void metadataPrint(Id3Metadata *data){
             }
         }            
     }
-
+    id3v2ResetIterTag(data->version2);
 }
 
 
@@ -634,8 +634,44 @@ int main(int argc, char *argv[]){
     }
 
     Id3Metadata *data = id3NewMetadataFromFile(argv[1]);
-    metadataPrint(data);
     
+    Id3v2FrameId id;
+    if(id3v2GetVersion(data->version2) >= 30){
+        id = TALB;
+    }else{
+        id = TAL;
+    }
+
+
+    Id3List *l = id3v2SearchForFrames(data->version2, id);
+    ListIter *iter = id3NewListIter(l);
+    Id3v2Frame *checkFrame = NULL;
+    while((checkFrame = id3NextListIter(iter)) != NULL){
+        Id3v2TextBody *body = (Id3v2TextBody *)checkFrame->frame;
+        printf("----------------------\n");
+        encodedprintf(body->description,body->encoding);
+        printf("\n");
+        encodedprintf(body->value, body->encoding);
+        Id3v2Frame *testFrame = id3v2CreateTextFrame(TXX, body->encoding, body->value, body->description);
+        printf("\n----------------------\n");
+
+        printf("%s\n",checkFrame->header->id);
+        Id3v2TextBody *body2 = (Id3v2TextBody *)testFrame->frame;
+        printf("----------------------\n");
+        encodedprintf(body2->description,body2->encoding);
+        printf("\n");
+        encodedprintf(body2->value, body2->encoding);
+        printf("\n----------------------\n");
+        id3v2FreeFrame(testFrame);
+    }
+    id3DestroyList(l);
+    id3FreeListIter(iter);
+    
+    //printf("[Original]===================================================================\n");
+    //metadataPrint(data);
+    //printf("[edited]=====================================================================\n");
+    //metadataPrint(data);
+
     //printf("[Make A Copy]\n");
     //Id3Metadata *data2 = id3CopyMetadata(data);
     //printf("Exact copy| %s\n", id3v1CompareTag(data->version1, data2->version1) == 0 ? "false" : "true");

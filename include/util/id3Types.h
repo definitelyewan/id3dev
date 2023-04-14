@@ -13,22 +13,22 @@ extern "C"{
 */
 
 //structs
-typedef struct _List{
+typedef struct _Id3List{
     int size;
     void (*deleteData)(void* toDelete);
     void *(*copyData)(void* toCopy);
-    struct _node *head;
-}List;
+    struct _Id3Node *head;
+}Id3List;
 
 typedef struct _ListIter{
-    List *l;
-    struct _node *curr;
+    Id3List *l;
+    struct _Id3Node *curr;
 }ListIter;
 
-typedef struct _node{
+typedef struct _Id3Node{
     void *data;
-    struct _node *next;
-}Node;
+    struct _Id3Node *next;
+}Id3Node;
 
 /*
     reader types
@@ -316,7 +316,7 @@ typedef struct _Id3v2header{
 
 typedef struct _Id3v2Tag{
     Id3v2Header *header;
-    List *frames;
+    Id3List *frames;
     ListIter *iter;
 
 }Id3v2Tag;
@@ -528,7 +528,7 @@ typedef struct _Id3v2EventTimeCodesEvent{
 
 typedef struct _Id3v2EventTimeCodesBody{
     unsigned int timeStampFormat;
-    List *eventTimeCodes;
+    Id3List *eventTimeCodes;
     ListIter *eventsTimeCodesIter;
 
 }Id3v2EventTimeCodesBody;
@@ -554,7 +554,7 @@ typedef struct _Id3v2SynchronizedLyricsBody{
     unsigned int timeStampFormat;
     unsigned int contentType;
     id3buf descriptor;
-    List *lyrics;
+    Id3List *lyrics;
     ListIter *lyricsIter;
     
 }Id3v2SynchronizedLyricsBody;

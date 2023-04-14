@@ -67,7 +67,7 @@ typedef unsigned char _id3byte;
 //Padding bytes found in ID3v2.2s header
 #define ID3V2_PADDING_SIZE 4
 
-//Length of bytes found in ID3v2s header
+//Length of bytes found in ID3v2s header or frame header
 #define ID3V2_HEADER_SIZE 10
 
 //The length of the size bytes found within the ID3v2.2 frame header
@@ -100,7 +100,7 @@ typedef unsigned char _id3byte;
 //The number of bytes dedicated to a date in an ID3v2 commercial or ownership frame
 #define ID3V2_BASE_DATE_FORMAT_LEN 8
 
-//The offset to the tag size header in an ID3v2 tag
+//The offset to the tag size header in an ID3v2.2 tag
 #define ID3V2_TAG_SIZE_OFFSET 6
 
 //The length of the 'image/' MIME type prefix

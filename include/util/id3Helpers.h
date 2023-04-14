@@ -15,21 +15,20 @@ unsigned int syncint_decode(int value);
 void addressFree(void **pptr);
 char *integerToCharPointer(int value);
 
-
 //list functions
-List *newList(void (*deleteFunction)(void* toDelete), void *(*copyFunction)(void* toCopy));
-List *copyList(List *list);
-Node *newNode(void *data);
-void listPush(List *list, void *toAdd);
-void *listRemove(List *list, int pos);
-void freeList(List *list);
-void destroyList(List *list);
+Id3List *id3NewList(void (*deleteFunction)(void* toDelete), void *(*copyFunction)(void* toCopy));
+Id3List *id3CopyList(Id3List *list);
+Id3Node *id3NewNode(void *data);
+void id3PushList(Id3List *list, void *toAdd);
+void *id3RemoveList(Id3List *list, int pos);
+void id3FreeList(Id3List *list);
+void id3DestroyList(Id3List *list);
 
-ListIter *newListIter(List *list);
-ListIter *copyListIter(ListIter *li);
-void *nextListIter(ListIter *li);
-bool hasNextListIter(ListIter *li);
-void freeListIter(ListIter *li);
+ListIter *id3NewListIter(Id3List *list);
+ListIter *id3CopyListIter(ListIter *li);
+void *id3NextListIter(ListIter *li);
+bool id3HasNextListIter(ListIter *li);
+void id3FreeListIter(ListIter *li);
 
 #ifdef __cplusplus
 } //extern c end

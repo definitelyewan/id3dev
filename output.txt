@@ -1,29 +1,9 @@
-ID3V1 tag information
-artist | [Death Grips]
-album  | [The Powers That B]
-comment| []
-genre  | [Other]
-title  | [On GP]
-track  | [9]
-year   | [2015]
-ID3V2 tag information
-ver. 40
-flags. 0000
-tag size. 1881646
-[*]no extended header
-POPM|FS:29 HS:10 ID:79|F:0000 C:0 E:0 G:0|None|email:[asdasdsadasdasdasdasdas] rating:[128] counter:[0] 
-POPM|FS:6 HS:10 ID:79|F:0000 C:0 E:0 G:0|None|rating:[196] counter:[3] 
-ETCO|FS:11 HS:10 ID:69|F:0000 C:0 E:0 G:0|None|format:[2] types:[[2][6]] stamps:[[610000][1220000]]
-WCOM|FS:44 HS:10 ID:128|F:0000 C:0 E:0 G:0|None|parsed and present
-TXXX|FS:61 HS:10 ID:124|F:0000 C:0 E:0 G:0|UTF16|desc:[utf8�>2!g!] value:[H& I& J& K& L& M& N& O&utf8]
-TCON|FS:178 HS:10 ID:89|F:0000 C:0 E:0 G:0|ISO_8859_1|desc:[] value:[Experimental Hip-Hop, Glitch Hop, Abstract Hip-Hop, Industrial Hip-Hop, Footwork, Wonky, Noise Rock, Rap Rock, Synth Punk, Hardcore Hip-Hop, Experimental Rock & Digital Hardcore]
-TDRC|FS:5 HS:10 ID:-1|F:0000 C:0 E:0 G:0|ISO_8859_1|desc:[] value:[2015]
-APIC|FS:34808 HS:10 ID:64|F:0000 C:0 E:0 G:0|UTF16|mime:[image/jpeg] type:[3] desc:[test] picData:[0x4d6a7d0] 
-APIC|FS:1845204 HS:10 ID:64|F:0000 C:0 E:0 G:0|ISO_8859_1|mime:[image/jpeg] type:[0] desc:[test] picData:[0x4b9db00] 
-TCOM|FS:25 HS:10 ID:88|F:0000 C:0 E:0 G:0|UTF16|desc:[] value:[Death Grips]
-TPE2|FS:25 HS:10 ID:111|F:0000 C:0 E:0 G:0|UTF16|desc:[] value:[Death Grips]
-TIT2|FS:13 HS:10 ID:98|F:0000 C:0 E:0 G:0|UTF16|desc:[] value:[On GP]
-TPE1|FS:25 HS:10 ID:110|F:0000 C:0 E:0 G:0|UTF16|desc:[] value:[Death Grips]
-TPOS|FS:9 HS:10 ID:114|F:0000 C:0 E:0 G:0|UTF16|desc:[] value:[2/2]
-TRCK|FS:13 HS:10 ID:116|F:0000 C:0 E:0 G:0|UTF16|desc:[] value:[09/10]
-TALB|FS:67 HS:10 ID:86|F:0000 C:0 E:0 G:0|UTF8|None|desc:[] value:[The Powers That Butf8ÛȾℲⅧ♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏utf8]
+----------------------
+
+22, A Million
+----------------------
+TAL
+----------------------
+
+22, A Million
+----------------------

@@ -147,7 +147,7 @@ Id3v2Frame *id3v2NewFrame(Id3v2FrameHeader *header, void *bodyContent){
     return frame;
 }
 
-List *id3v2ExtractFrames(id3buf buffer, Id3v2Header *header){
+Id3List *id3v2ExtractFrames(id3buf buffer, Id3v2Header *header){
 
     int saveSize = header->size - ID3V2_HEADER_SIZE;
     int extHeaderOffset = 0;
@@ -167,7 +167,7 @@ List *id3v2ExtractFrames(id3buf buffer, Id3v2Header *header){
     Id3Reader *stream = id3NewReader(buffer, saveSize);
 
     // create list
-    List *list = newList(id3v2FreeFrame, id3v2CopyFrame);
+    Id3List *list = id3NewList(id3v2FreeFrame, id3v2CopyFrame);
 
     while(saveSize > 0){
 
@@ -175,7 +175,7 @@ List *id3v2ExtractFrames(id3buf buffer, Id3v2Header *header){
 
         // get a frame to add to the list
         if((frame = id3v2ParseFrame(id3ReaderCursor(stream), header)) != NULL){
-            listPush(list, (void *)frame);
+            id3PushList(list, (void *)frame);
             id3ReaderSeek(stream, frame->header->frameSize + frame->header->headerSize, SEEK_CUR);
             saveSize = saveSize - frame->header->frameSize - frame->header->headerSize;
 
@@ -458,36 +458,48 @@ void *id3v2CopyFrame(void *toCopy){
     return NULL;
 }
 
-Id3v2Frame *id3v2SearchFrame(Id3v2Tag *tag, Id3v2FrameId id){
-    
-    if(tag == NULL){
-        return NULL;
-    }
-
-    if(tag->frames == NULL){
-        return NULL;
-    }
-
-
-    Node *n = tag->frames->head;
-
-    while(n != NULL){
-        
-        Id3v2Frame *sFrame = (Id3v2Frame *) n->data;
-        
-        if(sFrame->header->idNum == id){
-            return sFrame;
-        }
-
-        n = n->next;
-    }
-
-    return NULL;
-}
-
 /*
     Text frame functions
 */
+
+Id3v2Frame *id3v2CreateTextFrame(Id3v2FrameId id, id3byte encoding, id3buf value, id3buf description){
+    
+    if(!(encoding == ISO_8859_1 || encoding == UTF16 || encoding == UTF16BE || encoding == UTF8)){
+        return NULL;
+    }
+    if(value == NULL){
+        return NULL;
+    }
+
+    Id3v2FlagContent *flags = NULL;
+    Id3v2FrameHeader *frameHeader = NULL;
+    Id3v2TextBody *body = NULL;
+    Id3v2TextBody *ret = NULL;
+    unsigned int size = 1; //encoding so +1
+    unsigned int headerSize = 0;
+
+    if(id >= WXX){
+        headerSize = ID3V2_HEADER_SIZE;
+    }else{
+        headerSize = ID3V2_TAG_SIZE_OFFSET;
+    }
+
+    size = id3strlen(value, encoding);
+    
+    if(description != NULL){
+        size = size + id3strlen(description, encoding);
+        //padding
+        size++;
+    }
+
+    flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
+    frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(id),size,headerSize,flags);
+    body = id3v2NewTextBody(encoding, value, description);
+    ret = id3v2CopyTextBody(body);
+    free(body);
+    
+    return id3v2NewFrame(frameHeader, ret);
+}
 
 Id3v2Frame *id3v2ParseTextFrame(id3buf buffer, Id3v2Header *header){
 
@@ -1120,7 +1132,7 @@ Id3v2Frame *id3v2CopyEventTimeCodesFrame(Id3v2Frame *frame){
 }
 
 Id3v2EventTimeCodesBody *id3v2CopyEventTimeCodesBody(Id3v2EventTimeCodesBody *body){
-    return (body == NULL) ? NULL : id3v2NewEventTimeCodesBody(body->timeStampFormat, copyList(body->eventTimeCodes));
+    return (body == NULL) ? NULL : id3v2NewEventTimeCodesBody(body->timeStampFormat, id3CopyList(body->eventTimeCodes));
 }
 
 Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
@@ -1136,7 +1148,7 @@ Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(id3buf buffer, Id3v2FrameH
     //-1 to skip time format
     int saveSize = frameHeader->frameSize - 1;
     unsigned int timeStampFormat = 0;
-    List *events = NULL;
+    Id3List *events = NULL;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
     // copy time stamp format
@@ -1144,7 +1156,7 @@ Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(id3buf buffer, Id3v2FrameH
     id3ReaderSeek(stream, 1, SEEK_CUR);
 
     // get a list of event codes
-    events = newList(id3v2FreeEventCode, id3v2CopyEventCodeEvent);
+    events = id3NewList(id3v2FreeEventCode, id3v2CopyEventCodeEvent);
 
     while(saveSize > 0){
 
@@ -1162,7 +1174,7 @@ Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(id3buf buffer, Id3v2FrameH
 
         // add event to the list
         newEvent = id3v2NewEventCodeEvent(typeOfEvent, stamp);
-        listPush(events, newEvent);
+        id3PushList(events, newEvent);
 
         saveSize = saveSize - ID3V2_EVENT_CODE_LEN;
     }
@@ -1171,7 +1183,7 @@ Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(id3buf buffer, Id3v2FrameH
     return id3v2NewEventTimeCodesBody(timeStampFormat, events);
 }
 
-Id3v2EventTimeCodesBody *id3v2NewEventTimeCodesBody(unsigned int timeStampFormat, List *events){
+Id3v2EventTimeCodesBody *id3v2NewEventTimeCodesBody(unsigned int timeStampFormat, Id3List *events){
 
     Id3v2EventTimeCodesBody *eventTimeCodesBody = malloc(sizeof(Id3v2EventTimeCodesBody));
 
@@ -1179,7 +1191,7 @@ Id3v2EventTimeCodesBody *id3v2NewEventTimeCodesBody(unsigned int timeStampFormat
     eventTimeCodesBody->timeStampFormat = timeStampFormat;
     eventTimeCodesBody->eventTimeCodes = events;
     
-    ListIter *iter = newListIter(events);
+    ListIter *iter = id3NewListIter(events);
 
     eventTimeCodesBody->eventsTimeCodesIter = iter;
 
@@ -1213,8 +1225,8 @@ void id3v2FreeEventTimeCodesFrame(Id3v2Frame *toDelete){
 
     Id3v2EventTimeCodesBody *body = (Id3v2EventTimeCodesBody *)toDelete->frame;
 
-    destroyList(body->eventTimeCodes);
-    freeListIter(body->eventsTimeCodesIter);
+    id3DestroyList(body->eventTimeCodes);
+    id3FreeListIter(body->eventsTimeCodesIter);
     free(body);
     free(toDelete);
 }
@@ -1614,7 +1626,7 @@ Id3v2SynchronizedLyricsBody *id3v2CopySynchronizedLyricsBody(Id3v2SynchronizedLy
     id3buf language = NULL;
     unsigned int timeStampFormat = 0;
     unsigned int contentType = 0;
-    List *lyrics = NULL;
+    Id3List *lyrics = NULL;
 
 
     encoding = body->encoding;
@@ -1632,7 +1644,7 @@ Id3v2SynchronizedLyricsBody *id3v2CopySynchronizedLyricsBody(Id3v2SynchronizedLy
     }
 
     if(body->lyrics->head != NULL){
-        lyrics = copyList(body->lyrics);
+        lyrics = id3CopyList(body->lyrics);
     }
 
     return id3v2NewSynchronizedLyricsBody(encoding, language, timeStampFormat, contentType, descriptor, lyrics);
@@ -1650,7 +1662,7 @@ Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(id3buf buffer, Id3
     unsigned int timeStampFormat = 0;
     unsigned int contentType = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
-    List *lyrics = NULL;
+    Id3List *lyrics = NULL;
 
     // read encoding
     encoding = buffer[0];
@@ -1679,7 +1691,7 @@ Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(id3buf buffer, Id3
     id3ReaderSeek(stream, id3ReaderAllocationAdd(encoding), SEEK_CUR);
 
     // body content
-    lyrics = newList(id3v2FreeStampedLyric, id3v2CopyStampedLyric);
+    lyrics = id3NewList(id3v2FreeStampedLyric, id3v2CopyStampedLyric);
 
     while(id3ReaderGetCh(stream) != EOF){
 
@@ -1698,7 +1710,7 @@ Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(id3buf buffer, Id3
         id3ReaderSeek(stream, ID3V2_TIME_STAMP_LEN, SEEK_CUR);
 
         lyric = id3v2NewStampedLyric(text, timeStamp, lyricLen);
-        listPush(lyrics, lyric);
+        id3PushList(lyrics, lyric);
         
     }
 
@@ -1706,7 +1718,7 @@ Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(id3buf buffer, Id3
     return id3v2NewSynchronizedLyricsBody(encoding, language, timeStampFormat, contentType, descriptor, lyrics);
 }
 
-Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(id3byte encoding, id3buf language, unsigned int timeStampFormat, unsigned int contentType, id3buf descriptor, List *lyrics){
+Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(id3byte encoding, id3buf language, unsigned int timeStampFormat, unsigned int contentType, id3buf descriptor, Id3List *lyrics){
 
     Id3v2SynchronizedLyricsBody *synchronizedLyricsBody = malloc(sizeof(Id3v2SynchronizedLyricsBody));
 
@@ -1718,7 +1730,7 @@ Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(id3byte encoding, id
     synchronizedLyricsBody->descriptor = descriptor;
     synchronizedLyricsBody->lyrics = lyrics;
 
-    ListIter *iter = newListIter(lyrics);
+    ListIter *iter = id3NewListIter(lyrics);
 
     synchronizedLyricsBody->lyricsIter = iter;
 
@@ -1761,8 +1773,8 @@ void id3v2FreeSynchronizedLyricsFrame(Id3v2Frame *toDelete){
         free(body->language);
     }
 
-    destroyList(body->lyrics);
-    freeListIter(body->lyricsIter);
+    id3DestroyList(body->lyrics);
+    id3FreeListIter(body->lyricsIter);
     free(body);
     free(toDelete);
 }
@@ -5457,3 +5469,588 @@ Id3v2FrameId id3v2FrameIdFromStr(char *str){
 
     return HUH;
 }
+
+char *id3v2FrameIdStrFromId(Id3v2FrameId id){
+
+    char *str = NULL;
+
+    switch(id){
+        case HUH:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"HUH");
+            return str;
+        case BUF:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"BUF");
+            return str;
+        case CNT:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"CNT");
+            return str;
+        case COM:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"COM");
+            return str;
+        case CRA:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"CRA");
+            return str;
+        case CRM:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"CRM");
+            return str;
+        case ETC:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"ETC");
+            return str;
+        case EQU:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"EQU");
+            return str;
+        case GEO:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"GEO");
+            return str;
+        case IPL:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"IPL");
+            return str;
+        case LNK:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"LNK");
+            return str;
+        case MCI:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"MCI");
+            return str;
+        case MLL:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"MLL");
+            return str;
+        case PIC:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"PIC");
+            return str;
+        case POP:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"POP");
+            return str;
+        case REV:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"REV");
+            return str;
+        case RVA:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"RVA");
+            return str;
+        case SLT:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"SLT");
+            return str;
+        case STC:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"STC");
+            return str;
+        case TAL:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TAL");
+            return str;
+        case TBP:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TBP");
+            return str;
+        case TCM:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TCM");
+            return str;
+        case TCO:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TCO");
+            return str;
+        case TCR:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TCR");
+            return str;
+        case TDA:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TDA");
+            return str;
+        case TDY:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TDY");
+            return str;
+        case TEN:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TEN");
+            return str;
+        case TFT:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TFT");
+            return str;
+        case TIM:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TIM");
+            return str;
+        case TKE:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TKE");
+            return str;
+        case TLA:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TLA");
+            return str;
+        case TLE:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TLE");
+            return str;
+        case TMT:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TMT");
+            return str;
+        case TOA:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TOA");
+            return str;
+        case TOF:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TOF");
+            return str;
+        case TOL:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TOL");
+            return str;
+        case TOR:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TOR");
+            return str;
+        case TOT:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TOT");
+            return str;
+        case TP1:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TP1");
+            return str;
+        case TP2:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TP2");
+            return str;
+        case TP3:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TP3");
+            return str;
+        case TP4:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TP4");
+            return str;
+        case TPA:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TPA");
+            return str;
+        case TPB:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TPB");
+            return str;
+        case TRC:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TRC");
+            return str;
+        case TRD:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TRD");
+            return str;
+        case TRK:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TRK");
+            return str;
+        case TSI:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TSI");
+            return str;
+        case TSS:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TSS");
+            return str;
+        case TT1:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TT1");
+            return str;
+        case TT2:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TT2");
+            return str;
+        case TT3:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TT3");
+            return str;
+        case TXT:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TXT");
+            return str;
+        case TXX:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TXX");
+            return str;
+        case TYE:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TYE");
+            return str;
+        case UFI:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"UFI");
+            return str;
+        case ULT:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"ULT");
+            return str;
+        case WAF:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WAF");
+            return str;
+        case WAR:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WAR");
+            return str;
+        case WAS:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WAS");
+            return str;
+        case WCM:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WCM");
+            return str;
+        case WCP:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WCP");
+            return str;
+        case WPB:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WPB");
+            return str;
+        case WXX:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WXX");
+            return str;
+        case AENC:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"AENC");
+            return str;
+        case APIC:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"APIC");
+            return str;
+        case COMM:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"COMM");
+            return str;
+        case COMR:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"COMR");
+            return str;
+        case ENCR:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"ENCR");
+            return str;
+        case EQUA:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"EQUA");
+            return str;
+        case ETCO:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"ETCO");
+            return str;
+        case GEOB:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"GEOB");
+            return str;
+        case GRID:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"GRID");
+            return str;
+        case IPLS:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"IPLS");
+            return str;
+        case LINK:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"LINK");
+            return str;
+        case MCDI:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"MCDI");
+            return str;
+        case MLLT:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"MLLT");
+            return str;
+        case OWNE:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"OWNE");
+            return str;
+        case PRIV:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"PRIV");
+            return str;
+        case PCNT:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"PCNT");
+            return str;
+        case POPM:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"POPM");
+            return str;
+        case POSS:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"POSS");
+            return str;
+        case RBUF:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"RBUF");
+            return str;
+        case RVAD:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"RVAD");
+            return str;
+        case RVRB:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"RVRB");
+            return str;
+        case SYLT:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"SYLT");
+            return str;
+        case SYTC:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"SYTC");
+            return str;
+        case TALB:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TALB");
+            return str;
+        case TBPM:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TBPM");
+            return str;
+        case TCOM:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TCOM");
+            return str;
+        case TCON:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TCON");
+            return str;
+        case TCOP:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TCOP");
+            return str;
+        case TDAT:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TDAT");
+            return str;
+        case TDLY:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TDLY");
+            return str;
+        case TENC:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TENC");
+            return str;
+        case TEXT:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TEXT");
+            return str;
+        case TFLT:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TFLT");
+            return str;
+        case TIME:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TIME");
+            return str;
+        case TIT1:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TIT1");
+            return str;
+        case TIT2:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TIT2");
+            return str;
+        case TIT3:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TIT3");
+            return str;
+        case TKEY:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TKEY");
+            return str;
+        case TLAN:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TLAN");
+            return str;
+        case TLEN:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TLEN");
+            return str;
+        case TMED:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TMED");
+            return str;
+        case TOAL:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TOAL");
+            return str;
+        case TOFN:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TOFN");
+            return str;
+        case TOLY:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TOLY");
+            return str;
+        case TOPE:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TOPE");
+            return str;
+        case TORY:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TORY");
+            return str;
+        case TOWN:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TOWN");
+            return str;
+        case TPE1:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TPE1");
+            return str;
+        case TPE2:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TPE2");
+            return str;
+        case TPE3:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TPE3");
+            return str;
+        case TPE4:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TPE4");
+            return str;
+        case TPOS:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TPOS");
+            return str;
+        case TPUB:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TPUB");
+            return str;
+        case TRCK:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TRCK");
+            return str;
+        case TRDA:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TRDA");
+            return str;
+        case TRSN:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TRSN");
+            return str;
+        case TRSO:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TRSO");
+            return str;
+        case TSIZ:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TSIZ");
+            return str;
+        case TSRC:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TSRC");
+            return str;
+        case TSSE:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TSSE");
+            return str;
+        case TYER:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TYER");
+            return str;
+        case TXXX:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TXXX");
+            return str;
+        case UFID:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"UFID");
+            return str;
+        case USER:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"USER");
+            return str;
+        case USLT:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"USLT");
+            return str;
+        case WCOM:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WCOM");
+            return str;
+        case WCOP:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WCOP");
+            return str;
+        case WOAF:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WOAF");
+            return str;
+        case WOAR:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WOAR");
+            return str;
+        case WOAS:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WOAS");
+            return str;
+        case WORS:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WORS");
+            return str;
+        case WPAY:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WPAY");
+            return str;
+        case WPUB:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WPUB");
+            return str;
+        case WXXX:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"WXXX");
+            return str;
+        case RVA2:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"RVA2");
+            return str;
+        case EQU2:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"EQU2");
+            return str;
+        case ASPI:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"ASPI");
+            return str;
+        case SEEK:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"SEEK");
+            return str;
+        case SIGN:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"SIGN");
+            return str;
+        default:
+            str = calloc(sizeof(char), ID3V22_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"HUH");
+            return str;
+    }
+}
+

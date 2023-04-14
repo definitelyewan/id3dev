@@ -50,9 +50,9 @@ void addressFree(void **pptr){
     }
 }
 
-List *newList(void (*deleteFunction)(void* toDelete), void *(*copyFunction)(void* toCopy)){
+Id3List *id3NewList(void (*deleteFunction)(void* toDelete), void *(*copyFunction)(void* toCopy)){
 
-    List *list = malloc(sizeof(List));
+    Id3List *list = malloc(sizeof(Id3List));
 
     list->head = NULL;
     list->size = 0;
@@ -62,9 +62,9 @@ List *newList(void (*deleteFunction)(void* toDelete), void *(*copyFunction)(void
     return list;
 }
 
-Node *newNode(void *data){
+Id3Node *id3NewNode(void *data){
 
-    Node *node = malloc(sizeof(Node));
+    Id3Node *node = malloc(sizeof(Id3Node));
 
     node->data = data;
     node->next = NULL;
@@ -72,17 +72,17 @@ Node *newNode(void *data){
     return node;
 }
 
-void listPush(List *list, void *toAdd){
+void id3PushList(Id3List *list, void *toAdd){
 
     if(list == NULL || toAdd == NULL){
         return;
     }
-    Node *node = newNode(toAdd);
+    Id3Node *node = id3NewNode(toAdd);
     
     if(list->size == 0){
         list->head = node;
     }else{
-        Node *tmp = list->head;
+        Id3Node *tmp = list->head;
         node->next = tmp;
         list->head = node;
     }
@@ -90,7 +90,7 @@ void listPush(List *list, void *toAdd){
     list->size = list->size + 1;
 }
 
-void freeList(List *list){
+void id3FreeList(Id3List *list){
     
     if(list == NULL){
         return;
@@ -100,13 +100,13 @@ void freeList(List *list){
         return;
     }
 
-    Node *curr = list->head;
+    Id3Node *curr = list->head;
     for(int i = 0; i < list->size; i++){
         if(curr == NULL){
             break;
         }
 
-        Node *tmp = curr;
+        Id3Node *tmp = curr;
         curr = tmp->next;
         list->deleteData(tmp->data);
         free(tmp);
@@ -116,7 +116,7 @@ void freeList(List *list){
     list->size = 0;
 }
 
-void destroyList(List *list){
+void id3DestroyList(Id3List *list){
     
     if(list == NULL){
         return;
@@ -126,11 +126,11 @@ void destroyList(List *list){
         return;
     }
 
-    freeList(list);
+    id3FreeList(list);
     free(list);
 }
 
-void *listRemove(List *list, int pos){
+void *id3RemoveList(Id3List *list, int pos){
 	
     if(list == NULL){
         return NULL;
@@ -140,8 +140,8 @@ void *listRemove(List *list, int pos){
         return NULL;
     }
 
-    Node *temp = list->head;
-    Node *prev = list->head;
+    Id3Node *temp = list->head;
+    Id3Node *prev = list->head;
     void *toReturn;
     for(int i = 0; i < pos; i++) {
         if(i == 0 && pos == 1) {
@@ -168,7 +168,7 @@ void *listRemove(List *list, int pos){
     return NULL;
 }
 
-List *copyList(List *list){
+Id3List *id3CopyList(Id3List *list){
 
     if(list == NULL){
         return NULL;
@@ -178,18 +178,18 @@ List *copyList(List *list){
         return NULL;
     }
 
-    List *ret = newList(list->deleteData, list->copyData);
-    Node *n = list->head;
+    Id3List *ret = id3NewList(list->deleteData, list->copyData);
+    Id3Node *n = list->head;
 
     while(n != NULL){
-        listPush(ret, ret->copyData(n->data));
+        id3PushList(ret, ret->copyData(n->data));
         n = n->next;
     }
 
     return ret;
 }
 
-ListIter *newListIter(List *list){
+ListIter *id3NewListIter(Id3List *list){
 
     if(list == NULL){
         return NULL;
@@ -202,7 +202,7 @@ ListIter *newListIter(List *list){
 
     return li;
 }
-ListIter *copyListIter(ListIter *li){
+ListIter *id3CopyListIter(ListIter *li){
 
     if(li == NULL){
         return NULL;
@@ -216,7 +216,7 @@ ListIter *copyListIter(ListIter *li){
     return liCopy;
 
 }
-void *nextListIter(ListIter *li){
+void *id3NextListIter(ListIter *li){
     
     if(li == NULL){
         return NULL;
@@ -233,11 +233,11 @@ void *nextListIter(ListIter *li){
 }
 
 
-bool hasNextListIter(ListIter *li){
+bool id3HasNextListIter(ListIter *li){
     return (li->curr != NULL) ? true : false;
 
 }
-void freeListIter(ListIter *li){
+void id3FreeListIter(ListIter *li){
     if(li != NULL){
         free(li);
     }

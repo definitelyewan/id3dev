@@ -17,7 +17,7 @@ void id3v1SetComment(id3buf comment, Id3v1Tag *tag);
 void id3v1SetGenre(Genre genre, Id3v1Tag *tag);
 void id3v1SetTrack(int track, Id3v1Tag *tag);
 
-//edit functions
+//util functions
 void id3v1ClearTagInformation(Id3v1Tag *tag);
 bool id3v1CompareTag(Id3v1Tag *tag1, Id3v1Tag *tag2);
 

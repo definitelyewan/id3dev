@@ -4,6 +4,8 @@
 #include "id3v2Manipulate.h"
 #include "id3Helpers.h"
 #include "id3Defines.h"
+#include "id3v2Frames.h"
+#include "id3v2Header.h"
 #include "id3Reader.h" 
 
 //checks
@@ -76,7 +78,85 @@ bool id3v2ManipFullFrameErrorChecks(Id3v2Frame *frame){
     return false;
 }
 
+//set
+void id3v2SetFrameAlterPreservationIndicator(bool indicator, Id3v2Frame *frame){
+
+}
+
+void id3v2SetFrameFileAlterPreservationIndicator(Id3v2Frame *frame){
+
+}
+
+void id3v2SetFrameReadOnlyIndicator(Id3v2Frame *frame){
+
+}
+
+void id3v2SetFrameUnsynchronizationIndicator(Id3v2Frame *frame){
+
+}
+
+void id3v2SetFrameDataLengthSize(Id3v2Frame *frame){
+
+}
+
+void id3v2SetFrameEncryptionMethod(Id3v2Frame *frame){
+
+}
+
+void id3v2SetFrameGroup(Id3v2Frame *frame){
+
+}
+
 //util
+Id3v2Frame *id3v2IterTag(Id3v2Tag *tag){
+
+    if(tag == NULL){
+        return NULL;
+    }
+
+    if(id3HasNextListIter(tag->iter)){
+        return  (Id3v2Frame *)id3NextListIter(tag->iter);
+    }
+
+    return NULL;
+}
+
+void id3v2ResetIterTag(Id3v2Tag *tag){
+    
+    if(tag == NULL){
+        return;
+    }
+    
+    ListIter *iterN = id3NewListIter(tag->frames);
+    id3FreeListIter(tag->iter);
+    tag->iter = iterN;
+}
+
+Id3List *id3v2SearchForFrames(Id3v2Tag *tag, Id3v2FrameId id){
+    
+    if(tag == NULL){
+        return NULL;
+    }
+    
+    if(tag->frames == NULL || tag->iter == NULL){
+        return NULL;
+    }
+
+    Id3v2Frame *currFrame = NULL;
+    Id3List *idList = id3NewList(id3v2FreeFrame,id3v2CopyFrame);
+
+    while((currFrame = id3v2IterTag(tag)) != NULL){
+
+        if(id3v2GetFrameID(currFrame) == id){
+            Id3v2Frame *copy = id3v2CopyFrame((void *)currFrame);
+            id3PushList(idList, (void *)copy);
+        }
+    }
+    
+    id3v2ResetIterTag(tag);
+    return idList;
+}
+
 void id3v2SavePicture(const char *fileName, Id3v2Frame *frame){
 
     if(fileName == NULL){
@@ -205,7 +285,7 @@ int id3v2GetVersion(Id3v2Tag *tag){
     return strtol(str, NULL, 10); //base 10
 }
 
-bool id3v2UnsynchronizedIndicator(Id3v2Tag *tag){
+bool id3v2GetUnsynchronizedIndicator(Id3v2Tag *tag){
     
     if(id3v2ManipHeaderErrorChecks(tag) == true){
         return false;
@@ -214,15 +294,15 @@ bool id3v2UnsynchronizedIndicator(Id3v2Tag *tag){
     return (id3v2ManipHeaderErrorChecks(tag) == true) ? false : tag->header->unsynchronisation;
 }
 
-bool id3v2ExperimentalIndicator(Id3v2Tag *tag){
+bool id3v2GetExperimentalIndicator(Id3v2Tag *tag){
     return (id3v2ManipHeaderErrorChecks(tag) == true) ? false : tag->header->experimentalIndicator;
 }
 
-bool id3v2ExtendedIndicator(Id3v2Tag *tag){
-    return (id3v2ManipHeaderErrorChecks(tag) == true) ? false : tag->header->extendedHeader;
+bool id3v2GetExtendedIndicator(Id3v2Tag *tag){
+    return (id3v2ManipHeaderErrorChecks(tag) == true) ? false : (tag->header->extendedHeader == NULL) ? false: true;
 }
 
-bool id3v2FooterIndicator(Id3v2Tag *tag){
+bool id3v2GetFooterIndicator(Id3v2Tag *tag){
     return (id3v2ManipHeaderErrorChecks(tag) == true) ? false : tag->header->footer;
 }
 
@@ -234,19 +314,19 @@ size_t id3v2GetTagSize(Id3v2Tag *tag){
     frame flag content
 */
 
-bool id3v2FrameAlterPreservationIndicator(Id3v2Frame *frame){
+bool id3v2GetFrameAlterPreservationIndicator(Id3v2Frame *frame){
     return (id3v2ManipFlagContentErrorChecks(frame) == true) ? false : frame->header->flagContent->tagAlterPreservation;
 }
 
-bool id3v2FrameFileAlterPreservationIndicator(Id3v2Frame *frame){
+bool id3v2GetFrameFileAlterPreservationIndicator(Id3v2Frame *frame){
     return (id3v2ManipFlagContentErrorChecks(frame) == true) ? false : frame->header->flagContent->fileAlterPreservation;
 }
 
-bool id3v2FrameReadOnlyIndicator(Id3v2Frame *frame){
+bool id3v2GetFrameReadOnlyIndicator(Id3v2Frame *frame){
     return (id3v2ManipFlagContentErrorChecks(frame) == true) ? false : frame->header->flagContent->readOnly;
 }
 
-bool id3v2FrameUnsynchronizationIndicator(Id3v2Frame *frame){
+bool id3v2GetFrameUnsynchronizationIndicator(Id3v2Frame *frame){
     return (id3v2ManipFlagContentErrorChecks(frame) == true) ? false : frame->header->flagContent->unsynchronization;
 }
 
@@ -577,8 +657,8 @@ id3byte id3v2GetEventTimeCodeType(Id3v2Frame *frame){
 
     Id3v2EventTimeCodesBody *body = (Id3v2EventTimeCodesBody *)frame->frame;
 
-    if(hasNextListIter(body->eventsTimeCodesIter)){
-        Id3v2EventTimesCodeEvent *event = (Id3v2EventTimesCodeEvent *)nextListIter(body->eventsTimeCodesIter);
+    if(id3HasNextListIter(body->eventsTimeCodesIter)){
+        Id3v2EventTimesCodeEvent *event = (Id3v2EventTimesCodeEvent *)id3NextListIter(body->eventsTimeCodesIter);
 
         return event->typeOfEvent;
     }
@@ -602,8 +682,8 @@ long id3v2GetEventTimeCodeTimeStamp(Id3v2Frame *frame){
 
     Id3v2EventTimeCodesBody *body = (Id3v2EventTimeCodesBody *)frame->frame;
 
-    if(hasNextListIter(body->eventsTimeCodesIter)){
-        Id3v2EventTimesCodeEvent *event = (Id3v2EventTimesCodeEvent *)nextListIter(body->eventsTimeCodesIter);
+    if(id3HasNextListIter(body->eventsTimeCodesIter)){
+        Id3v2EventTimesCodeEvent *event = (Id3v2EventTimesCodeEvent *)id3NextListIter(body->eventsTimeCodesIter);
 
         return event->timeStamp;
     }
@@ -629,9 +709,9 @@ void id3v2ResetEventTimeCodeIter(Id3v2Frame *frame){
 
     Id3v2EventTimeCodesBody *body = (Id3v2EventTimeCodesBody *)frame->frame;
 
-    freeListIter(body->eventsTimeCodesIter);
+    id3FreeListIter(body->eventsTimeCodesIter);
 
-    ListIter *li = newListIter(body->eventTimeCodes);
+    ListIter *li = id3NewListIter(body->eventTimeCodes);
 
     body->eventsTimeCodesIter = li;
 }
@@ -752,8 +832,8 @@ id3buf id3v2GetSynchronizedLyricsValue(Id3v2Frame *frame){
     int encoding = id3v2GetEncoding(frame);
     id3buf text = NULL;
 
-    if(hasNextListIter(body->lyricsIter)){
-        Id3v2StampedLyric *stamp = (Id3v2StampedLyric *)nextListIter(body->lyricsIter);
+    if(id3HasNextListIter(body->lyricsIter)){
+        Id3v2StampedLyric *stamp = (Id3v2StampedLyric *)id3NextListIter(body->lyricsIter);
 
         if(stamp->lyricLen == 0){
             return NULL;
@@ -786,8 +866,8 @@ long id3v2GetSynchronizedLyricsTimeStamp(Id3v2Frame *frame){
 
     Id3v2SynchronizedLyricsBody *body = (Id3v2SynchronizedLyricsBody *)frame->frame;
 
-    if(hasNextListIter(body->lyricsIter)){
-        Id3v2StampedLyric *stamp = (Id3v2StampedLyric *)nextListIter(body->lyricsIter);
+    if(id3HasNextListIter(body->lyricsIter)){
+        Id3v2StampedLyric *stamp = (Id3v2StampedLyric *)id3NextListIter(body->lyricsIter);
         return stamp->timeStamp;
     }
 
@@ -811,9 +891,9 @@ void id3v2ResetSynchronizedLyricsIter(Id3v2Frame *frame){
 
     Id3v2SynchronizedLyricsBody *body = (Id3v2SynchronizedLyricsBody *)frame->frame;
 
-    freeListIter(body->lyricsIter);
+    id3FreeListIter(body->lyricsIter);
 
-    ListIter *li = newListIter(body->lyrics);
+    ListIter *li = id3NewListIter(body->lyrics);
 
     body->lyricsIter = li;
 }

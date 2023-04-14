@@ -55,7 +55,7 @@ Id3v2Tag *id3v2ParseTagFromBuffer(unsigned char *buffer, int tagSize){
 
     unsigned char *frames = NULL;
     Id3v2Header *headerInfo = NULL;
-    List *frameList = NULL;
+    Id3List *frameList = NULL;
 
 
     //read header information
@@ -86,17 +86,17 @@ Id3v2Tag *id3v2ParseTagFromBuffer(unsigned char *buffer, int tagSize){
 }
 
 Id3v2Tag *id3v2CopyTag(Id3v2Tag *toCopy){
-    return (toCopy == NULL) ? NULL : id3v2NewTag(id3v2CopyHeader(toCopy->header), copyList(toCopy->frames));
+    return (toCopy == NULL) ? NULL : id3v2NewTag(id3v2CopyHeader(toCopy->header), id3CopyList(toCopy->frames));
 }
 
-Id3v2Tag *id3v2NewTag(Id3v2Header *header, List *frames){
+Id3v2Tag *id3v2NewTag(Id3v2Header *header, Id3List *frames){
 
     Id3v2Tag *tag = malloc(sizeof(Id3v2Tag));
 
     tag->header = header;
     tag->frames = frames;
 
-    ListIter *iter = newListIter(frames);
+    ListIter *iter = id3NewListIter(frames);
 
     tag->iter = iter;
 
@@ -111,31 +111,25 @@ void id3v2FreeTag(void *toDelete){
 
     Id3v2Tag *tag = (Id3v2Tag *)toDelete;
 
-    destroyList(tag->frames);
+    id3DestroyList(tag->frames);
     id3v2FreeHeader(tag->header);
-    freeListIter(tag->iter);
+    id3FreeListIter(tag->iter);
     free(tag);
 }
 
-Id3v2Frame *id3v2IterTag(Id3v2Tag *tag){
+void id3v2AddFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame){
 
-    if(tag == NULL){
-        return NULL;
-    }
-
-    if(hasNextListIter(tag->iter)){
-        return  (Id3v2Frame *)nextListIter(tag->iter);
-    }
-
-    return NULL;
-}
-void id3v2ResetIterTag(Id3v2Tag *tag){
-    
     if(tag == NULL){
         return;
     }
-    
-    ListIter *iterN = newListIter(tag->frames);
-    freeListIter(tag->iter);
-    tag->iter = iterN;
+
+    if(tag->frames == NULL){
+        return;
+    }
+
+    if(frame == NULL){
+        return;
+    }
+
+    id3PushList(tag->frames, (void *)frame);
 }
