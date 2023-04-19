@@ -24,11 +24,11 @@ void *id3RemoveList(Id3List *list, int pos);
 void id3FreeList(Id3List *list);
 void id3DestroyList(Id3List *list);
 
-ListIter *id3NewListIter(Id3List *list);
-ListIter *id3CopyListIter(ListIter *li);
-void *id3NextListIter(ListIter *li);
-bool id3HasNextListIter(ListIter *li);
-void id3FreeListIter(ListIter *li);
+Id3ListIter *id3NewListIter(Id3List *list);
+Id3ListIter *id3CopyListIter(Id3ListIter *li);
+void *id3NextListIter(Id3ListIter *li);
+bool id3HasNextListIter(Id3ListIter *li);
+void id3FreeListIter(Id3ListIter *li);
 
 #ifdef __cplusplus
 } //extern c end

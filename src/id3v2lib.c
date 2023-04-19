@@ -96,7 +96,7 @@ Id3v2Tag *id3v2NewTag(Id3v2Header *header, Id3List *frames){
     tag->header = header;
     tag->frames = frames;
 
-    ListIter *iter = id3NewListIter(frames);
+    Id3ListIter *iter = id3NewListIter(frames);
 
     tag->iter = iter;
 
@@ -122,7 +122,7 @@ void id3v2AddFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame){
     if(tag == NULL){
         return;
     }
-
+    
     if(tag->frames == NULL){
         return;
     }
@@ -131,5 +131,8 @@ void id3v2AddFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame){
         return;
     }
 
+    tag->header->size = tag->header->size + frame->header->frameSize + frame->header->headerSize;
     id3PushList(tag->frames, (void *)frame);
+    id3FreeListIter(tag->iter);
+    tag->iter = id3NewListIter(tag->frames);
 }

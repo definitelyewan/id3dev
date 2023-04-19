@@ -5,7 +5,6 @@
 extern "C"{
 #endif
 
-#include <stdbool.h>
 #include "id3Types.h"
 
 //mem functions
@@ -30,6 +29,7 @@ size_t id3strlen(id3buf buffer, id3byte encoding);
 
 //extra
 void id3ReaderPrintf(Id3Reader *reader);
+bool id3ValidEncoding(id3byte encoding);
 
 #ifdef __cplusplus
 } //extern c end

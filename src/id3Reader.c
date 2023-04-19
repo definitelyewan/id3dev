@@ -213,7 +213,7 @@ size_t strlenUTF16(id3buf buffer){
 
         len = len + 2;
     }
-
+    
     return len;
 }
 
@@ -257,10 +257,10 @@ size_t id3strlen(id3buf buffer, id3byte encoding){
             len = strlen((char *)buffer);
             break;
         case UTF16:
-            len = strlenUTF16(buffer);
+            len = strlenUTF16(buffer) + 1;
             break;
         case UTF16BE:
-            len = strlenUTF16BE(buffer);
+            len = strlenUTF16BE(buffer) + 1;
             break;
         case UTF8:
             len = strlenUTF8(buffer);
@@ -297,4 +297,12 @@ void id3ReaderPrintf(Id3Reader *reader){
         printf("[%x]",id3ReaderCursor(reader)[i]);
     }
     printf("]\n");
+}
+
+bool id3ValidEncoding(id3byte encoding){
+    if(!(encoding == ISO_8859_1 || encoding == UTF16 || encoding == UTF16BE || encoding == UTF8)){
+        return false;
+    }
+
+    return true;
 }

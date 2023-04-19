@@ -464,9 +464,10 @@ void *id3v2CopyFrame(void *toCopy){
 
 Id3v2Frame *id3v2CreateTextFrame(Id3v2FrameId id, id3byte encoding, id3buf value, id3buf description){
     
-    if(!(encoding == ISO_8859_1 || encoding == UTF16 || encoding == UTF16BE || encoding == UTF8)){
+    if(id3ValidEncoding(encoding) == false){
         return NULL;
     }
+
     if(value == NULL){
         return NULL;
     }
@@ -477,20 +478,17 @@ Id3v2Frame *id3v2CreateTextFrame(Id3v2FrameId id, id3byte encoding, id3buf value
     Id3v2TextBody *ret = NULL;
     unsigned int size = 1; //encoding so +1
     unsigned int headerSize = 0;
-
-    if(id >= WXX){
+    
+    //check id
+    if(TAL >= id && TXX <= id){
+        headerSize = ID3V2_TAG_SIZE_OFFSET;
+    }else if(TALB >= id && TXXX <= id){
         headerSize = ID3V2_HEADER_SIZE;
     }else{
-        headerSize = ID3V2_TAG_SIZE_OFFSET;
+        return NULL;
     }
 
-    size = id3strlen(value, encoding);
-    
-    if(description != NULL){
-        size = size + id3strlen(description, encoding);
-        //padding
-        size++;
-    }
+    size = id3strlen(value, encoding) + id3strlen(description, encoding);
 
     flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
     frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(id),size,headerSize,flags);
@@ -656,6 +654,56 @@ void id3v2FreeTextFrame(Id3v2Frame *toDelete){
     URL frame functions
 */
 
+Id3v2Frame *id3v2CreateURLFrame(Id3v2FrameId id, id3byte encoding, id3buf url, id3buf description){
+
+    if(id3ValidEncoding(encoding) == false){
+        return NULL;
+    }
+
+    if(url == NULL){
+        return NULL;
+    }
+
+    Id3v2FlagContent *flags = NULL;
+    Id3v2FrameHeader *frameHeader = NULL;
+    Id3v2URLBody *body = NULL;
+    Id3v2URLBody *ret = NULL;
+    unsigned int size = 0; //encoding so +1
+    unsigned int headerSize = 0;
+    
+    //check id
+    if(WAF >= id && WXX <= id){
+        headerSize = ID3V2_TAG_SIZE_OFFSET;
+    }else if(WCOM >= id && WXXX <= id){
+        headerSize = ID3V2_HEADER_SIZE;
+    }else{
+        return NULL;
+    }
+
+    if(id == WXX || id == WXXX){
+        //+1 for encoding
+        size = id3strlen(url, ISO_8859_1) + 1;
+        
+        if(description != NULL){
+            //+1 for padding
+            size = size + id3strlen(description, encoding) + 1;
+        }
+        
+        
+    }else{
+      size = id3strlen(url, ISO_8859_1);  
+    }
+    
+    flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
+    frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(id),size,headerSize,flags);
+    body = id3v2NewURLBody((id == WXX || id == WXXX) ? encoding : ISO_8859_1, url, description);
+    ret = id3v2CopyURLBody(body);
+    free(body);
+    
+    return id3v2NewFrame(frameHeader, ret);
+
+}
+
 Id3v2Frame *id3v2ParseURLFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
@@ -721,7 +769,7 @@ Id3v2URLBody *id3v2CopyURLBody(Id3v2URLBody *body){
 
     encoding = body->encoding;
 
-    if(url != NULL){
+    if(body->url != NULL){
         url = calloc(sizeof(id3byte), strlen((char *)body->url) + 1);
         memcpy(url, body->url, strlen((char *)body->url));
     }
@@ -812,6 +860,46 @@ void id3v2FreeURLFrame(Id3v2Frame *toDelete){
 /*
     Involved persons list frame functions
 */
+
+Id3v2Frame *id3v2CreateInvolvedPeopleListFrame(Id3v2FrameId id, id3byte encoding, id3buf peopleListStrings){
+
+    if(id3ValidEncoding(encoding) == false){
+        return NULL;
+    }
+
+    if(peopleListStrings == NULL){
+        return NULL;
+    }
+
+    Id3v2FlagContent *flags = NULL;
+    Id3v2FrameHeader *frameHeader = NULL;
+    Id3v2InvolvedPeopleListBody *body = NULL;
+    Id3v2InvolvedPeopleListBody *ret = NULL;
+    unsigned int size = 1; //encoding so +1
+    unsigned int headerSize = 0;
+
+    //check id
+    switch(id){
+        case IPL:
+            headerSize = ID3V2_TAG_SIZE_OFFSET;
+            break;
+        case IPLS:
+            headerSize = ID3V2_HEADER_SIZE;
+            break;
+        default:
+            return NULL;
+    }
+    
+    size = size + id3strlen(peopleListStrings, encoding);
+
+    flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
+    frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(id),size,headerSize,flags);
+    body = id3v2NewInvolvedPeopleListBody(encoding, peopleListStrings);
+    ret = id3v2CopyInvolvedPeopleListBody(body);
+    free(body);
+
+    return id3v2NewFrame(frameHeader, ret);
+}
 
 Id3v2Frame *id3v2ParseInvolvedPeopleListFrame(id3buf buffer, Id3v2Header *header){
 
@@ -951,6 +1039,42 @@ void id3v2FreeInvolvedPeopleListFrame(Id3v2Frame *toDelete){
     Music CD identifier frame functions
 */
 
+Id3v2Frame *id3v2CreateMusicCDIdentifierFrame(Id3v2FrameId id, id3buf cdtoc){
+
+    if(cdtoc == NULL){
+        return NULL;
+    }
+
+    Id3v2FlagContent *flags = NULL;
+    Id3v2FrameHeader *frameHeader = NULL;
+    Id3v2MusicCDIdentifierBody *body = NULL;
+    Id3v2MusicCDIdentifierBody *ret = NULL;
+    unsigned int size = 0;
+    unsigned int headerSize = 0;
+
+    //check id
+    switch(id){
+        case MCI:
+            headerSize = ID3V2_TAG_SIZE_OFFSET;
+            break;
+        case MCDI:
+            headerSize = ID3V2_HEADER_SIZE;
+            break;
+        default:
+            return NULL;
+    }
+
+    size = id3strlen(cdtoc, ISO_8859_1);
+
+    flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
+    frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(id),size,headerSize,flags);
+    body = id3v2NewMusicCDIdentifierBody(cdtoc);
+    ret = id3v2CopyMusicCDIdentifierBody(body);
+    free(body);
+
+    return id3v2NewFrame(frameHeader, ret);
+}
+
 Id3v2Frame *id3v2ParseMusicCDIdentifierFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
@@ -1079,6 +1203,31 @@ void id3v2FreeMusicCDIdentifierFrame(Id3v2Frame *toDelete){
     Event time codes frame functions
 */
 
+Id3v2Frame *id3v2CreateEventCodesFrame(Id3v2FrameId id, unsigned int timeStampFormat){
+
+    Id3v2FlagContent *flags = NULL;
+    Id3v2FrameHeader *frameHeader = NULL;
+    Id3v2EventTimeCodesBody *body = NULL;
+    unsigned int headerSize = 0;
+    //check id
+    switch(id){
+        case ETC:
+            headerSize = ID3V2_TAG_SIZE_OFFSET;
+            break;
+        case ETCO:
+            headerSize = ID3V2_HEADER_SIZE;
+            break;
+        default:
+            return NULL;
+    }
+
+    flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
+    frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(id),1,headerSize,flags);
+    body = id3v2NewEventTimeCodesBody(timeStampFormat, NULL);
+
+    return id3v2NewFrame(frameHeader, body);
+}
+
 Id3v2Frame *id3v2ParseEventTimeCodesFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
@@ -1191,7 +1340,7 @@ Id3v2EventTimeCodesBody *id3v2NewEventTimeCodesBody(unsigned int timeStampFormat
     eventTimeCodesBody->timeStampFormat = timeStampFormat;
     eventTimeCodesBody->eventTimeCodes = events;
     
-    ListIter *iter = id3NewListIter(events);
+    Id3ListIter *iter = id3NewListIter(events);
 
     eventTimeCodesBody->eventsTimeCodesIter = iter;
 
@@ -1254,6 +1403,50 @@ void id3v2FreeEventCode(void *toDelete){
 /*
     Synced tempo codes frame functions
 */
+
+Id3v2Frame *id3v2CreateSyncedTempoCodesFrame(Id3v2FrameId id, id3byte timeStampFormat, id3buf tempoData, unsigned int tempoDataLen){
+    
+    if(timeStampFormat != 1 || timeStampFormat != 2){
+        return NULL;
+    }
+
+    if(tempoData == NULL){
+        return NULL;
+    }
+
+    if(tempoDataLen == 0){
+        return NULL;
+    }
+
+    Id3v2FlagContent *flags = NULL;
+    Id3v2FrameHeader *frameHeader = NULL;
+    Id3v2SyncedTempoCodesBody *body = NULL;
+    unsigned int headerSize = 0;
+    id3buf data = NULL;
+
+    //check id
+    switch(id){
+        case STC:
+            headerSize = ID3V2_TAG_SIZE_OFFSET;
+            break;
+        case SYTC:
+            headerSize = ID3V2_HEADER_SIZE;
+            break;
+        default:
+            return NULL;
+    }
+
+    Id3Reader *stream = NULL;
+
+    stream = id3NewReader(tempoData, tempoDataLen);
+    data = id3ReaderEncodedRemainder(stream, ISO_8859_1);
+
+    flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
+    frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(id),tempoDataLen + 1,headerSize,flags);
+    body = id3v2NewSyncedTempoCodesBody(timeStampFormat, data, tempoDataLen);
+
+    return id3v2NewFrame(frameHeader, body);
+}
 
 Id3v2Frame *id3v2ParseSyncedTempoCodesFrame(id3buf buffer, Id3v2Header *header){
 
@@ -1387,6 +1580,47 @@ void id3v2FreeSyncedTempoCodesFrame(Id3v2Frame *toDelete){
 /*
     unsynced lyrics frame functions
 */
+
+Id3v2Frame *id3v2CreateUnsynchronizedLyricsFrame(Id3v2FrameId id, id3byte encoding, id3buf language, id3buf descriptor, id3buf lyrics){
+
+    if(id3ValidEncoding(encoding) == false){
+        return NULL;
+    }
+
+    Id3v2FlagContent *flags = NULL;
+    Id3v2FrameHeader *frameHeader = NULL;
+    Id3v2UnsynchronizedLyricsBody *body = NULL;
+    Id3v2UnsynchronizedLyricsBody *ret = NULL;
+    unsigned int headerSize = 0;
+    unsigned int size = 1 + ID3V2_LANGUAGE_LEN; // +1 for encoding
+
+    //check id
+    switch(id){
+        case ULT:
+            headerSize = ID3V2_TAG_SIZE_OFFSET;
+            break;
+        case USLT:
+            headerSize = ID3V2_HEADER_SIZE;
+            break;
+        default:
+            return NULL;
+    }
+
+    //+1 for padding
+    if(encoding == ISO_8859_1){
+        size++;
+    }
+
+    size = size + id3strlen(descriptor, encoding) + id3strlen(lyrics, encoding);
+
+    flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
+    frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(id),size,headerSize,flags);
+    body = id3v2NewUnsynchronizedLyricsBody(encoding,language,descriptor,lyrics);
+    ret = id3v2CopyUnsynchronizedLyricsBody(body);
+    free(body);
+    
+    return id3v2NewFrame(frameHeader, ret);
+}
 
 Id3v2Frame *id3v2ParseUnsynchronizedLyricsFrame(id3buf buffer, Id3v2Header *header){
 
@@ -1562,6 +1796,35 @@ void id3v2FreeUnsynchronizedLyricsFrame(Id3v2Frame *toDelete){
     Synced lyrics frame functions
 */
 
+Id3v2Frame *id3v2CreateSynchronizedLyricsFrame(Id3v2FrameId id, id3byte encoding, id3buf language, unsigned int timeStampFormat, unsigned int contentType, id3buf descriptor){
+
+    if(id3ValidEncoding(encoding)){
+        return NULL;
+    }
+
+    Id3v2FlagContent *flags = NULL;
+    Id3v2FrameHeader *frameHeader = NULL;
+    Id3v2UnsynchronizedLyricsBody *body = NULL;
+    Id3v2UnsynchronizedLyricsBody *ret = NULL;
+    unsigned int headerSize = 0;
+    unsigned int size = 1 + 1 + 1 + ID3V2_LANGUAGE_LEN; // +1 for encoding
+
+    //check id
+    switch(id){
+        case SLT:
+            headerSize = ID3V2_TAG_SIZE_OFFSET;
+            break;
+        case SYLT:
+            headerSize = ID3V2_HEADER_SIZE;
+            break;
+        default:
+            return NULL;
+    }
+
+    size = size + id3strlen(descriptor, encoding);
+
+}
+
 Id3v2Frame *id3v2ParseSynchronizedLyricsFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
@@ -1730,7 +1993,7 @@ Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(id3byte encoding, id
     synchronizedLyricsBody->descriptor = descriptor;
     synchronizedLyricsBody->lyrics = lyrics;
 
-    ListIter *iter = id3NewListIter(lyrics);
+    Id3ListIter *iter = id3NewListIter(lyrics);
 
     synchronizedLyricsBody->lyricsIter = iter;
 

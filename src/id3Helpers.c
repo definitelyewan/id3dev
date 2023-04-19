@@ -189,26 +189,26 @@ Id3List *id3CopyList(Id3List *list){
     return ret;
 }
 
-ListIter *id3NewListIter(Id3List *list){
+Id3ListIter *id3NewListIter(Id3List *list){
 
     if(list == NULL){
         return NULL;
     }
 
-    ListIter *li = malloc(sizeof(ListIter));
+    Id3ListIter *li = malloc(sizeof(Id3ListIter));
 
     li->l = list;
     li->curr = list->head;
 
     return li;
 }
-ListIter *id3CopyListIter(ListIter *li){
+Id3ListIter *id3CopyListIter(Id3ListIter *li){
 
     if(li == NULL){
         return NULL;
     }
 
-    ListIter *liCopy = malloc(sizeof(ListIter)); 
+    Id3ListIter *liCopy = malloc(sizeof(Id3ListIter)); 
 
     liCopy->l = li->l;
     liCopy->curr = li->curr;
@@ -216,7 +216,7 @@ ListIter *id3CopyListIter(ListIter *li){
     return liCopy;
 
 }
-void *id3NextListIter(ListIter *li){
+void *id3NextListIter(Id3ListIter *li){
     
     if(li == NULL){
         return NULL;
@@ -233,11 +233,11 @@ void *id3NextListIter(ListIter *li){
 }
 
 
-bool id3HasNextListIter(ListIter *li){
+bool id3HasNextListIter(Id3ListIter *li){
     return (li->curr != NULL) ? true : false;
 
 }
-void id3FreeListIter(ListIter *li){
+void id3FreeListIter(Id3ListIter *li){
     if(li != NULL){
         free(li);
     }

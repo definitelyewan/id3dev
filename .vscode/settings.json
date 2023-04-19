@@ -2,6 +2,7 @@
     "files.associations": {
         "stdbool.h": "c",
         "*.rmd": "markdown",
-        "id3.h": "c"
+        "id3.h": "c",
+        "id3types.h": "c"
     }
 }

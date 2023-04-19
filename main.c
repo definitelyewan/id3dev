@@ -181,8 +181,8 @@ void metadataPrint(Id3Metadata *data){
                     id3byte type = 0x00;
                     long time = 0;
 
-                    printf("format:[%d] ",id3v2GetTimeStampFormat(currFrame));
-                    
+                    printf("format:[%x] ",id3v2GetTimeStampFormat(currFrame));
+
                     printf("types:[");
                     while((type = id3v2GetEventTimeCodeType(currFrame)) != 0x00){
                         printf("[%x]",type);
@@ -196,6 +196,8 @@ void metadataPrint(Id3Metadata *data){
                         printf("[%ld]",time);
                     }
                     printf("]");
+
+                    id3v2ResetEventTimeCodeIter(currFrame);
 
                 }else if(id3v2GetFrameID(currFrame) == ULT || id3v2GetFrameID(currFrame) == USLT){
 
@@ -637,40 +639,31 @@ int main(int argc, char *argv[]){
     
     Id3v2FrameId id;
     if(id3v2GetVersion(data->version2) >= 30){
-        id = TALB;
+        id = USLT;
     }else{
-        id = TAL;
+        id = ULT;
     }
 
+    //printf("[Original]===================================================================\n");
+    //metadataPrint(data);
 
     Id3List *l = id3v2SearchForFrames(data->version2, id);
-    ListIter *iter = id3NewListIter(l);
+    Id3ListIter *iter = id3NewListIter(l);
     Id3v2Frame *checkFrame = NULL;
     while((checkFrame = id3NextListIter(iter)) != NULL){
-        Id3v2TextBody *body = (Id3v2TextBody *)checkFrame->frame;
-        printf("----------------------\n");
-        encodedprintf(body->description,body->encoding);
-        printf("\n");
-        encodedprintf(body->value, body->encoding);
-        Id3v2Frame *testFrame = id3v2CreateTextFrame(TXX, body->encoding, body->value, body->description);
-        printf("\n----------------------\n");
+        
+        Id3v2UnsynchronizedLyricsBody *body = (Id3v2UnsynchronizedLyricsBody *)checkFrame->frame;
+        
+        Id3v2Frame *testFrame = id3v2CreateUnsynchronizedLyricsFrame(id,body->encoding, body->language, body->descriptor, body->lyrics);
 
-        printf("%s\n",checkFrame->header->id);
-        Id3v2TextBody *body2 = (Id3v2TextBody *)testFrame->frame;
-        printf("----------------------\n");
-        encodedprintf(body2->description,body2->encoding);
-        printf("\n");
-        encodedprintf(body2->value, body2->encoding);
-        printf("\n----------------------\n");
-        id3v2FreeFrame(testFrame);
+        id3v2AddFrameToTag(data->version2, testFrame);
+        //id3v2FreeFrame(testFrame);
     }
     id3DestroyList(l);
     id3FreeListIter(iter);
     
-    //printf("[Original]===================================================================\n");
-    //metadataPrint(data);
-    //printf("[edited]=====================================================================\n");
-    //metadataPrint(data);
+    printf("[edited]=====================================================================\n");
+    metadataPrint(data);
 
     //printf("[Make A Copy]\n");
     //Id3Metadata *data2 = id3CopyMetadata(data);

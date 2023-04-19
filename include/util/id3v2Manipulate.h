@@ -96,6 +96,7 @@ void id3v2ResetIterTag(Id3v2Tag *tag);
 Id3List *id3v2SearchForFrames(Id3v2Tag *tag, Id3v2FrameId id);
 void id3v2SavePicture(const char *fileName, Id3v2Frame *frame);
 void id3v2SaveEncapsulatedObject(Id3v2Frame *frame);
+void id3v2AddEventToEventFrame(Id3v2Frame *eventCodeFrame, id3byte typeOfEvent, long timeStamp);
 
 //compatability functions a.k.a getters
 int id3v2GetTagSizeRestriction(Id3v2Tag *tag);

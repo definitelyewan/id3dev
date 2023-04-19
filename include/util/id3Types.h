@@ -18,16 +18,19 @@ typedef struct _Id3List{
     void (*deleteData)(void* toDelete);
     void *(*copyData)(void* toCopy);
     struct _Id3Node *head;
+
 }Id3List;
 
-typedef struct _ListIter{
+typedef struct _Id3ListIter{
     Id3List *l;
     struct _Id3Node *curr;
-}ListIter;
+
+}Id3ListIter;
 
 typedef struct _Id3Node{
     void *data;
     struct _Id3Node *next;
+
 }Id3Node;
 
 /*
@@ -247,7 +250,6 @@ typedef enum _Genre{
 
 //structs
 typedef struct _Id3v1Tag{
-    
     id3buf title;
     id3buf artist;
     id3buf albumTitle;
@@ -317,7 +319,7 @@ typedef struct _Id3v2header{
 typedef struct _Id3v2Tag{
     Id3v2Header *header;
     Id3List *frames;
-    ListIter *iter;
+    Id3ListIter *iter;
 
 }Id3v2Tag;
 
@@ -518,18 +520,19 @@ typedef struct _Id3v2InvolvedPeopleListBody{
 
 typedef struct _Id3v2MusicCDIdentifierBody{
     id3buf cdtoc;
+
 }Id3v2MusicCDIdentifierBody;
 
 typedef struct _Id3v2EventTimeCodesEvent{
     id3byte typeOfEvent;
-    long timeStamp;
+    int timeStamp;
 
 }Id3v2EventTimesCodeEvent;
 
 typedef struct _Id3v2EventTimeCodesBody{
     unsigned int timeStampFormat;
     Id3List *eventTimeCodes;
-    ListIter *eventsTimeCodesIter;
+    Id3ListIter *eventsTimeCodesIter;
 
 }Id3v2EventTimeCodesBody;
 
@@ -555,7 +558,7 @@ typedef struct _Id3v2SynchronizedLyricsBody{
     unsigned int contentType;
     id3buf descriptor;
     Id3List *lyrics;
-    ListIter *lyricsIter;
+    Id3ListIter *lyricsIter;
     
 }Id3v2SynchronizedLyricsBody;
 

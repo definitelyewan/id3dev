@@ -78,35 +78,6 @@ bool id3v2ManipFullFrameErrorChecks(Id3v2Frame *frame){
     return false;
 }
 
-//set
-void id3v2SetFrameAlterPreservationIndicator(bool indicator, Id3v2Frame *frame){
-
-}
-
-void id3v2SetFrameFileAlterPreservationIndicator(Id3v2Frame *frame){
-
-}
-
-void id3v2SetFrameReadOnlyIndicator(Id3v2Frame *frame){
-
-}
-
-void id3v2SetFrameUnsynchronizationIndicator(Id3v2Frame *frame){
-
-}
-
-void id3v2SetFrameDataLengthSize(Id3v2Frame *frame){
-
-}
-
-void id3v2SetFrameEncryptionMethod(Id3v2Frame *frame){
-
-}
-
-void id3v2SetFrameGroup(Id3v2Frame *frame){
-
-}
-
 //util
 Id3v2Frame *id3v2IterTag(Id3v2Tag *tag){
 
@@ -127,7 +98,7 @@ void id3v2ResetIterTag(Id3v2Tag *tag){
         return;
     }
     
-    ListIter *iterN = id3NewListIter(tag->frames);
+    Id3ListIter *iterN = id3NewListIter(tag->frames);
     id3FreeListIter(tag->iter);
     tag->iter = iterN;
 }
@@ -239,6 +210,36 @@ void id3v2SaveEncapsulatedObject(Id3v2Frame *frame){
    free(fileName);
    free(name);
 }
+
+void id3v2AddEventToEventFrame(Id3v2Frame *eventCodeFrame, id3byte typeOfEvent, long timeStamp){
+
+    if(eventCodeFrame == NULL){
+        return;
+    }
+    //printf("%d\n",typeOfEvent);
+    Id3v2EventTimesCodeEvent *event = NULL;
+    Id3v2EventTimeCodesBody *body = NULL;
+    Id3List *list = NULL;
+
+    if(eventCodeFrame->frame == NULL){
+        return;
+    }
+
+    body = (Id3v2EventTimeCodesBody *)eventCodeFrame->frame;
+    event = id3v2NewEventCodeEvent(typeOfEvent, timeStamp);
+    
+    
+    if(body->eventTimeCodes == NULL){
+        list = id3NewList(id3v2FreeEventCode,id3v2CopyEventCodeEvent);
+        body->eventTimeCodes = list;
+    }
+
+    eventCodeFrame->header->frameSize = eventCodeFrame->header->frameSize + 1 + 4;
+    
+    id3PushList(body->eventTimeCodes, (void *)event);
+    id3v2ResetEventTimeCodeIter(eventCodeFrame);
+}
+
 
 //compatability functions a.k.a getters
 
@@ -711,7 +712,7 @@ void id3v2ResetEventTimeCodeIter(Id3v2Frame *frame){
 
     id3FreeListIter(body->eventsTimeCodesIter);
 
-    ListIter *li = id3NewListIter(body->eventTimeCodes);
+    Id3ListIter *li = id3NewListIter(body->eventTimeCodes);
 
     body->eventsTimeCodesIter = li;
 }
@@ -761,6 +762,10 @@ id3buf id3v2GetLanguage(Id3v2Frame *frame){
             break;
         default:
             return NULL;
+    }
+
+    if(lang == NULL){
+        return NULL;
     }
 
     ret = calloc(sizeof(id3byte), ID3V2_LANGUAGE_LEN+1);
@@ -893,7 +898,7 @@ void id3v2ResetSynchronizedLyricsIter(Id3v2Frame *frame){
 
     id3FreeListIter(body->lyricsIter);
 
-    ListIter *li = id3NewListIter(body->lyrics);
+    Id3ListIter *li = id3NewListIter(body->lyrics);
 
     body->lyricsIter = li;
 }
