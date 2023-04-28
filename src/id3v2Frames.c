@@ -5,7 +5,7 @@
 #include "id3v2Header.h"
 #include "id3Helpers.h"
 #include "id3Reader.h"
-#include "limits.h"
+#include <limits.h>
 
 /*
     FRAME FUNCTIONS
