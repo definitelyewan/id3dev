@@ -564,7 +564,7 @@ typedef struct _Id3v2SynchronizedLyricsBody{
 
 typedef struct _Id3v2StampedLyric{
     id3buf text;
-    long timeStamp;
+    int timeStamp;
     size_t lyricLen;
 
 }Id3v2StampedLyric;

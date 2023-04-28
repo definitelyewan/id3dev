@@ -179,7 +179,7 @@ void metadataPrint(Id3Metadata *data){
                 }else if(id3v2GetFrameID(currFrame) == ETC || id3v2GetFrameID(currFrame) == ETCO){
 
                     id3byte type = 0x00;
-                    long time = 0;
+                    int time = 0;
 
                     printf("format:[%x] ",id3v2GetTimeStampFormat(currFrame));
 
@@ -193,7 +193,7 @@ void metadataPrint(Id3Metadata *data){
 
                     printf("stamps:[");
                     while((time = id3v2GetEventTimeCodeTimeStamp(currFrame)) != -1){
-                        printf("[%ld]",time);
+                        printf("[%d]",time);
                     }
                     printf("]");
 
@@ -231,7 +231,7 @@ void metadataPrint(Id3Metadata *data){
                     int format = id3v2GetTimeStampFormat(currFrame);
                     int contentType = id3v2GetSynchronizedLyricsContentType(currFrame);
                     id3buf text = NULL;
-                    long stamp = 0;
+                    int stamp = 0;
 
                     if(language != NULL){
                         printf("language:[%s] ",language);
@@ -261,7 +261,7 @@ void metadataPrint(Id3Metadata *data){
 
                     printf("stamp:[");
                     while((stamp = id3v2GetSynchronizedLyricsTimeStamp(currFrame)) != -1){
-                        printf("[%ld]",stamp);
+                        printf("[%d]",stamp);
                     }
                     printf("] ");
 
@@ -639,28 +639,28 @@ int main(int argc, char *argv[]){
     
     Id3v2FrameId id;
     if(id3v2GetVersion(data->version2) >= 30){
-        id = USLT;
+        id = PCNT;
     }else{
-        id = ULT;
+        id = CNT;
     }
-
+    
+    Id3v2Frame *new = id3v2CreatePlayCounterFrame(id, 100);
+    id3v2AddFrameToTag(data->version2, new);
     //printf("[Original]===================================================================\n");
     //metadataPrint(data);
 
-    Id3List *l = id3v2SearchForFrames(data->version2, id);
-    Id3ListIter *iter = id3NewListIter(l);
-    Id3v2Frame *checkFrame = NULL;
-    while((checkFrame = id3NextListIter(iter)) != NULL){
-        
-        Id3v2UnsynchronizedLyricsBody *body = (Id3v2UnsynchronizedLyricsBody *)checkFrame->frame;
-        
-        Id3v2Frame *testFrame = id3v2CreateUnsynchronizedLyricsFrame(id,body->encoding, body->language, body->descriptor, body->lyrics);
+    // Id3List *l = id3v2SearchForFrames(data->version2, id);
+    // Id3ListIter *iter = id3NewListIter(l);
+    // Id3v2Frame *checkFrame = NULL;
+    // while((checkFrame = id3NextListIter(iter)) != NULL){
 
-        id3v2AddFrameToTag(data->version2, testFrame);
-        //id3v2FreeFrame(testFrame);
-    }
-    id3DestroyList(l);
-    id3FreeListIter(iter);
+    //     Id3v2GeneralEncapsulatedObjectBody *body = (Id3v2GeneralEncapsulatedObjectBody *)checkFrame->frame;
+    //     Id3v2Frame *testFrame = id3v2CreateGeneralEncapsulatedObjectFrame(id, body->encoding, body->mimeType, body->filename, body->contentDescription, body->encapsulatedObject, body->encapsulatedObjectLen);
+    //     id3v2AddFrameToTag(data->version2, testFrame);
+    //     //id3v2FreeFrame(testFrame);
+    // }
+    // id3DestroyList(l);
+    // id3FreeListIter(iter);
     
     printf("[edited]=====================================================================\n");
     metadataPrint(data);

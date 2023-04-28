@@ -5,6 +5,7 @@
 #include "id3v2Header.h"
 #include "id3Helpers.h"
 #include "id3Reader.h"
+#include "limits.h"
 
 /*
     FRAME FUNCTIONS
@@ -134,6 +135,8 @@ void id3v2FreeFrame(void *toDelete){
     // seek frame 2.4 only
     }else if(curr->header->idNum == SEEK){
         id3v2FreeSeekFrame(curr);
+    }else{
+        id3v2FreeSubjectiveFrame(curr);
     }
 }
 
@@ -1309,7 +1312,7 @@ Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(id3buf buffer, Id3v2FrameH
 
     while(saveSize > 0){
 
-        long stamp = 0;
+        int stamp = 0;
         id3byte typeOfEvent = 0x00;
         Id3v2EventTimesCodeEvent *newEvent = NULL;
 
@@ -1347,7 +1350,7 @@ Id3v2EventTimeCodesBody *id3v2NewEventTimeCodesBody(unsigned int timeStampFormat
     return eventTimeCodesBody;
 }
 
-Id3v2EventTimesCodeEvent *id3v2NewEventCodeEvent(id3byte typeOfEvent, long timeStamp){
+Id3v2EventTimesCodeEvent *id3v2NewEventCodeEvent(id3byte typeOfEvent, int timeStamp){
 
     Id3v2EventTimesCodeEvent *eventCode = malloc(sizeof(Id3v2EventTimesCodeEvent));
 
@@ -1798,16 +1801,20 @@ void id3v2FreeUnsynchronizedLyricsFrame(Id3v2Frame *toDelete){
 
 Id3v2Frame *id3v2CreateSynchronizedLyricsFrame(Id3v2FrameId id, id3byte encoding, id3buf language, unsigned int timeStampFormat, unsigned int contentType, id3buf descriptor){
 
-    if(id3ValidEncoding(encoding)){
+    if(id3ValidEncoding(encoding) == false){
         return NULL;
     }
 
     Id3v2FlagContent *flags = NULL;
     Id3v2FrameHeader *frameHeader = NULL;
-    Id3v2UnsynchronizedLyricsBody *body = NULL;
-    Id3v2UnsynchronizedLyricsBody *ret = NULL;
+    Id3v2SynchronizedLyricsBody *body = NULL;
+    Id3v2SynchronizedLyricsBody *ret = NULL;
     unsigned int headerSize = 0;
-    unsigned int size = 1 + 1 + 1 + ID3V2_LANGUAGE_LEN; // +1 for encoding
+    unsigned int size = 1; //+1 for encoding
+
+    size = size + ID3V2_LANGUAGE_LEN;
+    size++; //+1 for time stamp format
+    size++; //+1 for content type
 
     //check id
     switch(id){
@@ -1823,6 +1830,15 @@ Id3v2Frame *id3v2CreateSynchronizedLyricsFrame(Id3v2FrameId id, id3byte encoding
 
     size = size + id3strlen(descriptor, encoding);
 
+    size++; //padding
+
+    flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
+    frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(id),size,headerSize,flags);
+    body = id3v2NewSynchronizedLyricsBody(encoding, language, timeStampFormat, contentType, descriptor, NULL);
+    ret = id3v2CopySynchronizedLyricsBody(body);
+    free(body);
+
+    return id3v2NewFrame(frameHeader, ret);
 }
 
 Id3v2Frame *id3v2ParseSynchronizedLyricsFrame(id3buf buffer, Id3v2Header *header){
@@ -1906,7 +1922,7 @@ Id3v2SynchronizedLyricsBody *id3v2CopySynchronizedLyricsBody(Id3v2SynchronizedLy
         memcpy(language, body->language, ID3V2_LANGUAGE_LEN);
     }
 
-    if(body->lyrics->head != NULL){
+    if(body->lyrics != NULL){
         lyrics = id3CopyList(body->lyrics);
     }
 
@@ -1959,7 +1975,7 @@ Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(id3buf buffer, Id3
     while(id3ReaderGetCh(stream) != EOF){
 
         id3buf text = NULL;
-        long timeStamp = 0;
+        int timeStamp = 0;
         size_t lyricLen = 0;
         Id3v2StampedLyric *lyric = NULL;
 
@@ -2000,7 +2016,7 @@ Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(id3byte encoding, id
     return synchronizedLyricsBody;
 }
 
-Id3v2StampedLyric *id3v2NewStampedLyric(id3buf text, long timeStamp, size_t lyricLen){
+Id3v2StampedLyric *id3v2NewStampedLyric(id3buf text, int timeStamp, size_t lyricLen){
 
     Id3v2StampedLyric *newLyric = malloc(sizeof(Id3v2StampedLyric));
 
@@ -2079,6 +2095,45 @@ void id3v2FreeStampedLyric(void *toDelete){
 /*
     comment frame functions
 */
+
+Id3v2Frame *id3v2CreateCommentFrame(Id3v2FrameId id, id3byte encoding, id3buf language, id3buf description, id3buf text){
+
+    if(id3ValidEncoding(encoding) == false){
+        return NULL;
+    }
+
+    Id3v2FlagContent *flags = NULL;
+    Id3v2FrameHeader *frameHeader = NULL;
+    Id3v2CommentBody *body = NULL;
+    Id3v2CommentBody *ret = NULL;
+    unsigned int headerSize = 0;
+    unsigned int size = 1 + ID3V2_LANGUAGE_LEN; //+1 for encoding
+
+    //check id
+    switch(id){
+        case COM:
+            headerSize = ID3V2_TAG_SIZE_OFFSET;
+            break;
+        case COMM:
+            headerSize = ID3V2_HEADER_SIZE;
+            break;
+        default:
+            return NULL;
+    }
+
+    size = size + id3strlen(description, encoding) + id3strlen(text, encoding);
+    if(encoding == ISO_8859_1){
+        size++;
+    }
+
+    flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
+    frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(id),size,headerSize,flags);
+    body = id3v2NewCommentBody(encoding, language, description, text);
+    ret = id3v2CopyCommentBody(body);
+    free(body);
+
+    return id3v2NewFrame(frameHeader, ret);
+}
 
 Id3v2Frame *id3v2ParseCommentFrame(id3buf buffer, Id3v2Header *header){
 
@@ -2256,6 +2311,34 @@ void id3v2FreeCommentFrame(Id3v2Frame *toDelete){
     Subjective frame functions
 */
 
+Id3v2Frame *id3v2CreateSubjectiveFrame(Id3v2FrameId id, id3buf value, int valueSize){
+
+
+    Id3v2FlagContent *flags = NULL;
+    Id3v2FrameHeader *frameHeader = NULL;
+    Id3v2SubjectiveBody *body = NULL;
+    Id3v2SubjectiveBody *ret = NULL;
+    unsigned int headerSize = 0;
+    
+    if(valueSize <= 0 && value != NULL){
+        return NULL;
+    }
+
+    if(id <= WXX){
+        headerSize = ID3V2_TAG_SIZE_OFFSET;
+    }else{
+        headerSize = ID3V2_HEADER_SIZE;
+    }
+
+    flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
+    frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(id),valueSize,headerSize,flags);
+    body = id3v2NewSubjectiveBody(value, valueSize);
+    ret = id3v2CopySubjectiveBody(body);
+    free(body);
+
+    return id3v2NewFrame(frameHeader, ret);
+}
+
 Id3v2Frame *id3v2ParseSubjectiveFrame(id3buf buffer, Id3v2Header *header){
     
     if(buffer == NULL){
@@ -2385,6 +2468,22 @@ void id3v2FreeSubjectiveFrame(Id3v2Frame *toDelete){
     Relative volume adjustment frame functions
 */
 
+Id3v2Frame *id3v2CreateRelativeVolumeAdjustmentFrame(Id3v2FrameId id, id3buf value, int valueSize){
+    
+    switch(id){
+        case RVA:
+            break;
+        case RVA2:
+            break;
+        case RVAD:
+            break;
+        default:
+            return NULL;
+    }
+
+    return id3v2CreateSubjectiveFrame(id, value, valueSize);
+}
+
 Id3v2Frame *id3v2ParseRelativeVolumeAdjustmentFrame(id3buf buffer, Id3v2Header *header){
     return id3v2ParseSubjectiveFrame(buffer, header);
 }
@@ -2412,6 +2511,22 @@ void id3v2FreeRelativeVolumeAdjustmentFrame(Id3v2Frame *toDelete){
 /*
     Equalization frame functions
 */
+
+Id3v2Frame *id3v2CreateEqualisationFrame(Id3v2FrameId id, id3buf value, int valueSize){
+
+    switch(id){
+        case EQU:
+            break;
+        case EQUA:
+            break;
+        case EQU2:
+            break;
+        default:
+            return NULL;
+    }
+
+    return id3v2CreateSubjectiveFrame(id, value, valueSize);
+}
 
 Id3v2Frame *id3v2ParseEqualisationFrame(id3buf buffer, Id3v2Header *header){
     return id3v2ParseSubjectiveFrame(buffer, header);
@@ -2441,6 +2556,20 @@ void id3v2FreeEqualisationFrame(Id3v2Frame *toDelete){
     Reverb frame functions
 */
 
+Id3v2Frame *id3v2CreateReverbFrame(Id3v2FrameId id, id3buf value, int valueSize){
+
+    switch(id){
+        case REV:
+            break;
+        case RVRB:
+            break;
+        default:
+            return NULL;
+    }
+
+    return id3v2CreateSubjectiveFrame(id, value, valueSize);
+}
+
 Id3v2Frame *id3v2ParseReverbFrame(id3buf buffer, Id3v2Header *header){
     return id3v2ParseSubjectiveFrame(buffer, header);
 }
@@ -2468,6 +2597,45 @@ void id3v2FreeReverbFrame(Id3v2Frame *toDelete){
 /*
     Picture frame functions
 */
+
+Id3v2Frame *id3v2CreatePictureFrame(Id3v2FrameId id, id3byte encoding, id3buf format, id3byte pictureType, id3buf description, id3buf pictureData, int picSize){
+
+    Id3v2FlagContent *flags = NULL;
+    Id3v2FrameHeader *frameHeader = NULL;
+    Id3v2PictureBody *body = NULL;
+    Id3v2PictureBody *ret = NULL;
+    unsigned int headerSize = 0;
+    unsigned int frameSize = 1 + 1; //+1 for encoding and picture type
+
+    if(picSize <= 0 && pictureData != NULL){
+        return NULL;
+    }
+
+    if(id3ValidEncoding(encoding) == false){
+        return NULL;
+    }
+
+    switch(id){
+        case PIC:
+            headerSize = ID3V2_TAG_SIZE_OFFSET;
+            break;
+        case APIC:
+            headerSize = ID3V2_HEADER_SIZE;
+            break;
+        default:
+            return NULL;
+    }
+
+    frameSize = frameSize + id3strlen(format, ISO_8859_1) + 1 + id3strlen(description, encoding) + 1 + picSize;
+
+    flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
+    frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(id),frameSize,headerSize,flags);
+    body = id3v2NewPictureBody(encoding, format, pictureType, description, pictureData, picSize);
+    ret = id3v2CopyPictureBody(body);
+    free(body);
+
+    return id3v2NewFrame(frameHeader, ret);
+}
 
 Id3v2Frame *id3v2ParsePictureFrame(id3buf buffer, Id3v2Header *header){
 
@@ -2684,6 +2852,44 @@ void id3v2FreePictureFrame(Id3v2Frame *toDelete){
     General encapsulated object frame functions
 */
 
+Id3v2Frame *id3v2CreateGeneralEncapsulatedObjectFrame(Id3v2FrameId id, id3byte encoding, id3buf mimeType, id3buf filename, id3buf contentDescription, id3buf encapsulatedObject, unsigned int encapsulatedObjectLen){
+
+    Id3v2FlagContent *flags = NULL;
+    Id3v2FrameHeader *frameHeader = NULL;
+    Id3v2GeneralEncapsulatedObjectBody *body = NULL;
+    Id3v2GeneralEncapsulatedObjectBody *ret = NULL;
+    unsigned int headerSize = 0;
+    unsigned int frameSize = 1; //+1 for encoding
+
+    if(id3ValidEncoding(encoding) == false){
+        return NULL;
+    }
+    
+    switch(id){
+        case GEO:
+            headerSize = ID3V2_TAG_SIZE_OFFSET;
+            break;
+        case GEOB:
+            headerSize = ID3V2_HEADER_SIZE;
+            break;
+        default:
+            return NULL;
+    }
+
+    frameSize = frameSize + id3strlen(mimeType, ISO_8859_1) + 1;
+    frameSize = frameSize + id3strlen(filename, encoding) + 1;
+    frameSize = frameSize + id3strlen(contentDescription, encoding) + 1;
+    frameSize = frameSize + encapsulatedObjectLen;
+    
+    flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
+    frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(id),frameSize,headerSize,flags);
+    body = id3v2NewGeneralEncapsulatedObjectBody(encoding, mimeType, filename, contentDescription, encapsulatedObject, encapsulatedObjectLen);
+    ret = id3v2CopyGeneralEncapsulatedObjectBody(body);
+    free(body);
+
+    return id3v2NewFrame(frameHeader, ret);
+}
+
 Id3v2Frame *id3v2ParseGeneralEncapsulatedObjectFrame(id3buf buffer, Id3v2Header *header){
 
     if(buffer == NULL){
@@ -2759,7 +2965,7 @@ Id3v2GeneralEncapsulatedObjectBody *id3v2CopyGeneralEncapsulatedObjectBody(Id3v2
     unsigned int encapsulatedObjectLen = 0;
 
     encoding = body->encoding;
-    encapsulatedObjectLen = encapsulatedObjectLen;
+    encapsulatedObjectLen = body->encapsulatedObjectLen;
 
 
     if(body->mimeType != NULL){
@@ -2888,6 +3094,54 @@ void id3v2FreeGeneralEncapsulatedObjectFrame(Id3v2Frame *toDelete){
 /*
     play counter frame functions
 */
+
+Id3v2Frame *id3v2CreatePlayCounterFrame(Id3v2FrameId id, long counter){
+
+
+    Id3v2FlagContent *flags = NULL;
+    Id3v2FrameHeader *frameHeader = NULL;
+    Id3v2PlayCounterBody *body = NULL;
+    unsigned int headerSize = 0;
+    unsigned int frameSize = 0;
+
+    switch(id){
+        case CNT:
+            headerSize = ID3V2_TAG_SIZE_OFFSET;
+            break;
+        case PCNT:
+            headerSize = ID3V2_HEADER_SIZE;
+            break;
+        default:
+            return NULL;
+    }
+
+    if(counter < 0){
+        return NULL;
+    }
+
+    //how big is the counter
+    if(counter <= LONG_MAX){
+        frameSize = sizeof(long);
+    }
+
+    if(counter <= INT_MAX){
+        frameSize = sizeof(int);
+    }
+
+    if(counter <= SHRT_MAX){
+        frameSize = sizeof(short);
+    }
+
+    if(counter <= SCHAR_MAX){
+        frameSize = sizeof(char);
+    }
+
+    flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
+    frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(id),frameSize,headerSize,flags);
+    body = id3v2NewPlayCounterBody(counter);
+    
+    return id3v2NewFrame(frameHeader, body);
+}
 
 Id3v2Frame *id3v2ParsePlayCounterFrame(id3buf buffer, Id3v2Header *header){
 

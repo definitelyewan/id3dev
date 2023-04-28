@@ -96,7 +96,8 @@ void id3v2ResetIterTag(Id3v2Tag *tag);
 Id3List *id3v2SearchForFrames(Id3v2Tag *tag, Id3v2FrameId id);
 void id3v2SavePicture(const char *fileName, Id3v2Frame *frame);
 void id3v2SaveEncapsulatedObject(Id3v2Frame *frame);
-void id3v2AddEventToEventFrame(Id3v2Frame *eventCodeFrame, id3byte typeOfEvent, long timeStamp);
+void id3v2AddEventToEventFrame(Id3v2Frame *eventCodeFrame, id3byte typeOfEvent, int timeStamp);
+void id3v2AddLyricToSynchronizedLyricsFrame(Id3v2Frame *lyricFrame, id3buf lyric, int timeStamp);
 
 //compatability functions a.k.a getters
 int id3v2GetTagSizeRestriction(Id3v2Tag *tag);
@@ -134,14 +135,14 @@ id3buf id3v2GetInvolvedPeopleListValue(Id3v2Frame *frame);
 id3buf id3v2GetCDIDValue(Id3v2Frame *frame);
 int id3v2GetTimeStampFormat(Id3v2Frame *frame);
 id3byte id3v2GetEventTimeCodeType(Id3v2Frame *frame);
-long id3v2GetEventTimeCodeTimeStamp(Id3v2Frame *frame);
+int id3v2GetEventTimeCodeTimeStamp(Id3v2Frame *frame);
 void id3v2ResetEventTimeCodeIter(Id3v2Frame *frame);
 id3buf id3v2GetSyncedTempoCodesFrameValue(Id3v2Frame *frame);
 id3buf id3v2GetLanguage(Id3v2Frame *frame);
 id3buf id3v2GetUnsynchronizedLyrics(Id3v2Frame *frame);
 int id3v2GetSynchronizedLyricsContentType(Id3v2Frame *frame);
 id3buf id3v2GetSynchronizedLyricsValue(Id3v2Frame *frame);
-long id3v2GetSynchronizedLyricsTimeStamp(Id3v2Frame *frame);
+int id3v2GetSynchronizedLyricsTimeStamp(Id3v2Frame *frame);
 void id3v2ResetSynchronizedLyricsIter(Id3v2Frame *frame);
 id3buf id3v2GetCommentValue(Id3v2Frame *frame);
 id3buf id3v2GetSubjectiveValue(Id3v2Frame *frame);

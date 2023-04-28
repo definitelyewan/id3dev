@@ -71,7 +71,7 @@ Id3v2Frame *id3v2CopyEventTimeCodesFrame(Id3v2Frame *frame);
 Id3v2EventTimeCodesBody *id3v2CopyEventTimeCodesBody(Id3v2EventTimeCodesBody *body);
 Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(id3buf buffer, Id3v2FrameHeader *frameHeader);
 Id3v2EventTimeCodesBody *id3v2NewEventTimeCodesBody(unsigned int timeStampFormat, Id3List *events);
-Id3v2EventTimesCodeEvent *id3v2NewEventCodeEvent(id3byte typeOfEvent, long timeStamp);
+Id3v2EventTimesCodeEvent *id3v2NewEventCodeEvent(id3byte typeOfEvent, int timeStamp);
 void id3v2FreeEventTimeCodesFrame(Id3v2Frame *toDelete);
 void *id3v2CopyEventCodeEvent(void *toCopy);
 void id3v2FreeEventCode(void *toDelete);
@@ -101,12 +101,13 @@ Id3v2Frame *id3v2CopySynchronizedLyricsFrame(Id3v2Frame *frame);
 Id3v2SynchronizedLyricsBody *id3v2CopySynchronizedLyricsBody(Id3v2SynchronizedLyricsBody *body);
 Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(id3buf buffer, Id3v2FrameHeader *frameHeader);
 Id3v2SynchronizedLyricsBody *id3v2NewSynchronizedLyricsBody(id3byte encoding, id3buf language, unsigned int timeStampFormat, unsigned int contentType, id3buf descriptor, Id3List *lyrics);
-Id3v2StampedLyric *id3v2NewStampedLyric(id3buf text, long timeStamp, size_t lyricLen);
+Id3v2StampedLyric *id3v2NewStampedLyric(id3buf text, int timeStamp, size_t lyricLen);
 void id3v2FreeSynchronizedLyricsFrame(Id3v2Frame *toDelete);
 void *id3v2CopyStampedLyric(void *toCopy);
 void id3v2FreeStampedLyric(void *toDelete);
 
 //comment frame functions
+Id3v2Frame *id3v2CreateCommentFrame(Id3v2FrameId id, id3byte encoding, id3buf language, id3buf description, id3buf text);
 Id3v2Frame *id3v2ParseCommentFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyCommentFrame(Id3v2Frame *frame);
 Id3v2CommentBody *id3v2CopyCommentBody(Id3v2CommentBody *body);
@@ -115,6 +116,7 @@ Id3v2CommentBody *id3v2NewCommentBody(id3byte encoding, id3buf language, id3buf 
 void id3v2FreeCommentFrame(Id3v2Frame *toDelete);
 
 //subjective frame functions
+Id3v2Frame *id3v2CreateSubjectiveFrame(Id3v2FrameId id, id3buf value, int valueSize);
 Id3v2Frame *id3v2ParseSubjectiveFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopySubjectiveFrame(Id3v2Frame *frame);
 Id3v2SubjectiveBody *id3v2CopySubjectiveBody(Id3v2SubjectiveBody *body);
@@ -123,6 +125,7 @@ Id3v2SubjectiveBody *id3v2NewSubjectiveBody(id3buf value, int valueSize);
 void id3v2FreeSubjectiveFrame(Id3v2Frame *toDelete);
 
 //Relative volume adjustment frame functions
+Id3v2Frame *id3v2CreateRelativeVolumeAdjustmentFrame(Id3v2FrameId id, id3buf value, int valueSize);
 Id3v2Frame *id3v2ParseRelativeVolumeAdjustmentFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyRelativeVolumeAdjustmentFrame(Id3v2Frame *frame);
 Id3v2RelativeVolumeAdjustmentBody *id3v2CopyRelativeVolumeAdjustmentBody(Id3v2SubjectiveBody *body);
@@ -131,6 +134,7 @@ Id3v2RelativeVolumeAdjustmentBody *id3v2NewRelativeVolumeAdjustmentBody(id3buf v
 void id3v2FreeRelativeVolumeAdjustmentFrame(Id3v2Frame *toDelete);
 
 //Equalisation frame functions
+Id3v2Frame *id3v2CreateEqualisationFrame(Id3v2FrameId id, id3buf value, int valueSize);
 Id3v2Frame *id3v2ParseEqualisationFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyEqualisationFrame(Id3v2Frame *frame);
 Id3v2EqualisationBody *id3v2CopyEqualisationBody(Id3v2EqualisationBody *body);
@@ -139,6 +143,7 @@ Id3v2EqualisationBody *id3v2NewEqualisationBody(id3buf value, int valueSize);
 void id3v2FreeEqualisationFrame(Id3v2Frame *toDelete);
 
 //Reverb frame functions
+Id3v2Frame *id3v2CreateReverbFrame(Id3v2FrameId id, id3buf value, int valueSize);
 Id3v2Frame *id3v2ParseReverbFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyReverbFrame(Id3v2Frame *frame);
 Id3v2ReverbBody *id3v2CopyReverbBody(Id3v2ReverbBody *body);
@@ -147,6 +152,7 @@ Id3v2ReverbBody *id3v2NewReverbBody(id3buf value, int valueSize);
 void id3v2FreeReverbFrame(Id3v2Frame *toDelete);
 
 //picture frame functions
+Id3v2Frame *id3v2CreatePictureFrame(Id3v2FrameId id, id3byte encoding, id3buf format, id3byte pictureType, id3buf description, id3buf pictureData, int picSize);
 Id3v2Frame *id3v2ParsePictureFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyPictureFrame(Id3v2Frame *frame);
 Id3v2PictureBody *id3v2CopyPictureBody(Id3v2PictureBody *body);
@@ -155,6 +161,7 @@ Id3v2PictureBody *id3v2NewPictureBody(id3byte encoding, id3buf format, id3byte p
 void id3v2FreePictureFrame(Id3v2Frame *toDelete);
 
 //general encapsulated object frame functions
+Id3v2Frame *id3v2CreateGeneralEncapsulatedObjectFrame(Id3v2FrameId id, id3byte encoding, id3buf mimeType, id3buf filename, id3buf contentDescription, id3buf encapsulatedObject, unsigned int encapsulatedObjectLen);
 Id3v2Frame *id3v2ParseGeneralEncapsulatedObjectFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyGeneralEncapsulatedObjectFrame(Id3v2Frame *frame);
 Id3v2GeneralEncapsulatedObjectBody *id3v2CopyGeneralEncapsulatedObjectBody(Id3v2GeneralEncapsulatedObjectBody *body);
@@ -163,6 +170,7 @@ Id3v2GeneralEncapsulatedObjectBody *id3v2ParseGeneralEncapsulatedObjectBody(id3b
 void id3v2FreeGeneralEncapsulatedObjectFrame(Id3v2Frame *toDelete);
 
 //play counter frame functions
+Id3v2Frame *id3v2CreatePlayCounterFrame(Id3v2FrameId id, long counter);
 Id3v2Frame *id3v2ParsePlayCounterFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyPlayCounterFrame(Id3v2Frame *frame);
 Id3v2PlayCounterBody *id3v2CopyPlayCounterBody(Id3v2PlayCounterBody *body);

@@ -211,19 +211,15 @@ void id3v2SaveEncapsulatedObject(Id3v2Frame *frame){
    free(name);
 }
 
-void id3v2AddEventToEventFrame(Id3v2Frame *eventCodeFrame, id3byte typeOfEvent, long timeStamp){
+void id3v2AddEventToEventFrame(Id3v2Frame *eventCodeFrame, id3byte typeOfEvent, int timeStamp){
 
-    if(eventCodeFrame == NULL){
+    if(id3v2ManipFullFrameErrorChecks(eventCodeFrame) == true){
         return;
     }
-    //printf("%d\n",typeOfEvent);
+
     Id3v2EventTimesCodeEvent *event = NULL;
     Id3v2EventTimeCodesBody *body = NULL;
     Id3List *list = NULL;
-
-    if(eventCodeFrame->frame == NULL){
-        return;
-    }
 
     body = (Id3v2EventTimeCodesBody *)eventCodeFrame->frame;
     event = id3v2NewEventCodeEvent(typeOfEvent, timeStamp);
@@ -240,6 +236,38 @@ void id3v2AddEventToEventFrame(Id3v2Frame *eventCodeFrame, id3byte typeOfEvent, 
     id3v2ResetEventTimeCodeIter(eventCodeFrame);
 }
 
+void id3v2AddLyricToSynchronizedLyricsFrame(Id3v2Frame *lyricFrame, id3buf lyric, int timeStamp){
+
+    if(id3v2ManipFullFrameErrorChecks(lyricFrame) == true){
+        return;
+    }
+    
+    id3buf newLyric = NULL;
+    int strSize = 0;
+    Id3v2StampedLyric *stampedLyric = NULL;
+    Id3v2SynchronizedLyricsBody *body = NULL;
+    Id3List *list = NULL;
+
+    //build new string
+    body = (Id3v2SynchronizedLyricsBody *)lyricFrame->frame;
+    strSize = id3strlen(lyric, body->encoding);
+    newLyric = calloc(sizeof(id3byte), strSize + id3ReaderAllocationAdd(body->encoding));
+    memcpy(newLyric, lyric, strSize);
+
+    //make a new stamp
+    stampedLyric = id3v2NewStampedLyric(newLyric, timeStamp, strSize);
+
+    //add the new stamp
+    if(body->lyrics == NULL){
+        list = id3NewList(id3v2FreeStampedLyric, id3v2CopyStampedLyric);
+        body->lyrics = list;
+    }
+
+    lyricFrame->header->frameSize = lyricFrame->header->frameSize + strSize + ID3V2_TIME_STAMP_LEN + 1;//+1 is a padding
+
+    id3PushList(body->lyrics, (void *)stampedLyric);
+    id3v2ResetSynchronizedLyricsIter(lyricFrame);
+}
 
 //compatability functions a.k.a getters
 
@@ -666,7 +694,8 @@ id3byte id3v2GetEventTimeCodeType(Id3v2Frame *frame){
 
     return 0x00;
 }
-long id3v2GetEventTimeCodeTimeStamp(Id3v2Frame *frame){
+
+int id3v2GetEventTimeCodeTimeStamp(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return -1;
@@ -854,7 +883,7 @@ id3buf id3v2GetSynchronizedLyricsValue(Id3v2Frame *frame){
 
 }
 
-long id3v2GetSynchronizedLyricsTimeStamp(Id3v2Frame *frame){
+int id3v2GetSynchronizedLyricsTimeStamp(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return -1;
@@ -935,28 +964,6 @@ id3buf id3v2GetSubjectiveValue(Id3v2Frame *frame){
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
-
-    switch(id3v2GetFrameID(frame)){
-        case REV:
-            break;
-        case RVA:
-            break;
-        case EQU:
-            break;
-        case EQUA:
-            break;
-        case RVAD:
-            break;
-        case RVRB:
-            break;
-        case RVA2:
-            break;
-        case EQU2:
-            break;
-        default:
-            return NULL;
-    }
-
 
     Id3v2SubjectiveBody *body = (Id3v2SubjectiveBody *)frame->frame;
     id3buf value = NULL;
