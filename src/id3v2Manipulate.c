@@ -1153,7 +1153,7 @@ id3buf id3v2GetGeneralEncapsulatedObjectValue(Id3v2Frame *frame){
     return value;
 }
 
-int id3v2GetPlayCount(Id3v2Frame *frame){
+unsigned long id3v2GetPlayCount(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return -1;
@@ -1162,15 +1162,15 @@ int id3v2GetPlayCount(Id3v2Frame *frame){
 
     switch(id3v2GetFrameID(frame)){
         case CNT:
-            return (int)((Id3v2PlayCounterBody *)frame->frame)->counter;
+            return (unsigned long)((Id3v2PlayCounterBody *)frame->frame)->counter;
         case PCNT:
-            return (int)((Id3v2PlayCounterBody *)frame->frame)->counter;
+            return (unsigned long)((Id3v2PlayCounterBody *)frame->frame)->counter;
         case POP:
-            return (int)((Id3v2PopularBody *)frame->frame)->counter;
+            return (unsigned long)((Id3v2PopularBody *)frame->frame)->counter;
         case POPM:
-            return (int)((Id3v2PopularBody *)frame->frame)->counter;
+            return (unsigned long)((Id3v2PopularBody *)frame->frame)->counter;
         default:
-            return -1;
+            return 0;
     }
 }
 
@@ -1366,14 +1366,14 @@ id3buf id3v2GetUniqueFileIdentifierValue(Id3v2Frame *frame){
     return value;
 }
 
-long id3v2GetPositionSynchronisationValue(Id3v2Frame *frame){
+unsigned long id3v2GetPositionSynchronisationValue(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
-        return -1;
+        return 0;
     }
 
     if(id3v2GetFrameID(frame) != POSS){
-        return -1;
+        return 0;
     }
 
     return ((Id3v2PositionSynchronisationBody *)frame->frame)->pos;

@@ -2,18 +2,17 @@
 ID3V2 tag information
 ver. 30
 flags. 0000
-tag size. 524038
+tag size. 262849
 [*]no extended header
-GEOB|FS:261227 HS:10 ID:70|F:0000 C:0 E:0 G:0|UTF16|mime:[png] fileName:[geo] desc:[testfile] object:[0x4ce3200] 
+UFID|FS:38 HS:10 ID:125|F:0000 C:0 E:0 G:0|None|owner:[http://www.id3.org/dummy/ufid.html] identifier:[lil] 
 TCON|FS:12 HS:10 ID:89|F:0000 C:0 E:0 G:0|ISO_8859_1|desc:[] value:[crack music]
 TYER|FS:5 HS:10 ID:123|F:0000 C:0 E:0 G:0|ISO_8859_1|desc:[] value:[2021]
-USLT|FS:62 HS:10 ID:127|F:0000 C:0 E:0 G:0|UTF16|language:[azz] desc:[nolang] lyircs:[this has no langauge]
 UFID|FS:39 HS:10 ID:125|F:0000 C:0 E:0 G:0|None|owner:[http://www.id3.org/dummy/ufid.html] identifier:[lil] 
 POPM|FS:23 HS:10 ID:79|F:0000 C:0 E:0 G:0|None|email:[myemail@email.com] rating:[100] counter:[27] 
 TXXX|FS:21 HS:10 ID:124|F:0000 C:0 E:0 G:0|UTF16|desc:[test] value:[utf]
 WXXX|FS:31 HS:10 ID:136|F:0000 C:0 E:0 G:0|UTF16|desc:[testde] url:[http://id3.org]
 OWNE|FS:22 HS:10 ID:76|F:0000 C:0 E:0 G:0|UTF16|price:[$90000] date:[12345678] seller:[me]
-GEOB|FS:261227 HS:10 ID:70|F:0000 C:0 E:0 G:0|UTF16|mime:[png] fileName:[geo] desc:[testfile] object:[0x4d24800] 
+GEOB|FS:261227 HS:10 ID:70|F:0000 C:0 E:0 G:0|UTF16|mime:[png] fileName:[geo] desc:[testfile] object:[0x4bf1d30] 
 COMM|FS:44 HS:10 ID:65|F:0000 C:0 E:0 G:0|UTF16|language:[fre] desc:[utf16comm] value:[ha bitch]
 COMM|FS:102 HS:10 ID:65|F:0000 C:0 E:0 G:0|ISO_8859_1|language:[eng] desc:[description of comment] value:[this is a comment in latin 1 which should probably be changed to ISO-8559-1]
 SYLT|FS:64 HS:10 ID:84|F:0000 C:0 E:0 G:0|UTF16|language:[eng] format:[2] type:[1] desc:[test2] lyrics:[[
@@ -22,7 +21,8 @@ lyric2]] stamp:[[60000][1200000]]
 SYLT|FS:35 HS:10 ID:84|F:0000 C:0 E:0 G:0|ISO_8859_1|language:[eng] format:[2] type:[1] desc:[test] lyrics:[[
 lyric1][
 lyric2]] stamp:[[60000][1200000]] 
-USLT|FS:20 HS:10 ID:127|F:0000 C:0 E:0 G:0|ISO_8859_1|language:[fre] lyircs:[wub wub no desc]
+USLT|FS:36 HS:10 ID:127|F:0000 C:0 E:0 G:0|UTF16|language:[fre] desc:[french] lyircs:[wub wub]
+USLT|FS:49 HS:10 ID:127|F:0000 C:0 E:0 G:0|ISO_8859_1|language:[eng] desc:[desc] lyircs:[youve lost your mojo which sucks i guess]
 ETCO|FS:16 HS:10 ID:69|F:0000 C:0 E:0 G:0|None|format:[2] types:[[5][6][2]] stamps:[[60000][142000][0]]
 WCOM|FS:6 HS:10 ID:128|F:0000 C:0 E:0 G:0|None|parsed and present
 TRCK|FS:7 HS:10 ID:116|F:0000 C:0 E:0 G:0|UTF16|desc:[] value:[02]

@@ -376,13 +376,13 @@ void metadataPrint(Id3Metadata *data){
 
 
                 }else if(id3v2GetFrameID(currFrame) == CNT || id3v2GetFrameID(currFrame) == PCNT){
-                    printf("plays:[%d] ",id3v2GetPlayCount(currFrame));
+                    printf("plays:[%ld] ",id3v2GetPlayCount(currFrame));
 
                 }else if(id3v2GetFrameID(currFrame) == POP || id3v2GetFrameID(currFrame) == POPM){
                     
                     id3buf email = id3v2GetEmail(currFrame);
                     int rating = id3v2GetRating(currFrame);
-                    int counter = id3v2GetPlayCount(currFrame);
+                    unsigned long counter = id3v2GetPlayCount(currFrame);
 
                     if(email != NULL){
                         printf("email:[%s] ",email);
@@ -394,7 +394,7 @@ void metadataPrint(Id3Metadata *data){
                     }
 
                     if(counter != -1){
-                        printf("counter:[%d] ",counter);
+                        printf("counter:[%ld] ",counter);
                     }
 
                 }else if(id3v2GetFrameID(currFrame) == CRM){
@@ -457,7 +457,7 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == POSS){
                     int format = id3v2GetTimeStampFormat(currFrame);
-                    long pos = id3v2GetPositionSynchronisationValue(currFrame);
+                    unsigned long pos = id3v2GetPositionSynchronisationValue(currFrame);
 
                     printf("fomat:[%d] pos:[%ld] ",format,pos);
 
@@ -639,28 +639,26 @@ int main(int argc, char *argv[]){
     
     Id3v2FrameId id;
     if(id3v2GetVersion(data->version2) >= 30){
-        id = PCNT;
+        id = UFID;
     }else{
-        id = CNT;
+        id = UFI;
     }
     
-    Id3v2Frame *new = id3v2CreatePlayCounterFrame(id, 100);
-    id3v2AddFrameToTag(data->version2, new);
     //printf("[Original]===================================================================\n");
     //metadataPrint(data);
 
-    // Id3List *l = id3v2SearchForFrames(data->version2, id);
-    // Id3ListIter *iter = id3NewListIter(l);
-    // Id3v2Frame *checkFrame = NULL;
-    // while((checkFrame = id3NextListIter(iter)) != NULL){
+    Id3List *l = id3v2SearchForFrames(data->version2, id);
+    Id3ListIter *iter = id3NewListIter(l);
+    Id3v2Frame *checkFrame = NULL;
+    while((checkFrame = id3NextListIter(iter)) != NULL){
 
-    //     Id3v2GeneralEncapsulatedObjectBody *body = (Id3v2GeneralEncapsulatedObjectBody *)checkFrame->frame;
-    //     Id3v2Frame *testFrame = id3v2CreateGeneralEncapsulatedObjectFrame(id, body->encoding, body->mimeType, body->filename, body->contentDescription, body->encapsulatedObject, body->encapsulatedObjectLen);
-    //     id3v2AddFrameToTag(data->version2, testFrame);
-    //     //id3v2FreeFrame(testFrame);
-    // }
-    // id3DestroyList(l);
-    // id3FreeListIter(iter);
+        Id3v2UniqueFileIdentifierBody *body = (Id3v2UniqueFileIdentifierBody *)checkFrame->frame;
+        Id3v2Frame *testFrame = id3v2CreateUniqueFileIdentiferFrame(id, body->ownerIdentifier, body->identifier);
+        id3v2AddFrameToTag(data->version2, testFrame);
+        //id3v2FreeFrame(testFrame);
+    }
+    id3DestroyList(l);
+    id3FreeListIter(iter);
     
     printf("[edited]=====================================================================\n");
     metadataPrint(data);

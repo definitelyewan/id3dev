@@ -170,23 +170,25 @@ Id3v2GeneralEncapsulatedObjectBody *id3v2ParseGeneralEncapsulatedObjectBody(id3b
 void id3v2FreeGeneralEncapsulatedObjectFrame(Id3v2Frame *toDelete);
 
 //play counter frame functions
-Id3v2Frame *id3v2CreatePlayCounterFrame(Id3v2FrameId id, long counter);
+Id3v2Frame *id3v2CreatePlayCounterFrame(Id3v2FrameId id, unsigned long counter);
 Id3v2Frame *id3v2ParsePlayCounterFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyPlayCounterFrame(Id3v2Frame *frame);
 Id3v2PlayCounterBody *id3v2CopyPlayCounterBody(Id3v2PlayCounterBody *body);
 Id3v2PlayCounterBody *id3v2ParsePlayCounterBody(id3buf buffer, Id3v2FrameHeader *fhrameHeader);
-Id3v2PlayCounterBody *id3v2NewPlayCounterBody(long counter);
+Id3v2PlayCounterBody *id3v2NewPlayCounterBody(unsigned long counter);
 void id3v2FreePlayCounterFrame(Id3v2Frame *toDelete);
 
 //popularmeter frame functions
+Id3v2Frame *id3v2CreatePopularFrame(Id3v2FrameId id, id3buf email, unsigned int rating,  unsigned long counter);
 Id3v2Frame *id3v2ParsePopularFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyPopularFrame(Id3v2Frame *frame);
 Id3v2PopularBody *id3v2CopyPopularBody(Id3v2PopularBody *body);
-Id3v2PopularBody *id3v2NewPopularBody(id3buf email, unsigned int rating, long counter);
+Id3v2PopularBody *id3v2NewPopularBody(id3buf email, unsigned int rating,  unsigned long counter);
 Id3v2PopularBody *id3v2ParsePopularBody(id3buf buffer, Id3v2FrameHeader *frameHeader);
 void id3v2FreePopularFrame(Id3v2Frame *toDelete);
 
 //encrypted meta frame functions 2.2 only
+Id3v2Frame *id3v2CreateEncryptedMetaFrame(id3buf ownerIdentifier, id3buf content, id3buf encryptedDatablock, unsigned int encryptedDatablockLen);
 Id3v2Frame *id3v2ParseEncryptedMetaFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyEncryptedMetaFrame(Id3v2Frame *frame);
 Id3v2EncryptedMetaBody *id3v2CopyEncryptedMetaBody(Id3v2EncryptedMetaBody *body);
@@ -195,6 +197,7 @@ Id3v2EncryptedMetaBody *id3v2ParseEncryptedMetaBody(id3buf buffer, Id3v2FrameHea
 void id3v2FreeEncryptedMetaFrame(Id3v2Frame *toDelete);
 
 //audio encryption frame functions
+Id3v2Frame *id3v2CreateAudioEncryptionFrame(Id3v2FrameId id, id3buf ownerIdentifier, void *previewStart, unsigned int previewLength, id3buf encryptionInfo, unsigned int encryptionInfoLen);
 Id3v2Frame *id3v2ParseAudioEncryptionFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyAudioEncryptionFrame(Id3v2Frame *frame);
 Id3v2AudioEncryptionBody *id3v2CopyAudioEncryptionBody(Id3v2AudioEncryptionBody *body);
@@ -203,6 +206,7 @@ Id3v2AudioEncryptionBody *id3v2NewAudioEncryptionBody(id3buf ownerIdentifier, vo
 void id3v2FreeAudioEncryptionFrame(Id3v2Frame *toDelete);
 
 //unique file identifier frame functions
+Id3v2Frame *id3v2CreateUniqueFileIdentiferFrame(Id3v2FrameId id, id3buf ownerIdentifier, id3buf identifier);
 Id3v2Frame *id3v2ParseUniqueFileIdentiferFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyUniqueFileIdentifierFrame(Id3v2Frame *frame);
 Id3v2UniqueFileIdentifierBody *id3v2CopyUniqueFileIdentifierBody(Id3v2UniqueFileIdentifierBody *body);
@@ -211,14 +215,16 @@ Id3v2UniqueFileIdentifierBody *id3v2NewUniqueFileIdentifierBody(id3buf ownerIden
 void id3v2FreeUniqueFileIdentifierFrame(Id3v2Frame *toDelete);
 
 //position synchronisation frame ^2.3
+Id3v2Frame *id3v2CreatePositionSynchronisationFrame(id3byte timeStampFormat, unsigned long pos);
 Id3v2Frame *id3v2ParsePositionSynchronisationFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyPositionSynchronisationFrame(Id3v2Frame *frame);
 Id3v2PositionSynchronisationBody *id3v2CopyPositionSynchronisationBody(Id3v2PositionSynchronisationBody *body);
 Id3v2PositionSynchronisationBody *id3v2ParsePositionSynchronisationBody(id3buf buffer, Id3v2FrameHeader *frameHeader);
-Id3v2PositionSynchronisationBody *id3v2NewPositionSynchronisationBody(id3byte timeStampFormat, long pos);
+Id3v2PositionSynchronisationBody *id3v2NewPositionSynchronisationBody(id3byte timeStampFormat, unsigned long pos);
 void id3v2FreePositionSynchronisationFrame(Id3v2Frame *toDelete);
 
 //terms of service frame functions ^2.3
+Id3v2Frame *id3v2CreateTermsOfUseFrame(id3byte encoding, id3buf language, id3buf text);
 Id3v2Frame *id3v2ParseTermsOfUseFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyTermsOfUseFrame(Id3v2Frame *frame);
 Id3v2TermsOfUseBody *id3v2CopyTermsOfUseBody(Id3v2TermsOfUseBody *body);
@@ -227,6 +233,7 @@ Id3v2TermsOfUseBody *id3v2NewTermsOfUseBody(id3byte encoding, id3buf language, i
 void id3v2FreeTermsOfUseFrame(Id3v2Frame *toDelete);
 
 //ownership frame functions ^2.3
+Id3v2Frame *id3v2CreateOwnershipFrame(id3byte encoding, id3buf pricePayed, id3buf dateOfPunch, id3buf seller);
 Id3v2Frame *id3v2ParseOwnershipFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyOwnershipFrame(Id3v2Frame *frame);
 Id3v2OwnershipBody *id3v2CopyOwnershipBody(Id3v2OwnershipBody *body);
@@ -235,6 +242,7 @@ Id3v2OwnershipBody *id3v2NewOwnershipBody(id3byte encoding, id3buf pricePayed, i
 void id3v2FreeOwnershipFrame(Id3v2Frame *toDelete);
 
 //commercial frame functions ^2.3
+Id3v2Frame *id3v2CreateCommercialFrame(id3byte encoding, id3buf priceString, id3buf validUntil, id3buf contractURL, id3byte receivedAs, id3buf nameOfSeller, id3buf description, id3buf mimeType, id3buf sellerLogo, unsigned int sellerLogoLen);
 Id3v2Frame *id3v2ParseCommercialFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyCommercialFrame(Id3v2Frame *frame);
 Id3v2CommercialBody *id3v2CopyCommercialBody(Id3v2CommercialBody *body);
@@ -243,6 +251,7 @@ Id3v2CommercialBody *id3v2NewCommercialBody(id3byte encoding, id3buf priceString
 void id3v2FreeCommercialFrame(Id3v2Frame *toDelete);
 
 //encryption method registration frame functions ^2.3
+Id3v2Frame *id3v2CreateEncryptionMethodRegistrationFrame(id3buf ownerIdentifier, id3byte methodSymbol, id3buf encryptionData, unsigned int encryptionDataLen);
 Id3v2Frame *id3v2ParseEncryptionMethodRegistrationFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyEncryptionMethodRegistrationFrame(Id3v2Frame *frame);
 Id3v2EncryptionMethodRegistrationBody *id3v2CopyEncryptionMethodRegistrationBody(Id3v2EncryptionMethodRegistrationBody *body);
@@ -251,6 +260,7 @@ Id3v2EncryptionMethodRegistrationBody *id3v2NewEncryptionMethodRegistrationBody(
 void id3v2FreeEncryptionMethodRegistrationFrame(Id3v2Frame *toDelete);
 
 //group id registration frame functions ^2.3
+Id3v2Frame *id3v2CreateGroupIDRegistrationFrame(id3buf ownerIdentifier, id3byte groupSymbol, id3buf groupDependentData, unsigned int groupDependentDataLen);
 Id3v2Frame *id3v2ParseGroupIDRegistrationFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyGroupIDRegistrationFrame(Id3v2Frame *frame);
 Id3v2GroupIDRegistrationBody *id3v2CopyGroupIDRegistrationBody(Id3v2GroupIDRegistrationBody *body);
@@ -259,6 +269,7 @@ Id3v2GroupIDRegistrationBody *id3v2NewGroupIDRegistrationBody(id3buf ownerIdenti
 void id3v2FreeGroupIDRegistrationFrame(Id3v2Frame *toDelete);
 
 //private frame functions ^2.3
+Id3v2Frame *id3v2CreatePrivateFrame(id3buf ownerIdentifier, id3buf privateData, unsigned int privateDataLen);
 Id3v2Frame *id3v2ParsePrivateFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyPrivateFrame(Id3v2Frame *frame);
 Id3v2PrivateBody *id3v2CopyPrivateBody(Id3v2PrivateBody *body);
@@ -266,7 +277,8 @@ Id3v2PrivateBody *id3v2ParsePrivateBody(id3buf buffer, Id3v2FrameHeader *frameHe
 Id3v2PrivateBody *id3v2NewPrivateBody(id3buf ownerIdentifier, id3buf privateData, unsigned int privateDataLen);
 void id3v2FreePrivateFrame(Id3v2Frame *toDelete);
 
-//Signature frame fnctions
+//Signature frame functions
+Id3v2Frame *id3v2CreateSignatureFrame(id3byte groupSymbol, id3buf signature, unsigned int sigLen);
 Id3v2Frame *id3v2ParseSignatureFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopySignatureFrame(Id3v2Frame *frame);
 Id3v2SignatureBody *id3v2CopySignatureBody(Id3v2SignatureBody *body);
@@ -275,6 +287,7 @@ Id3v2SignatureBody *id3v2NewSignatureBody(id3byte groupSymbol, id3buf signature,
 void id3v2FreeSignatureFrame(Id3v2Frame *toDelete);
 
 //Seek frame functions
+Id3v2Frame *id3v2CreateSeekFrame(int minimumOffsetToNextTag);
 Id3v2Frame *id3v2ParseSeekFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopySeekFrame(Id3v2Frame *frame);
 Id3v2SeekBody *id3v2CopySeekBody(Id3v2SeekBody *body);

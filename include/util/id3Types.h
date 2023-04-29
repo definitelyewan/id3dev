@@ -608,7 +608,7 @@ typedef struct _Id3v2GeneralEncapsulatedObjectBody{
 }Id3v2GeneralEncapsulatedObjectBody;
 
 typedef struct _Id3v2PlayCounterBody{
-    long counter;
+    unsigned long counter;
 
 }Id3v2PlayCounterBody;
 
@@ -644,7 +644,7 @@ typedef struct _Id3v2UniqueFileIdentifierBody{
 
 typedef struct _Id3v2PositionSynchronisationBody{
     id3byte timeStampFormat;
-    long pos;
+    unsigned long pos;
 
 }Id3v2PositionSynchronisationBody;
 
@@ -684,7 +684,6 @@ typedef struct _Id3v2EncryptionMethodRegistrationBody{
     unsigned int encryptionDataLen;
 
 }Id3v2EncryptionMethodRegistrationBody;
-
 
 typedef struct _Id3v2GroupIDRegistrationBody{
     id3buf ownerIdentifier;
