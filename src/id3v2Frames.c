@@ -5508,7 +5508,7 @@ Id3v2Frame *id3v2CreateSeekFrame(int minimumOffsetToNextTag){
 
     Id3v2FlagContent *flags = NULL;
     Id3v2FrameHeader *frameHeader = NULL;
-    Id3v2SignatureBody *body = NULL;
+    Id3v2SeekBody *body = NULL;
 
     flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
     frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(SEEK),sizeof(int),ID3V2_HEADER_SIZE,flags);
