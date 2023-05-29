@@ -107,6 +107,9 @@ typedef unsigned char _id3byte;
 //The length of the 'image/' MIME type prefix
 #define ID3V2_MIME_IMG_LEN 6
 
+//zlib compression size
+#define ZLIB_COMPRESSION_SIZE 4
+
 #ifdef __cplusplus
 } //extern c end
 #endif

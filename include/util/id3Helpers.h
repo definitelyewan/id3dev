@@ -6,7 +6,7 @@ extern "C"{
 #endif
 
 #include "id3Types.h"
-#include <stdbool.h>
+#include <stdint.h>
 
 
 //byte functions
@@ -14,6 +14,14 @@ int getBits8(unsigned char *bytes, int byteNum);
 unsigned int syncint_decode(int value);
 void addressFree(void **pptr);
 char *integerToCharPointer(int value);
+
+//unicode helpers
+unsigned char *utf16ToUtf8(unsigned char *src, size_t srcSize);
+unsigned char *utf8ToUtf16(unsigned char *src, size_t srcSize, unsigned int utfv);
+bool isISO_8859_1(const unsigned char *str);
+bool isUTF16(const unsigned char *str, size_t length);
+bool isUTF16BE(const unsigned char *str, size_t length);
+bool isUTF8(const unsigned char *str);
 
 //list functions
 Id3List *id3NewList(void (*deleteFunction)(void* toDelete), void *(*copyFunction)(void* toCopy));

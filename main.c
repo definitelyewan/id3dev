@@ -31,6 +31,8 @@ void encodedprintf(id3buf str, int encoding){
 }
 
 void metadataPrint(Id3Metadata *data){
+    
+    
     if(hasId3v1(data)){
 
         printf("ID3V1 tag information\n");
@@ -115,6 +117,7 @@ void metadataPrint(Id3Metadata *data){
                         break;
                     case UTF8:
                         printf("UTF8|");
+                        break;
                     default:
                         printf("None|");
                 }
@@ -157,15 +160,36 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == IPL || id3v2GetFrameID(currFrame) == IPLS){
                     
-                    id3buf people = id3v2GetInvolvedPeopleListValue(currFrame);
-                    
-                    printf("people:[");
-                    encodedprintf(people, encoding);
-                    printf("] ");
+                    id3buf person = NULL;
+                    id3buf job = NULL;
 
-                    if(people != NULL){
-                        free(people);
+                    while(true){
+                        
+                        printf("involved:[");
+                        person = id3v2GetInvolvedPeopleListPerson(currFrame);
+                        job = id3v2GetInvolvedPeopleListJob(currFrame);
+
+                        if(person != NULL){
+                            encodedprintf(person, id3v2GetEncoding(currFrame));
+                            printf(" ");
+                            free(person);
+                        }
+                        
+                        if(job != NULL){
+                            encodedprintf(job, id3v2GetEncoding(currFrame));
+                            free(job);
+                        }
+
+                        printf("] ");
+
+                        if(!id3v2IterInvolvedPeopleListFrame(currFrame)){
+                            break;
+                            
+                        }
+                        
                     }  
+
+                    id3v2ResetInvolvedPeopleListIter(currFrame);
 
                 }else if(id3v2GetFrameID(currFrame) == MCI || id3v2GetFrameID(currFrame) == MCDI){
 
@@ -178,26 +202,15 @@ void metadataPrint(Id3Metadata *data){
 
                 }else if(id3v2GetFrameID(currFrame) == ETC || id3v2GetFrameID(currFrame) == ETCO){
 
-                    id3byte type = 0x00;
-                    int time = 0;
+                    while(true){
 
-                    printf("format:[%x] ",id3v2GetTimeStampFormat(currFrame));
-
-                    printf("types:[");
-                    while((type = id3v2GetEventTimeCodeType(currFrame)) != 0x00){
-                        printf("[%x]",type);
+                        printf("stamp:[type :[%x] time:[%d]]",id3v2GetEventTimeCodeType(currFrame),id3v2GetEventTimeCodeTimeStamp(currFrame));    
+                        
+                        if(!id3v2IterEventTimeCodesFrame(currFrame)){
+                            break;
+                        }
                     }
-                    printf("] ");
-
-                    id3v2ResetEventTimeCodeIter(currFrame);
-
-                    printf("stamps:[");
-                    while((time = id3v2GetEventTimeCodeTimeStamp(currFrame)) != -1){
-                        printf("[%d]",time);
-                    }
-                    printf("]");
-
-                    id3v2ResetEventTimeCodeIter(currFrame);
+                    id3v2ResetEventTimeCodesIter(currFrame);
 
                 }else if(id3v2GetFrameID(currFrame) == ULT || id3v2GetFrameID(currFrame) == USLT){
 
@@ -249,21 +262,24 @@ void metadataPrint(Id3Metadata *data){
                     }
 
                     printf("lyrics:[");
-                    while((text = id3v2GetSynchronizedLyricsValue(currFrame)) != NULL){
-                        printf("[");
+                    while(true){
+                        text = id3v2GetSynchronizedLyricsValue(currFrame);
+                        stamp = id3v2GetSynchronizedLyricsTimeStamp(currFrame);
+
+                        printf("stamp:[%d] ",stamp);
+
+                        printf("text[");
                         encodedprintf(text,encoding);
                         printf("]");
                         free(text);
+
+                        if(!id3v2IterSynchronizedLyricsFrame(currFrame)){
+                            break;
+                        }
                     }
                     printf("] ");
 
                     id3v2ResetSynchronizedLyricsIter(currFrame);
-
-                    printf("stamp:[");
-                    while((stamp = id3v2GetSynchronizedLyricsTimeStamp(currFrame)) != -1){
-                        printf("[%d]",stamp);
-                    }
-                    printf("] ");
 
                 }else if(id3v2GetFrameID(currFrame) == COM || id3v2GetFrameID(currFrame) == COMM){
 
@@ -639,27 +655,51 @@ int main(int argc, char *argv[]){
     
     Id3v2FrameId id;
     if(id3v2GetVersion(data->version2) >= 30){
-        id = UFID;
+        id = WXXX;
     }else{
-        id = UFI;
+        id = WXX;
     }
     
     //printf("[Original]===================================================================\n");
     //metadataPrint(data);
-
+    /*
     Id3List *l = id3v2SearchForFrames(data->version2, id);
     Id3ListIter *iter = id3NewListIter(l);
     Id3v2Frame *checkFrame = NULL;
-    while((checkFrame = id3NextListIter(iter)) != NULL){
 
-        Id3v2UniqueFileIdentifierBody *body = (Id3v2UniqueFileIdentifierBody *)checkFrame->frame;
-        Id3v2Frame *testFrame = id3v2CreateUniqueFileIdentiferFrame(id, body->ownerIdentifier, body->identifier);
-        id3v2AddFrameToTag(data->version2, testFrame);
+    while((checkFrame = id3NextListIter(iter)) != NULL){
+        
+        id3v2SetFrameAlterPreservationIndicator(true, checkFrame);
+
+        //id3v2AddFrameToTag(data->version2, testFrame);
         //id3v2FreeFrame(testFrame);
     }
     id3DestroyList(l);
     id3FreeListIter(iter);
-    
+    */
+    Id3v2Frame *f = NULL;
+    while((f = id3v2IterTag(data->version2)) != NULL){
+        if(id3v2GetFrameID(f) == id){
+            
+            id3v2SetEncoding(UTF16, f);
+            
+            //id3v2SetDescription((id3buf)"top text... bottom text",id3strlen(
+            //(id3buf)"top text... bottom text",ISO_8859_1),f, data->version2);
+            //id3v2SetTextValue((id3buf)"top text... bottom text",id3strlen(
+            //(id3buf)"top text... bottom text",ISO_8859_1),f, data->version2);
+            //id3v2SetFrameAlterPreservationIndicator(true, f);
+            //id3v2SetFrameFileAlterPreservationIndicator(true, f);
+            //id3v2SetFrameReadOnlyIndicator(true, f);
+            //id3v2SetFrameUnsynchronizationIndicator(true, f);
+            //id3v2SetFrameDataLengthSize(100, f);
+            //id3v2SetFrameEncryptionMethod(0x99, f);
+            //id3v2SetFrameGroup(0x99, f);
+
+        }
+        
+    }
+    id3v2ResetIterTag(data->version2);
+
     printf("[edited]=====================================================================\n");
     metadataPrint(data);
 

@@ -3,6 +3,8 @@
         "stdbool.h": "c",
         "*.rmd": "markdown",
         "id3.h": "c",
-        "id3types.h": "c"
+        "id3types.h": "c",
+        "stdint.h": "c",
+        "id3defines.h": "c"
     }
 }

@@ -877,7 +877,6 @@ Id3v2Frame *id3v2CreateInvolvedPeopleListFrame(Id3v2FrameId id, id3byte encoding
     Id3v2FlagContent *flags = NULL;
     Id3v2FrameHeader *frameHeader = NULL;
     Id3v2InvolvedPeopleListBody *body = NULL;
-    Id3v2InvolvedPeopleListBody *ret = NULL;
     unsigned int size = 1; //encoding so +1
     unsigned int headerSize = 0;
 
@@ -892,16 +891,12 @@ Id3v2Frame *id3v2CreateInvolvedPeopleListFrame(Id3v2FrameId id, id3byte encoding
         default:
             return NULL;
     }
-    
-    size = size + id3strlen(peopleListStrings, encoding);
 
     flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
     frameHeader = id3v2NewFrameHeader(id3v2FrameIdStrFromId(id),size,headerSize,flags);
-    body = id3v2NewInvolvedPeopleListBody(encoding, peopleListStrings);
-    ret = id3v2CopyInvolvedPeopleListBody(body);
-    free(body);
+    body = id3v2NewInvolvedPeopleListBody(encoding, NULL);
 
-    return id3v2NewFrame(frameHeader, ret);
+    return id3v2NewFrame(frameHeader, body);
 }
 
 Id3v2Frame *id3v2ParseInvolvedPeopleListFrame(id3buf buffer, Id3v2Header *header){
@@ -957,23 +952,7 @@ Id3v2Frame *id3v2CopyInvolvedPeopleListFrame(Id3v2Frame *frame){
 }
 
 Id3v2InvolvedPeopleListBody *id3v2CopyInvolvedPeopleListBody(Id3v2InvolvedPeopleListBody *body){
-
-    if(body == NULL){
-        return NULL;
-    }
-
-    id3byte encoding = 0x00;
-    id3buf text = NULL;
-
-
-    encoding = body->encoding;
-
-    if(body->peopleListStrings != NULL){
-        text = calloc(sizeof(id3byte), id3strlen(body->peopleListStrings, encoding) + id3ReaderAllocationAdd(encoding));
-        memcpy(text, body->peopleListStrings, id3strlen(body->peopleListStrings, encoding));
-    }
-
-    return id3v2NewInvolvedPeopleListBody(encoding, text);
+    return (body == NULL) ? NULL : id3v2NewInvolvedPeopleListBody(body->encoding, id3CopyList(body->involvedPeople));
 }
 
 Id3v2InvolvedPeopleListBody *id3v2ParseInvolvedPeopleListBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
@@ -986,31 +965,73 @@ Id3v2InvolvedPeopleListBody *id3v2ParseInvolvedPeopleListBody(id3buf buffer, Id3
         return NULL;
     }
 
+    int saveSize = frameHeader->frameSize - 1;
     id3byte encoding = 0x00;
-    id3buf text = NULL;
-
+    Id3List *list = id3NewList(id3v2FreeInvolvedPerson, id3v2CopyInvolvedPerson);
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
-
-    // copy encoding
-    encoding = id3ReaderCursor(stream)[0];
+    //copy encoding
+    encoding = id3ReaderGetCh(stream);
     id3ReaderSeek(stream, 1, SEEK_CUR);
 
-    // copy text
-    text = id3ReaderEncodedRemainder(stream, encoding);
+    while(saveSize > 0){
+
+        id3buf person = NULL;
+        id3buf job = NULL;
+        size_t pLen = 0;
+        size_t jLen = 0;
+        Id3v2InvolvedPerson *iPerson = NULL;
+
+        //read person
+        pLen = id3strlen(id3ReaderCursor(stream), encoding);
+        person = calloc(sizeof(id3byte),pLen + id3ReaderAllocationAdd(encoding));
+        id3ReaderRead(stream, person, pLen);
+
+        //skip padding
+        id3ReaderSeek(stream, 1, SEEK_CUR);
+        saveSize--; //-1 for spacer
+
+        //read job
+        jLen = id3strlen(id3ReaderCursor(stream), encoding);
+        job = calloc(sizeof(id3byte), jLen + id3ReaderAllocationAdd(encoding));
+        id3ReaderRead(stream, job, jLen);
+        
+        //skip padding
+        id3ReaderSeek(stream, 1, SEEK_CUR);
+        saveSize--; //-1 for spacer        
+
+        iPerson = id3v2NewInvolvedPerson(person, job, pLen, jLen); 
+        id3PushList(list, (void *)iPerson);
+        saveSize = saveSize - (pLen + jLen);
+    }
 
     id3FreeReader(stream);
-    return id3v2NewInvolvedPeopleListBody(encoding, text);
+    return id3v2NewInvolvedPeopleListBody(encoding, list);
 }
 
-Id3v2InvolvedPeopleListBody *id3v2NewInvolvedPeopleListBody(id3byte encoding, id3buf peopleListStrings){
+Id3v2InvolvedPeopleListBody *id3v2NewInvolvedPeopleListBody(id3byte encoding, Id3List *involvedPeople){
 
     Id3v2InvolvedPeopleListBody *involvedPeopleListBody = malloc(sizeof(Id3v2InvolvedPeopleListBody));
+    Id3ListIter *li = id3NewListIter(involvedPeople);
 
     // copy data
     involvedPeopleListBody->encoding = encoding;
-    involvedPeopleListBody->peopleListStrings = peopleListStrings;
+    involvedPeopleListBody->involvedPeople = involvedPeople;
+    involvedPeopleListBody->involvedPeopleIter = li;
+
 
     return involvedPeopleListBody;
+}
+
+Id3v2InvolvedPerson *id3v2NewInvolvedPerson(id3buf person, id3buf job, size_t personLen, size_t jobLen){
+
+    Id3v2InvolvedPerson *iPerson = malloc(sizeof(Id3v2InvolvedPerson));
+
+    iPerson->person = person;
+    iPerson->job = job;
+    iPerson->personLen = personLen;
+    iPerson->jobLen = jobLen;
+
+    return iPerson;
 }
 
 void id3v2FreeInvolvedPeopleListFrame(Id3v2Frame *toDelete){
@@ -1030,13 +1051,124 @@ void id3v2FreeInvolvedPeopleListFrame(Id3v2Frame *toDelete){
 
     Id3v2InvolvedPeopleListBody *body = (Id3v2InvolvedPeopleListBody *)toDelete->frame;
 
-    if(body->peopleListStrings != NULL){
-        free(body->peopleListStrings);
-    }
-
+    id3DestroyList(body->involvedPeople);
+    id3FreeListIter(body->involvedPeopleIter);
     free(body);
     free(toDelete);
 }
+
+void *id3v2CopyInvolvedPerson(void *toCopy){
+
+    if(toCopy == NULL){
+        return NULL;
+    }
+
+
+    id3buf job = NULL;
+    id3buf person = NULL;
+    Id3v2InvolvedPerson *iPerson = (Id3v2InvolvedPerson *)toCopy;
+
+
+    //to be safe an etra byte will be added as padding because i dont
+    //want to store multiple encoding bytes
+    if(iPerson->job != NULL){
+        job = calloc(sizeof(id3byte),iPerson->jobLen + 2);//<- would usually be + 1
+        memcpy(job, iPerson->job, iPerson->jobLen);
+    }
+
+    if(iPerson->person != NULL){
+        person = calloc(sizeof(id3byte),iPerson->personLen + 2);//<- would usually be + 1
+        memcpy(person, iPerson->person, iPerson->personLen);
+    }
+
+    return id3v2NewInvolvedPerson(person, job, iPerson->personLen, iPerson->jobLen);
+}
+
+void id3v2FreeInvolvedPerson(void *toDelete){
+
+    if(toDelete == NULL){
+        return;
+    }
+
+    Id3v2InvolvedPerson *iPerson = (Id3v2InvolvedPerson *)toDelete;
+
+    if(iPerson->job != NULL){
+        free(iPerson->job);
+    }
+
+    if(iPerson->person != NULL){
+        free(iPerson->person);        
+    }
+
+    free(iPerson);
+}
+
+int id3v2IterInvolvedPeopleListFrame(Id3v2Frame *frame){
+    
+    if(frame == NULL){
+        return 0;
+    }
+
+    if(frame->header == NULL){
+        return 0;
+    }
+
+    if(frame->frame == NULL){
+        return 0;
+    }
+
+    switch(frame->header->idNum){
+        case IPL:
+            break;
+        case IPLS:
+            break;
+        default:
+            return 0;
+    }
+
+    Id3v2InvolvedPeopleListBody *body = (Id3v2InvolvedPeopleListBody *)frame->frame;
+    
+    //iterate
+    if(id3HasNextListIter(body->involvedPeopleIter)){
+        
+        id3NextListIter(body->involvedPeopleIter);
+        return 1;
+    }
+    return 0;   
+}
+
+void id3v2ResetInvolvedPeopleListIter(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return;
+    }
+
+    if(frame->header == NULL){
+        return;
+    }
+
+    if(frame->frame == NULL){
+        return;
+    }
+
+    switch(frame->header->idNum){
+        case IPL:
+            break;
+        case IPLS:
+            break;
+        default:
+            return;
+    }
+
+    Id3ListIter *li = NULL;
+
+    //replace iter
+    Id3v2InvolvedPeopleListBody *body = (Id3v2InvolvedPeopleListBody *)frame->frame;  
+    li = id3NewListIter(body->involvedPeople);
+    id3FreeListIter(body->involvedPeopleIter);
+    body->involvedPeopleIter = li;
+}
+
 
 /*
     Music CD identifier frame functions
@@ -1403,6 +1535,73 @@ void id3v2FreeEventCode(void *toDelete){
     free(toDelete);
 }
 
+int id3v2IterEventTimeCodesFrame(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return 0;
+    }
+
+    if(frame->frame == NULL){
+        return 0;
+    }
+
+    if(frame->header == NULL){
+        return 0;
+    }
+
+    switch(frame->header->idNum){
+        case ETC:
+            break;
+        case ETCO:
+            break;
+        default:
+            return 0;
+    }
+
+    Id3v2EventTimeCodesBody *body = (Id3v2EventTimeCodesBody *)frame->frame;
+    
+    //iterate
+    if(id3HasNextListIter(body->eventsTimeCodesIter)){
+        
+        id3NextListIter(body->eventsTimeCodesIter);
+        return 1;
+    }
+    return 0;  
+
+}
+
+void id3v2ResetEventTimeCodesIter(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return;
+    }
+
+    if(frame->header == NULL){
+        return;
+    }
+
+    if(frame->frame == NULL){
+        return;
+    }
+
+    switch(frame->header->idNum){
+        case ETC:
+            break;
+        case ETCO:
+            break;
+        default:
+            return;
+    }
+
+    Id3ListIter *li = NULL;
+
+    //replace iter
+    Id3v2EventTimeCodesBody *body = (Id3v2EventTimeCodesBody *)frame->frame;  
+    li = id3NewListIter(body->eventTimeCodes);
+    id3FreeListIter(body->eventsTimeCodesIter);
+    body->eventsTimeCodesIter = li;
+
+}
 /*
     Synced tempo codes frame functions
 */
@@ -2090,6 +2289,61 @@ void id3v2FreeStampedLyric(void *toDelete){
     }
 
     free(lyric);
+}
+
+int id3v2IterSynchronizedLyricsFrame(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return 0;
+    }
+
+    if(frame->frame == NULL || frame->header == NULL){
+        return 0;
+    }
+
+    switch(frame->header->idNum){
+        case SLT:
+            break;
+        case SYLT:
+            break;
+        default:
+            return 0;
+    }
+
+    Id3v2SynchronizedLyricsBody *body = (Id3v2SynchronizedLyricsBody *)frame->frame;
+    //iterate
+    if(id3HasNextListIter(body->lyricsIter)){
+        
+        id3NextListIter(body->lyricsIter);
+        return 1;
+    }
+    return 0;  
+
+}
+
+void id3v2ResetSynchronizedLyricsIter(Id3v2Frame *frame){
+
+    if(frame == NULL){
+        return;
+    }
+
+    if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    switch(frame->header->idNum){
+        case SLT:
+            break;
+        case SYLT:
+            break;
+        default:
+            return;
+    }  
+
+    Id3v2SynchronizedLyricsBody *body = (Id3v2SynchronizedLyricsBody *)frame->frame;
+    id3FreeListIter(body->lyricsIter);
+    Id3ListIter *li = id3NewListIter(body->lyrics);
+    body->lyricsIter = li;
 }
 
 /*

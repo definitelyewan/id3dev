@@ -512,9 +512,18 @@ typedef struct _Id3v2URLBody{
 
 }Id3v2URLBody;
 
+typedef struct _Id3v2InvolvedPerson{
+    id3buf person;
+    id3buf job;
+    size_t personLen;
+    size_t jobLen;
+
+}Id3v2InvolvedPerson;
+
 typedef struct _Id3v2InvolvedPeopleListBody{
     id3byte encoding;
-    id3buf peopleListStrings;
+    Id3List *involvedPeople;
+    Id3ListIter *involvedPeopleIter;
 
 }Id3v2InvolvedPeopleListBody;
 

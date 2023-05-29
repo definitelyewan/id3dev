@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "id3Reader.h"
+#include "id3Helpers.h"
 
 Id3Reader *id3NewReader(unsigned char *buffer,  size_t bufferSize){
 
@@ -251,7 +252,9 @@ size_t id3strlen(id3buf buffer, id3byte encoding){
     if(buffer == NULL){
         return 0;
     }
+
     size_t len = 0;
+    
     switch(encoding){
         case ISO_8859_1:
             len = strlen((char *)buffer);
@@ -272,6 +275,93 @@ size_t id3strlen(id3buf buffer, id3byte encoding){
     return len;
 }
 
+id3buf id3TextFormatConvert(id3buf buffer, size_t bufferLen, id3byte desiredEncoding){
+
+    if(!id3ValidEncoding(desiredEncoding)){
+        return NULL;
+    }
+
+    id3byte strEncoding = UNKNOWN_ENCODING;
+
+    //the given string was?
+    if(isISO_8859_1(buffer)){
+        strEncoding = ISO_8859_1;
+        
+    }else if(isUTF16(buffer, bufferLen)){
+        strEncoding = UTF16;
+    }else if(isUTF16BE(buffer, bufferLen)){
+        strEncoding = UTF16BE;
+    }else if(isUTF8(buffer)){
+        strEncoding = UTF8;
+    }else{
+        //failed
+        return NULL;
+    }
+
+    id3buf newStr = NULL;
+
+    switch(desiredEncoding){
+        case ISO_8859_1:
+        //utf8 and ascii are basically the same so no conversion needed
+        //i mean there different but i dont need to really convert them    
+            if(strEncoding == UTF16 || strEncoding == UTF16BE){ 
+                newStr = utf16ToUtf8(buffer, bufferLen);
+            
+            }else if(strEncoding == ISO_8859_1){
+                newStr = calloc(sizeof(id3byte), bufferLen + 1);
+                memcpy(newStr, buffer, bufferLen);
+            }
+            break;
+
+        case UTF16:
+            if(strEncoding == ISO_8859_1 || strEncoding == UTF8){
+                newStr = utf8ToUtf16(buffer, bufferLen, UTF16);
+
+            }else if(strEncoding == UTF16BE){
+                unsigned char *tmp = utf16ToUtf8(buffer, bufferLen);
+                
+                if(tmp == NULL){
+                    return NULL;
+                }
+
+                newStr = utf8ToUtf16(buffer, bufferLen, UTF16);
+                free(tmp);
+            }   
+            break;
+
+        case UTF16BE:
+            if(strEncoding == ISO_8859_1 || strEncoding == UTF8){
+                newStr = utf8ToUtf16(buffer, bufferLen, UTF16BE);
+
+            }else if(strEncoding == UTF16){
+                unsigned char *tmp = utf16ToUtf8(buffer, bufferLen);
+                
+                if(tmp == NULL){
+                    return NULL;
+                }
+
+                newStr = utf8ToUtf16(buffer, bufferLen, UTF16BE);
+                free(tmp);
+            }
+            break;
+
+        case UTF8:
+            if(strEncoding == UTF16 || strEncoding == UTF16BE){
+                newStr = utf16ToUtf8(buffer, bufferLen);
+
+            }else if(strEncoding == ISO_8859_1){
+                newStr = calloc(sizeof(id3byte), bufferLen + 1);
+                memcpy(newStr, buffer, bufferLen);
+            }
+            break;
+        default:
+            //failed
+            return NULL;
+    }
+
+    //nothing converted if it got here with null
+    return newStr;
+}
 
 void id3ReaderPrintf(Id3Reader *reader){
 

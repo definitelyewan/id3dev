@@ -52,8 +52,13 @@ Id3v2Frame *id3v2ParseInvolvedPeopleListFrame(id3buf buffer, Id3v2Header *header
 Id3v2Frame *id3v2CopyInvolvedPeopleListFrame(Id3v2Frame *frame);
 Id3v2InvolvedPeopleListBody *id3v2CopyInvolvedPeopleListBody(Id3v2InvolvedPeopleListBody *body);
 Id3v2InvolvedPeopleListBody *id3v2ParseInvolvedPeopleListBody(id3buf buffer, Id3v2FrameHeader *frameHeader);
-Id3v2InvolvedPeopleListBody *id3v2NewInvolvedPeopleListBody(id3byte encoding, id3buf peopleListStrings);
+Id3v2InvolvedPeopleListBody *id3v2NewInvolvedPeopleListBody(id3byte encoding, Id3List *involvedPeople);
+Id3v2InvolvedPerson *id3v2NewInvolvedPerson(id3buf person, id3buf job, size_t personLen, size_t jobLen);
 void id3v2FreeInvolvedPeopleListFrame(Id3v2Frame *toDelete);
+void *id3v2CopyInvolvedPerson(void *toCopy);
+void id3v2FreeInvolvedPerson(void *toDelete);
+int id3v2IterInvolvedPeopleListFrame(Id3v2Frame *frame);
+void id3v2ResetInvolvedPeopleListIter(Id3v2Frame *frame);
 
 //music cd identifier frame funstions
 Id3v2Frame *id3v2CreateMusicCDIdentifierFrame(Id3v2FrameId id, id3buf cdtoc);
@@ -75,6 +80,8 @@ Id3v2EventTimesCodeEvent *id3v2NewEventCodeEvent(id3byte typeOfEvent, int timeSt
 void id3v2FreeEventTimeCodesFrame(Id3v2Frame *toDelete);
 void *id3v2CopyEventCodeEvent(void *toCopy);
 void id3v2FreeEventCode(void *toDelete);
+int id3v2IterEventTimeCodesFrame(Id3v2Frame *frame);
+void id3v2ResetEventTimeCodesIter(Id3v2Frame *frame);
 
 //synced tempo codes functions
 Id3v2Frame *id3v2CreateSyncedTempoCodesFrame(Id3v2FrameId id, id3byte timeStampFormat, id3buf tempoData, unsigned int tempoDataLen);
@@ -105,6 +112,8 @@ Id3v2StampedLyric *id3v2NewStampedLyric(id3buf text, int timeStamp, size_t lyric
 void id3v2FreeSynchronizedLyricsFrame(Id3v2Frame *toDelete);
 void *id3v2CopyStampedLyric(void *toCopy);
 void id3v2FreeStampedLyric(void *toDelete);
+int id3v2IterSynchronizedLyricsFrame(Id3v2Frame *frame);
+void id3v2ResetSynchronizedLyricsIter(Id3v2Frame *frame);
 
 //comment frame functions
 Id3v2Frame *id3v2CreateCommentFrame(Id3v2FrameId id, id3byte encoding, id3buf language, id3buf description, id3buf text);

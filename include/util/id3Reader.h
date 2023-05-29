@@ -26,6 +26,7 @@ size_t strlenUTF16(id3buf buffer);
 size_t strlenUTF16BE(id3buf buffer);
 size_t strlenUTF8(id3buf buffer);
 size_t id3strlen(id3buf buffer, id3byte encoding);
+id3buf id3TextFormatConvert(id3buf buffer, size_t bufferLen, id3byte desiredEncoding);
 
 //extra
 void id3ReaderPrintf(Id3Reader *reader);
