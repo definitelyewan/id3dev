@@ -3,6 +3,8 @@
 #include <string.h>
 #include <math.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <limits.h>
 #include "id3Helpers.h"
 
 int getBits8(unsigned char *bytes, int byteNum){
@@ -31,6 +33,14 @@ unsigned int syncint_decode(int value){
     return result;
 }
 
+void addressFree(void **pptr){
+    if(pptr && *pptr){
+        free(*pptr);
+        *pptr = NULL;
+        pptr = NULL;
+    }
+}
+
 char *integerToCharPointer(int value){
 
     int n = log10(value) + 1;
@@ -43,24 +53,27 @@ char *integerToCharPointer(int value){
     return numberArray;
 }
 
-void addressFree(void **pptr){
-    if(pptr && *pptr){
-        free(*pptr);
-        *pptr = NULL;
-        pptr = NULL;
-    }
+//should be fast and protect against over/under flow
+//sub = false is +
+//sub = true is -
+unsigned int uSafeSum(unsigned int a, unsigned int b, bool sub){
+    return (sub) ? //mode selected true = subtraction 
+    (b > a) ? 0: a - b: // b - a gives underflow
+    ((UINT_MAX - a) < b) ? UINT_MAX: a + b; // gives overflow
 }
 
 //should work with utf16be
-unsigned char *utf16ToUtf8(unsigned char* src, size_t srcSize){
-    
+unsigned char *utf16ToUtf8(unsigned char *src, size_t srcSize){
+
     if(src == NULL){
         return NULL;
     }
 
     size_t index = 0;
+    size_t newSrcSize = 0;
     bool bomOffset = false;
     unsigned char *dest = NULL;
+    unsigned char *newSrc = NULL;
 
     //check for bom
     if(srcSize >= UNICODE_BOM_SIZE && src[0] == 0xFE && src[1] == 0xFF){
@@ -69,12 +82,43 @@ unsigned char *utf16ToUtf8(unsigned char* src, size_t srcSize){
         bomOffset = true;
     }
 
+    if(bomOffset == true){
+        
+        if(src[UNICODE_BOM_SIZE] != 0x00){
+            newSrc = calloc(sizeof(unsigned char), srcSize + 1);
+            
+            /*
+                this is problematic and i cant find a way around it
 
+                the problem with the stament newSrc[0] = 0x00; is that 
+                a only one endians works or ensures it? so what happens
+                if there are two 0x00s back to back well... you probably
+                get no string.
+
+                this probably wont occur due to the if condition above
+                but it would not be good if it did.  
+            */
+            newSrc[0] = 0x00;
+            
+            memcpy(newSrc + 1, src + UNICODE_BOM_SIZE, srcSize - 1);
+            newSrcSize = srcSize - UNICODE_BOM_SIZE;
+        }else{
+            newSrc = calloc(sizeof(unsigned char), srcSize - UNICODE_BOM_SIZE + 1);
+            memcpy(newSrc, src + UNICODE_BOM_SIZE, srcSize - UNICODE_BOM_SIZE);
+            newSrcSize = srcSize - UNICODE_BOM_SIZE;
+        }
+        
+
+    }else{
+        newSrc = calloc(sizeof(unsigned char), srcSize + 1);
+        memcpy(newSrc, src, srcSize);
+        newSrcSize = srcSize;
+    }
 
     //maximum length of the converted string
-    size_t maxDestSize = srcSize - (bomOffset ? 2 : 0);
-    for(size_t i = bomOffset ? 2 : 0; i < srcSize; i += 2){
-        uint16_t codepoint = (src[i] << 8) | src[i + 1];
+    size_t maxDestSize = newSrcSize;
+    for(size_t i = 0; i < newSrcSize; i += 2){
+        uint16_t codepoint = (newSrc[i] << 8) | newSrc[i + 1];
         if(codepoint >= 0x80 && codepoint < 0x800){
             maxDestSize += 1;
         }else if(codepoint >= 0x800){
@@ -84,14 +128,9 @@ unsigned char *utf16ToUtf8(unsigned char* src, size_t srcSize){
 
     dest = calloc(sizeof(unsigned char),maxDestSize + 2);
 
-    //eat bom pretty hacky tho
-    if(bomOffset == true){
-        src[UNICODE_BOM_SIZE-1] = 0x00;
-    }
-
     //convert based on 0x0000
-    for(size_t i = bomOffset; i < srcSize; i += 2){
-        uint16_t codepoint = (src[i] << 8) | src[i + 1];
+    for(size_t i = 0; i < newSrcSize; i += 2){
+        uint16_t codepoint = (newSrc[i] << 8) | newSrc[i + 1];
         if(codepoint < 0x80){
             dest[index] = (unsigned char)codepoint;
             index++;
@@ -110,80 +149,132 @@ unsigned char *utf16ToUtf8(unsigned char* src, size_t srcSize){
         }
     }
 
+    free(newSrc);
     return dest;
 }
 
 unsigned char *utf8ToUtf16(unsigned char* src, size_t srcSize, unsigned int utfv){
-
+    
     if(src == NULL){
         return NULL;
     }
 
     size_t index = 0;
-    size_t srcIndex = 0;
     size_t destSize = 0;
+    unsigned char * bytes = src;
 
     //max size required for the destination string
     if(utfv == UTF16){
         destSize += UNICODE_BOM_SIZE;
     }
 
-    while(srcIndex < srcSize){
-        unsigned char c = src[srcIndex];
-        srcIndex++;
-
-        if((c & 0x80) == 0){
-            //1 byte for ascii;
-        }else if((c & 0xE0) == 0xC0){
-            //2 byte
-            ++srcIndex;
-        }else if((c & 0xF0) == 0xE0){
-            // 3 byte sequence
-            srcIndex += 2;
-        } else {
-            // Invalid UTF-8 sequence
-            return NULL;
+    while(*bytes){
+        
+        //ASCII
+        //use bytes[0] <= 0x7F to allow ASCII control characters
+        if((bytes[0] == 0x09 || bytes[0] == 0x0A || bytes[0] == 0x0D || (0x20 <= bytes[0] && bytes[0] <= 0x7E))){
+            bytes += 1;
+            destSize += 2;
+            continue;
         }
 
-        destSize += 2; // 2 bytes for each codepoint in UTF-16
-    }
+        //non-overlong 2-byte
+        if(((0xC2 <= bytes[0] && bytes[0] <= 0xDF) && (0x80 <= bytes[1] && bytes[1] <= 0xBF))){
+            bytes += 2;
+            destSize += 4;
+            continue;
+        }
 
+        //excluding overlongs
+        //straight 3-byte
+        //excluding surrogates
+        if((bytes[0] == 0xE0 && (0xA0 <= bytes[1] && bytes[1] <= 0xBF) && (0x80 <= bytes[2] && bytes[2] <= 0xBF)) ||
+            (((0xE1 <= bytes[0] && bytes[0] <= 0xEC) || bytes[0] == 0xEE || bytes[0] == 0xEF) && (0x80 <= bytes[1] && bytes[1] <= 0xBF) && (0x80 <= bytes[2] && bytes[2] <= 0xBF)) ||
+            (bytes[0] == 0xED && (0x80 <= bytes[1] && bytes[1] <= 0x9F) && (0x80 <= bytes[2] && bytes[2] <= 0xBF))){
+            bytes += 3;
+            destSize += 6;
+            continue;
+        }
+        //planes 1-3
+        //planes 4-15
+        //plane 16
+        if((bytes[0] == 0xF0 && (0x90 <= bytes[1] && bytes[1] <= 0xBF) && (0x80 <= bytes[2] && bytes[2] <= 0xBF) && (0x80 <= bytes[3] && bytes[3] <= 0xBF)) ||
+            ((0xF1 <= bytes[0] && bytes[0] <= 0xF3) && (0x80 <= bytes[1] && bytes[1] <= 0xBF) && (0x80 <= bytes[2] && bytes[2] <= 0xBF) && (0x80 <= bytes[3] && bytes[3] <= 0xBF)) ||
+            (bytes[0] == 0xF4 && (0x80 <= bytes[1] && bytes[1] <= 0x8F) && (0x80 <= bytes[2] && bytes[2] <= 0xBF) && (0x80 <= bytes[3] && bytes[3] <= 0xBF))){
+            bytes += 4;
+            destSize += 8;
+            continue;
+        }
+
+        return NULL;
+    }
+    
     unsigned char *dest = calloc(sizeof(unsigned char),destSize + 2);
-    srcIndex = 0;
 
     //make bom
     if(utfv == UTF16){
-        dest[index] = 0xFE;
-        index++;
         dest[index] = 0xFF;
+        index++;
+        dest[index] = 0xFE;
         index++;
     }
 
-    while(srcIndex < srcSize){
-        unsigned char c = src[srcIndex++];
+    bytes = src;
+    while(*bytes){
+        // Read the next UTF-16 code unit
+        uint16_t c = *bytes;
         uint16_t codepoint;
+        bytes++;
 
-        if((c & 0x80) == 0){
-            //1 byte sequence for ascii
+        // ASCII
+        if ((c <= 0x7F)) {
             codepoint = c;
-        }else if((c & 0xE0) == 0xC0){
-            //2 byte sequence
-            codepoint = ((src[srcIndex] & 0x3F) << 6) | (c & 0x1F);
-            ++srcIndex;
-        }else if((c & 0xF0) == 0xE0){
-            //3 byte sequence
-            codepoint = ((src[srcIndex] & 0x3F) << 12) | ((src[srcIndex + 1] & 0x3F) << 6) | (c & 0x0F);
-            srcIndex += 2;
-        }else{
-            //invalid utf8 sequence
-            free(dest);
-            return NULL;
+            dest[index] = (codepoint >> 8) & 0xFF;
+            index++;
+            dest[index] = codepoint & 0xFF;
+            index++;
+            continue;
         }
 
-        dest[index] = (codepoint >> 8) & 0xFF;
-        index++;
-        dest[index] = codepoint & 0xFF;
-        index++;
+        // Non-overlong 2-byte
+        if ((0xC2 <= c && c <= 0xDF) && (0x80 <= *bytes && *bytes <= 0xBF)) {
+            codepoint = ((c & 0x1F) << 6) | (*bytes & 0x3F);
+            bytes++;
+            dest[index] = (codepoint >> 8) & 0xFF;
+            index++;
+            dest[index] = codepoint & 0xFF;
+            index++;
+            continue;
+        }
+
+        // Straight 3-byte (excluding surrogates)
+        if (((0xE0 <= c && c <= 0xEC) || c == 0xEE || c == 0xEF) &&
+            (0x80 <= bytes[0] && bytes[0] <= 0xBF) &&
+            (0x80 <= bytes[1] && bytes[1] <= 0xBF)) {
+            codepoint = ((c & 0x0F) << 12) | ((*bytes & 0x3F) << 6) | (bytes[1] & 0x3F);
+            bytes += 2;
+            dest[index] = (codepoint >> 8) & 0xFF;
+            index++;
+            dest[index] = codepoint & 0xFF;
+            index++;
+            continue;
+        }
+
+        // Planes 1-3, Planes 4-15, Plane 16
+        if ((0xF0 <= c && c <= 0xF3) &&
+            (0x80 <= bytes[0] && bytes[0] <= 0xBF) &&
+            (0x80 <= bytes[1] && bytes[1] <= 0xBF) &&
+            (0x80 <= bytes[2] && bytes[2] <= 0xBF)) {
+            codepoint = ((c & 0x07) << 18) | ((*bytes & 0x3F) << 12) | ((bytes[1] & 0x3F) << 6) | (bytes[2] & 0x3F);
+            bytes += 3;
+            dest[index] = (codepoint >> 16) & 0xFF;
+            index++;
+            dest[index] = (codepoint >> 8) & 0xFF;
+            index++;
+            dest[index] = codepoint & 0xFF;
+            index++;
+            continue;
+        }
     }
 
     return dest;
@@ -192,6 +283,10 @@ unsigned char *utf8ToUtf16(unsigned char* src, size_t srcSize, unsigned int utfv
 bool isISO_8859_1(const unsigned char *str){
 
     if(str == NULL){
+        return false;
+    }
+
+    if(str[0] == '\0'){
         return false;
     }
 
@@ -217,7 +312,7 @@ bool isUTF16(const unsigned char *str, size_t length){
     }
 
     //if theres a bom its utf16
-    if((str[0] == '\xFE' && str[1] == '\xFF') || (str[0] == '\xFF' && str[1] == '\xFE')){
+    if((str[0] == 0xFE && str[1] == 0xFF) || (str[0] == 0xFF && str[1] == 0xFE)){
         return true;
     }
 
@@ -235,9 +330,10 @@ bool isUTF16BE(const unsigned char* str, size_t length){
     }
 
     //if theres a bom its not utf16be
-    if((str[0] == '\xFE' && str[1] == '\xFF') || (str[0] == '\xFF' && str[1] == '\xFE')){
+    if((str[0] == 0xFE && str[1] == 0xFF) || (str[0] == 0xFF && str[1] == 0xFE)){
         return false;
     }
+
 
     //check for valid UTF-16BE encoding
     for(size_t i = 0; i < length - 1; i += 2){
@@ -324,6 +420,27 @@ Id3Node *id3NewNode(void *data){
 
 void id3PushList(Id3List *list, void *toAdd){
 
+    if (list == NULL || toAdd == NULL) {
+        return;
+    }
+    
+    Id3Node *node = id3NewNode(toAdd);
+    
+    if (list->size == 0) {
+        list->head = node;
+    } else {
+        Id3Node *current = list->head;
+        
+        while (current->next != NULL) {
+            current = current->next;
+        }
+        
+        current->next = node;
+    }
+
+    list->size = list->size + 1;
+
+/*
     if(list == NULL || toAdd == NULL){
         return;
     }
@@ -338,6 +455,7 @@ void id3PushList(Id3List *list, void *toAdd){
     }
 
     list->size = list->size + 1;
+*/
 }
 
 void id3FreeList(Id3List *list){
@@ -381,40 +499,44 @@ void id3DestroyList(Id3List *list){
 }
 
 void *id3RemoveList(Id3List *list, int pos){
-	
-    if(list == NULL){
+    
+    if(list == NULL || pos < 0 || pos > list->size) {
         return NULL;
     }
     
-    if(pos <= 0 || pos > list->size){
-        return NULL;
+    Id3Node* tmp = list->head;
+    Id3Node* prev = NULL;
+    int currentPosition = 0;
+
+    if(list->size == 1 && tmp != NULL){
+        void *data = tmp->data;
+        free(tmp);
+        (list->size)--;
+        return data;
     }
 
-    Id3Node *temp = list->head;
-    Id3Node *prev = list->head;
-    void *toReturn;
-    for(int i = 0; i < pos; i++) {
-        if(i == 0 && pos == 1) {
-            toReturn = list->head->data;
-            list->head = list->head->next;
-            free(temp);
-            return toReturn;
-        }else{
-            if(i == pos - 1 && temp) {
-                toReturn = temp->data;
-                prev->next = temp->next;
-                free(temp);
-            }else {
-                prev = temp;
+    while(tmp != NULL && currentPosition < pos){
+        prev = tmp;
+        tmp = tmp->next;
+        currentPosition++;
+    }
 
-                if(prev == NULL){
-                    break;
-                }
-                    
-                temp = temp->next;
-            }
+    if(tmp != NULL){
+        
+        //unlink the node
+        if(prev != NULL){
+            prev->next = tmp->next;
+        }else{
+            list->head = tmp->next;
         }
-    }   
+        void* data = tmp->data;
+        free(tmp);
+
+        (list->size)--;
+
+        return data;
+    }
+
     return NULL;
 }
 

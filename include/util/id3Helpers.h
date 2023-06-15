@@ -6,14 +6,16 @@ extern "C"{
 #endif
 
 #include "id3Types.h"
-#include <stdint.h>
 
 
 //byte functions
 int getBits8(unsigned char *bytes, int byteNum);
 unsigned int syncint_decode(int value);
 void addressFree(void **pptr);
+
+//integer functions
 char *integerToCharPointer(int value);
+unsigned int uSafeSum(unsigned int a, unsigned int b, bool sub);
 
 //unicode helpers
 unsigned char *utf16ToUtf8(unsigned char *src, size_t srcSize);

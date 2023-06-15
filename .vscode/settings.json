@@ -5,6 +5,7 @@
         "id3.h": "c",
         "id3types.h": "c",
         "stdint.h": "c",
-        "id3defines.h": "c"
+        "id3defines.h": "c",
+        "limits.h": "c"
     }
 }

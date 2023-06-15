@@ -286,7 +286,6 @@ id3buf id3TextFormatConvert(id3buf buffer, size_t bufferLen, id3byte desiredEnco
     //the given string was?
     if(isISO_8859_1(buffer)){
         strEncoding = ISO_8859_1;
-        
     }else if(isUTF16(buffer, bufferLen)){
         strEncoding = UTF16;
     }else if(isUTF16BE(buffer, bufferLen)){
@@ -299,7 +298,16 @@ id3buf id3TextFormatConvert(id3buf buffer, size_t bufferLen, id3byte desiredEnco
     }
 
     id3buf newStr = NULL;
-
+    
+    //printf("Here strEncoding = %x desiredEncoding = %x\n", strEncoding, desiredEncoding);
+    
+    //just copy no other logic needed
+    if(desiredEncoding == strEncoding){
+        newStr = calloc(sizeof(id3byte), bufferLen + id3ReaderAllocationAdd(strEncoding));
+        memcpy(newStr, buffer, id3strlen(buffer, strEncoding));
+        return newStr;
+    }
+    
     switch(desiredEncoding){
         case ISO_8859_1:
         //utf8 and ascii are basically the same so no conversion needed
@@ -307,8 +315,8 @@ id3buf id3TextFormatConvert(id3buf buffer, size_t bufferLen, id3byte desiredEnco
             if(strEncoding == UTF16 || strEncoding == UTF16BE){ 
                 newStr = utf16ToUtf8(buffer, bufferLen);
             
-            }else if(strEncoding == ISO_8859_1){
-                newStr = calloc(sizeof(id3byte), bufferLen + 1);
+            }else if(strEncoding == ISO_8859_1 || strEncoding == UTF8){
+                newStr = calloc(sizeof(id3byte), bufferLen + id3ReaderAllocationAdd(strEncoding));
                 memcpy(newStr, buffer, bufferLen);
             }
             break;
@@ -324,9 +332,9 @@ id3buf id3TextFormatConvert(id3buf buffer, size_t bufferLen, id3byte desiredEnco
                     return NULL;
                 }
 
-                newStr = utf8ToUtf16(buffer, bufferLen, UTF16);
+                newStr = utf8ToUtf16(tmp, id3strlen(tmp, UTF8), UTF16);
                 free(tmp);
-            }   
+            } 
             break;
 
         case UTF16BE:
@@ -335,12 +343,12 @@ id3buf id3TextFormatConvert(id3buf buffer, size_t bufferLen, id3byte desiredEnco
 
             }else if(strEncoding == UTF16){
                 unsigned char *tmp = utf16ToUtf8(buffer, bufferLen);
-                
+
                 if(tmp == NULL){
                     return NULL;
                 }
 
-                newStr = utf8ToUtf16(buffer, bufferLen, UTF16BE);
+                newStr = utf8ToUtf16(tmp, id3strlen(tmp, UTF8), UTF16BE);
                 free(tmp);
             }
             break;

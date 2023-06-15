@@ -624,7 +624,7 @@ typedef struct _Id3v2PlayCounterBody{
 typedef struct _Id3v2PopularBody{
     id3buf email;
     unsigned int rating;
-    long counter;
+    unsigned long counter;
 
 }Id3v2PopularBody;
 

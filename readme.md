@@ -14,7 +14,7 @@
     1. read id3v2.x attributes from a user ✅
 4. change attributes
     1. edit id3v1 attributes ✅
-    1. edit id3v2.x attributes ❌
+    1. edit id3v2.x attributes ✅
 5. write id3
     1. write id3v1 to a file ✅
     1. write id3v2 to a file ❌

@@ -5,11 +5,10 @@
 extern "C"{
 #endif
 
-#include <stdbool.h>
 #include "id3Types.h"
 
 bool containsId3v1(unsigned char *buffer);
-void id3v1WriteTag(const char *filePath, Id3v1Tag *tag);
+void id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag);
 char *id3v1ToJSON(const Id3v1Tag *tag);
 
 

@@ -10,7 +10,7 @@ bool containsId3v1(unsigned char *buffer){
     return (memcmp(buffer,"TAG",ID3V1_ID_LEN) == 0) ? true: false;
 }
 
-void id3v1WriteTag(const char *filePath, Id3v1Tag *tag){
+void id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag){
 
     if(filePath == NULL){
         return;

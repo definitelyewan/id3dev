@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "id3v2Frames.h"
 #include "id3v2Header.h"
 #include "id3Helpers.h"
 #include "id3Reader.h"
-#include <limits.h>
 
 /*
     FRAME FUNCTIONS

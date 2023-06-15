@@ -379,7 +379,7 @@ void metadataPrint(Id3Metadata *data){
                         printf("object:[%p] ",obj);
                         free(obj);
                         
-                        id3v2SaveEncapsulatedObject(currFrame);
+                        //id3v2SaveEncapsulatedObject(currFrame);
                     }
 
                     if(fileName != NULL){
@@ -644,7 +644,6 @@ void metadataPrint(Id3Metadata *data){
     id3v2ResetIterTag(data->version2);
 }
 
-
 int main(int argc, char *argv[]){
 
     if(argc != 2){
@@ -653,40 +652,152 @@ int main(int argc, char *argv[]){
 
     Id3Metadata *data = id3NewMetadataFromFile(argv[1]);
     
-    Id3v2FrameId id;
-    if(id3v2GetVersion(data->version2) >= 30){
-        id = WXXX;
-    }else{
-        id = WXX;
+    if(data == NULL){
+        perror(argv[1]);
+        exit(0);
     }
     
-    //printf("[Original]===================================================================\n");
-    //metadataPrint(data);
-    /*
-    Id3List *l = id3v2SearchForFrames(data->version2, id);
-    Id3ListIter *iter = id3NewListIter(l);
-    Id3v2Frame *checkFrame = NULL;
+    //make it just utf8
+    Id3ListIter *m = id3NewListIter(data->version2->frames);
+    Id3v2Frame *mf = NULL;
 
-    while((checkFrame = id3NextListIter(iter)) != NULL){
-        
-        id3v2SetFrameAlterPreservationIndicator(true, checkFrame);
-
-        //id3v2AddFrameToTag(data->version2, testFrame);
-        //id3v2FreeFrame(testFrame);
+    while((mf = id3NextListIter(m)) != NULL){
+        id3v2SetEncoding(UTF8, mf);
     }
-    id3DestroyList(l);
-    id3FreeListIter(iter);
-    */
+    id3FreeListIter(m);
+
+    //metadataPrint(data);
+    
+    id3buf curr = NULL;
+    id3v2SetTitle((id3buf)"😔",strlen("😔"), data->version2);
+    id3v2SetArtist((id3buf)"muffin man",strlen("muffin man"), data->version2);
+    id3v2SetAlbum((id3buf)"()()()()()brackets?",strlen("()()()()()brackets?"), data->version2);
+    id3v2SetAlbumArtist((id3buf)"§§§",strlen("§§§"), data->version2);
+    id3v2SetComment((id3buf)"yum",strlen("yum"), data->version2);
+    id3v2SetComposer((id3buf)"✝",strlen("✝"), data->version2);
+    id3v2SetGenre((id3buf)"trap",strlen("trap"),data->version2);
+    id3v2SetTrack((id3buf)"69/420",strlen("69/420"),data->version2);
+    id3v2SetDisc((id3buf)"69/420",strlen("69/420"),data->version2);
+    id3v2SetYear((id3buf)"9999",strlen("9999"),data->version2);
+    id3v2SetLyrics((id3buf)"मेरी छोटी बाइक",strlen("मेरी छोटी बाइक"),data->version2);
+
+    curr = id3v2GetTitle(UTF8, data->version2);
+    printf("Title:[");
+    encodedprintf(curr, UTF8);
+    printf("]\n");
+    if(curr != NULL){
+        free(curr);
+    }
+
+    curr = id3v2GetArtist(UTF8, data->version2);
+    printf("Artist:[");
+    encodedprintf(curr, UTF8);
+    printf("]\n");
+    if(curr != NULL){
+        free(curr);
+    }
+
+    curr = id3v2GetAlbumArtist(UTF8, data->version2);
+    printf("Album Artist:[");
+    encodedprintf(curr, UTF8);
+    printf("]\n");
+    if(curr != NULL){
+        free(curr);
+    }
+
+    curr = id3v2GetAlbum(UTF8, data->version2);
+    printf("Album:[");
+    encodedprintf(curr, UTF8);
+    printf("]\n");
+    if(curr != NULL){
+        free(curr);
+    }
+
+    curr = id3v2GetComposer(UTF8, data->version2);
+    printf("Composer:[");
+    encodedprintf(curr, UTF8);
+    printf("]\n");
+    if(curr != NULL){
+        free(curr);
+    }
+
+    curr = id3v2GetYear(UTF8, data->version2);
+    printf("Year:[");
+    encodedprintf(curr, UTF8);
+    printf("]\n");
+    if(curr != NULL){
+        free(curr);
+    }
+
+    curr = id3v2GetComment(UTF8, data->version2);
+    printf("Comment:[");
+    encodedprintf(curr, UTF8);
+    printf("]\n");
+    if(curr != NULL){
+        free(curr);
+    }
+
+    curr = id3v2GetGenre(UTF8, data->version2);
+    printf("Genre:[");
+    encodedprintf(curr, UTF8);
+    printf("]\n");
+    if(curr != NULL){
+        free(curr);
+    }
+
+    curr = id3v2GetTrack(UTF8, data->version2);
+    printf("track:[");
+    encodedprintf(curr, UTF8);
+    printf("]\n");
+    if(curr != NULL){
+        free(curr);
+    }
+
+    curr = id3v2GetDisc(UTF8, data->version2);
+    printf("disc:[");
+    encodedprintf(curr, UTF8);
+    printf("]\n");
+    if(curr != NULL){
+        free(curr);
+    }
+
+    curr = id3v2GetLyrics(UTF8, data->version2);
+    printf("lyrics:[");
+    encodedprintf(curr, UTF8);
+    printf("]\n");
+    if(curr != NULL){
+        free(curr);
+    }
+
+    /*
+    Id3v2FrameId id;
+    if(id3v2GetVersion(data->version2) >= 30){
+        id = GEOB;
+    }else{
+        id = GEO;
+    }
+    
     Id3v2Frame *f = NULL;
     while((f = id3v2IterTag(data->version2)) != NULL){
         if(id3v2GetFrameID(f) == id){
             
-            id3v2SetEncoding(UTF16, f);
-            
+            //id3v2SetGeneralEncapsulatedObjectValue(NULL,9,f);
+            //id3v2SetObjectFileName((id3buf)"tryAgain",strlen("tryAgain"),f);
+            //id3v2SetLanguage((id3buf)"CA", f);
+            //id3v2SetUnsynchronizedLyrics((id3buf)"nwordswordpword",strlen("nwordswordpword"),f);
+            //id3v2SetEncoding(UTF8, f);
+            //id3v2RemoveEventTimeCode(60000, f);
+            //id3v2SetMIMEType((id3buf)"jpeg", f);
+            //id3v2SetCommentValue((id3buf)"wubwub",strlen("wubwub"), f);
+            //id3v2RemoveSynchronizedLyric(1200000, f);            
+
+
+            //id3v2SetDescription(NULL, 0, f);
+            //id3v2SetURLValue(NULL, 0, f);
             //id3v2SetDescription((id3buf)"top text... bottom text",id3strlen(
-            //(id3buf)"top text... bottom text",ISO_8859_1),f, data->version2);
-            //id3v2SetTextValue((id3buf)"top text... bottom text",id3strlen(
-            //(id3buf)"top text... bottom text",ISO_8859_1),f, data->version2);
+            //(id3buf)"top text... bottom text",ISO_8859_1),f);
+            //id3v2SetURLValue((id3buf)"top text... bottom text",id3strlen(
+            //(id3buf)"top text... bottom text",ISO_8859_1),f);
             //id3v2SetFrameAlterPreservationIndicator(true, f);
             //id3v2SetFrameFileAlterPreservationIndicator(true, f);
             //id3v2SetFrameReadOnlyIndicator(true, f);
@@ -699,10 +810,10 @@ int main(int argc, char *argv[]){
         
     }
     id3v2ResetIterTag(data->version2);
-
+    
     printf("[edited]=====================================================================\n");
     metadataPrint(data);
-
+    */
     //printf("[Make A Copy]\n");
     //Id3Metadata *data2 = id3CopyMetadata(data);
     //printf("Exact copy| %s\n", id3v1CompareTag(data->version1, data2->version1) == 0 ? "false" : "true");
