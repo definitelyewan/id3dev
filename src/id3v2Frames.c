@@ -23,7 +23,6 @@ void id3v2FreeFrame(void *toDelete){
         return;
     }
 
-    // free frames
     // all text frames
     if(curr->header->id[0] == 'T'){
         id3v2FreeTextFrame(curr);
@@ -459,6 +458,27 @@ void *id3v2CopyFrame(void *toCopy){
     }
 
     return NULL;
+}
+
+bool isFrameWritable(Id3v2FlagContent *flags){
+
+    if(flags == NULL){
+        return true;
+    }
+
+    if(flags->readOnly == true){
+        return false;
+    }
+
+    if(flags->decompressedSize > 0){
+        return false;
+    }
+
+    if(flags->encryption > 0){
+        return false;
+    }
+
+    return true;
 }
 
 /*

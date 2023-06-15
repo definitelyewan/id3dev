@@ -6,7 +6,6 @@ extern "C"{
 #endif
 
 #include "id3Types.h"
-#include <stdbool.h>
 
 //frame functions
 Id3List *id3v2ExtractFrames(id3buf buffer, Id3v2Header *header);
@@ -14,6 +13,7 @@ Id3v2Frame *id3v2NewFrame(Id3v2FrameHeader *header, void *bodyContent);
 Id3v2Frame *id3v2ParseFrame(id3buf buffer, Id3v2Header *header);
 void *id3v2CopyFrame(void *toCopy);
 void id3v2FreeFrame(void *toDelete);
+bool isFrameWritable(Id3v2FlagContent *flags);
 
 //header frame functions
 Id3v2FrameHeader *id3v2ParseFrameHeader(id3buf buffer, Id3v2Header *header);

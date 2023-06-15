@@ -663,10 +663,14 @@ int main(int argc, char *argv[]){
 
     while((mf = id3NextListIter(m)) != NULL){
         id3v2SetEncoding(UTF8, mf);
+        //id3v2SetFrameEncryptionMethod(0xD7, mf);
+        //id3v2SetFrameReadOnlyIndicator(true, mf);
+        id3v2SetFrameDataLengthSize(100, mf);
     }
     id3FreeListIter(m);
 
-    //metadataPrint(data);
+    metadataPrint(data);
+    
     
     id3buf curr = NULL;
     id3v2SetTitle((id3buf)"😔",strlen("😔"), data->version2);

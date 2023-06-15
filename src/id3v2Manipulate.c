@@ -1136,7 +1136,7 @@ void id3v2SetFrameEncryptionMethod(id3byte symbol, Id3v2Frame *frame){
     }
 
     if(frame->header->flagContent != NULL){
-        
+
         //add to size only once
         if(frame->header->flagContent->encryption == 0x00){
             frame->header->headerSize = frame->header->headerSize + 1; 
@@ -1230,6 +1230,10 @@ void id3v2SetEncoding(id3byte encoding, Id3v2Frame *frame){
         return;
     }
     
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     int id = 0;
     unsigned int *sizes = NULL;
 
@@ -1337,7 +1341,7 @@ int id3v2GetEncoding(Id3v2Frame *frame){
     if(id3v2ManipFrameHeaderErrorChecks(frame) == true){
         return -1;
     }
-    
+
     int id = 0;
 
     if(frame->header->id[0] == 'T'){
@@ -1406,7 +1410,11 @@ void id3v2SetDescription(id3buf description, size_t descriptionLength, Id3v2Fram
     if(frame->header == NULL){
         return;
     }
-    
+
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     id3buf newDesc = NULL;
     id3buf currDesc = NULL;
     int newDescLen = 0;
@@ -1544,6 +1552,8 @@ id3buf id3v2GetDescription(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     id3buf ptr = NULL;
     id3buf ret = NULL;
     int encoding = id3v2GetEncoding(frame);
@@ -1634,6 +1644,10 @@ void id3v2SetTextValue(id3buf value, unsigned int valueLength, Id3v2Frame *frame
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     id3buf currValue = NULL;
     id3buf newValue = NULL;
     int currValueLen = 0;
@@ -1667,6 +1681,8 @@ id3buf id3v2GetTextValue(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     Id3v2TextBody *body = (Id3v2TextBody *)frame->frame;
     
     if(body->value == NULL){
@@ -1686,6 +1702,10 @@ void id3v2SetURLValue(id3buf value, size_t valueLength, Id3v2Frame *frame){
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -1722,6 +1742,8 @@ id3buf id3v2GetURLValue(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     if(frame->header->id[0] != 'W'){
         return NULL;
     }
@@ -1747,6 +1769,8 @@ id3buf id3v2GetInvolvedPeopleListPerson(Id3v2Frame *frame){
     if(frame->frame == NULL){
         return NULL;
     }
+
+ 
 
     switch(id3v2GetFrameID(frame)){
         case IPL:
@@ -1791,6 +1815,8 @@ id3buf id3v2GetInvolvedPeopleListJob(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     switch(id3v2GetFrameID(frame)){
         case IPL:
             break;
@@ -1832,6 +1858,10 @@ void id3v2RemoveInvolvedPerson(id3buf personToRemove,  unsigned int personToRemo
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -1907,6 +1937,10 @@ void id3v2SetCDIDValue(char *cdtoc, Id3v2Frame *frame){
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     switch(frame->header->idNum){
         case MCI:
             break;
@@ -1949,6 +1983,8 @@ id3buf id3v2GetCDIDValue(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     switch(frame->header->idNum){
         case MCI:
             break;
@@ -1968,6 +2004,10 @@ id3buf id3v2GetCDIDValue(Id3v2Frame *frame){
 void id3v2SetTimeStampFormat(id3byte format, Id3v2Frame *frame){
 
     if(frame == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -2028,6 +2068,12 @@ id3byte id3v2GetEventTimeCodeType(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return 0x00;
+    }
+
+    if(frame->header->flagContent != NULL){
+        if(frame->header->flagContent->encryption > 0){
+            return 0x00;
+        }
     }
 
     switch(id3v2GetFrameID(frame)){
@@ -2098,6 +2144,10 @@ void id3v2RemoveEventTimeCode(int stamp, Id3v2Frame *frame){
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     switch(frame->header->idNum){
         case ETC:
             break;
@@ -2157,6 +2207,10 @@ void id3v2SetSyncedTempoCodesFrameValue(id3buf value, unsigned int valueLength, 
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     id3buf copy = NULL;
     Id3v2SyncedTempoCodesBody *body = NULL;
     
@@ -2184,6 +2238,8 @@ id3buf id3v2GetSyncedTempoCodesFrameValue(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     Id3v2SyncedTempoCodesBody *body = (Id3v2SyncedTempoCodesBody *)frame->frame;
     id3buf data = malloc((sizeof(id3byte)*body->tempoDataLen)+1);
     memcpy(data, body->tempoData, body->tempoDataLen);
@@ -2198,6 +2254,10 @@ void id3v2SetLanguage(id3buf lang, Id3v2Frame *frame){
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -2260,7 +2320,9 @@ id3buf id3v2GetLanguage(Id3v2Frame *frame){
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
-    
+
+ 
+
     id3buf lang = NULL;
     id3buf ret = NULL;
     switch(id3v2GetFrameID(frame)){
@@ -2309,6 +2371,10 @@ void id3v2SetUnsynchronizedLyrics(id3buf lyrics, unsigned int lyricLength, Id3v2
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     switch(frame->header->idNum){
         case USLT:
             break;
@@ -2346,6 +2412,8 @@ id3buf id3v2GetUnsynchronizedLyrics(Id3v2Frame *frame){
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
+
+ 
 
     id3buf ptr = NULL;
     id3buf ret = NULL;
@@ -2463,6 +2531,10 @@ void id3v2RemoveSynchronizedLyric(int timeStamp, Id3v2Frame *frame){
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     switch(frame->header->idNum){
         case SYLT:
             break;
@@ -2512,7 +2584,11 @@ void id3v2SetCommentValue(id3buf comment, unsigned int commentLength, Id3v2Frame
     if(frame->frame == NULL || frame->header == NULL){
         return;
     }
-    
+
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     switch(frame->header->idNum){
         case COM:
             break;
@@ -2545,6 +2621,8 @@ id3buf id3v2GetCommentValue(Id3v2Frame *frame){
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
+
+ 
 
     switch(id3v2GetFrameID(frame)){
         case COM:
@@ -2646,6 +2724,9 @@ void id3v2SetMIMEType(id3buf format, Id3v2Frame *frame){
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
 
     id3buf mime = NULL;
     id3buf oldMime = NULL;
@@ -2711,6 +2792,8 @@ id3buf id3v2GetMIMEType(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     id3buf buildMIME = NULL;
     id3buf mime = NULL;
 
@@ -2754,6 +2837,10 @@ void id3v2SetPictureType(id3byte pictureType, Id3v2Frame *frame){
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     switch(frame->header->idNum){
         case PIC:
             ((Id3v2PictureBody *)frame->frame)->pictureType = pictureType;
@@ -2794,6 +2881,10 @@ void id3v2SetPictureValue(id3buf picture, unsigned int pictureLength, Id3v2Frame
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -2842,7 +2933,9 @@ id3buf id3v2GetPictureValue(Id3v2Frame *frame){
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
-    
+
+ 
+
     Id3v2PictureBody *body = (Id3v2PictureBody *)frame->frame;
     id3buf value = NULL;
     
@@ -2872,6 +2965,10 @@ void id3v2SetObjectFileName(id3buf fileName, unsigned int fileNameLength, Id3v2F
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -2914,6 +3011,8 @@ id3buf id3v2GetObjectFileName(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     int encoding = id3v2GetEncoding(frame);
     id3buf name = NULL;
 
@@ -2945,6 +3044,10 @@ void id3v2SetGeneralEncapsulatedObjectValue(id3buf value, unsigned int valueLeng
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -2988,6 +3091,8 @@ id3buf id3v2GetGeneralEncapsulatedObjectValue(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     id3buf value = NULL;
 
     switch(id3v2GetFrameID(frame)){
@@ -3021,6 +3126,10 @@ void id3v2SetPlayCount(unsigned long playCount, Id3v2Frame *frame){
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     switch(frame->header->idNum){
         case CNT:
             ((Id3v2PlayCounterBody *)frame->frame)->counter = playCount;
@@ -3045,7 +3154,6 @@ unsigned long id3v2GetPlayCount(Id3v2Frame *frame){
         return 0;
     }
 
-
     switch(id3v2GetFrameID(frame)){
         case CNT:
             return (unsigned long)((Id3v2PlayCounterBody *)frame->frame)->counter;
@@ -3067,6 +3175,10 @@ void id3v2SetEmail(char *email, Id3v2Frame *frame){
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -3107,6 +3219,7 @@ id3buf id3v2GetEmail(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
 
     switch(id3v2GetFrameID(frame)){
         case POP:
@@ -3140,6 +3253,10 @@ void id3v2SetRating(unsigned int rating, Id3v2Frame *frame){
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     switch(frame->header->idNum){
         case POP:
             break;
@@ -3157,7 +3274,6 @@ int id3v2GetRating(Id3v2Frame *frame){
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return -1;
     }
-
 
     switch(id3v2GetFrameID(frame)){
         case POP:
@@ -3180,6 +3296,10 @@ void id3v2SetOwnerIdentifier(char *owner, Id3v2Frame *frame){
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -3240,6 +3360,8 @@ id3buf id3v2GetOwnerIdentifier(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     id3buf ptr = NULL;
     id3buf ret = NULL;
 
@@ -3288,6 +3410,10 @@ void id3v2SetEncryptedMetaValue(id3buf value, unsigned int valueLength, Id3v2Fra
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     if(frame->header->idNum != CRM){
         return;
     }
@@ -3323,6 +3449,8 @@ id3buf id3v2GetEncryptedMetaValue(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     id3buf ptr = ((Id3v2EncryptedMetaBody *)frame->frame)->encryptedDatablock;
     id3buf ret = NULL;
 
@@ -3345,6 +3473,10 @@ void id3v2SetPreviewStart(void *start, Id3v2Frame *frame){
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     if(frame->header->idNum != AENC){
         return;
     }
@@ -3357,6 +3489,8 @@ id3buf id3v2GetPreviewStart(Id3v2Frame *frame){
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
+
+ 
 
     if(id3v2GetFrameID(frame) != AENC){
         return NULL;
@@ -3372,6 +3506,10 @@ void id3v2SetPreviewLength(unsigned int previewLength, Id3v2Frame *frame){
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -3402,6 +3540,10 @@ void id3v2SetAudioEncryptionValue(id3buf value, unsigned int valueLength, Id3v2F
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -3440,6 +3582,8 @@ id3buf id3v2GetAudioEncryptionValue(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     id3buf value = NULL;
 
     if(((Id3v2AudioEncryptionBody *)frame->frame)->encryptionInfo == NULL){
@@ -3460,6 +3604,10 @@ void id3v2SetUniqueFileIdentifierValue(char *identifier, Id3v2Frame *frame){
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -3531,6 +3679,10 @@ void id3v2SetPositionSynchronisationValue(unsigned long position, Id3v2Frame *fr
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     if(frame->header->idNum != POSS){
         return;
     }
@@ -3561,6 +3713,10 @@ void id3v2SetTermsOfUseValue(id3buf termsOfuse, unsigned int termsOfuseLength, I
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     if(frame->header->idNum != USER){
         return;
     }
@@ -3568,8 +3724,6 @@ void id3v2SetTermsOfUseValue(id3buf termsOfuse, unsigned int termsOfuseLength, I
     id3buf replace = NULL;
     id3buf curr = NULL;
     Id3v2TermsOfUseBody *body = (Id3v2TermsOfUseBody *)frame->frame;
-
-
 
     if(termsOfuse != NULL && termsOfuseLength > 0){
         replace = id3TextFormatConvert(termsOfuse, termsOfuseLength, body->encoding);
@@ -3591,6 +3745,8 @@ id3buf id3v2GetTermsOfUseValue(Id3v2Frame *frame){
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return NULL;
     }
+
+ 
 
     if(id3v2GetFrameID(frame) != USER){
         return NULL;
@@ -3616,6 +3772,10 @@ void id3SetPrice(char *price, Id3v2Frame *frame){
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -3659,6 +3819,8 @@ id3buf id3v2GetPrice(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     id3buf ptr = NULL;
     id3buf ret = NULL;
 
@@ -3693,6 +3855,10 @@ void id3v2SetPunchDate(char *punch, Id3v2Frame *frame){
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     if(frame->header->idNum != OWNE){
         return;
     }
@@ -3721,6 +3887,8 @@ id3buf id3v2GetPunchDate(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     id3buf ptr = NULL;
     id3buf ret = NULL;
 
@@ -3748,6 +3916,10 @@ void id3v2SetSeller(id3buf seller, unsigned int sellerLength, Id3v2Frame *frame)
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -3786,6 +3958,8 @@ id3buf id3v2GetSeller(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     id3buf ptr = NULL;
     id3buf ret = NULL;
     int encoding = 0;
@@ -3822,6 +3996,10 @@ void id3v2SetValidDate(char *validDate, Id3v2Frame *frame){
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     if(frame->header->idNum != COMR){
         return;
     }
@@ -3854,6 +4032,8 @@ id3buf id3v2GetValidDate(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     id3buf ptr = NULL;
     id3buf ret = NULL;
 
@@ -3876,6 +4056,10 @@ void id3v2SetContactURL(char *url, Id3v2Frame *frame){
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -3911,6 +4095,8 @@ id3buf id3v2GetContractURL(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     id3buf ptr = NULL;
     id3buf ret = NULL;
 
@@ -3937,6 +4123,10 @@ void id3v2SetCommecialDeliveryMethod(id3byte deliveryMethod, Id3v2Frame *frame){
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -3968,6 +4158,10 @@ void id3v2SetCommercialSellerLogo(id3buf logo, unsigned int logoLength, Id3v2Fra
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -4006,6 +4200,8 @@ id3buf id3v2GetCommercialSellerLogo(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     if(id3v2GetFrameID(frame) != COMR){
         return NULL;
     }
@@ -4032,6 +4228,10 @@ void id3v2SetSymbol(id3byte symbol, Id3v2Frame *frame){
         return;
     }
 
+    if(!isFrameWritable(frame->header->flagContent)){
+        return;
+    }
+
     switch(frame->header->idNum){
         case ENCR:
             ((Id3v2EncryptionMethodRegistrationBody *)frame->frame)->methodSymbol = symbol;
@@ -4053,6 +4253,12 @@ id3byte id3v2GetSymbol(Id3v2Frame *frame){
         return 0x00;
     }
 
+    if(frame->header->flagContent != NULL){
+        if(frame->header->flagContent->encryption > 0){
+            return 0x00;
+        }
+    }
+
     switch(id3v2GetFrameID(frame)){
         case ENCR:
             return ((Id3v2EncryptionMethodRegistrationBody *)frame->frame)->methodSymbol;
@@ -4072,6 +4278,10 @@ void id3v2SetEncryptionRegistrationValue(id3buf value, unsigned int valueLength,
     }
 
     if(frame->frame != NULL || frame->header != NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -4106,6 +4316,8 @@ id3buf id3v2GetEncryptionRegistrationValue(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     if(id3v2GetFrameID(frame) != ENCR){
         return NULL;
     }
@@ -4124,6 +4336,10 @@ void id3v2SetGroupIDValue(id3buf value, unsigned int valueLength, Id3v2Frame *fr
     }
 
     if(frame->frame != NULL || frame->header != NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -4158,6 +4374,8 @@ id3buf id3v2GetGroupIDValue(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     if(id3v2GetFrameID(frame) != GRID){
         return NULL;
     }
@@ -4176,6 +4394,10 @@ void id3v2SetPrivateValue(id3buf value, unsigned int valueLength, Id3v2Frame *fr
     }
 
     if(frame->frame != NULL || frame->header != NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -4210,6 +4432,8 @@ id3buf id3v2GetPrivateValue(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     if(id3v2GetFrameID(frame) != PRIV){
         return NULL;
     }
@@ -4228,6 +4452,10 @@ void id3v2SetSignatureValue(id3buf value, unsigned int valueLength, Id3v2Frame *
     }
 
     if(frame->frame != NULL || frame->header != NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
@@ -4262,6 +4490,8 @@ id3buf id3v2GetSignatureValue(Id3v2Frame *frame){
         return NULL;
     }
 
+ 
+
     if(id3v2GetFrameID(frame) != SIGN){
         return NULL;
     }
@@ -4280,6 +4510,10 @@ void id3v2SetOffsetToNextTag(int offset, Id3v2Frame *frame){
     }
 
     if(frame->frame == NULL || frame->header == NULL){
+        return;
+    }
+
+    if(!isFrameWritable(frame->header->flagContent)){
         return;
     }
 
