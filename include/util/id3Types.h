@@ -602,7 +602,7 @@ typedef struct _Id3v2PictureBody{
     id3byte pictureType;
     id3buf description;
     id3buf pictureData;
-    int picSize;
+    unsigned int picSize;
 
 }Id3v2PictureBody;
 

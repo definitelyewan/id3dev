@@ -5,7 +5,6 @@
 extern "C"{
 #endif
 
-#include <stdbool.h>
 #include "id3Types.h"
 #include "id3v2.h"
 #include "id3v1.h"

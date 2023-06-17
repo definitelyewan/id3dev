@@ -11,6 +11,7 @@ extern "C"{
 #include "id3v2Frames.h"
 #include "id3Reader.h"
 #include "id3v2Manipulate.h"
+#include "id3v2Write.h"
 
 //tag functions makers and deleters
 Id3v2Tag *id3v2ParseTagFromFile(const char *filePath);
