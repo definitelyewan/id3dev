@@ -72,7 +72,6 @@ bool id3v2ReadUnsynchronizedIndicator(Id3v2Tag *tag);
 bool id3v2ReadExperimentalIndicator(Id3v2Tag *tag);
 bool id3v2ReadExtendedIndicator(Id3v2Tag *tag);
 bool id3v2ReadFooterIndicator(Id3v2Tag *tag);
-size_t id3v2ReadTagSize(Id3v2Tag *tag);
 
 //read and write frame attributes
 
@@ -85,12 +84,18 @@ void id3v2SetFrameReadOnlyIndicator(bool indicator, Id3v2Frame *frame);
 bool id3v2ReadFrameReadOnlyIndicator(Id3v2Frame *frame);
 void id3v2SetFrameUnsynchronizationIndicator(bool indicator, Id3v2Frame *frame);
 bool id3v2ReadFrameUnsynchronizationIndicator(Id3v2Frame *frame);
-void id3v2SetFrameDataLengthSize(size_t size, Id3v2Frame *frame);
-size_t id3v2ReadFrameDataLengthSize(Id3v2Frame *frame);
+
+/*
+    WRONG WORNG WRONG WRONG WRONG decompressions size and data length indeicator are different
+*/
+void id3v2SetFrameCompressionSize(size_t size, Id3v2Frame *frame);
+size_t id3v2ReadFrameCompressionSize(Id3v2Frame *frame);
 void id3v2SetFrameEncryptionMethod(id3byte symbol, Id3v2Frame *frame);
 id3byte id3v2ReadFrameEncryptionMethod(Id3v2Frame *frame);
 void id3v2SetFrameGroup(id3byte symbol, Id3v2Frame *frame);
 id3byte id3v2ReadFrameGroup(Id3v2Frame *frame);
+void id3v2SetDataLengthIndicator(bool indicator, Id3v2Frame *frame);
+bool id3v2ReadFrameDataLengthIndicator(Id3v2Frame *frame);
 
 //frame header
 char *id3v2ReadFrameStrID(Id3v2Frame *frame);

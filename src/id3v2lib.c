@@ -35,7 +35,7 @@ Id3v2Tag *id3v2ParseTagFromFile(const char *filePath){
     }
 
     buffer = headerBytes + ID3V2_TAG_SIZE_OFFSET;
-    tagSize = syncint_decode(getBits8(buffer,ID3V2_HEADER_SIZE_LEN));
+    tagSize = syncintDecode(btoi(buffer,ID3V2_HEADER_SIZE_LEN));
     
     //reset file so an enter buffer can be set
     fseek(fp, 0, SEEK_SET);
@@ -51,7 +51,7 @@ Id3v2Tag *id3v2ParseTagFromFile(const char *filePath){
     return id3v2ParseTagFromBuffer(buffer, tagSize);
 }
 
-Id3v2Tag *id3v2ParseTagFromBuffer(unsigned char *buffer, int tagSize){
+Id3v2Tag *id3v2ParseTagFromBuffer(unsigned char *buffer, unsigned int tagSize){
 
     unsigned char *frames = NULL;
     Id3v2Header *headerInfo = NULL;
@@ -78,7 +78,7 @@ Id3v2Tag *id3v2ParseTagFromBuffer(unsigned char *buffer, int tagSize){
     frames = frames + ID3V2_HEADER_SIZE;
 
     //extract frames from the file
-    frameList = id3v2ExtractFrames(frames, headerInfo);
+    frameList = id3v2ExtractFrames(frames, tagSize, headerInfo);
     
     //free(buffer);
 
@@ -130,8 +130,7 @@ void id3v2AddFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame){
     if(frame == NULL){
         return;
     }
-
-    tag->header->size = tag->header->size + frame->header->frameSize + frame->header->headerSize;
+    
     id3PushList(tag->frames, (void *)frame);
     id3FreeListIter(tag->iter);
     tag->iter = id3NewListIter(tag->frames);

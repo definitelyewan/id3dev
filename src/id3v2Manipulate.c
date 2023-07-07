@@ -546,60 +546,447 @@ void id3v2DualIDSetV(Id3v2FrameId id1, Id3v2FrameId id2, Id3v2Tag *tag, id3buf v
     li = id3NewListIter(tag->frames);
 
     while((f = id3NextListIter(li)) != NULL){
-
+        
         if(id3v2ReadFrameID(f) == id1 || id3v2ReadFrameID(f) == id2){
             definedFunction(value, valueLength, f);
-            break;
+            id3FreeListIter(li);
+            return;
         }
     }
 
-    id3FreeListIter(li);
+    
 }
 
 //quick reads n writes for common attrs
 
-void id3v2SetTitle(id3buf value, unsigned int valueLength, Id3v2Tag *tag){    
-    id3v2DualIDSetV(TT2, TIT2, tag, value, valueLength, id3v2SetTextValue);  
+void id3v2SetTitle(id3buf value, unsigned int valueLength, Id3v2Tag *tag){
+    id3buf t = id3v2ReadTitle(ISO_8859_1, tag);
+    
+    if(t != NULL){
+        id3v2DualIDSetV(TT2, TIT2, tag, value, valueLength, id3v2SetTextValue);
+        free(t);
+    
+    }else{
+
+        id3byte encoding = UNKNOWN_ENCODING;
+        Id3v2Frame *f = NULL;
+
+        if(isUTF8(value)){
+            encoding = UTF8;
+        }else if(isISO_8859_1(value)){
+            encoding = ISO_8859_1;
+        }else if(isUTF16(value, valueLength)){
+            encoding = UTF16;
+        }else if(isUTF16BE(value, valueLength)){
+            encoding = UTF16BE;
+        }
+        
+        switch(tag->header->versionMajor){
+            case ID3V22:
+                f = id3v2CreateTextFrame(TT2, encoding, value, NULL);                
+                id3PushList(tag->frames, f);
+                break;
+            case ID3V23:
+            case ID3V24:
+                f = id3v2CreateTextFrame(TIT2, encoding, value, NULL);             
+                id3PushList(tag->frames, f);
+                break;
+            default:
+                return;
+        }
+    }  
 }
 
 void id3v2SetArtist(id3buf value, unsigned int valueLength, Id3v2Tag *tag){
-    id3v2DualIDSetV(TP1, TPE1, tag, value, valueLength, id3v2SetTextValue);
+
+    id3buf t = id3v2ReadTitle(ISO_8859_1, tag);
+    
+    if(t != NULL){
+        id3v2DualIDSetV(TP1, TPE1, tag, value, valueLength, id3v2SetTextValue);
+        free(t);
+    
+    }else{
+
+        id3byte encoding = UNKNOWN_ENCODING;
+        Id3v2Frame *f = NULL;
+
+        if(isUTF8(value)){
+            encoding = UTF8;
+        }else if(isISO_8859_1(value)){
+            encoding = ISO_8859_1;
+        }else if(isUTF16(value, valueLength)){
+            encoding = UTF16;
+        }else if(isUTF16BE(value, valueLength)){
+            encoding = UTF16BE;
+        }
+        
+        switch(tag->header->versionMajor){
+            case ID3V22:
+                f = id3v2CreateTextFrame(TP1, encoding, value, NULL);                
+                id3PushList(tag->frames, f);
+                break;
+            case ID3V23:
+            case ID3V24:
+                f = id3v2CreateTextFrame(TPE1, encoding, value, NULL);             
+                id3PushList(tag->frames, f);
+                break;
+            default:
+                return;
+        }
+    }
 }
 
 void id3v2SetAlbum(id3buf value, unsigned int valueLength, Id3v2Tag *tag){
-    id3v2DualIDSetV(TAL, TALB, tag, value, valueLength, id3v2SetTextValue);
+
+    id3buf t = id3v2ReadTitle(ISO_8859_1, tag);
+    
+    if(t != NULL){
+        id3v2DualIDSetV(TAL, TALB, tag, value, valueLength, id3v2SetTextValue);
+        free(t);
+    
+    }else{
+
+        id3byte encoding = UNKNOWN_ENCODING;
+        Id3v2Frame *f = NULL;
+
+        if(isUTF8(value)){
+            encoding = UTF8;
+        }else if(isISO_8859_1(value)){
+            encoding = ISO_8859_1;
+        }else if(isUTF16(value, valueLength)){
+            encoding = UTF16;
+        }else if(isUTF16BE(value, valueLength)){
+            encoding = UTF16BE;
+        }
+        
+        switch(tag->header->versionMajor){
+            case ID3V22:
+                f = id3v2CreateTextFrame(TAL, encoding, value, NULL);                
+                id3PushList(tag->frames, f);
+                break;
+            case ID3V23:
+            case ID3V24:
+                f = id3v2CreateTextFrame(TALB, encoding, value, NULL);             
+                id3PushList(tag->frames, f);
+                break;
+            default:
+                return;
+        }
+    }    
 }
 
 void id3v2SetAlbumArtist(id3buf value, unsigned int valueLength, Id3v2Tag *tag){
-    id3v2DualIDSetV(TP2, TPE2, tag, value, valueLength, id3v2SetTextValue);
+
+    id3buf t = id3v2ReadTitle(ISO_8859_1, tag);
+    
+    if(t != NULL){
+        id3v2DualIDSetV(TP2, TPE2, tag, value, valueLength, id3v2SetTextValue);
+        free(t);
+    
+    }else{
+
+        id3byte encoding = UNKNOWN_ENCODING;
+        Id3v2Frame *f = NULL;
+
+        if(isUTF8(value)){
+            encoding = UTF8;
+        }else if(isISO_8859_1(value)){
+            encoding = ISO_8859_1;
+        }else if(isUTF16(value, valueLength)){
+            encoding = UTF16;
+        }else if(isUTF16BE(value, valueLength)){
+            encoding = UTF16BE;
+        }
+        
+        switch(tag->header->versionMajor){
+            case ID3V22:
+                f = id3v2CreateTextFrame(TP2, encoding, value, NULL);                
+                id3PushList(tag->frames, f);
+                break;
+            case ID3V23:
+            case ID3V24:
+                f = id3v2CreateTextFrame(TPE2, encoding, value, NULL);             
+                id3PushList(tag->frames, f);
+                break;
+            default:
+                return;
+        }
+    }        
 }
 
 void id3v2SetComposer(id3buf value, unsigned int valueLength, Id3v2Tag *tag){
-    id3v2DualIDSetV(TCM, TCOM, tag, value, valueLength, id3v2SetTextValue);
+
+    id3buf t = id3v2ReadTitle(ISO_8859_1, tag);
+    
+    if(t != NULL){
+        id3v2DualIDSetV(TCM, TCOM, tag, value, valueLength, id3v2SetTextValue);
+        free(t);
+    
+    }else{
+
+        id3byte encoding = UNKNOWN_ENCODING;
+        Id3v2Frame *f = NULL;
+
+        if(isUTF8(value)){
+            encoding = UTF8;
+        }else if(isISO_8859_1(value)){
+            encoding = ISO_8859_1;
+        }else if(isUTF16(value, valueLength)){
+            encoding = UTF16;
+        }else if(isUTF16BE(value, valueLength)){
+            encoding = UTF16BE;
+        }
+        
+        switch(tag->header->versionMajor){
+            case ID3V22:
+                f = id3v2CreateTextFrame(TCM, encoding, value, NULL);                
+                id3PushList(tag->frames, f);
+                break;
+            case ID3V23:
+            case ID3V24:
+                f = id3v2CreateTextFrame(TCOM, encoding, value, NULL);             
+                id3PushList(tag->frames, f);
+                break;
+            default:
+                return;
+        }
+    }
 }
 
 void id3v2SetYear(id3buf value, unsigned int valueLength, Id3v2Tag *tag){
-    id3v2DualIDSetV(TYE, TYER, tag, value, valueLength, id3v2SetTextValue);
+
+    id3buf t = id3v2ReadTitle(ISO_8859_1, tag);
+    
+    if(t != NULL){
+        id3v2DualIDSetV(TYE, TYER, tag, value, valueLength, id3v2SetTextValue);
+        free(t);
+    
+    }else{
+
+        id3byte encoding = UNKNOWN_ENCODING;
+        Id3v2Frame *f = NULL;
+
+        if(isUTF8(value)){
+            encoding = UTF8;
+        }else if(isISO_8859_1(value)){
+            encoding = ISO_8859_1;
+        }else if(isUTF16(value, valueLength)){
+            encoding = UTF16;
+        }else if(isUTF16BE(value, valueLength)){
+            encoding = UTF16BE;
+        }
+        
+        switch(tag->header->versionMajor){
+            case ID3V22:
+                f = id3v2CreateTextFrame(TYE, encoding, value, NULL);                
+                id3PushList(tag->frames, f);
+                break;
+            case ID3V23:
+            case ID3V24:
+                f = id3v2CreateTextFrame(TYER, encoding, value, NULL);             
+                id3PushList(tag->frames, f);
+                break;
+            default:
+                return;
+        }
+    }    
 }
 
 void id3v2SetComment(id3buf value, unsigned int valueLength, Id3v2Tag *tag){
-    id3v2DualIDSetV(COM, COMM, tag, value, valueLength, id3v2SetCommentValue);
+    
+    id3buf c = id3v2ReadComment(ISO_8859_1, tag);
+    
+    if(c != NULL){
+        id3v2DualIDSetV(COM, COMM, tag, value, valueLength, id3v2SetCommentValue);
+        free(c);
+    
+    }else{
+
+        id3byte encoding = UNKNOWN_ENCODING;
+        Id3v2Frame *f = NULL;
+
+        if(isUTF8(value)){
+            encoding = UTF8;
+        }else if(isISO_8859_1(value)){
+            encoding = ISO_8859_1;
+        }else if(isUTF16(value, valueLength)){
+            encoding = UTF16;
+        }else if(isUTF16BE(value, valueLength)){
+            encoding = UTF16BE;
+        }
+
+        switch(tag->header->versionMajor){
+            case ID3V22:
+                f = id3v2CreateCommentFrame(COM, encoding, NULL, NULL, value);                
+                id3PushList(tag->frames, f);
+                break;
+            case ID3V23:
+            case ID3V24:
+                f = id3v2CreateCommentFrame(COMM, encoding, NULL, NULL, value);                
+                id3PushList(tag->frames, f);
+                break;
+            default:
+                return;
+        }
+    }
 }
 
 void id3v2SetGenre(id3buf value, unsigned int valueLength, Id3v2Tag *tag){
-    id3v2DualIDSetV(TCO, TCON, tag, value, valueLength, id3v2SetTextValue);
+
+
+    id3buf t = id3v2ReadTitle(ISO_8859_1, tag);
+    
+    if(t != NULL){
+        id3v2DualIDSetV(TCO, TCON, tag, value, valueLength, id3v2SetTextValue);
+        free(t);
+    
+    }else{
+
+        id3byte encoding = UNKNOWN_ENCODING;
+        Id3v2Frame *f = NULL;
+
+        if(isUTF8(value)){
+            encoding = UTF8;
+        }else if(isISO_8859_1(value)){
+            encoding = ISO_8859_1;
+        }else if(isUTF16(value, valueLength)){
+            encoding = UTF16;
+        }else if(isUTF16BE(value, valueLength)){
+            encoding = UTF16BE;
+        }
+        
+        switch(tag->header->versionMajor){
+            case ID3V22:
+                f = id3v2CreateTextFrame(TCO, encoding, value, NULL);                
+                id3PushList(tag->frames, f);
+                break;
+            case ID3V23:
+            case ID3V24:
+                f = id3v2CreateTextFrame(TCON, encoding, value, NULL);             
+                id3PushList(tag->frames, f);
+                break;
+            default:
+                return;
+        }
+    }
 }
 
 void id3v2SetTrack(id3buf value, unsigned int valueLength, Id3v2Tag *tag){
-    id3v2DualIDSetV(TRK, TRCK, tag, value, valueLength, id3v2SetTextValue);
+
+
+    id3buf t = id3v2ReadTitle(ISO_8859_1, tag);
+    
+    if(t != NULL){
+        id3v2DualIDSetV(TRK, TRCK, tag, value, valueLength, id3v2SetTextValue);
+        free(t);
+    
+    }else{
+
+        id3byte encoding = UNKNOWN_ENCODING;
+        Id3v2Frame *f = NULL;
+
+        if(isUTF8(value)){
+            encoding = UTF8;
+        }else if(isISO_8859_1(value)){
+            encoding = ISO_8859_1;
+        }else if(isUTF16(value, valueLength)){
+            encoding = UTF16;
+        }else if(isUTF16BE(value, valueLength)){
+            encoding = UTF16BE;
+        }
+        
+        switch(tag->header->versionMajor){
+            case ID3V22:
+                f = id3v2CreateTextFrame(TRK, encoding, value, NULL);                
+                id3PushList(tag->frames, f);
+                break;
+            case ID3V23:
+            case ID3V24:
+                f = id3v2CreateTextFrame(TRCK, encoding, value, NULL);             
+                id3PushList(tag->frames, f);
+                break;
+            default:
+                return;
+        }
+    }
 }
 
 void id3v2SetDisc(id3buf value, unsigned int valueLength, Id3v2Tag *tag){
-    id3v2DualIDSetV(TPA, TPOS, tag, value, valueLength, id3v2SetTextValue);
+
+
+    id3buf t = id3v2ReadTitle(ISO_8859_1, tag);
+    
+    if(t != NULL){
+        id3v2DualIDSetV(TPA, TPOS, tag, value, valueLength, id3v2SetTextValue);
+        free(t);
+    
+    }else{
+
+        id3byte encoding = UNKNOWN_ENCODING;
+        Id3v2Frame *f = NULL;
+
+        if(isUTF8(value)){
+            encoding = UTF8;
+        }else if(isISO_8859_1(value)){
+            encoding = ISO_8859_1;
+        }else if(isUTF16(value, valueLength)){
+            encoding = UTF16;
+        }else if(isUTF16BE(value, valueLength)){
+            encoding = UTF16BE;
+        }
+        
+        switch(tag->header->versionMajor){
+            case ID3V22:
+                f = id3v2CreateTextFrame(TPA, encoding, value, NULL);                
+                id3PushList(tag->frames, f);
+                break;
+            case ID3V23:
+            case ID3V24:
+                f = id3v2CreateTextFrame(TPOS, encoding, value, NULL);             
+                id3PushList(tag->frames, f);
+                break;
+            default:
+                return;
+        }
+    }    
 }
 
 void id3v2SetLyrics(id3buf value, unsigned int valueLength, Id3v2Tag *tag){
-    id3v2DualIDSetV(ULT, USLT, tag, value, valueLength, id3v2SetUnsynchronizedLyrics);
+
+    id3buf t = id3v2ReadLyrics(ISO_8859_1, tag);
+    
+    if(t != NULL){
+        id3v2DualIDSetV(ULT, USLT, tag, value, valueLength, id3v2SetUnsynchronizedLyrics);
+        free(t);
+    
+    }else{
+        id3byte encoding = UNKNOWN_ENCODING;
+        Id3v2Frame *f = NULL;
+
+        if(isUTF8(value)){
+            encoding = UTF8;
+        }else if(isISO_8859_1(value)){
+            encoding = ISO_8859_1;
+        }else if(isUTF16(value, valueLength)){
+            encoding = UTF16;
+        }else if(isUTF16BE(value, valueLength)){
+            encoding = UTF16BE;
+        }
+        
+        switch(tag->header->versionMajor){
+            case ID3V22:
+                f = id3v2CreateUnsynchronizedLyricsFrame(ULT, encoding, NULL, NULL, value);                
+                id3PushList(tag->frames, f);
+                break;
+            case ID3V23:
+            case ID3V24:
+                f = id3v2CreateUnsynchronizedLyricsFrame(USLT, encoding, NULL, NULL, value);          
+                id3PushList(tag->frames, f);
+                break;
+            default:
+                return;
+        }
+    }
 }
 
 void id3v2SetPicture(id3buf value, unsigned int valueLength, Id3v2Tag *tag){
@@ -621,12 +1008,18 @@ void id3v2SetPicture(id3buf value, unsigned int valueLength, Id3v2Tag *tag){
 
         if(id3v2ReadFrameID(f) == PIC || id3v2ReadFrameID(f) == APIC){
             id3v2SetPictureValue(value,valueLength, f);
-            break;
+            id3FreeListIter(li);
+            return;
         }
     }
-
-    id3FreeListIter(li);
-
+    
+    if(tag->header->versionMajor == ID3V22){
+        f = id3v2CreatePictureFrame(PIC,UTF16, (id3buf)"image/", 0x00, NULL, value, valueLength);
+    }else{
+        f = id3v2CreatePictureFrame(APIC,UTF16, (id3buf)"image/", 0x00, NULL, value, valueLength);
+    }
+    
+    id3PushList(tag->frames, f);
 }
 
 id3buf id3v2ReadTitle(id3byte desiredEncoding, Id3v2Tag *tag){
@@ -939,10 +1332,6 @@ bool id3v2ReadFooterIndicator(Id3v2Tag *tag){
     return (id3v2ManipHeaderErrorChecks(tag) == true) ? false : tag->header->footer;
 }
 
-size_t id3v2ReadTagSize(Id3v2Tag *tag){
-    return (id3v2ManipHeaderErrorChecks(tag) == true) ? 0 : tag->header->size;
-}
-
 /*
     frame flag content
 */
@@ -1048,7 +1437,7 @@ bool id3v2ReadFrameUnsynchronizationIndicator(Id3v2Frame *frame){
     return (id3v2ManipFlagContentErrorChecks(frame) == true) ? false : frame->header->flagContent->unsynchronization;
 }
 
-void id3v2SetFrameDataLengthSize(size_t size, Id3v2Frame *frame){
+void id3v2SetFrameCompressionSize(size_t size, Id3v2Frame *frame){
 
     if(id3v2ManipFrameHeaderErrorChecks(frame) == true){
         return;
@@ -1063,7 +1452,6 @@ void id3v2SetFrameDataLengthSize(size_t size, Id3v2Frame *frame){
     if(frame->header->flagContent != NULL){
         
         if(size <= 0){
-            frame->header->flagContent->dataLengthIndicator = false;
             frame->header->flagContent->decompressedSize = 0;
 
             //correct size
@@ -1073,25 +1461,23 @@ void id3v2SetFrameDataLengthSize(size_t size, Id3v2Frame *frame){
             return;
         }
 
-        //add size only once if called multiple times
-        if(frame->header->flagContent->dataLengthIndicator == false){
-                    frame->header->headerSize = frame->header->headerSize + ZLIB_COMPRESSION_SIZE; 
+        if(frame->header->flagContent->decompressedSize == 0){
+            frame->header->headerSize = frame->header->headerSize + ZLIB_COMPRESSION_SIZE;
         }
 
-        frame->header->flagContent->dataLengthIndicator = true;
         frame->header->flagContent->decompressedSize = size;
 
         return;
     }
 
     //just in case the parser gave null
-    Id3v2FlagContent *flags = id3v2NewFlagContent(false,false,false,false,true,size,0,0);
+    Id3v2FlagContent *flags = id3v2NewFlagContent(false,false,false,false,false,size,0,0);
     frame->header->headerSize = frame->header->headerSize + ZLIB_COMPRESSION_SIZE; 
     frame->header->flagContent = flags;
 }
 
-size_t id3v2ReadFrameDataLengthSize(Id3v2Frame *frame){
-    return (id3v2ManipFlagContentErrorChecks(frame) == true) ? false : (frame->header->flagContent->dataLengthIndicator == false) ? 0 : frame->header->flagContent->decompressedSize;
+size_t id3v2ReadFrameCompressionSize(Id3v2Frame *frame){
+    return (id3v2ManipFlagContentErrorChecks(frame) == true) ? 0 : frame->header->flagContent->decompressedSize;
 }
 
 void id3v2SetFrameEncryptionMethod(id3byte symbol, Id3v2Frame *frame){
@@ -1164,6 +1550,32 @@ void id3v2SetFrameGroup(id3byte symbol, Id3v2Frame *frame){
 
 id3byte id3v2ReadFrameGroup(Id3v2Frame *frame){
     return (id3v2ManipFlagContentErrorChecks(frame) == true) ? 0x00 : frame->header->flagContent->grouping;
+}
+
+void id3v2SetDataLengthIndicator(bool indicator, Id3v2Frame *frame){
+
+    if(id3v2ManipFrameHeaderErrorChecks(frame) == true){
+        return;
+    }
+    
+    //2.2 doesnt have this
+    if(frame->header->idNum <= WXX){
+        return;
+    }
+    
+    if(frame->header->flagContent != NULL){
+        frame->header->flagContent->dataLengthIndicator = indicator;
+        return;
+    }
+
+    //just in case the parser gave null
+    Id3v2FlagContent *flags = id3v2NewFlagContent(indicator,false,false,false,true,0,0,0);
+    frame->header->flagContent = flags;
+
+}
+
+bool id3v2ReadFrameDataLengthIndicator(Id3v2Frame *frame){
+    return (id3v2ManipFlagContentErrorChecks(frame) == true) ? false : frame->header->flagContent->dataLengthIndicator;
 }
 
 /*

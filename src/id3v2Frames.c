@@ -149,9 +149,9 @@ Id3v2Frame *id3v2NewFrame(Id3v2FrameHeader *header, void *bodyContent){
     return frame;
 }
 
-Id3List *id3v2ExtractFrames(id3buf buffer, Id3v2Header *header){
+Id3List *id3v2ExtractFrames(id3buf buffer, unsigned int tagSize, Id3v2Header *header){
 
-    int saveSize = header->size - ID3V2_HEADER_SIZE;
+    int saveSize = tagSize - ID3V2_HEADER_SIZE;
     int extHeaderOffset = 0;
     int titleNameAndSizeLen = 0;
 
@@ -994,7 +994,6 @@ Id3v2InvolvedPeopleListBody *id3v2ParseInvolvedPeopleListBody(id3buf buffer, Id3
     id3ReaderSeek(stream, 1, SEEK_CUR);
 
     while(saveSize > 0){
-
         id3buf person = NULL;
         id3buf job = NULL;
         size_t pLen = 0;
@@ -1473,7 +1472,7 @@ Id3v2EventTimeCodesBody *id3v2ParseEventTimeCodesBody(id3buf buffer, Id3v2FrameH
         id3ReaderSeek(stream, 1, SEEK_CUR);
 
         // copy the time stamp
-        stamp = getBits8(id3ReaderCursor(stream), ID3V2_TIME_STAMP_LEN);
+        stamp = btoi(id3ReaderCursor(stream), ID3V2_TIME_STAMP_LEN);
         id3ReaderSeek(stream, ID3V2_TIME_STAMP_LEN, SEEK_CUR);
 
         // add event to the list
@@ -2204,7 +2203,7 @@ Id3v2SynchronizedLyricsBody *id3v2ParseSynchronizedLyricsBody(id3buf buffer, Id3
 
         id3ReaderSeek(stream, id3ReaderAllocationAdd(encoding), SEEK_CUR);
 
-        timeStamp = getBits8(id3ReaderCursor(stream), ID3V2_TIME_STAMP_LEN);
+        timeStamp = btoi(id3ReaderCursor(stream), ID3V2_TIME_STAMP_LEN);
         id3ReaderSeek(stream, ID3V2_TIME_STAMP_LEN, SEEK_CUR);
 
         lyric = id3v2NewStampedLyric(text, timeStamp, lyricLen);
@@ -3492,7 +3491,7 @@ Id3v2PlayCounterBody *id3v2ParsePlayCounterBody(id3buf buffer, Id3v2FrameHeader 
     unsigned long counter = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
-    counter = getBits8(id3ReaderCursor(stream),stream->bufferSize);
+    counter = btoi(id3ReaderCursor(stream),stream->bufferSize);
     
     id3FreeReader(stream);
     return id3v2NewPlayCounterBody(counter);
@@ -3698,7 +3697,7 @@ Id3v2PopularBody *id3v2ParsePopularBody(id3buf buffer, Id3v2FrameHeader *frameHe
     id3ReaderSeek(stream, 1, SEEK_CUR);
     
     //counter copy
-    counter = getBits8(id3ReaderCursor(stream), stream->bufferSize - stream->cursor);
+    counter = btoi(id3ReaderCursor(stream), stream->bufferSize - stream->cursor);
 
     id3FreeReader(stream);
     return id3v2NewPopularBody(email, rating, counter);
@@ -4089,7 +4088,7 @@ Id3v2AudioEncryptionBody *id3v2ParseAudioEncryptionBody(id3buf buffer, Id3v2Fram
     id3ReaderSeek(stream, 2, SEEK_CUR);
 
     // copy preview length
-    previewLength = getBits8(id3ReaderCursor(stream), 2);
+    previewLength = btoi(id3ReaderCursor(stream), 2);
     id3ReaderSeek(stream, 2, SEEK_CUR);
     
 
@@ -4444,7 +4443,7 @@ Id3v2PositionSynchronisationBody *id3v2ParsePositionSynchronisationBody(id3buf b
     id3ReaderSeek(stream, 1, SEEK_CUR);
 
     // gets a time stamp
-    pos = getBits8(id3ReaderCursor(stream), stream->bufferSize - stream->cursor);
+    pos = btoi(id3ReaderCursor(stream), stream->bufferSize - stream->cursor);
 
     id3FreeReader(stream);
     return id3v2NewPositionSynchronisationBody(timeStampFormat, pos);
@@ -5866,7 +5865,7 @@ Id3v2SeekBody *id3v2ParseSeekBody(id3buf buffer, Id3v2FrameHeader *frameHeader){
     int minimumOffsetToNextTag = 0;
 
     if(frameHeader->frameSize > 0){
-        minimumOffsetToNextTag = getBits8(buffer, frameHeader->frameSize);
+        minimumOffsetToNextTag = btoi(buffer, frameHeader->frameSize);
     }
 
     return id3v2NewSeekBody(minimumOffsetToNextTag);
@@ -5954,7 +5953,7 @@ Id3v2FlagContent *id3v2ParseFlagContent(id3buf buffer, Id3v2HeaderVersion versio
     
         // read the extra bits after the flags
         if(decompressedSize == true){
-            decompressedSize = getBits8(buffer, 4);
+            decompressedSize = btoi(buffer, 4);
             buffer = buffer + 4;
 
         }
@@ -5989,7 +5988,7 @@ Id3v2FlagContent *id3v2ParseFlagContent(id3buf buffer, Id3v2HeaderVersion versio
         }
 
         if(decompressedSize == true){
-            decompressedSize = getBits8(buffer, 4);
+            decompressedSize = btoi(buffer, 4);
             buffer = buffer + 4;
 
         }
@@ -6083,7 +6082,7 @@ Id3v2FrameHeader *id3v2ParseFrameHeader(id3buf buffer, Id3v2Header *header){
     buffer = buffer + versionOffset;
 
     // read size
-    frameSize = (header->versionMajor == ID3V24) ? syncint_decode(getBits8(buffer, versionOffset)): getBits8(buffer, versionOffset);
+    frameSize = (header->versionMajor == ID3V24) ? syncintDecode(btoi(buffer, versionOffset)): btoi(buffer, versionOffset);
     frameSizeOffset = buffer;
     buffer = buffer + versionOffset;
 
@@ -6095,7 +6094,7 @@ Id3v2FrameHeader *id3v2ParseFrameHeader(id3buf buffer, Id3v2Header *header){
 
         // in id3v2.4 a syncsafe int or a 4 byte int can be used
         if(flagContent->dataLengthIndicator == true){
-            frameSize = getBits8(frameSizeOffset, versionOffset);
+            frameSize = btoi(frameSizeOffset, versionOffset);
         }
     }
 

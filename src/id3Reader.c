@@ -5,10 +5,6 @@
 #include "id3Helpers.h"
 
 Id3Reader *id3NewReader(unsigned char *buffer,  size_t bufferSize){
-
-    if(buffer == NULL){
-        return NULL;
-    }
     
     if(bufferSize <= 0){
         return NULL;
@@ -20,8 +16,11 @@ Id3Reader *id3NewReader(unsigned char *buffer,  size_t bufferSize){
     reader->buffer = calloc(sizeof(id3byte), bufferSize);
     reader->bufferSize = bufferSize;
     reader->cursor = 0;
-
-    memcpy(reader->buffer, buffer, bufferSize);
+    
+    if(buffer != NULL){
+        memcpy(reader->buffer, buffer, bufferSize);
+    }
+    
     return reader;
 }
 
@@ -182,6 +181,43 @@ int id3ReaderGetCh(Id3Reader *reader){
     return id3ReaderCursor(reader) == NULL ? EOF: (int) id3ReaderCursor(reader)[0];
 }
 
+void id3ReaderWrite(Id3Reader *reader, id3buf src, size_t size){
+
+    if(reader == NULL || src == NULL || size > reader->bufferSize || size  == 0){
+        return;
+    }
+
+    size_t wSize = size;
+
+    //prevent overflow
+    if(size + reader->cursor > reader->bufferSize){
+        wSize = reader->bufferSize - reader->cursor;
+    }
+
+    memcpy(reader->buffer + reader->cursor, src, wSize);
+    reader->cursor += wSize;
+}
+
+//will not increment the cursor because you pick the position
+void id3ReaderWriteAtPosition(Id3Reader *reader, id3buf src, size_t srcSize, size_t pos){
+
+    if(reader == NULL){
+        return;
+    }
+
+    if(pos > reader->bufferSize){
+        return;
+    }
+
+    size_t wSize = srcSize;
+
+    //prevent overflow
+    if(srcSize > reader->bufferSize){
+        wSize = reader->bufferSize;
+    }
+
+    memcpy((reader->buffer) + pos, src, wSize);
+}
 
 bool hasBOM(id3buf buffer){
 

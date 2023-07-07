@@ -7,7 +7,7 @@
 #include <limits.h>
 #include "id3Helpers.h"
 
-int getBits8(unsigned char *bytes, int byteNum){
+int btoi(unsigned char *bytes, int byteNum){
     
     int byteAsInt = 0x00;
     for(int i = 0; i < byteNum; i++){
@@ -18,7 +18,33 @@ int getBits8(unsigned char *bytes, int byteNum){
     return byteAsInt;	  
 }
 
-unsigned int syncint_decode(int value){
+char *itob(int i){
+
+    int sz = 4;
+    char *ret = malloc(sizeof(char) * sz);
+
+    //reserve
+    char *aux = (char *) &i;
+
+    for(int j = sz - 1; j >= 0; j--){
+        ret[sz - 1 - j] = aux[j];
+    }
+
+    return ret;
+}
+
+unsigned int syncintDecode(unsigned int value){
+    /*
+    unsigned int value = 0;
+    unsigned int mask = 0x7F; // Mask to extract 7 bits
+    
+    for (int i = 0; i < 4; i++) {
+        value = (value << 7) | (syncSafe & mask);
+        syncSafe >>= 8;
+    }   
+    return value;
+    */
+    
     unsigned int a, b, c, d, result = 0x00;
     a = value & 0xFF;
     b = (value >> 8) & 0xFF;
@@ -31,6 +57,49 @@ unsigned int syncint_decode(int value){
     result = result | (d << 21);
 
     return result;
+    
+}
+
+unsigned int syncintEncode(unsigned int value){
+
+    unsigned int syncSafe = 0;
+    unsigned int mask = 0x7F; // Mask to extract 7 bits
+    unsigned int shift = 0;
+    
+    for (int i = 0; i < 4; i++) {
+        syncSafe |= ((value & mask) << shift);
+        mask <<= 8;
+        shift += 8;
+        value >>= 7;
+    }
+    
+    return syncSafe;
+
+    
+    /*
+    unsigned int syncSafe = 0;
+    unsigned int mask = 0x7F; // Mask to extract 7 bits
+    
+    for (int i = 0; i < 4; i++) {
+        syncSafe |= ((value >> (7 * (3 - i))) & mask) << (8 * i);
+    }
+    
+    return syncSafe;   
+    */
+    /*
+    int out = 0x7F;
+    int mask = 0x7F;
+
+    while(mask ^ 0x7FFFFFFF){
+        out = value & ~mask;
+        out <<= 1;
+        out |= value & mask;
+        mask = ((mask + 1) << 8) - 1;
+        value = out;
+    }
+
+    return out;
+    */
 }
 
 void addressFree(void **pptr){
@@ -420,18 +489,18 @@ Id3Node *id3NewNode(void *data){
 
 void id3PushList(Id3List *list, void *toAdd){
 
-    if (list == NULL || toAdd == NULL) {
+    if(list == NULL || toAdd == NULL){
         return;
     }
     
     Id3Node *node = id3NewNode(toAdd);
     
-    if (list->size == 0) {
+    if(list->size == 0){
         list->head = node;
-    } else {
+    }else{
         Id3Node *current = list->head;
         
-        while (current->next != NULL) {
+        while(current->next != NULL){
             current = current->next;
         }
         
@@ -439,23 +508,6 @@ void id3PushList(Id3List *list, void *toAdd){
     }
 
     list->size = list->size + 1;
-
-/*
-    if(list == NULL || toAdd == NULL){
-        return;
-    }
-    Id3Node *node = id3NewNode(toAdd);
-    
-    if(list->size == 0){
-        list->head = node;
-    }else{
-        Id3Node *tmp = list->head;
-        node->next = tmp;
-        list->head = node;
-    }
-
-    list->size = list->size + 1;
-*/
 }
 
 void id3FreeList(Id3List *list){

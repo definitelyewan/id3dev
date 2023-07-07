@@ -8,7 +8,7 @@ extern "C"{
 #include "id3Types.h"
 
 //frame functions
-Id3List *id3v2ExtractFrames(id3buf buffer, Id3v2Header *header);
+Id3List *id3v2ExtractFrames(id3buf buffer, unsigned int tagSize, Id3v2Header *header);
 Id3v2Frame *id3v2NewFrame(Id3v2FrameHeader *header, void *bodyContent);
 Id3v2Frame *id3v2ParseFrame(id3buf buffer, Id3v2Header *header);
 void *id3v2CopyFrame(void *toCopy);

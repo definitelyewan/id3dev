@@ -305,8 +305,6 @@ typedef struct _Id3v2header{
     bool unsynchronisation;
     bool experimentalIndicator;
     bool footer;
-    
-    size_t size;
     Id3v2ExtHeader *extendedHeader;
 
 }Id3v2Header;

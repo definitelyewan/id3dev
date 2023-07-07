@@ -9,8 +9,13 @@ extern "C"{
 
 
 //byte functions
-int getBits8(unsigned char *bytes, int byteNum);
-unsigned int syncint_decode(int value);
+
+//full credit for these functions goes to id3v2lib
+int btoi(unsigned char *bytes, int byteNum);
+char *itob(int i);
+unsigned int syncintDecode(unsigned int value);
+unsigned int syncintEncode(unsigned int value);
+
 void addressFree(void **pptr);
 
 //integer functions

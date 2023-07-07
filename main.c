@@ -61,7 +61,6 @@ void metadataPrint(Id3Metadata *data){
                                     id3v2ReadExtendedIndicator(tag), 
                                     id3v2ReadExperimentalIndicator(tag), 
                                     id3v2ReadFooterIndicator(tag));
-            printf("tag size. %ld\n",id3v2ReadTagSize(tag));
 
             if(id3v2ReadExtendedIndicator(tag) == true){
                 printf("ext size. %d\n",tag->header->extendedHeader->size);
@@ -95,11 +94,12 @@ void metadataPrint(Id3Metadata *data){
                                             id3v2ReadFrameID(currFrame));
 
                 //print flag content
-                printf("F:%d%d%d%d C:%ld E:%x G:%x|",id3v2ReadFrameAlterPreservationIndicator(currFrame),
+                printf("F:%d%d%d%d%d C:%ld E:%x G:%x|",id3v2ReadFrameAlterPreservationIndicator(currFrame),
                                                     id3v2ReadFrameFileAlterPreservationIndicator(currFrame),
                                                     id3v2ReadFrameReadOnlyIndicator(currFrame),
                                                     id3v2ReadFrameUnsynchronizationIndicator(currFrame),
-                                                    id3v2ReadFrameDataLengthSize(currFrame),
+                                                    id3v2ReadFrameDataLengthIndicator(currFrame),
+                                                    id3v2ReadFrameCompressionSize(currFrame),
                                                     id3v2ReadFrameEncryptionMethod(currFrame),
                                                     id3v2ReadFrameGroup(currFrame));
                 
@@ -662,13 +662,35 @@ int main(int argc, char *argv[]){
     Id3v2Frame *mf = NULL;
 
     while((mf = id3NextListIter(m)) != NULL){
-        id3v2SetEncoding(UTF8, mf);
+        //id3v2SetEncoding(UTF8, mf);
         //id3v2SetFrameEncryptionMethod(0xD7, mf);
         //id3v2SetFrameReadOnlyIndicator(true, mf);
-        //id3v2SetFrameDataLengthSize(100, mf);
+        //id3v2SetFrameCompressionSize(100, mf);
     }
-    id3FreeListIter(m);
 
+    id3FreeListIter(m);
+    /*size check*/
+    FILE *fc = fopen(argv[1], "rb");
+    id3byte v[4] = {0,0,0,0};
+    fseek(fc, 6, SEEK_SET);
+    fread(v, 1, 4, fc);
+    printf("[%x][%x][%x][%x]\n",v[0],v[1],v[2],v[3]);
+    printf("%d %d\n",syncintDecode(btoi(v,4)), id3v2CalculateTagSize(data->version2));
+    fclose(fc);
+
+    unsigned int len = 0;
+    id3buf r = id3v2TagToBuffer(&len, data->version2);
+
+    if(r == NULL){
+        printf("NULL\n");
+    }
+
+    FILE *fp = fopen("output.mp3","wb");
+    fwrite(r,1,len,fp);
+    fclose(fp);
+    free(r);
+    
+    /*
     metadataPrint(data);
     
     
@@ -772,8 +794,8 @@ int main(int argc, char *argv[]){
     if(curr != NULL){
         free(curr);
     }
-
-    /*
+    
+    
     Id3v2FrameId id;
     if(id3v2ReadVersion(data->version2) >= 30){
         id = GEOB;
@@ -806,7 +828,7 @@ int main(int argc, char *argv[]){
             //id3v2SetFrameFileAlterPreservationIndicator(true, f);
             //id3v2SetFrameReadOnlyIndicator(true, f);
             //id3v2SetFrameUnsynchronizationIndicator(true, f);
-            //id3v2SetFrameDataLengthSize(100, f);
+            //id3v2SetFrameCompressionSize(100, f);
             //id3v2SetFrameEncryptionMethod(0x99, f);
             //id3v2SetFrameGroup(0x99, f);
 

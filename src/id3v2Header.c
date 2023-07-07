@@ -19,7 +19,6 @@ Id3v2Header *id3v2ParseHeader(id3buf buffer, unsigned int bufferSize){
     bool unsynchronisation = false;
     bool experimentalIndicator = false;
     bool footer = false;
-    size_t size = 0;
     Id3v2ExtHeader *extendedHeader = NULL;
 
     Id3Reader *stream = id3NewReader(buffer, bufferSize);
@@ -59,7 +58,6 @@ Id3v2Header *id3v2ParseHeader(id3buf buffer, unsigned int bufferSize){
     
     //frame size
     id3ReaderRead(stream, tmpHeaderSize, ID3V2_HEADER_SIZE_LEN);
-    size = syncint_decode(getBits8(tmpHeaderSize,ID3V2_HEADER_SIZE_LEN));
     
     //header extension
     if(extFlag == true){
@@ -70,10 +68,10 @@ Id3v2Header *id3v2ParseHeader(id3buf buffer, unsigned int bufferSize){
     //clean up
     id3FreeReader(stream);
 
-    return id3v2NewHeader((int)version[1], (int)version[0], unsynchronisation, experimentalIndicator, footer, size, extendedHeader);
+    return id3v2NewHeader((int)version[1], (int)version[0], unsynchronisation, experimentalIndicator, footer, extendedHeader);
 }
 
-Id3v2Header *id3v2NewHeader(int versionMinor, int versionMajor, bool unsynchronisation, bool experimentalIndicator, bool footer, size_t size, Id3v2ExtHeader *extendedHeader){
+Id3v2Header *id3v2NewHeader(int versionMinor, int versionMajor, bool unsynchronisation, bool experimentalIndicator, bool footer, Id3v2ExtHeader *extendedHeader){
     
     Id3v2Header *header = malloc(sizeof(Id3v2Header));
 
@@ -82,14 +80,13 @@ Id3v2Header *id3v2NewHeader(int versionMinor, int versionMajor, bool unsynchroni
     header->unsynchronisation = unsynchronisation;
     header->experimentalIndicator = experimentalIndicator;
     header->footer = footer;
-    header->size = size;
     header->extendedHeader = extendedHeader;
 
     return header;
 }
 
 Id3v2Header *id3v2CopyHeader(Id3v2Header *toCopy){
-    return (toCopy == NULL) ? NULL : id3v2NewHeader(toCopy->versionMinor, toCopy->versionMajor, toCopy->unsynchronisation, toCopy->experimentalIndicator, toCopy->footer, toCopy->size, id3v2CopyExtendedHeader(toCopy->extendedHeader));
+    return (toCopy == NULL) ? NULL : id3v2NewHeader(toCopy->versionMinor, toCopy->versionMajor, toCopy->unsynchronisation, toCopy->experimentalIndicator, toCopy->footer, id3v2CopyExtendedHeader(toCopy->extendedHeader));
 }
 
 void id3v2FreeHeader(Id3v2Header *header){
@@ -132,7 +129,7 @@ Id3v2ExtHeader *id3v2ParseExtendedHeader(id3buf buffer, Id3v2HeaderVersion versi
     //extended headers are treated differently between versions
     if(version == ID3V23){
         //copy size aka first 4 bytes
-        size = getBits8(buffer, ID3V2_HEADER_SIZE_LEN);
+        size = btoi(buffer, ID3V2_HEADER_SIZE_LEN);
 
         Id3Reader *stream = id3NewReader(buffer,size);
         id3ReaderSeek(stream,ID3V2_HEADER_SIZE_LEN + ID3V2_HEADER_SIZE_LEN,SEEK_CUR);
@@ -145,7 +142,7 @@ Id3v2ExtHeader *id3v2ParseExtendedHeader(id3buf buffer, Id3v2HeaderVersion versi
 
         //copy padding
         id3ReaderRead(stream, tmpPaddingSize, ID3V2_PADDING_SIZE);
-        padding = getBits8(tmpPaddingSize, ID3V2_PADDING_SIZE);
+        padding = btoi(tmpPaddingSize, ID3V2_PADDING_SIZE);
 
         //get crc
         if(crcFlag){
@@ -158,14 +155,14 @@ Id3v2ExtHeader *id3v2ParseExtendedHeader(id3buf buffer, Id3v2HeaderVersion versi
     }else if(version == ID3V24){
         
         //read the header size
-        size = syncint_decode(getBits8(buffer, ID3V2_HEADER_SIZE_LEN));
+        size = syncintDecode(btoi(buffer, ID3V2_HEADER_SIZE_LEN));
   
         Id3Reader *stream = id3NewReader(buffer,size);
         //size is known so skip it
         id3ReaderSeek(stream, ID3V2_HEADER_SIZE_LEN, SEEK_CUR);
 
         //if any other value this invalid flags exist
-        if(id3ReaderGetCh(stream) == 1){
+        if(id3ReaderGetCh(stream) > 0){
             
             //read flags
             id3ReaderSeek(stream, 1, SEEK_CUR);
@@ -216,10 +213,10 @@ Id3v2ExtHeader *id3v2ParseExtendedHeader(id3buf buffer, Id3v2HeaderVersion versi
     }
 
 
-    return id3v2NewExtendedHeader(size, padding, update, crc, tagSizeRestriction, encodingRestriction, textSizeRestriction, imageEncodingRestriction, imageSizeRestriction);
+    return id3v2NewExtHeader(size, padding, update, crc, tagSizeRestriction, encodingRestriction, textSizeRestriction, imageEncodingRestriction, imageSizeRestriction);
 }
 
-Id3v2ExtHeader *id3v2NewExtendedHeader(int size, int padding, id3byte update, id3buf crc, id3byte tagSizeRestriction, id3byte encodingRestriction, id3byte textSizeRestriction, id3byte imageEncodingRestriction, id3byte imageSizeRestriction){
+Id3v2ExtHeader *id3v2NewExtHeader(int size, int padding, id3byte update, id3buf crc, id3byte tagSizeRestriction, id3byte encodingRestriction, id3byte textSizeRestriction, id3byte imageEncodingRestriction, id3byte imageSizeRestriction){
 
     Id3v2ExtHeader *extHeader = malloc(sizeof(Id3v2ExtHeader));
 
@@ -267,7 +264,7 @@ Id3v2ExtHeader *id3v2CopyExtendedHeader(Id3v2ExtHeader *toCopy){
         memcpy(crc, toCopy->crc, toCopy->crcLen);
     }
 
-    return id3v2NewExtendedHeader(size, padding, update, crc, tagSizeRestriction, encodingRestriction, textSizeRestriction, imageEncodingRestriction, imageSizeRestriction);
+    return id3v2NewExtHeader(size, padding, update, crc, tagSizeRestriction, encodingRestriction, textSizeRestriction, imageEncodingRestriction, imageSizeRestriction);
 }
 
 void id3v2FreeExtHeader(Id3v2ExtHeader *extHeader){
@@ -285,4 +282,8 @@ void id3v2FreeExtHeader(Id3v2ExtHeader *extHeader){
 
 bool containsId3v2(id3buf buffer){
     return (memcmp("ID3",buffer,3) == 0) ? true: false;
+}
+
+bool id3v2IsValidVersion(int version){
+    return (version >= ID3V22 && version <= ID3V24) ? true: false;
 }
