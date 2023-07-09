@@ -61,7 +61,7 @@ unsigned int syncintDecode(unsigned int value){
 }
 
 unsigned int syncintEncode(unsigned int value){
-
+    /*
     unsigned int syncSafe = 0;
     unsigned int mask = 0x7F; // Mask to extract 7 bits
     unsigned int shift = 0;
@@ -74,7 +74,7 @@ unsigned int syncintEncode(unsigned int value){
     }
     
     return syncSafe;
-
+    */
     
     /*
     unsigned int syncSafe = 0;
@@ -86,7 +86,7 @@ unsigned int syncintEncode(unsigned int value){
     
     return syncSafe;   
     */
-    /*
+    
     int out = 0x7F;
     int mask = 0x7F;
 
@@ -99,7 +99,7 @@ unsigned int syncintEncode(unsigned int value){
     }
 
     return out;
-    */
+    
 }
 
 void addressFree(void **pptr){

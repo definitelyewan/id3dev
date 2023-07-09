@@ -11,13 +11,14 @@ extern "C"{
 
 //A buffer of n bytes consisting of raw data from parsed metadata
 //This can be in the form of UTF8, UTF16, UTF16BE, ISO_8859_1, or unformated
-#define id3buf _id3buf
 typedef unsigned char * _id3buf;
+#define id3buf _id3buf
+
 
 //A single byte of raw metadata
 //This can be in the form of UTF8, UTF16, UTF16BE, ISO_8859_1, or unformated
-#define id3byte _id3byte
 typedef unsigned char _id3byte;
+#define id3byte _id3byte
 
 /*
     READER

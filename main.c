@@ -662,6 +662,7 @@ int main(int argc, char *argv[]){
     Id3v2Frame *mf = NULL;
 
     while((mf = id3NextListIter(m)) != NULL){
+        printf("%s\n",mf->header->id);
         //id3v2SetEncoding(UTF8, mf);
         //id3v2SetFrameEncryptionMethod(0xD7, mf);
         //id3v2SetFrameReadOnlyIndicator(true, mf);
@@ -680,11 +681,11 @@ int main(int argc, char *argv[]){
 
     unsigned int len = 0;
     id3buf r = id3v2TagToBuffer(&len, data->version2);
-
+    printf("buffer size is %d\n",len);
     if(r == NULL){
         printf("NULL\n");
     }
-
+    
     FILE *fp = fopen("output.mp3","wb");
     fwrite(r,1,len,fp);
     fclose(fp);

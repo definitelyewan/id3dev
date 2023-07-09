@@ -333,22 +333,20 @@ id3buf id3v2HeaderToBuffer(unsigned int *len, unsigned int tagLength, Id3v2Heade
             id3ReaderWrite(stream, (id3buf)&(header->versionMajor),1);
             id3ReaderWrite(stream, (id3buf)&(header->versionMinor),1);
 
-            //size
-            tmp = itob((int)syncintEncode(tagLength));
-            id3ReaderWrite(stream, (id3buf)tmp, ID3V2_HEADER_SIZE_LEN);
-            free(tmp);
-
             //flags
             //%abcd0000
             if(header->unsynchronisation == true){
                 id3ReaderCursor(stream)[0] ^= 1 << 7;
             }
+
             if(header->experimentalIndicator == true){
                 id3ReaderCursor(stream)[0] ^= 1 << 5;
             }
+
             if(header->experimentalIndicator == true){
                 id3ReaderCursor(stream)[0] ^= 1 << 4;
             }
+
             if(header->extendedHeader != NULL){
                 id3ReaderCursor(stream)[0] ^= 1 << 6;
                 id3ReaderSeek(stream, 1, SEEK_CUR);
@@ -360,6 +358,12 @@ id3buf id3v2HeaderToBuffer(unsigned int *len, unsigned int tagLength, Id3v2Heade
                     free(extHeader);
                 }
             }
+
+            //size
+            tmp = itob((int)syncintEncode(tagLength));
+            id3ReaderSeek(stream, 3 + ID3V2_VERSION_SIZE_OF_BYTES + 1, SEEK_SET);
+            id3ReaderWrite(stream, (id3buf)tmp, ID3V2_HEADER_SIZE_LEN);
+            free(tmp);
 
             break;
         default:
@@ -706,7 +710,12 @@ id3buf id3v2FrameHeaderToBuffer(unsigned int *len, Id3v2HeaderVersion version, I
         id3ReaderWrite(stream, (id3buf)frameHeader->id, ID3V23_SIZE_OF_SIZE_BYTES);
 
         //frame size
-        tmp = itob((int)frameHeader->frameSize);
+        if(version == ID3V24){
+            tmp = itob((int) syncintEncode(frameHeader->frameSize)); 
+        }else{
+            tmp = itob((int) frameHeader->frameSize);
+        }
+
         id3ReaderWrite(stream, (id3buf)tmp, ID3V23_SIZE_OF_SIZE_BYTES);
         free(tmp);
 

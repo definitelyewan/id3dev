@@ -3113,6 +3113,7 @@ void id3v2SetMIMEType(id3buf format, Id3v2Frame *frame){
     id3buf mime = NULL;
     id3buf oldMime = NULL;
     id3buf buildMime = NULL;
+    id3buf tmp = NULL;
     unsigned int mimeLen = 0;
     
     if(format != NULL){
@@ -3125,7 +3126,6 @@ void id3v2SetMIMEType(id3buf format, Id3v2Frame *frame){
         
         //build a mime with image/
         case APIC:
-            id3buf tmp = NULL;
             oldMime = ((Id3v2PictureBody *)frame->frame)->format;
 
             buildMime = calloc(sizeof(id3byte), mimeLen + ID3V2_MIME_IMG_LEN + 1);
