@@ -662,7 +662,7 @@ int main(int argc, char *argv[]){
     Id3v2Frame *mf = NULL;
 
     while((mf = id3NextListIter(m)) != NULL){
-        printf("%s\n",mf->header->id);
+        //printf("%s\n",mf->header->id);
         //id3v2SetEncoding(UTF8, mf);
         //id3v2SetFrameEncryptionMethod(0xD7, mf);
         //id3v2SetFrameReadOnlyIndicator(true, mf);

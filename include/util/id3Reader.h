@@ -19,8 +19,10 @@ size_t id3ReaderReadEncodedSize(Id3Reader *reader, id3byte encoding);
 id3buf id3ReaderEncodedRemainder(Id3Reader *reader, id3byte encoding);
 id3buf id3ReaderCursor(Id3Reader *reader);
 int id3ReaderGetCh(Id3Reader *reader);
+
 void id3ReaderWrite(Id3Reader *reader, id3buf src, size_t size);
 void id3ReaderWriteAtPosition(Id3Reader *reader, id3buf src, size_t srcSize, size_t pos);
+void id3ReaderWriteTrailingBytes(Id3Reader *reader, size_t n);
 
 //unicode functions
 bool hasBOM(id3buf buffer);

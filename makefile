@@ -2,6 +2,9 @@ CC = gcc
 CFLAGS = -Wall -g -std=c99
 LDFLAGS= -L.
 
+##optimization flags
+##CFLAGS = -fsanitize=address -Wall -g -std=c99
+
 INC = include/
 INC_UTIL = include/util/
 SRC = src/

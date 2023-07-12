@@ -29,6 +29,9 @@ id3buf id3v2FrameFlagContentToBuffer(unsigned int *len, Id3v2HeaderVersion versi
 id3buf id3v2FrameHeaderToBuffer(unsigned int *len, Id3v2HeaderVersion version, Id3v2FrameHeader *frameHeader);
 
 id3buf id3v2TextFrameToBuffer(unsigned int *len, Id3v2HeaderVersion version, Id3v2Frame *frame);
+id3buf id3v2URLFrameToBuffer(unsigned int *len, Id3v2HeaderVersion version, Id3v2Frame *frame);
+id3buf id3v2InvolvedPeopleListToBuffer(unsigned int *len, Id3v2HeaderVersion version, Id3v2Frame *frame);
+id3buf id3v2MusicCDIdentifierToBuffer(unsigned int *len, Id3v2HeaderVersion version, Id3v2Frame *frame);
 #ifdef __cplusplus
 } //extern c end
 #endif

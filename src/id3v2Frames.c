@@ -23,8 +23,8 @@ void id3v2FreeFrame(void *toDelete){
         return;
     }
 
-    // all text frames
-    if(curr->header->id[0] == 'T'){
+    // all text frames except TIPL
+    if(curr->header->id[0] == 'T' && curr->header->idNum != TIPL){
         id3v2FreeTextFrame(curr);
 
     // all url frames
@@ -32,7 +32,7 @@ void id3v2FreeFrame(void *toDelete){
         id3v2FreeURLFrame(curr);
 
     // Involved people list
-    }else if(curr->header->idNum == IPL || curr->header->idNum == IPLS){
+    }else if(curr->header->idNum == IPL || curr->header->idNum == IPLS || curr->header->idNum == TIPL){
         id3v2FreeInvolvedPeopleListFrame(curr);
 
     // music cd identifier frame
@@ -219,18 +219,16 @@ Id3v2Frame *id3v2ParseFrame(id3buf buffer, Id3v2Header *header){
     Id3v2Frame *newFrame = NULL;
     int idSize = id3v2IdAndSizeOffset(header);
 
-    // text frames
-    if(buffer[0] == 'T'){
+    // text frames except TIPL
+    if(buffer[0] == 'T' && strncmp((char *)buffer, "TIPL", idSize) != 0){
         newFrame = id3v2ParseTextFrame(buffer, header);
-
     // URL frames
     }else if(buffer[0] == 'W'){
         newFrame = id3v2ParseURLFrame(buffer, header);
 
     // involved peoples list
-    }else if((memcmp(buffer, "IPL", idSize) == 0) || (memcmp(buffer, "IPLS", idSize) == 0)){
+    }else if((memcmp(buffer, "IPL", idSize) == 0) || (memcmp(buffer, "IPLS", idSize) == 0) || (memcmp(buffer, "TIPL", idSize) == 0)){
         newFrame = id3v2ParseInvolvedPeopleListFrame(buffer, header);
-
     // music cd identifier
     }else if((memcmp(buffer, "MCI", idSize) == 0) || (memcmp(buffer, "MCDI", idSize) == 0)){
         newFrame = id3v2ParseMusicCDIdentifierFrame(buffer, header);
@@ -344,8 +342,8 @@ void *id3v2CopyFrame(void *toCopy){
 
     Id3v2Frame *curr = toCopy;
 
-    // all text frames
-    if(curr->header->id[0] == 'T'){
+    // all text frames except TIPL
+    if(curr->header->id[0] == 'T' && curr->header->idNum != TIPL){
         return id3v2CopyTextFrame(curr);
 
     // all url frames
@@ -353,7 +351,7 @@ void *id3v2CopyFrame(void *toCopy){
         return id3v2CopyURLFrame(curr);
 
     // Involved people list
-    }else if(curr->header->idNum == IPL || curr->header->idNum == IPLS){
+    }else if(curr->header->idNum == IPL || curr->header->idNum == IPLS || curr->header->idNum == TIPL){
         return id3v2CopyInvolvedPeopleListFrame(curr);
 
     // music cd identifier frame
@@ -908,6 +906,9 @@ Id3v2Frame *id3v2CreateInvolvedPeopleListFrame(Id3v2FrameId id, id3byte encoding
         case IPLS:
             headerSize = ID3V2_HEADER_SIZE;
             break;
+        case TIPL:
+            headerSize = ID3V2_HEADER_SIZE;
+            break;
         default:
             return NULL;
     }
@@ -945,7 +946,7 @@ Id3v2Frame *id3v2ParseInvolvedPeopleListFrame(id3buf buffer, Id3v2Header *header
         return NULL;
     }
 
-    if(newHeader->idNum != IPL && newHeader->idNum != IPLS){
+    if(newHeader->idNum != IPL && newHeader->idNum != IPLS && newHeader->idNum != TIPL){
         id3v2FreeFrameHeader(newHeader);
         return NULL;
     }
@@ -989,8 +990,14 @@ Id3v2InvolvedPeopleListBody *id3v2ParseInvolvedPeopleListBody(id3buf buffer, Id3
     id3byte encoding = 0x00;
     Id3List *list = id3NewList(id3v2FreeInvolvedPerson, id3v2CopyInvolvedPerson);
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
+    
     //copy encoding
     encoding = id3ReaderGetCh(stream);
+
+    if(encoding == UTF16 || encoding == UTF16BE){
+        id3ReaderWriteTrailingBytes(stream, id3ReaderAllocationAdd(encoding));
+    }
+
     id3ReaderSeek(stream, 1, SEEK_CUR);
 
     while(saveSize > 0){
@@ -6553,6 +6560,9 @@ Id3v2FrameId id3v2FrameIdFromStr(char *str){
             if(strncmp("TYER", str, offset) == 0){
                 return TYER;
             }
+            if(strncmp("TIPL", str, offset) == 0){
+                return TIPL;
+            }
             if(strncmp("TXXX", str, offset) == 0){
                 return TXXX;
             }
@@ -7109,6 +7119,10 @@ char *id3v2FrameIdStrFromId(Id3v2FrameId id){
         case TYER:
             str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
             strcpy(str,"TYER");
+            return str;
+        case TIPL:
+            str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);
+            strcpy(str,"TIPL");
             return str;
         case TXXX:
             str = calloc(sizeof(char), ID3V23_SIZE_OF_SIZE_BYTES+1);

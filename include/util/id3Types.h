@@ -450,6 +450,7 @@ typedef enum _Id3v2FrameId{
     TSIZ, // Size
     TSRC, // ISRC (international standard recording code)
     TSSE, // Software/Hardware and settings used for encoding
+    TIPL, // ID3v2.4 Involved people list
     TYER, // Year
     TXXX, // User defined text information frame
     UFID, // Unique file identifier

@@ -219,6 +219,25 @@ void id3ReaderWriteAtPosition(Id3Reader *reader, id3buf src, size_t srcSize, siz
     memcpy((reader->buffer) + pos, src, wSize);
 }
 
+void id3ReaderWriteTrailingBytes(Id3Reader *reader, size_t n){
+    
+    if(reader == NULL || n == 0){
+        return;
+    }
+
+    size_t wSize = reader->bufferSize + n;
+    id3buf tmp = calloc(sizeof(id3byte), wSize);
+
+    for(size_t i = 0; i < reader->bufferSize; i++){
+        tmp[i] = reader->buffer[i];
+    }
+    free(reader->buffer);
+
+    reader->buffer = tmp;
+    reader->bufferSize += n;
+
+}
+
 bool hasBOM(id3buf buffer){
 
     if(buffer == NULL){
@@ -428,7 +447,7 @@ void id3ReaderPrintf(Id3Reader *reader){
 
     printf("[");
     for(int i = 0; i < size; i++){
-        printf("[%x]",id3ReaderCursor(reader)[i]);
+        printf("[%x]",reader->buffer[i]);
     }
     printf("]\n");
 }
