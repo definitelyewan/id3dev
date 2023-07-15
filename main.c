@@ -668,16 +668,24 @@ int main(int argc, char *argv[]){
         //id3v2SetFrameReadOnlyIndicator(true, mf);
         //id3v2SetFrameCompressionSize(100, mf);
     }
-
     id3FreeListIter(m);
-    /*size check*/
-    FILE *fc = fopen(argv[1], "rb");
-    id3byte v[4] = {0,0,0,0};
-    fseek(fc, 6, SEEK_SET);
-    fread(v, 1, 4, fc);
-    printf("[%x][%x][%x][%x]\n",v[0],v[1],v[2],v[3]);
-    printf("%d %d\n",syncintDecode(btoi(v,4)), id3v2CalculateTagSize(data->version2));
-    fclose(fc);
+    //test play counter
+    char *fh = calloc(1,5);
+    id3buf t = NULL;
+    unsigned int tl = 0;
+    strcpy(fh,"PCNT");
+    Id3v2FrameHeader *pcnth = id3v2NewFrameHeader(fh, 5, 10, NULL);
+    Id3v2PlayCounterBody *pb = id3v2ParsePlayCounterBody((id3buf)"\x00\x00\x00\x01\xff",pcnth);
+    Id3v2Frame *pf = id3v2NewFrame(pcnth, pb);
+    printf("%ld\n",pb->counter);
+    t = id3v2PlayCounterFrameToBuffer(&tl, ID3V23, pf);
+
+    for(int i = 0; i < tl; i++){
+        printf("[%x]",t[i]);
+    }
+    printf("\n");
+    id3v2FreeFrame(pf);
+    free(t);
 
     unsigned int len = 0;
     id3buf r = id3v2TagToBuffer(&len, data->version2);

@@ -446,7 +446,7 @@ void id3ReaderPrintf(Id3Reader *reader){
     }
 
     printf("[");
-    for(int i = 0; i < size; i++){
+    for(int i = reader->cursor; i < reader->bufferSize; i++){
         printf("[%x]",reader->buffer[i]);
     }
     printf("]\n");

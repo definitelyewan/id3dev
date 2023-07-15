@@ -3498,7 +3498,7 @@ id3buf id3v2ReadGeneralEncapsulatedObjectValue(Id3v2Frame *frame){
     return value;
 }
 
-void id3v2SetPlayCount(unsigned long playCount, Id3v2Frame *frame){
+void id3v2SetPlayCount(size_t playCount, Id3v2Frame *frame){
 
     if(frame == NULL){
         return; 
@@ -3530,7 +3530,7 @@ void id3v2SetPlayCount(unsigned long playCount, Id3v2Frame *frame){
     }
 }
 
-unsigned long id3v2ReadPlayCount(Id3v2Frame *frame){
+size_t id3v2ReadPlayCount(Id3v2Frame *frame){
 
     if(id3v2ManipFullFrameErrorChecks(frame) == true){
         return 0;

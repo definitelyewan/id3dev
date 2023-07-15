@@ -616,7 +616,7 @@ typedef struct _Id3v2GeneralEncapsulatedObjectBody{
 }Id3v2GeneralEncapsulatedObjectBody;
 
 typedef struct _Id3v2PlayCounterBody{
-    unsigned long counter;
+    size_t counter;
 
 }Id3v2PlayCounterBody;
 

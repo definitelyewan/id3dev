@@ -179,12 +179,12 @@ Id3v2GeneralEncapsulatedObjectBody *id3v2ParseGeneralEncapsulatedObjectBody(id3b
 void id3v2FreeGeneralEncapsulatedObjectFrame(Id3v2Frame *toDelete);
 
 //play counter frame functions
-Id3v2Frame *id3v2CreatePlayCounterFrame(Id3v2FrameId id, unsigned long counter);
+Id3v2Frame *id3v2CreatePlayCounterFrame(Id3v2FrameId id, size_t counter);
 Id3v2Frame *id3v2ParsePlayCounterFrame(id3buf buffer, Id3v2Header *header);
 Id3v2Frame *id3v2CopyPlayCounterFrame(Id3v2Frame *frame);
 Id3v2PlayCounterBody *id3v2CopyPlayCounterBody(Id3v2PlayCounterBody *body);
 Id3v2PlayCounterBody *id3v2ParsePlayCounterBody(id3buf buffer, Id3v2FrameHeader *fhrameHeader);
-Id3v2PlayCounterBody *id3v2NewPlayCounterBody(unsigned long counter);
+Id3v2PlayCounterBody *id3v2NewPlayCounterBody(size_t counter);
 void id3v2FreePlayCounterFrame(Id3v2Frame *toDelete);
 
 //popularmeter frame functions

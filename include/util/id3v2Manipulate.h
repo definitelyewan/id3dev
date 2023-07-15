@@ -190,8 +190,8 @@ void id3v2SetGeneralEncapsulatedObjectValue(id3buf value, unsigned int valueLeng
 id3buf id3v2ReadGeneralEncapsulatedObjectValue(Id3v2Frame *frame);
 
 //how many times a songs been played
-void id3v2SetPlayCount(unsigned long playCount, Id3v2Frame *frame);
-unsigned long id3v2ReadPlayCount(Id3v2Frame *frame);
+void id3v2SetPlayCount(size_t playCount, Id3v2Frame *frame);
+size_t id3v2ReadPlayCount(Id3v2Frame *frame);
 
 //email for popm
 void id3v2SetEmail(char *email, Id3v2Frame *frame);

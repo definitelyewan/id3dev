@@ -550,9 +550,11 @@ id3buf id3v2FrameToBuffer(unsigned int *len, Id3v2HeaderVersion version, Id3v2Fr
     }else if(frame->header->id[0] == 'W'){
         raw = id3v2TextFrameToBuffer(len, version, frame);
     }else if(frame->header->idNum == IPL || frame->header->idNum == IPLS || frame->header->idNum == TIPL){
-        raw = id3v2InvolvedPeopleListToBuffer(len, version, frame);
+        raw = id3v2InvolvedPeopleListFrameToBuffer(len, version, frame);
     }else if(frame->header->idNum == MCI || frame->header->idNum == MCDI){
-        raw = id3v2MusicCDIdentifierToBuffer(len, version, frame);
+        raw = id3v2MusicCDIdentifierFrameToBuffer(len, version, frame);
+    }else if(frame->header->idNum == CNT || frame->header->idNum == PCNT){
+        raw = id3v2PlayCounterFrameToBuffer(len, version, frame);
     }
 
     return raw;
@@ -881,7 +883,7 @@ id3buf id3v2URLFrameToBuffer(unsigned int *len, Id3v2HeaderVersion version, Id3v
     return raw;
 }
 
-id3buf id3v2InvolvedPeopleListToBuffer(unsigned int *len, Id3v2HeaderVersion version, Id3v2Frame *frame){
+id3buf id3v2InvolvedPeopleListFrameToBuffer(unsigned int *len, Id3v2HeaderVersion version, Id3v2Frame *frame){
 
     if(frame == NULL){
         *len = 0;
@@ -959,7 +961,7 @@ id3buf id3v2InvolvedPeopleListToBuffer(unsigned int *len, Id3v2HeaderVersion ver
     return raw;
 }
 
-id3buf id3v2MusicCDIdentifierToBuffer(unsigned int *len, Id3v2HeaderVersion version, Id3v2Frame *frame){
+id3buf id3v2MusicCDIdentifierFrameToBuffer(unsigned int *len, Id3v2HeaderVersion version, Id3v2Frame *frame){
 
     if(frame == NULL){
         *len = 0;
@@ -1006,6 +1008,142 @@ id3buf id3v2MusicCDIdentifierToBuffer(unsigned int *len, Id3v2HeaderVersion vers
     id3FreeReader(stream);
 
     return raw;
-
 }
+
+id3buf id3v2PlayCounterFrameToBuffer(unsigned int *len, Id3v2HeaderVersion version, Id3v2Frame *frame){
+
+    if(frame == NULL){
+        *len = 0;
+        return NULL;
+    }
+
+    if(frame->header == NULL || frame->frame == NULL){
+        *len = 0;
+        return NULL;
+    }
+
+    if(!id3v2IsValidVersion(version)){
+        *len = 0;
+        return NULL;
+    }
+
+    id3buf raw = NULL;
+    id3buf frameHeader = NULL;
+    unsigned int frameHeaderLen = 0;
+    unsigned int sz = 0;
+    size_t pos = 0;
+    size_t bits = 0;
+    Id3Reader *stream = NULL;
+    Id3v2PlayCounterBody *body = NULL;
+    
+    //correct for std mush be at least 32bit
+    if(frame->header->frameSize < 4){//4 bytes is 32 bits
+        sz = frame->header->frameSize + 4;
+    }else{
+        sz = frame->header->frameSize + frame->header->headerSize;
+    }
+
+    stream = id3NewReader(NULL, sz);
+    body = (Id3v2PlayCounterBody *)frame->frame;
+    bits = body->counter;
+
+    //frame header
+    frameHeader = id3v2FrameHeaderToBuffer(&frameHeaderLen, version, frame->header);
+    
+    if(frameHeader != NULL && frameHeaderLen > 0){
+        id3ReaderWrite(stream, frameHeader, frameHeaderLen);
+        free(frameHeader);
+    }else{
+        *len = 0;
+        return NULL;
+    }
+
+    //work from the back
+    id3ReaderSeek(stream, 0, SEEK_END);
+
+    while(pos < frame->header->frameSize && bits != 0){
+
+        id3byte b = 0;
+
+        //set bits
+        for(int i = 0; i < 8; i++){
+            if(bits == 0){
+                break;
+            }
+
+            b ^= 1 << i;
+            bits--;
+        }
+
+        id3ReaderWriteAtPosition(stream, &b, 1, (stream->bufferSize - pos) - 1);
+        
+        pos++;
+    }
+
+    //finish up
+    raw = calloc(sizeof(id3byte), sz);
+    memcpy(raw, stream->buffer, sz);
+    *len = sz;
+    id3FreeReader(stream);
+
+    return raw;
+}
+
+id3buf id3v2CommentFrameTOBUffer(unsigned int *len, Id3v2HeaderVersion version, Id3v2Frame *frame){
+
+    if(frame == NULL){
+        *len = 0;
+        return NULL;
+    }
+
+    if(frame->header == NULL || frame->frame == NULL){
+        *len = 0;
+        return NULL;
+    }
+
+    if(!id3v2IsValidVersion(version)){
+        *len = 0;
+        return NULL;
+    }
+
+    id3buf raw = NULL;
+    id3buf frameHeader = NULL;
+    unsigned int frameHeaderLen = 0;
+    unsigned int sz = 0;
+    Id3Reader *stream = NULL;
+    Id3v2CommentBody *body = NULL;
+
+    stream = id3NewReader(NULL, sz);
+    body = (Id3v2CommentBody *)frame->frame;
+
+    //frame header
+    frameHeader = id3v2FrameHeaderToBuffer(&frameHeaderLen, version, frame->header);
+    
+    if(frameHeader != NULL && frameHeaderLen > 0){
+        id3ReaderWrite(stream, frameHeader, frameHeaderLen);
+        free(frameHeader);
+    }else{
+        *len = 0;
+        return NULL;
+    }
+
+    //finish up
+    raw = calloc(sizeof(id3byte), sz);
+    memcpy(raw, stream->buffer, sz);
+    *len = sz;
+    id3FreeReader(stream);
+
+    return raw;
+}
+
+
+
+
+
+
+
+
+
+
+
 

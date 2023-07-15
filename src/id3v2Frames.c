@@ -3379,7 +3379,7 @@ void id3v2FreeGeneralEncapsulatedObjectFrame(Id3v2Frame *toDelete){
     play counter frame functions
 */
 
-Id3v2Frame *id3v2CreatePlayCounterFrame(Id3v2FrameId id, unsigned long counter){
+Id3v2Frame *id3v2CreatePlayCounterFrame(Id3v2FrameId id, size_t counter){
 
 
     Id3v2FlagContent *flags = NULL;
@@ -3399,17 +3399,11 @@ Id3v2Frame *id3v2CreatePlayCounterFrame(Id3v2FrameId id, unsigned long counter){
             return NULL;
     }
 
-    //how big is the counter
-    if(counter <= UINT_MAX){
-        frameSize = sizeof(int);
-    }
-
-    if(counter <= USHRT_MAX){
-        frameSize = sizeof(short);
-    }
-
-    if(counter <= UCHAR_MAX){
-        frameSize = sizeof(char);
+    //cant be less then 32 bits
+    if(counter < 32){
+        frameSize = 4;
+    }else{
+        frameSize = counter >> 3; //divide by 8
     }
 
     flags = id3v2NewFlagContent(false,false,false,false,false,0,0,0);
@@ -3495,16 +3489,24 @@ Id3v2PlayCounterBody *id3v2ParsePlayCounterBody(id3buf buffer, Id3v2FrameHeader 
         return NULL;
     }
 
-    unsigned long counter = 0;
+    size_t counter = 0;
     Id3Reader *stream = id3NewReader(buffer, frameHeader->frameSize);
 
-    counter = btoi(id3ReaderCursor(stream),stream->bufferSize);
+    for(size_t i = 0; i < stream->bufferSize; i++){
+        
+        //count set bits in a byte
+        for(int j = 7; j >= 0; j--){
+            counter += (id3ReaderGetCh(stream) >> j) & 1;
+        }
+
+        id3ReaderSeek(stream, 1, SEEK_CUR);
+    }
     
     id3FreeReader(stream);
     return id3v2NewPlayCounterBody(counter);
 }
 
-Id3v2PlayCounterBody *id3v2NewPlayCounterBody(unsigned long counter){
+Id3v2PlayCounterBody *id3v2NewPlayCounterBody(size_t counter){
 
     Id3v2PlayCounterBody *body = malloc(sizeof(Id3v2PlayCounterBody));
 
