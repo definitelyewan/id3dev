@@ -1,0 +1,6 @@
+[submodule "modules/LinkedListLib"]
+	path = modules/LinkedListLib
+	url = https://github.com/definitelyewan/LinkedListLib.git
+[submodule "modules/ByteStream"]
+	path = modules/ByteStream
+	url = https://github.com/definitelyewan/ByteStream.git
