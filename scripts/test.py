@@ -51,8 +51,8 @@ except OSError as e:
         raise
 
 #build tests
-if os.path.exists("test"):
-    os.chdir("test")
+if os.path.exists("tests"):
+    os.chdir("tests")
 else:
     quit()
 
@@ -74,7 +74,7 @@ except OSError as e:
 #call test execs
 try:
     if platform == "linux" or platform == "linux2" or "darwin":
-        subprocess.call("./id3v1_test")
+        subprocess.call(["valgrind","--leak-check=full","./id3v1_test"])
     elif platform == "win32":
         if os.path.exists("Release"):
             os.chdir("Release")

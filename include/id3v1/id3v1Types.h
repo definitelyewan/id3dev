@@ -220,12 +220,12 @@ typedef enum _Genre{
 }Genre;
 
 typedef struct _Id3v1Tag{
-    uint8_t *title;
-    uint8_t *artist;
-    uint8_t *albumTitle;
+    uint8_t title[ID3V1_FIELD_SIZE];
+    uint8_t artist[ID3V1_FIELD_SIZE];
+    uint8_t albumTitle[ID3V1_FIELD_SIZE];
     int year;
     int track;
-    uint8_t *comment;
+    uint8_t comment[ID3V1_FIELD_SIZE];
     Genre genre;
 
 }Id3v1Tag;
