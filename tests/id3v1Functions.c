@@ -526,6 +526,29 @@ static void id3v1WriteTitle_WithSmallTitle(void **state){
     id3v1DestroyTag(&tag);
 }
 
+static void id3v1WriteYear_WithSmallTitle(void **state){
+    (void) state; /* unused */
+
+
+    Id3v1Tag *tag = id3v1NewTag((uint8_t *)"this is a title of a song",
+                                NULL,
+                                NULL,
+                                0,
+                                0,
+                                NULL,
+                                0);
+
+    assert_true(id3v1WriteTitle("", tag));
+
+    for(int i = 0; i < ID3V1_FIELD_SIZE; i++){
+        assert_int_equal(tag->title[i], 0);
+    }
+
+
+    id3v1DestroyTag(&tag);
+}
+
+
 int main(){
     
     const struct CMUnitTest tests[] = {
