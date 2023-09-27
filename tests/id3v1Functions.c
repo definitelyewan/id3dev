@@ -526,11 +526,30 @@ static void id3v1WriteTitle_WithSmallTitle(void **state){
     id3v1DestroyTag(&tag);
 }
 
-static void id3v1WriteYear_WithSmallTitle(void **state){
+static void id3v1WriteYear_save0(void **state){
     (void) state; /* unused */
 
 
-    Id3v1Tag *tag = id3v1NewTag((uint8_t *)"this is a title of a song",
+    Id3v1Tag *tag = id3v1NewTag(NULL,
+                                NULL,
+                                NULL,
+                                2001,
+                                0,
+                                NULL,
+                                0);
+
+    assert_true(id3v1WriteYear(0, tag));
+
+    assert_int_equal(0, tag->year);
+
+    id3v1DestroyTag(&tag);
+}
+
+static void id3v1WriteYear_saveBig(void **state){
+    (void) state; /* unused */
+
+
+    Id3v1Tag *tag = id3v1NewTag(NULL,
                                 NULL,
                                 NULL,
                                 0,
@@ -538,16 +557,255 @@ static void id3v1WriteYear_WithSmallTitle(void **state){
                                 NULL,
                                 0);
 
-    assert_true(id3v1WriteTitle("", tag));
+    assert_true(id3v1WriteYear(INT_MAX, tag));
 
-    for(int i = 0; i < ID3V1_FIELD_SIZE; i++){
-        assert_int_equal(tag->title[i], 0);
-    }
-
+    assert_int_equal(INT_MAX, tag->year);
 
     id3v1DestroyTag(&tag);
 }
 
+static void id3v1CompareTag_noTags(void **state){
+    (void) state; /* unused */
+
+    assert_false(id3v1CompareTag(NULL, NULL));
+}
+
+static void id3v1CompareTag_oneTag(void **state){
+    (void) state; /* unused */
+
+    Id3v1Tag *tag = id3v1NewTag(NULL,
+                                NULL,
+                                NULL,
+                                0,
+                                0,
+                                NULL,
+                                0);
+
+
+    assert_false(id3v1CompareTag(tag, NULL));
+
+    id3v1DestroyTag(&tag);
+}
+
+static void id3v1CompareTag_diffGenere(void **state){
+    (void) state; /* unused */
+
+    Id3v1Tag *tag1 = id3v1NewTag(NULL,
+                                NULL,
+                                NULL,
+                                0,
+                                0,
+                                NULL,
+                                NOISE_GENRE);
+
+    Id3v1Tag *tag2 = id3v1NewTag(NULL,
+                                NULL,
+                                NULL,
+                                0,
+                                0,
+                                NULL,
+                                POP_GENRE);
+
+
+    assert_false(id3v1CompareTag(tag1, tag2));
+
+    id3v1DestroyTag(&tag1);
+    id3v1DestroyTag(&tag2);
+}
+
+static void id3v1CompareTag_diffComment(void **state){
+    (void) state; /* unused */
+
+    Id3v1Tag *tag1 = id3v1NewTag(NULL,
+                                NULL,
+                                NULL,
+                                0,
+                                0,
+                                (uint8_t *)"this is the worst",
+                                0);
+
+    Id3v1Tag *tag2 = id3v1NewTag(NULL,
+                                NULL,
+                                NULL,
+                                0,
+                                0,
+                                (uint8_t *)"this is the best",
+                                0);
+
+
+    assert_false(id3v1CompareTag(tag1, tag2));
+
+    id3v1DestroyTag(&tag1);
+    id3v1DestroyTag(&tag2);
+}
+
+static void id3v1CompareTag_diffTrack(void **state){
+    (void) state; /* unused */
+
+    Id3v1Tag *tag1 = id3v1NewTag(NULL,
+                                NULL,
+                                NULL,
+                                0,
+                                12,
+                                NULL,
+                                0);
+
+    Id3v1Tag *tag2 = id3v1NewTag(NULL,
+                                NULL,
+                                NULL,
+                                0,
+                                30,
+                                NULL,
+                                0);
+
+
+    assert_false(id3v1CompareTag(tag1, tag2));
+
+    id3v1DestroyTag(&tag1);
+    id3v1DestroyTag(&tag2);
+}
+
+static void id3v1CompareTag_diffYear(void **state){
+    (void) state; /* unused */
+
+    Id3v1Tag *tag1 = id3v1NewTag(NULL,
+                                NULL,
+                                NULL,
+                                1800,
+                                0,
+                                NULL,
+                                0);
+
+    Id3v1Tag *tag2 = id3v1NewTag(NULL,
+                                NULL,
+                                NULL,
+                                2023,
+                                0,
+                                NULL,
+                                0);
+
+
+    assert_false(id3v1CompareTag(tag1, tag2));
+
+    id3v1DestroyTag(&tag1);
+    id3v1DestroyTag(&tag2);
+}
+
+static void id3v1CompareTag_diffAlbum(void **state){
+    (void) state; /* unused */
+
+    Id3v1Tag *tag1 = id3v1NewTag(NULL,
+                                NULL,
+                                (uint8_t *)"the money store",
+                                0,
+                                0,
+                                NULL,
+                                0);
+
+    Id3v1Tag *tag2 = id3v1NewTag(NULL,
+                                NULL,
+                                (uint8_t *)"speak now",
+                                0,
+                                0,
+                                NULL,
+                                0);
+
+
+    assert_false(id3v1CompareTag(tag1, tag2));
+
+    id3v1DestroyTag(&tag1);
+    id3v1DestroyTag(&tag2);
+}
+
+static void id3v1CompareTag_diffArtist(void **state){
+    (void) state; /* unused */
+
+    Id3v1Tag *tag1 = id3v1NewTag(NULL,
+                                (uint8_t *)"alvvays",
+                                NULL,
+                                0,
+                                0,
+                                NULL,
+                                0);
+
+    Id3v1Tag *tag2 = id3v1NewTag(NULL,
+                                (uint8_t *)"Lana del ray",
+                                NULL,
+                                0,
+                                0,
+                                NULL,
+                                0);
+
+
+    assert_false(id3v1CompareTag(tag1, tag2));
+
+    id3v1DestroyTag(&tag1);
+    id3v1DestroyTag(&tag2);
+}
+
+static void id3v1CompareTag_diffTitle(void **state){
+    (void) state; /* unused */
+
+    Id3v1Tag *tag1 = id3v1NewTag((uint8_t *)"1999",
+                                NULL,
+                                NULL,
+                                0,
+                                0,
+                                NULL,
+                                0);
+
+    Id3v1Tag *tag2 = id3v1NewTag((uint8_t *)"thank u, next",
+                                NULL,
+                                NULL,
+                                0,
+                                0,
+                                NULL,
+                                0);
+
+
+    assert_false(id3v1CompareTag(tag1, tag2));
+
+    id3v1DestroyTag(&tag1);
+    id3v1DestroyTag(&tag2);
+}
+
+static void id3v1CompareTag_same(void **state){
+    (void) state; /* unused */
+
+    Id3v1Tag *tag1 = id3v1NewTag((uint8_t *)"1999",
+                                (uint8_t *)"charli xcx",
+                                (uint8_t *)"charli",
+                                4,
+                                2019,
+                                NULL,
+                                POP_GENRE);
+
+    Id3v1Tag *tag2 = id3v1NewTag((uint8_t *)"1999",
+                                (uint8_t *)"charli xcx",
+                                (uint8_t *)"charli",
+                                4,
+                                2019,
+                                NULL,
+                                POP_GENRE);
+
+    assert_true(id3v1CompareTag(tag1, tag2));
+
+    id3v1DestroyTag(&tag1);
+    id3v1DestroyTag(&tag2);
+}
+
+static void id3v1GenreFromTable_checkNoNull(void **state){
+    (void) state; /* unused */
+
+    for(int i = 0; i < 255; i++){
+        assert_non_null(id3v1GenreFromTable(i));
+    }
+}
+
+static void id3v1GenreFromTable_checkForHipHopGenre(void **state){
+    (void) state; /* unused */
+    assert_string_equal(id3v1GenreFromTable(HIP_HOP_GENRE), "Hip-Hop");
+}
 
 int main(){
     
@@ -591,6 +849,30 @@ int main(){
         cmocka_unit_test(id3v1WriteTitle_WithNullTitle),
         cmocka_unit_test(id3v1WriteTitle_WithBigTitle),
         cmocka_unit_test(id3v1WriteTitle_WithSmallTitle),
+
+        //id3v1WriteYear tests
+        //same logic for genere and track
+        cmocka_unit_test(id3v1WriteYear_save0),
+        cmocka_unit_test(id3v1WriteYear_saveBig),
+
+        //id3v1CompareTag tests
+        cmocka_unit_test(id3v1CompareTag_noTags),
+        cmocka_unit_test(id3v1CompareTag_diffGenere),
+        cmocka_unit_test(id3v1CompareTag_diffTrack),
+        cmocka_unit_test(id3v1CompareTag_diffYear),
+        cmocka_unit_test(id3v1CompareTag_diffAlbum),
+        cmocka_unit_test(id3v1CompareTag_diffArtist),
+        cmocka_unit_test(id3v1CompareTag_diffComment),
+        cmocka_unit_test(id3v1CompareTag_diffTitle),
+        cmocka_unit_test(id3v1CompareTag_same),
+
+        //no tests for any read functions
+        //these just do tag->xxxxx 
+
+        //id3v1GenreFromTable tests
+        cmocka_unit_test(id3v1GenreFromTable_checkNoNull),
+        cmocka_unit_test(id3v1GenreFromTable_checkForHipHopGenre),
+
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

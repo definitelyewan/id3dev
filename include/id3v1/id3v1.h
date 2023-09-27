@@ -23,6 +23,7 @@ int id3v1WriteTrack(int track, Id3v1Tag *tag);
 
 //util functions
 bool id3v1CompareTag(Id3v1Tag *tag1, Id3v1Tag *tag2);
+char *id3v1GenreFromTable(Genre val);
 
 //compatability functions a.k.a getters
 char *id3v1ReadTitle(Id3v1Tag *tag);
