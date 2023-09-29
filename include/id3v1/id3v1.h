@@ -35,8 +35,8 @@ Genre id3v1ReadGenre(Id3v1Tag *tag);
 int id3v1ReadTrack(Id3v1Tag *tag);
 
 //writes
-void id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag);
 char *id3v1ToJSON(const Id3v1Tag *tag);
+int id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag);
 
 #ifdef __cplusplus
 } //extern c end

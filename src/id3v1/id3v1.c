@@ -568,33 +568,19 @@ int id3v1ReadTrack(Id3v1Tag *tag){
 char *id3v1ToJSON(const Id3v1Tag *tag){
 
     char *jsonStr = NULL;
-
     int memCount = 0;
+
     if(tag == NULL){
         jsonStr = calloc(sizeof(char), 3);
         strncpy(jsonStr,"{}",3);
         return jsonStr;
     }
 
-    memCount = 2/*{}*/ + 1/*\0*/ + 28/*""*8 - the ints*/ + 8/*:*8*/ + 1/*,*7*/;
-    memCount = memCount + strlen("title");
-    memCount = memCount + strlen("artist");
-    memCount = memCount + strlen("album");
-    memCount = memCount + strlen("year");
-    memCount = memCount + strlen("track");
-    memCount = memCount + strlen("comment");
-    memCount = memCount + strlen("genreNumber");
-    memCount = memCount + strlen("genre");
-    memCount = memCount + strlen((char *)tag->title);
-    memCount = memCount + strlen((char *)tag->artist);
-    memCount = memCount + strlen((char *)tag->albumTitle);
-    memCount = memCount + strlen((char *)tag->comment);
-    memCount = memCount + strlen(genreFromTable(tag->genre));
-    memCount = memCount + (sizeof(int) * 3); /*year, track & genre*/
-    
+    //96 is for formating
+    memCount = 98 + ID3V1_MAX_SIZE + (sizeof(int) * 3) + strlen(id3v1GenreFromTable(tag->genre));    
     jsonStr = calloc(sizeof(char), memCount);
 
-    sprintf(jsonStr,"{\"title\":\"%s\",\"artist\":\"%s\",\"album\":%s,\"year\":%d,\"track\":%d,\"comment\":%s,\"genreNumber\":%d,\"genre\":%s}",
+    sprintf(jsonStr,"{\"title\":\"%s\",\"artist\":\"%s\",\"album\":\"%s\",\"year\":%d,\"track\":%d,\"comment\":\"%s\",\"genreNumber\":%d,\"genre\":\"%s\"}",
     (char *) tag->title, 
     (char *) tag->artist,
     (char *) tag->albumTitle, 
@@ -604,17 +590,12 @@ char *id3v1ToJSON(const Id3v1Tag *tag){
     tag->genre, 
     id3v1GenreFromTable(tag->genre));
     return jsonStr;
-
 }
 
-void id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag){
-/*
-    if(filePath == NULL){
-        return;
-    }
+int id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag){
 
-    if(tag == NULL){
-        return;
+    if(filePath == NULL || tag == NULL){
+        return 0;
     }
 
     FILE *fp = NULL;
@@ -630,46 +611,57 @@ void id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag){
     byteStreamWrite(stream, (unsigned char *)itob(tag->track), 1);
     byteStreamWrite(stream, (unsigned char *)itob((int)tag->genre), 1);
 
-
     if((fp = fopen(filePath, "r+b")) == NULL){
         //create a new file and write the bytes to it    
         if((fp = fopen(filePath, "wb")) == NULL){
             byteStreamDestroy(stream);
-            return;
+            return 0;
         }
         
         if((fwrite(byteStreamCursor(stream), 1, ID3V1_MAX_SIZE, fp)) == 0){
             byteStreamDestroy(stream);
             fclose(fp);
-            return;
+            return 0;
         }
 
     }else{
+
+        //get file size
+        fseek()
+        size_t index = ftell(fp);
+    }
+    /*
+    else{
+    
         //file size
         fseek(fp,0, SEEK_END);
         int index = ftell(fp);
         uint8_t isTag[ID3V1_TAG_ID_SIZE];
 
         if((fseek(fp, index - ID3V1_MAX_SIZE, SEEK_SET)) != 0){
+            byteStreamDestroy(&tag);
             fclose(fp);
             return;
         }
         
         //check to see if the file has ID3 metadata
         if(fread(isTag, 1, ID3V1_TAG_ID_SIZE, fp) == 0){
+            byteStreamDestroy(&tag);
             fclose(fp);
             return;
         }
 
         //coupld not find 'TAG'
-        if(!containsId3v1(isTag)){
+        if(!id3v1HasTag(isTag)){
             if(fseek(fp, 0, SEEK_END) != 0){
+                byteStreamDestroy(&tag);
                 fclose(fp);
                 return;
             }
 
         }else{
             if(fseek(fp, index - ID3V1_MAX_SIZE, SEEK_SET) != 0){
+                byteStreamDestroy(&tag);
                 fclose(fp);
                 return;
             }
@@ -677,11 +669,11 @@ void id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag){
 
         //write bytes to the file at the right position
         if((fwrite(byteStreamCursor(stream), 1, ID3V1_MAX_SIZE, fp)) == 0){
+            byteStreamDestroy(&tag);
             fclose(fp);
             return;
         }
     }
-
+    */
     byteStreamDestroy(stream);
-*/
 }

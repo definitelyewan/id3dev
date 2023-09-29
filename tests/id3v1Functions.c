@@ -807,6 +807,111 @@ static void id3v1GenreFromTable_checkForHipHopGenre(void **state){
     assert_string_equal(id3v1GenreFromTable(HIP_HOP_GENRE), "Hip-Hop");
 }
 
+static void id3v1ToJSON_fullTag(void **state){
+    (void) state; /* unused */
+
+        Id3v1Tag *tag = id3v1NewTag((uint8_t *)"1999",
+                                (uint8_t *)"charli xcx",
+                                (uint8_t *)"charli",
+                                4,
+                                2019,
+                                "pretty good song",
+                                POP_GENRE);
+
+
+        char *json = id3v1ToJSON(tag);
+
+
+        assert_non_null(json);
+
+        assert_string_equal(json,
+        "{\"title\":\"1999\",\"artist\":\"charli xcx\",\"album\":\"charli\",\"year\":4,\"track\":2019,\"comment\":\"pretty good song\",\"genreNumber\":13,\"genre\":\"Pop\"}");
+
+
+        free(json);
+        id3v1DestroyTag(&tag);
+}
+
+static void id3v1ToJSON_noGenere(void **state){
+    (void) state; /* unused */
+
+        Id3v1Tag *tag = id3v1NewTag((uint8_t *)"1999",
+                                (uint8_t *)"charli xcx",
+                                (uint8_t *)"charli",
+                                4,
+                                2019,
+                                "pretty good song",
+                                12);
+
+
+        char *json = id3v1ToJSON(tag);
+
+
+        assert_non_null(json);
+        assert_string_equal(json,
+        "{\"title\":\"1999\",\"artist\":\"charli xcx\",\"album\":\"charli\",\"year\":4,\"track\":2019,\"comment\":\"pretty good song\",\"genreNumber\":12,\"genre\":\"Other\"}");
+
+
+        free(json);
+        id3v1DestroyTag(&tag);
+}
+
+static void id3v1ToJSON_noYear(void **state){
+    (void) state; /* unused */
+
+        Id3v1Tag *tag = id3v1NewTag((uint8_t *)"1999",
+                                (uint8_t *)"charli xcx",
+                                (uint8_t *)"charli",
+                                4,
+                                0,
+                                "pretty good song",
+                                POP_GENRE);
+
+
+        char *json = id3v1ToJSON(tag);
+
+
+        assert_non_null(json);
+
+        assert_string_equal(json,
+        "{\"title\":\"1999\",\"artist\":\"charli xcx\",\"album\":\"charli\",\"year\":4,\"track\":0,\"comment\":\"pretty good song\",\"genreNumber\":13,\"genre\":\"Pop\"}");
+
+
+        free(json);
+        id3v1DestroyTag(&tag);
+}
+
+static void id3v1ToJSON_noTitle(void **state){
+    (void) state; /* unused */
+
+        Id3v1Tag *tag = id3v1NewTag(NULL,
+                                (uint8_t *)"charli xcx",
+                                (uint8_t *)"charli",
+                                4,
+                                2019,
+                                "pretty good song",
+                                POP_GENRE);
+
+
+        char *json = id3v1ToJSON(tag);
+
+
+        assert_non_null(json);
+
+        assert_string_equal(json,
+        "{\"title\":\"\",\"artist\":\"charli xcx\",\"album\":\"charli\",\"year\":4,\"track\":2019,\"comment\":\"pretty good song\",\"genreNumber\":13,\"genre\":\"Pop\"}");
+
+
+        free(json);
+        id3v1DestroyTag(&tag);
+}
+
+static void id3v1WriteTagToFile_noInputs(void **state){
+    (void) state; /* unused */
+
+}
+
+
 int main(){
     
     const struct CMUnitTest tests[] = {
@@ -872,6 +977,14 @@ int main(){
         //id3v1GenreFromTable tests
         cmocka_unit_test(id3v1GenreFromTable_checkNoNull),
         cmocka_unit_test(id3v1GenreFromTable_checkForHipHopGenre),
+
+        //id3v1ToJSON
+        cmocka_unit_test(id3v1ToJSON_fullTag),
+        cmocka_unit_test(id3v1ToJSON_noGenere),
+        cmocka_unit_test(id3v1ToJSON_noYear),
+        cmocka_unit_test(id3v1ToJSON_noTitle),
+
+        //id3v1WriteTagToFile
 
     };
 
