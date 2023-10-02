@@ -15,9 +15,9 @@ else:
 #build with cmake
 try:
     if platform == "linux" or platform == "linux2" or "darwin":
-        subprocess.call(["cmake", "-S", ".", "-B", "./build", "-DBUILD_TESTS=ON"])
+        subprocess.call(["cmake", "-S", ".", "-B", "./build", "-DBUILD_ID3_TESTS=ON"])
     elif platform == "win32":
-        subprocess.call(["cmake", "-S", ".", "-B", ".\\build", "-DBUILD_TESTS=ON"])
+        subprocess.call(["cmake", "-S", ".", "-B", ".\\build", "-DBUILD_ID3_TESTS=ON"])
 
 except OSError as e:
     if e.errno == errno.ENOENT:
@@ -74,7 +74,7 @@ except OSError as e:
 #call test execs
 try:
     if platform == "linux" or platform == "linux2" or "darwin":
-        subprocess.call(["valgrind","--leak-check=full","./id3v1_test"])
+        subprocess.call(["valgrind","--leak-check=full", "--show-leak-kinds=all","./id3v1_test"])
     elif platform == "win32":
         if os.path.exists("Release"):
             os.chdir("Release")

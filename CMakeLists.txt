@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22.1)
 project(Id3dev VERSION 1.0.0.0)
 
 option(BUILD_SHARED_LIBS "building a shared lib" ON)
-option(BUILD_TESTS "build tests" ON)
+option(BUILD_ID3_TESTS "build tests" ON)
 option(DEDUB_SYMBOLS "enables debugging" ON)
 
 set(ID3V1_HEADERS
@@ -25,6 +25,7 @@ endif()
 
 add_library(Id3dev ${ID3V1_HEADERS} ${ID3V1_SRC})
 target_link_libraries(Id3dev ByteStream)
+target_link_libraries(Id3dev m)
 
 target_include_directories(Id3dev PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v1")
 set_target_properties(Id3dev PROPERTIES C_STANDARD 99)
@@ -32,6 +33,6 @@ set_target_properties(Id3dev PROPERTIES C_STANDARD 99)
 
 add_subdirectory("modules/ByteStream")
 
-if(BUILD_TESTS)
+if(BUILD_ID3_TESTS)
   add_subdirectory(tests)
 endif()

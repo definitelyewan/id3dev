@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "id3v1.h"
 #include "byteStream.h"
 #include "byteInt.h"
@@ -107,7 +108,6 @@ int id3v1WriteTrack(int track, Id3v1Tag *tag){
 }
 
 bool id3v1CompareTag(Id3v1Tag *tag1, Id3v1Tag *tag2){
-
 
     if(tag1 == NULL || tag2 == NULL){
         return false;
@@ -598,6 +598,10 @@ int id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag){
         return 0;
     }
 
+    char *tmp = NULL;
+    unsigned char byte = 0x00;
+    int n = 0;
+    int yearW = 0;
     FILE *fp = NULL;
     ByteStream *stream = byteStreamCreate(NULL, ID3V1_MAX_SIZE);
 
@@ -605,75 +609,108 @@ int id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag){
     byteStreamWrite(stream, (unsigned char *)tag->title, ID3V1_FIELD_SIZE);
     byteStreamWrite(stream, (unsigned char *)tag->artist, ID3V1_FIELD_SIZE);
     byteStreamWrite(stream, (unsigned char *)tag->albumTitle, ID3V1_FIELD_SIZE);
-    byteStreamWrite(stream, (unsigned char *)tag->artist, ID3V1_FIELD_SIZE);
-    byteStreamWrite(stream, (unsigned char *)itob(tag->year), ID3V1_YEAR_SIZE);
+    
+    //int to string
+    n = log10(tag->year) + 1;
+    yearW = tag->year;
+    tmp = calloc(n, sizeof(char));
+
+    for(int i = n - 1; i >= 0; --i, yearW /= 10){
+        tmp[i] = (yearW % 10) + '0';
+    }
+
+    //write convert
+    byteStreamWrite(stream, (unsigned char *)tmp, ID3V1_YEAR_SIZE);
+    free(tmp);
+
     byteStreamWrite(stream, (unsigned char *)tag->comment, ID3V1_FIELD_SIZE);
-    byteStreamWrite(stream, (unsigned char *)itob(tag->track), 1);
-    byteStreamWrite(stream, (unsigned char *)itob((int)tag->genre), 1);
+    
+    //track is one byte but an int can be more so clamp it
+    if(tag->track <= 0xFF && tag->track > 0x00){
+        byteStreamSeek(stream, -1, SEEK_CUR);
+        byte = (unsigned char) tag->track & 0xFF;
+        byteStreamWrite(stream, &byte, 1);
+    }
+
+    //genere is one byte as well
+    byte = (unsigned char) tag->genre & 0xFF;
+    byteStreamWrite(stream, &byte, 1);
+
+    byteStreamRewind(stream);
 
     if((fp = fopen(filePath, "r+b")) == NULL){
+        
         //create a new file and write the bytes to it    
         if((fp = fopen(filePath, "wb")) == NULL){
             byteStreamDestroy(stream);
             return 0;
         }
-        
+
         if((fwrite(byteStreamCursor(stream), 1, ID3V1_MAX_SIZE, fp)) == 0){
             byteStreamDestroy(stream);
             fclose(fp);
             return 0;
         }
-
+        
     }else{
 
         //get file size
-        fseek()
+        fseek(fp, 0, SEEK_END);
         size_t index = ftell(fp);
-    }
-    /*
-    else{
-    
-        //file size
-        fseek(fp,0, SEEK_END);
-        int index = ftell(fp);
-        uint8_t isTag[ID3V1_TAG_ID_SIZE];
+        size_t offset = 0;
+        unsigned char *buffer[ID3V1_MAX_SIZE];
 
+
+        //seek to tag start
+        //if the file is less then 128 bytes then we can catch that here.
+        //there will be no tag due to size or if there is its corrupt and
+        //will be treated as regular file data and skipped over.
         if((fseek(fp, index - ID3V1_MAX_SIZE, SEEK_SET)) != 0){
-            byteStreamDestroy(&tag);
+            
+            fseek(fp, 0, SEEK_END);
+            if(fwrite(byteStreamCursor(stream), 1, ID3V1_MAX_SIZE, fp) != 0){
+                byteStreamDestroy(stream);
+                fclose(fp);
+                return 1;
+            }
+            
+            byteStreamDestroy(stream);
             fclose(fp);
-            return;
+            return 0;
         }
-        
+
         //check to see if the file has ID3 metadata
-        if(fread(isTag, 1, ID3V1_TAG_ID_SIZE, fp) == 0){
-            byteStreamDestroy(&tag);
+        if(fread(buffer, 1, ID3V1_TAG_ID_SIZE, fp) == 0){
+            byteStreamDestroy(stream);
             fclose(fp);
-            return;
+            return 0;
         }
 
         //coupld not find 'TAG'
-        if(!id3v1HasTag(isTag)){
+        if(!id3v1HasTag((uint8_t *)buffer)){
             if(fseek(fp, 0, SEEK_END) != 0){
-                byteStreamDestroy(&tag);
+                byteStreamDestroy(stream);
                 fclose(fp);
-                return;
+                return 0;
             }
 
         }else{
             if(fseek(fp, index - ID3V1_MAX_SIZE, SEEK_SET) != 0){
-                byteStreamDestroy(&tag);
+                byteStreamDestroy(stream);
                 fclose(fp);
-                return;
+                return 0;
             }
         }
 
         //write bytes to the file at the right position
         if((fwrite(byteStreamCursor(stream), 1, ID3V1_MAX_SIZE, fp)) == 0){
-            byteStreamDestroy(&tag);
+            byteStreamDestroy(stream);
             fclose(fp);
-            return;
+            return 0;
         }
     }
-    */
+
     byteStreamDestroy(stream);
+    fclose(fp);
+    return 1;
 }

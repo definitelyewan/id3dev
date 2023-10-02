@@ -4,6 +4,7 @@
 #include "id3v1Types.h"
 #include "id3v1Parser.h"
 #include "byteStream.h"
+#include "byteInt.h"
 
 bool id3v1HasTag(uint8_t *buffer){
     return (memcmp(buffer,"TAG",ID3V1_TAG_ID_SIZE) == 0) ? true : false;
@@ -115,16 +116,18 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
     }
 
     //get year and set index for next tag
-    for(int i = 0; i < 4; i++){
-        year[i] = 0;
-    }
+    memset(year, 0, ID3V1_YEAR_SIZE);
     if(!byteStreamRead(stream, year, ID3V1_YEAR_SIZE)){
         byteStreamDestroy(stream);
         return id3v1NewTag(holdTitle, holdArtist, holdAlbum, 0, 0, NULL, OTHER_GENRE);
     }else{
         if(memcmp(year,"\x00\x00\x00\x00\x00",ID3V1_YEAR_SIZE) != 0){
+            
+            int i = 0;
+            for(i = 0; year[i] == 0 && i < ID3V1_YEAR_SIZE; i++);
+            
             year[ID3V1_YEAR_SIZE] = '\0';
-            nYear = atoi((char *)year);
+            nYear = atoi((char *) (year + i));
         }
     }
     

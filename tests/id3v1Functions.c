@@ -8,6 +8,7 @@
 #include <string.h>
 #include <limits.h>
 #include "id3v1.h"
+#include "byteInt.h"
 
 void Id3v1TagPrintf(Id3v1Tag *tag){
 
@@ -909,8 +910,160 @@ static void id3v1ToJSON_noTitle(void **state){
 static void id3v1WriteTagToFile_noInputs(void **state){
     (void) state; /* unused */
 
+    assert_false(id3v1WriteTagToFile(NULL, NULL));
 }
 
+static void id3v1WriteTagToFile_CreateFile(void **state){
+    (void) state; /* unused */
+
+    Id3v1Tag *tag = id3v1NewTag((uint8_t *)"1999",
+                            (uint8_t *)"charli xcx",
+                            (uint8_t *)"charli",
+                            2019,
+                            4,
+                            "pretty good song",
+                            POP_GENRE);
+    Id3v1Tag *tag2 = NULL;
+
+    assert_true(id3v1WriteTagToFile("test.mp3", tag));
+    tag2 = id3v1TagFromFile("test.mp3");
+    assert_non_null(tag2);
+
+    assert_string_equal((char *)tag2->title, "1999");
+    assert_string_equal((char *)tag2->artist, "charli xcx");
+    assert_string_equal((char *)tag2->albumTitle, "charli");
+    assert_int_equal(tag2->year, 2019);
+    assert_string_equal((char *)tag2->comment, "pretty good song");
+    assert_int_equal(tag2->track, 4);
+    assert_int_equal(tag2->genre, POP_GENRE);
+    id3v1DestroyTag(&tag);
+    id3v1DestroyTag(&tag2);
+
+    remove("test.mp3");
+}
+
+static void id3v1WriteTagToFile_editExistingFile(void **state){
+    (void) state; /* unused */
+
+    Id3v1Tag *pretag = id3v1NewTag((uint8_t *)"1999",
+                            (uint8_t *)"charli xcx",
+                            (uint8_t *)"charli",
+                            2019,
+                            4,
+                            "pretty good song",
+                            POP_GENRE);
+
+
+
+    Id3v1Tag *tag2 = id3v1NewTag((uint8_t *)"Headlines",
+                            (uint8_t *)"Drake",
+                            (uint8_t *)"Take Care",
+                            2011,
+                            3,
+                            NULL,
+                            RAP_GENRE);
+    Id3v1Tag *readTag = NULL;
+
+    assert_true(id3v1WriteTagToFile("test.mp3", pretag));
+    assert_true(id3v1WriteTagToFile("test.mp3", tag2));
+
+    readTag = id3v1TagFromFile("test.mp3");
+    assert_non_null(readTag);
+
+    assert_string_equal((char *)readTag->title, "Headlines");
+    assert_string_equal((char *)readTag->artist, "Drake");
+    assert_string_equal((char *)readTag->albumTitle, "Take Care");
+    assert_int_equal(readTag->year, 2011);
+    for(int i = 0; i < ID3V1_FIELD_SIZE; i++){
+        assert_int_equal(readTag->comment[i], 0);
+    }
+    assert_int_equal(readTag->track, 3);
+    assert_int_equal(readTag->genre, RAP_GENRE);
+    
+    id3v1DestroyTag(&pretag);
+    id3v1DestroyTag(&tag2);
+    id3v1DestroyTag(&readTag);
+    
+    remove("test.mp3");
+}
+
+static void id3v1WriteTagToFile_appendFile(void **state){
+    (void) state; /* unused */
+
+    FILE *fp = fopen("test.mp3","w");
+
+    fwrite("do not overwrite me please",1,27,fp);
+    fclose(fp);
+
+
+    Id3v1Tag *tag2 = id3v1NewTag((uint8_t *)"Headlines",
+                            (uint8_t *)"Drake",
+                            (uint8_t *)"Take Care",
+                            2011,
+                            3,
+                            NULL,
+                            RAP_GENRE);
+    Id3v1Tag *readTag = NULL;
+
+    assert_true(id3v1WriteTagToFile("test.mp3", tag2));
+
+    readTag = id3v1TagFromFile("test.mp3");
+    assert_non_null(readTag);
+
+    assert_string_equal((char *)readTag->title, "Headlines");
+    assert_string_equal((char *)readTag->artist, "Drake");
+    assert_string_equal((char *)readTag->albumTitle, "Take Care");
+    assert_int_equal(readTag->year, 2011);
+    for(int i = 0; i < ID3V1_FIELD_SIZE; i++){
+        assert_int_equal(readTag->comment[i], 0);
+    }
+    assert_int_equal(readTag->track, 3);
+    assert_int_equal(readTag->genre, RAP_GENRE);
+    
+    id3v1DestroyTag(&tag2);
+    id3v1DestroyTag(&readTag);
+    
+    remove("test.mp3");
+}
+
+static void id3v1WriteTagToFile_appendFileBig(void **state){
+    (void) state; /* unused */
+
+    FILE *fp = fopen("test.mp3","w");
+
+    fwrite("oiejvpeinvpwiuevnpiwernvpiwernvpiweornvpoiwernvpoewinvoipwenvpoewinveiowvneowpnvewionveopwinvreoiwnrvoewmldakcmsdkfnvjkfenwviuerpieojvweirjv49fu980hv4tubvonufikldockc0924-9r934u8r234funeijdckdl",1,194,fp);
+    fclose(fp);
+
+
+    Id3v1Tag *tag2 = id3v1NewTag((uint8_t *)"Headlines",
+                            (uint8_t *)"Drake",
+                            (uint8_t *)"Take Care",
+                            2011,
+                            3,
+                            NULL,
+                            RAP_GENRE);
+    Id3v1Tag *readTag = NULL;
+
+    assert_true(id3v1WriteTagToFile("test.mp3", tag2));
+
+    readTag = id3v1TagFromFile("test.mp3");
+    assert_non_null(readTag);
+
+    assert_string_equal((char *)readTag->title, "Headlines");
+    assert_string_equal((char *)readTag->artist, "Drake");
+    assert_string_equal((char *)readTag->albumTitle, "Take Care");
+    assert_int_equal(readTag->year, 2011);
+    for(int i = 0; i < ID3V1_FIELD_SIZE; i++){
+        assert_int_equal(readTag->comment[i], 0);
+    }
+    assert_int_equal(readTag->track, 3);
+    assert_int_equal(readTag->genre, RAP_GENRE);
+    
+    id3v1DestroyTag(&tag2);
+    id3v1DestroyTag(&readTag);
+    
+    remove("test.mp3");
+}
 
 int main(){
     
@@ -985,6 +1138,11 @@ int main(){
         cmocka_unit_test(id3v1ToJSON_noTitle),
 
         //id3v1WriteTagToFile
+        cmocka_unit_test(id3v1WriteTagToFile_noInputs),
+        cmocka_unit_test(id3v1WriteTagToFile_CreateFile),
+        cmocka_unit_test(id3v1WriteTagToFile_editExistingFile),
+        cmocka_unit_test(id3v1WriteTagToFile_appendFile),
+        cmocka_unit_test(id3v1WriteTagToFile_appendFileBig),
 
     };
 
