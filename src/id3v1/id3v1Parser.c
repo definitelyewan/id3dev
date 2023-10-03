@@ -6,10 +6,29 @@
 #include "byteStream.h"
 #include "byteInt.h"
 
+/**
+ * @brief Detect a "TAG" magic number/ID to identify the use of id3v1.
+ * @details This function returns true if successful and false otherwise.
+ * @param buffer 
+ * @return true 
+ * @return false 
+ */
 bool id3v1HasTag(uint8_t *buffer){
     return (memcmp(buffer,"TAG",ID3V1_TAG_ID_SIZE) == 0) ? true : false;
 }
 
+/**
+ * @brief Creates an Id3v1Tag structure.
+ * 
+ * @param title 
+ * @param artist 
+ * @param albumTitle 
+ * @param year 
+ * @param track 
+ * @param comment 
+ * @param genre 
+ * @return Id3v1Tag* 
+ */
 Id3v1Tag *id3v1NewTag(uint8_t *title, uint8_t *artist, uint8_t *albumTitle, int year, int track, uint8_t *comment, Genre genre){
 
     Id3v1Tag *tag = malloc(sizeof(Id3v1Tag));
@@ -41,6 +60,11 @@ Id3v1Tag *id3v1NewTag(uint8_t *title, uint8_t *artist, uint8_t *albumTitle, int 
     return tag;
 }
 
+/**
+ * @brief Resets all structure members to empty.
+ * @details OTHER_GENRE(12) is used as clear due to its unkown designation. 
+ * @param tag 
+ */
 void id3v1ClearTag(Id3v1Tag *tag){
     
     if(tag == NULL){
@@ -57,6 +81,10 @@ void id3v1ClearTag(Id3v1Tag *tag){
     tag->year = 0;
 }
 
+/**
+ * @brief Frees an Id3v1Tag structure and sets its address and pointer to null.
+ * @param toDelete 
+ */
 void id3v1DestroyTag(Id3v1Tag **toDelete){
 
     //error address free
@@ -67,6 +95,12 @@ void id3v1DestroyTag(Id3v1Tag **toDelete){
     }
 }
 
+/**
+ * @brief Parses a buffer into an Id3V1Tag structure.
+ * 
+ * @param buffer 
+ * @return Id3v1Tag* 
+ */
 Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
 
     //lots of error checking because i cannot 100% know what im given
