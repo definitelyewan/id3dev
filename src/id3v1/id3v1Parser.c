@@ -1,3 +1,13 @@
+/**
+ * @file id3v1Parser.c
+ * @author Ewan Jones
+ * @brief Function definitions for the parser
+ * @version 2.0
+ * @date 2023-10-03
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

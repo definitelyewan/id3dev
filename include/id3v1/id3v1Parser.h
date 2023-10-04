@@ -1,7 +1,7 @@
 /**
  * @file id3v1Parser.h
  * @author Ewan Jones
- * @brief declarations for the id3v1 parser
+ * @brief Declarations for the id3v1 parser
  * @version 2.0
  * @date 2023-10-03
  * 

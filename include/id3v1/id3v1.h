@@ -1,7 +1,7 @@
 /**
  * @file id3v1.h
  * @author Ewan Jones
- * @brief declarations used by utility functions
+ * @brief Declarations used by utility functions
  * @version 2.0
  * @date 2023-10-03
  * 

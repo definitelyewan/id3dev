@@ -1,7 +1,7 @@
 /**
  * @file id3v1Types.h
  * @author Ewan Jones
- * @brief defintions and types for id3v1 types
+ * @brief Defintions and types for id3v1 types
  * @version 2.0
  * @date 2023-10-02
  * 
