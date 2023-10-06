@@ -3,7 +3,6 @@
 main
 *.o
 *.so
-*.png
 vgcore.*
 *.exe
 .vscode
