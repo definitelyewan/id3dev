@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <!--tailwind css-->
+        <script src="https://cdn.tailwindcss.com"></script>
+
+        <!--daisy ui-->
+        <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.2/dist/full.css" rel="stylesheet" type="text/css" />
+        <script src="https://cdn.tailwindcss.com"></script>
+        
+        <title>ID3dev</title>
+    </head>
+    <body>
+
+
+        <div class="drawer">
+            <input id="my-drawer-3" type="checkbox" class="drawer-toggle" /> 
+            <div class="drawer-content flex flex-col">
+              <!-- Navbar -->
+              <div class="w-full navbar bg-base-300">
+                <div class="flex-none lg:hidden">
+                  <label for="my-drawer-3" aria-label="open sidebar" class="btn btn-square btn-ghost">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                  </label>
+                </div> 
+                <div class="flex-1 px-2 mx-2 text-xl"><b>ID3dev</b></div>
+                <div class="flex-none hidden lg:block">
+                  <ul class="menu menu-horizontal">
+                    <!-- Navbar menu content here -->
+                    <li><a href="https://github.com/definitelyewan/id3dev/">View Repo</a></li>
+                    <li><a href="https://id3.org/">Offical Source</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div> 
+          </div>
+
+        <div class="drawer lg:drawer-open">
+            <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+            <div class="drawer-content flex flex-col">
+              <!-- Page content here -->
+              <label for="my-drawer-2" class="btn btn-primary drawer-button lg:hidden justify-center items-center">Open drawer</label>
+                <div id="about">
+                    <div class="ml-5 flex flex-wrap grid-cols-1 grid-rows-1">
+                        
+                        <div class="flex-wrap">
+                            
+                                <h1 class="mb-4 text-3xl text-gray-900 dark:text-white md:text-5xl lg:text-6xl">About <span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">ID3dev</span>.</h1>
+                                <p class="text-lg font-normal text-gray-500 lg:text-xl dark:text-gray-400 whitespace-normal">ID3dev is a low-level library for reading, manipulating, and writing ID3 metadata of any version.</p>
+                                <p class="text-gray-500 lg:text-xl dark:text-gray-400 whitespace-normal">As of right now, ID3dev is going through a rewrite to ensure it has more modules and removes a lot of spaghetti code. As of right now, the only completed components are the projects linked list API and buffer streaming API along, with everything to do with ID3v1 and Id3v1.1. Below is a breakdown of the current status of this project.</p>
+                            
+                        </div>
+
+
+                    </div>
+                    <div class="grid">
+                        <div class="text-lg ml-5">
+                            <h1 class="mt-10 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">Progress</h1>
+                        </div>
+                        
+                        <div class="ml-5 mr-5 mt-5">
+                            <span class="text-base font-medium text-blue-700 dark:text-white">ID3v1 and ID3v1.1 Features</span>
+                            <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700">
+                                <div class="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style="width: 100%"> Complete</div>
+                            </div>  
+                        </div>
+                        <div class="ml-5 mr-5 mt-5">
+                            <span class="text-base font-medium text-blue-700 dark:text-white">ID3v2.2, ID3v2.3, and ID3v2.4 Features</span>
+                            <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700">
+                                <div class="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style="width: 0%"> 0%</div>
+                            </div>  
+                        </div>
+                        <div class="ml-5 mr-5 mt-5">
+                            <span class="text-base font-medium text-blue-700 dark:text-white">Test Cases</span>
+                            <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700">
+                                <div class="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style="width: 25%"> 25%</div>
+                            </div>  
+                        </div>
+                        <div class="ml-5 mr-5 mt-5">
+                            <span class="text-base font-medium text-blue-700 dark:text-white">Documentation</span>
+                            <div class="w-full bg-gray-200 rounded-full dark:bg-gray-700">
+                                <div class="bg-blue-600 text-xs font-medium text-blue-100 text-center p-0.5 leading-none rounded-full" style="width: 30%"> 30%</div>
+                            </div>  
+                        </div>
+                    </div>
+                </div>
+
+                <div id="id3v1" class="mt-10">
+                    <div class="ml-5 flex flex-wrap grid-cols-1 grid-rows-1">
+                        <div class="flex-wrap">
+                            <h1 class="mb-4 text-3xl text-gray-900 dark:text-white md:text-4xl lg:text-5xl">ID3v1</h1>
+                        </div>
+                    </div>
+                </div>
+                <div id="struct1" class="ml-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v1 Sturcture</h1>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                        ID3v1 is a 128-byte metadata container primarily used with MP3 files to store basic catalog information. This initial release can store artist name, song title, album title, release year, user comment, and genre.
+                        ID3v1 is identified by the 3-byte magic number 0x54 0x41 0x47 or in ASCII, TAG, and is located at 128 bytes from the end of an MP3 file using this form of metadata.
+                        Following the identifier are the following fields in order song title, artist, album, year, comment, and genere.
+                    </p>
+
+                    <div class="flex justify-center items-center">
+                        <img src="img/ID3v1_structure.png">
+                    </div>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        ID3v1 is made up of 5 text frames with the Latin1 (ISO-8859-1) character set and 1 integer field. The text fields consist of 4 30 byte fields which are title, artist, album, and comment with 1 4 byte field consisting of the year.
+                        All text fields are followed by a single genre byte with all compatible genres listed <a href="index.html#genres">here</a>.
+                    </p>
+                </div>
+                <div id="struct11" class="ml-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v1.1 Structure</h1>
+
+                    <div class="flex justify-center items-center">
+                        <img src="img/ID3v1_1_structure.png">
+                    </div>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        ID3v1.1 follows the exact same structure as the previous version except the comment field is shortend to make room for an extra integer. 
+                        In this version the comment field is truncated by 2 bytes making its capacity now 28 bytes.
+                        The first byte (ex 29th byte) is used to store a null character to indicate that the following character contains a track number.
+                    </p>
+                </div>
+                
+                <div id="genres" class="mt-10 ml-5">
+
+                    <h1 class="mb-4 text-3xl text-gray-900 dark:text-white md:text-4xl lg:text-5xl">Genres</h1>
+
+                    <div class="mockup-code">
+                        <pre data-prefix="1"><code>BLUES_GENRE</code></pre>           
+                        <pre data-prefix="2"><code>CLASSIC_ROCK_GENRE</code></pre>      
+                        <pre data-prefix="3"><code>COUNTRY_GENRE</code></pre>          
+                        <pre data-prefix="4"><code>DANCE_GENRE</code></pre>          
+                        <pre data-prefix="5"><code>DISCO_GENRE</code></pre>           
+                        <pre data-prefix="6"><code>PUNK_GENRE</code></pre>            
+                        <pre data-prefix="7"><code>GRUNGE_GENRE</code></pre>           
+                        <pre data-prefix="8"><code>HIP_HOP_GENRE</code></pre>         
+                        <pre data-prefix="9"><code>JAZZ_GENRE</code></pre>           
+                        <pre data-prefix="10"><code>METAL_GENRE</code></pre>      
+                        <pre data-prefix="11"><code>NEW_AGE_GENRE</code></pre>          
+                        <pre data-prefix="12"><code>OLDIES_GENRE</code></pre>      
+                        <pre data-prefix="13" class="bg-warning text-warning-content"><code>OTHER_GENRE (default in ID3dev)</code></pre>       
+                        <pre data-prefix="14"><code>POP_GENRE</code></pre>           
+                        <pre data-prefix="15"><code>RHYTHM_AND_BLUES_GENRE</code></pre> 
+                        <pre data-prefix="16"><code>RAP_GENRE</code></pre>              
+                        <pre data-prefix="17"><code>REGGAE_GENRE</code></pre>        
+                        <pre data-prefix="18"><code>ROCK_GENRE</code></pre>            
+                        <pre data-prefix="19"><code>TECHNO_GENRE</code></pre>         
+                        <pre data-prefix="20"><code>INDUSTRIAL_GENRE</code></pre>       
+                        <pre data-prefix="21"><code>ALTERNATIVE_GENRE</code></pre>    
+                        <pre data-prefix="22"><code>SKA_GENRE</code></pre>               
+                        <pre data-prefix="23"><code>EATH_METAL_GENRE</code></pre>        
+                        <pre data-prefix="24"><code>PRANKS_GENRE</code></pre>
+                        <pre data-prefix="25"><code>SOUNDTRACK_GENRE</code></pre>
+                        <pre data-prefix="26"><code>EURO_TECHNO_GENRE</code></pre>
+                        <pre data-prefix="27"><code>AMBIENT_GENRE</code></pre>
+                        <pre data-prefix="28"><code>TRIP_HOP_GENRE</code></pre>
+                        <pre data-prefix="29"><code>VOCAL_GENRE</code></pre>
+                        <pre data-prefix="30"><code>JAZZ_AND_FUNK_GENRE</code></pre>
+                        <pre data-prefix="31"><code>FUSION_GENRE</code></pre>
+                        <pre data-prefix="32"><code>TRANCE_GENRE</code></pre>
+                        <pre data-prefix="33"><code>CLASSICAL_GENRE</code></pre>
+                        <pre data-prefix="34"><code>INSTRUMENTAL_GENRE</code></pre>
+                        <pre data-prefix="35"><code>ACID_GENRE</code></pre>
+                        <pre data-prefix="36"><code>HOUSE_GENRE</code></pre>
+                        <pre data-prefix="37"><code>GAME_GENRE</code></pre>
+                        <pre data-prefix="38"><code>SOUND_CLIP_GENRE</code></pre>
+                        <pre data-prefix="39"><code>GOSPEL_GENRE</code></pre>
+                        <pre data-prefix="40"><code>NOISE_GENRE</code></pre>
+                        <pre data-prefix="41"><code>ALTERNATIVE_ROCK_GENRE</code></pre>
+                        <pre data-prefix="42"><code>BASS_GENRE</code></pre>
+                        <pre data-prefix="43"><code>SOUL_GENRE</code></pre>
+                        <pre data-prefix="44"><code>PUNK_GENRE</code></pre>
+                        <pre data-prefix="45"><code>SPACE_GENRE</code></pre>
+                        <pre data-prefix="46"><code>MEDITATIVE_GENRE</code></pre>
+                        <pre data-prefix="47"><code>INSTRUMENTAL_POP_GENRE</code></pre>
+                        <pre data-prefix="48"><code>INSTRUMENTAL_ROCK_GENRE</code></pre>
+                        <pre data-prefix="49"><code>ETHNIC_GENRE</code></pre>
+                        <pre data-prefix="50"><code>GOTHIC_GENRE</code></pre>
+                        <pre data-prefix="51"><code>DARKWAVE_GENRE</code></pre>
+                        <pre data-prefix="52"><code>TECHNO_INDUSTRIAL_GENRE</code></pre>
+                        <pre data-prefix="53"><code>ELECTRONIC_GENRE</code></pre>
+                        <pre data-prefix="54"><code>POP_FOLK_GENRE</code></pre>
+                        <pre data-prefix="55"><code>EURODANCE_GENRE</code></pre>
+                        <pre data-prefix="56"><code>DREAM_GENRE</code></pre>
+                        <pre data-prefix="57"><code>SOUTHERN_ROCK_GENRE</code></pre>
+                        <pre data-prefix="58"><code>COMEDY_GENRE</code></pre>
+                        <pre data-prefix="59"><code>CULT_GENRE</code></pre>
+                        <pre data-prefix="60"><code>GANGSTA_GENRE</code></pre>
+                        <pre data-prefix="61"><code>TOP_40_GENRE</code></pre>
+                        <pre data-prefix="62"><code>CHRISTIAN_RAP_GENRE</code></pre>
+                        <pre data-prefix="63"><code>POP_FUNK_GENRE</code></pre>
+                        <pre data-prefix="64"><code>JUNGLE_MUSIC_GENRE</code></pre>
+                        <pre data-prefix="65"><code>NATIVE_US_GENRE</code></pre>
+                        <pre data-prefix="66"><code>CABARET_GENRE</code></pre>
+                        <pre data-prefix="67"><code>NEW_WAVE_GENRE</code></pre>
+                        <pre data-prefix="68"><code>PSYCHEDELIC_GENRE</code></pre>
+                        <pre data-prefix="69"><code>RAVE_GENRE</code></pre>
+                        <pre data-prefix="70"><code>SHOWTUNES_GENRE</code></pre>
+                        <pre data-prefix="71"><code>TRAILER_GENRE</code></pre>
+                        <pre data-prefix="72"><code>LO_FI_GENRE</code></pre>
+                        <pre data-prefix="73"><code>TRIBAL_GENRE</code></pre>
+                        <pre data-prefix="74"><code>ACID_PUNK_GENRE</code></pre>
+                        <pre data-prefix="75"><code>ACID_JAZZ_GENRE</code></pre>
+                        <pre data-prefix="76"><code>POLKA_GENRE</code></pre>
+                        <pre data-prefix="77"><code>RETRO_GENRE</code></pre>
+                        <pre data-prefix="78"><code>MUSICAL_GENRE</code></pre>
+                        <pre data-prefix="79"><code>ROCKNROLL_GENRE</code></pre>
+                        <pre data-prefix="80"><code>HARD_ROCK_GENRE</code></pre>
+                        <pre data-prefix="81"><code>FOLK_GENRE</code></pre>
+                        <pre data-prefix="82"><code>FOLK_ROCK_GENRE</code></pre>
+                        <pre data-prefix="83"><code>NATIONAL_FOLK_GENRE</code></pre>
+                        <pre data-prefix="84"><code>SWING_GENRE</code></pre>
+                        <pre data-prefix="85"><code>FAST_FUSION_GENRE</code></pre>
+                        <pre data-prefix="86"><code>BEBOP_GENRE</code></pre>
+                        <pre data-prefix="87"><code>LATIN_GENRE</code></pre>
+                        <pre data-prefix="88"><code>REVIVAL_GENRE</code></pre>
+                        <pre data-prefix="89"><code>CELTIC_GENRE</code></pre>
+                        <pre data-prefix="90"><code>BLUEGRASS_GENRE</code></pre>
+                        <pre data-prefix="91"><code>AVANTGARDE_GENRE</code></pre>
+                        <pre data-prefix="92"><code>GOTHIC_ROCK_GENRE</code></pre>
+                        <pre data-prefix="93"><code>PROGRESSIVE_ROCK_GENRE</code></pre>
+                        <pre data-prefix="94"><code>PSYCHEDELIC_ROCK_GENRE</code></pre>                        
+                        <pre data-prefix="95"><code>SYMPHONIC_ROCK_GENRE</code></pre>
+                        <pre data-prefix="96"><code>SLOW_ROCK_GENRE</code></pre>
+                        <pre data-prefix="97"><code>BIG_BAND_GENRE</code></pre>
+                        <pre data-prefix="98"><code>CHORUS_GENRE</code></pre>
+                        <pre data-prefix="99"><code>EASY_LISTENING_GENRE</code></pre>
+                        <pre data-prefix="100"><code>ACOUSTIC_GENRE</code></pre>
+                        <pre data-prefix="101"><code>HUMOUR_GENRE</code></pre>
+                        <pre data-prefix="102"><code>SPEECH_GENRE</code></pre>
+                        <pre data-prefix="103"><code>CHANSON_GENRE</code></pre>
+                        <pre data-prefix="104"><code>OPERA_GENRE</code></pre>
+                        <pre data-prefix="105"><code>CHAMBER_MUSIC_GENRE</code></pre>
+                        <pre data-prefix="106"><code>SONATA_GENRE</code></pre>
+                        <pre data-prefix="107"><code>SYMPHONY_GENRE</code></pre>
+                        <pre data-prefix="108"><code>BOOTY_BASS_GENRE</code></pre>
+                        <pre data-prefix="109"><code>PRIMUS_GENRE</code></pre>
+                        <pre data-prefix="110"><code>PORN_GROOVE_GENRE</code></pre>
+                        <pre data-prefix="111"><code>SATIRE_GENRE</code></pre>
+                        <pre data-prefix="112"><code>SLOW_JAM_GENRE</code></pre>
+                        <pre data-prefix="113"><code>CLUB_GENRE</code></pre>
+                        <pre data-prefix="114"><code>TANGO_GENRE</code></pre>
+                        <pre data-prefix="115"><code>SAMBA_GENRE</code></pre>
+                        <pre data-prefix="116"><code>FOLKLORE_GENRE</code></pre>
+                        <pre data-prefix="117"><code>BALLAD_GENRE</code></pre>
+                        <pre data-prefix="118"><code>POWER_BALLAD_GENRE</code></pre>
+                        <pre data-prefix="119"><code>RHYTHMIC_SOUL_GENRE</code></pre>
+                        <pre data-prefix="120"><code>FREESTYLE_GENRE</code></pre>
+                        <pre data-prefix="121"><code>DUET_GENRE</code></pre>
+                        <pre data-prefix="122"><code>PUNK_ROCK_GENRE</code></pre>
+                        <pre data-prefix="123"><code>DRUM_SOLO_GENRE</code></pre>
+                        <pre data-prefix="124"><code>A_CAPPELLA_GENRE</code></pre>
+                        <pre data-prefix="125"><code>EURO_HOUSE_GENRE</code></pre>
+                        <pre data-prefix="126"><code>DANCE_HALL_GENRE</code></pre>
+                        <pre data-prefix="127"><code>GOA_MUSIC_GENRE</code></pre>
+                        <pre data-prefix="128"><code>DRUM_AND_BASS_GENRE</code></pre>
+                        <pre data-prefix="129"><code>CLUB_HOUSE_GENRE</code></pre>
+                        <pre data-prefix="130"><code>HARDCORE_TECHNO_GENRE</code></pre>
+                        <pre data-prefix="131"><code>TERROR_GENRE</code></pre>
+                        <pre data-prefix="132"><code>INDIE_GENRE</code></pre>
+                        <pre data-prefix="133"><code>BRITPOP_GENRE</code></pre>
+                        <pre data-prefix="134"><code>NEGERPUNK_GENRE</code></pre>
+                        <pre data-prefix="135"><code>POLSK_PUNK_GENRE</code></pre>
+                        <pre data-prefix="136"><code>BEAT_GENRE</code></pre>
+                        <pre data-prefix="137"><code>CHRISTIAN_GANGSTA_RAP_GENRE</code></pre>
+                        <pre data-prefix="138"><code>HEAVY_METAL_GENRE</code></pre>
+                        <pre data-prefix="139"><code>BLACK_METAL_GENRE</code></pre>
+                        <pre data-prefix="140"><code>CROSSOVER_GENRE</code></pre>
+                        <pre data-prefix="141"><code>CONTEMPORARY_CHRISTIAN_GENRE</code></pre>
+                        <pre data-prefix="142"><code>CHRISTIAN_ROCK_GENRE</code></pre>
+                        <pre data-prefix="143"><code>MERENGUE_GENRE</code></pre>
+                        <pre data-prefix="144"><code>SALSA_GENRE</code></pre>                        
+                        <pre data-prefix="145"><code>THRASH_METAL_GENRE</code></pre>
+                        <pre data-prefix="146"><code>ANIME_GENRE</code></pre>                        
+                        <pre data-prefix="147"><code>JPOP_GENRE</code></pre>
+                        <pre data-prefix="148"><code>SYNTHPOP_GENRE</code></pre>
+                        <pre data-prefix="149"><code>ABSTRACT_GENRE</code></pre>
+                        <pre data-prefix="150"><code>ART_ROCK_GENRE</code></pre>
+                        <pre data-prefix="151"><code>BAROQUE_GENRE</code></pre>
+                        <pre data-prefix="152"><code>BHANGRA_GENRE</code></pre>
+                        <pre data-prefix="153"><code>BIG_BEAT_GENRE</code></pre>
+                        <pre data-prefix="154"><code>BREAKBEAT_GENRE</code></pre>
+                        <pre data-prefix="155"><code>CHILLOUT_GENRE</code></pre>
+                        <pre data-prefix="156"><code>DOWNTEMPO_GENRE</code></pre>
+                        <pre data-prefix="157"><code>DUB_GENRE</code></pre>
+                        <pre data-prefix="158"><code>EBM_GENRE</code></pre>
+                        <pre data-prefix="159"><code>ECLECTIC_GENRE</code></pre>
+                        <pre data-prefix="160"><code>ELECTRO_GENRE</code></pre>
+                        <pre data-prefix="161"><code>ELECTROCLASH_GENRE</code></pre>
+                        <pre data-prefix="162"><code>EMO_GENRE</code></pre>
+                        <pre data-prefix="163"><code>EXPERIMENTAL_GENRE</code></pre>
+                        <pre data-prefix="164"><code>GARAGE_GENRE</code></pre>
+                        <pre data-prefix="165"><code>GLOBAL_GENRE</code></pre>
+                        <pre data-prefix="166"><code>IDM_GENRE</code></pre>
+                        <pre data-prefix="167"><code>ILLBIENT_GENRE</code></pre>
+                        <pre data-prefix="168"><code>INDUSTRO_GOTH_GENRE</code></pre>
+                        <pre data-prefix="169"><code>JAM_BAND_GENRE</code></pre>
+                        <pre data-prefix="170"><code>KRAUTROCK_GENRE</code></pre>
+                        <pre data-prefix="171"><code>LEFTFIELD_GENRE</code></pre>
+                        <pre data-prefix="172"><code>LOUNGE_GENRE</code></pre>
+                        <pre data-prefix="173"><code>MATH_ROCK_GENRE</code></pre>
+                        <pre data-prefix="174"><code>NEW_ROMANTIC_GENRE</code></pre>
+                        <pre data-prefix="175"><code>NU_BREAKZ_GENRE</code></pre>
+                        <pre data-prefix="176"><code>POST_PUNK_GENRE</code></pre>
+                        <pre data-prefix="177"><code>POST_ROCK_GENRE</code></pre>
+                        <pre data-prefix="178"><code>PSYTRANCE_GENRE</code></pre>
+                        <pre data-prefix="179"><code>SHOEGAZE_GENRE</code></pre>
+                        <pre data-prefix="180"><code>SPACE_ROCK_GENRE</code></pre>
+                        <pre data-prefix="181"><code>TROP_ROCK_GENRE</code></pre>
+                        <pre data-prefix="182"><code>WORLD_MUSIC_GENRE</code></pre>
+                        <pre data-prefix="183"><code>NEOCLASSICAL_GENRE</code></pre>
+                        <pre data-prefix="184"><code>AUDIOBOOK_GENRE</code></pre>
+                        <pre data-prefix="185"><code>AUDIO_THEATRE_GENRE</code></pre>
+                        <pre data-prefix="186"><code>NEUE_DEUTSCHE_WELLE_GENRE</code></pre>
+                        <pre data-prefix="187"><code>PODCAST_GENRE</code></pre>
+                        <pre data-prefix="189"><code>INDIE_ROCK_GENRE</code></pre>
+                        <pre data-prefix="190"><code>G_FUNK_GENRE</code></pre>
+                        <pre data-prefix="191"><code>DUBSTEP_GENRE</code></pre>
+                        <pre data-prefix="192"><code>GARAGE_ROCK_GENRE</code></pre>
+                        <pre data-prefix="193"><code>PSYBIENT_GENRE</code></pre>
+                    </div>
+                </div>
+            </div> 
+            <div class="drawer-side">
+              <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label> 
+              <ul class="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
+                <!-- Sidebar content here -->
+                <li class="text-xl"><a href="#about">About</a></li>
+                <li class="flex-wrap grid-cols-1 grid-rows-1">
+                    <p class="text-xl"><a href="#id3v1">ID3v1</a></p>
+                    <ul class="menu bg-base-200">
+                        <li><a href="#struct1">Id3v1 Structure</a></li>
+                        <li><a href="#struct11">Id3v1.1 Structure</a></li>
+                    </ul>
+                </li>
+                <li class="text-xl"><a href="#genres">Genres</a></li>
+              </ul>
+            
+            </div>
+          </div>
+        </div>
+    
+    </body>
+</html>
