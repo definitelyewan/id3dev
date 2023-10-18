@@ -725,17 +725,19 @@
                         <pre data-prefix=" "><code>Encryption = $01                   (1 byte)</code></pre> 
                         <pre data-prefix=" "><code>Grouping Identity = $01            (1 byte)</code></pre> 
                         <pre data-prefix=" "><code>Information = $2B 4D 2B 29 05 00   (6-bytes)</code></pre>
-                        <pre data-prefix=" "><code>-------------------------------------------------------------------------------------------------------------------------------</code></pre>
+                        <pre data-prefix=" "><code>----------------------------------------------------------------------------------</code></pre>
                         <pre data-prefix=" "><code>Layout in hex = $57 43 4F 4D 00 00 00 0C 20 E0 00 00 00 04 01 01 2B 4D 2B 29 05 00</code></pre>
-                        <pre data-prefix=" "><code>Total Bytes = Frame ID + Frame Size + Frame Flags + Decompressed Size + Encryption + Grouping Identity + Information = 20-Bytes</code></pre>
+                        <pre data-prefix=" "><code>Total Bytes = Frame ID + Frame Size + Frame Flags + Decompressed Size + Encryption 
+                            + Grouping Identity + Information = 20-Bytes</code></pre>
                         <pre data-prefix=" "><code>Frame Size = Decompressed Size + Encryption + Grouping Identity + Information = 10-Bytes</code></pre>  
                         <pre data-prefix=" " class="bg-warning text-warning-content"><code>Example 2:</code></pre>
                         <pre data-prefix=" "><code>Frame ID = WCOM                               (4-bytes)</code></pre> 
                         <pre data-prefix=" "><code>Frame Size = $00 00 00 1E                     (4-bytes)</code></pre>
                         <pre data-prefix=" "><code>Frame Flags = $00 00                          (2-bytes)</code></pre> 
                         <pre data-prefix=" "><code>Information = https://www.apple.com/itunes/   (30-bytes)</code></pre>
-                        <pre data-prefix=" "><code>----------------------------------------------------------------------------------------------------------------------------------------</code></pre>
-                        <pre data-prefix=" "><code>Layout in hex = $57 43 4F 4D 00 00 00 1E 00 00 68 74 74 70 73 3A 2F 2F 77 77 77 2E 61 70 70 6C 65 2E 63 6F 6D 2F 69 74 75 6E 65 73 2F 00</code></pre>
+                        <pre data-prefix=" "><code>----------------------------------------------------------------------------------</code></pre>
+                        <pre data-prefix=" "><code>Layout in hex = $57 43 4F 4D 00 00 00 1E 00 00 68 74 74 70 73 3A 2F 2F 77 77 77 2E
+                             61 70 70 6C 65 2E 63 6F 6D 2F 69 74 75 6E 65 73 2F 00</code></pre>
                         <pre data-prefix=" "><code>Total Bytes = Frame ID + Frame Size + Frame Flags + Information = 40-Bytes</code></pre>
                         <pre data-prefix=" "><code>Frame Size = Information = 30-Bytes</code></pre>
                     </div>
@@ -776,6 +778,137 @@
                         altered', i.e. %00000000. The flags field is defined as follows: 
                     </p>
 
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>a - Tag alter preservation</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag tells the software what to do with this frame if it is
+                        unknown and the tag is altered in any way. This applies to all
+                        kinds of alterations, including adding more padding and reordering
+                        the frames.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame should be preserved.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame should be discarded.</p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>b - File alter preservation</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag tells the tag parser what to do with this frame if it is
+                        unknown and the file, excluding the tag, is altered. This does not
+                        apply when the audio is completely replaced with other audio data.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame should be preserved.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame should be discarded.</p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>c - Read only</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag, if set, tells the software that the contents of this
+                        frame are intended to be read only. Changing the contents might
+                        break something, e.g. a signature. If the contents are changed,
+                        without knowledge of why the frame was flagged read only and
+                        without taking the proper means to compensate, e.g. recalculating
+                        the signature, the bit must be cleared.
+                    </p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>h - Grouping identity</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag indicates whether or not this frame belongs in a group
+                        with other frames. If set, a group identifier byte is added to the
+                        frame. Every frame with the same group identifier belongs to the
+                        same group.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame does not contain group information.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame contains group information.</p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>k - Compression</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag indicates whether or not the frame is compressed.
+                        A 'Data Length Indicator' byte must be included in the frame.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame is not compressed.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame is compressed using zlib [zlib] deflate method.
+                        If set, this requires the 'Data Length Indicator' bit
+                        to be set as well.</p>
+                    
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>m - Encryption</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag indicates whether or not the frame is encrypted. If set,
+                        one byte indicating with which method it was encrypted will be
+                        added to the frame. See description of the <a href="#Encryptionmethodregistration" class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline">ENCR frame</a> for more
+                        information about encryption method registration. Encryption
+                        should be done after compression. Whether or not setting this flag
+                        requires the presence of a 'Data Length Indicator' depends on the
+                        specific algorithm used.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame is not encrypted.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame is encrypted.</p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>n - Unsynchronisation</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag indicates whether or not unsynchronisation was applied
+                        to this frame. See section 6 for details on unsynchronisation.
+                        If this flag is set all data from the end of this header to the
+                        end of this frame has been unsynchronised. Although desirable, the
+                        presence of a 'Data Length Indicator' is not made mandatory by
+                        unsynchronisation.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame has not been unsynchronised.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame has been unsyrchronised.</p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>p - Data length indicator</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag indicates that a data length indicator has been added to
+                        the frame. The data length indicator is the value one would write
+                        as the 'Frame length' if all of the frame format flags were
+                        zeroed, represented as a 32 bit synchsafe integer.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = There is no Data Length Indicator.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2 mb-5">1 = A data length Indicator has been added to the frame.</p>
+
+                    <div class="mockup-code">
+                        <pre data-prefix=" " class="bg-warning text-warning-content"><code>Example 1:</code></pre>
+                        <pre data-prefix=" "><code>Frame ID = UFID                        (4-bytes)</code></pre> 
+                        <pre data-prefix=" "><code>Frame Size = $00 00 00 2D              (4-bytes)</code></pre>
+                        <pre data-prefix=" "><code>Frame Flags = $10 4D                   (2-bytes)</code></pre>
+                        <pre data-prefix=" "><code>Grouping Identity = $01                (1 byte)</code></pre> 
+                        <pre data-prefix=" "><code>Data Length Indicator = $00 00 00 1F   (4-bytes)</code></pre> 
+                        <pre data-prefix=" "><code>Encryption = $01                       (1 byte)</code></pre> 
+                        <pre data-prefix=" "><code>Information = $C3 8B C2 AB 52 28 2B C3 8E 7D C2 BF 7F 6F 66 69 69 C2 A1 C2 95 C2 BE
+                             7E 45 45 C2 85 5E 56 C2 AA C2 B1 5E 41 71 06 00 (39-bytes)</code></pre>
+                        <pre data-prefix=" "><code>-------------------------------------------------------------------------------------</code></pre>
+                        <pre data-prefix=" "><code>Layout in hex = $55 46 49 44 00 00 00 2D 10 4D 01 00 00 00 1F 01 C3 8B C2 AB 52 28 2B 
+                            C3 8E 7D C2 BF 7F 6F 66 69 69 C2 A1 C2 95 C2 BE 7E 45 45 C2 85 
+                            5E 56 C2 AA C2 B1 5E 41 71 06 00</code></pre>
+                        <pre data-prefix=" "><code>Total Bytes = Frame ID + Frame Size + Frame Flags + Data Length Indicator + Encryption
+                            + Grouping Identity + Information = 55-Bytes</code></pre>
+                        <pre data-prefix=" "><code>Frame Size = Data Length Indicator + Encryption + Grouping Identity + Information 
+                            = 45-Bytes</code></pre>  
+                        <pre data-prefix=" " class="bg-warning text-warning-content"><code>Example 2:</code></pre>
+                        <pre data-prefix=" "><code>Frame ID = TALB                        (4-bytes)</code></pre> 
+                        <pre data-prefix=" "><code>Frame Size = $00 00 00 19              (4-bytes)</code></pre>
+                        <pre data-prefix=" "><code>Frame Flags = $00 00                   (2-bytes)</code></pre>
+                        <pre data-prefix=" "><code>Encoding = $01                         (1 byte)</code></pre>
+                        <pre data-prefix=" "><code>Information = The Suburbs              (24-bytes)</code></pre>
+                        <pre data-prefix=" "><code>-------------------------------------------------------------------------------------</code></pre>
+                        <pre data-prefix=" "><code>Layout in hex = $54 41 4C 42 00 00 00 19 00 00 01 FF FE 54 00 68 00 65 00 20 00 53 00 
+                            75 00 62 00 75 00 72 00 62 00 73 00</code></pre>
+                        <pre data-prefix=" "><code>Total Bytes = Frame ID + Frame Size + Frame Flags + Encoding + Information = 35-Bytes</code></pre>
+                        <pre data-prefix=" "><code>Frame Size = Encoding + Information = 25-Bytes</code></pre> 
+                    </div>
                 </div>
 
                 <!--genre table-->
