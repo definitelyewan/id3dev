@@ -44,13 +44,13 @@
               <!-- Page content here -->
               <label for="my-drawer-2" class="btn btn-primary drawer-button lg:hidden justify-center items-center">Open drawer</label>
                 <div id="about">
-                    <div class="ml-5 flex flex-wrap grid-cols-1 grid-rows-1">
+                    <div class="ml-5 mr-5 flex flex-wrap grid-cols-1 grid-rows-1">
                         
                         <div class="flex-wrap">
                             
                                 <h1 class="mb-4 text-3xl text-gray-900 dark:text-white md:text-5xl lg:text-6xl">About <span class="text-transparent bg-clip-text bg-gradient-to-r to-emerald-600 from-sky-400">ID3dev</span>.</h1>
                                 <p class="text-lg font-normal text-gray-500 lg:text-xl dark:text-gray-400 whitespace-normal">ID3dev is a low-level library for reading, manipulating, and writing ID3 metadata of any version.</p>
-                                <p class="text-gray-500 lg:text-xl dark:text-gray-400 whitespace-normal">As of right now, ID3dev is going through a rewrite to ensure it has more modules and removes a lot of spaghetti code. As of right now, the only completed components are the projects linked list API and buffer streaming API along, with everything to do with ID3v1 and Id3v1.1. Below is a breakdown of the current status of this project.</p>
+                                <p class="text-gray-500 lg:text-xl dark:text-gray-400 whitespace-normal">As of right now, ID3dev is going through a rewrite to ensure it has more modules and is free of unreliable spaghetti code. As of right now, the only completed components are the project's external APIs along, with everything to do with ID3v1 and ID3v1.1. Below is a breakdown of the current status of this project.</p>
                             
                         </div>
 
@@ -58,7 +58,7 @@
                     </div>
                     <div class="grid">
                         <div class="text-lg ml-5">
-                            <h1 class="mt-10 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">Progress</h1>
+                            <h1 class="mt-5 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">Progress</h1>
                         </div>
                         
                         <div class="ml-5 mr-5 mt-5">
@@ -89,240 +89,1215 @@
                 </div>
 
                 <div id="id3v1" class="mt-10">
-                    <div class="ml-5 flex flex-wrap grid-cols-1 grid-rows-1">
+                    <div class="ml-5 mr-5 flex flex-wrap grid-cols-1 grid-rows-1">
                         <div class="flex-wrap">
                             <h1 class="mb-4 text-3xl text-gray-900 dark:text-white md:text-4xl lg:text-5xl">ID3v1</h1>
                         </div>
                     </div>
-                </div>
-                <div id="struct1" class="ml-5">
-                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v1 Sturcture</h1>
-                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
-                        ID3v1 is a 128-byte metadata container primarily used with MP3 files to store basic catalog information. This initial release can store artist name, song title, album title, release year, user comment, and genre.
-                        ID3v1 is identified by the 3-byte magic number 0x54 0x41 0x47 or in ASCII, TAG, and is located at 128 bytes from the end of an MP3 file using this form of metadata.
-                        Following the identifier are the following fields in order song title, artist, album, year, comment, and genere.
-                    </p>
-
                     <div class="flex justify-center items-center">
                         <img src="img/ID3v1_structure.png">
                     </div>
-
+                </div>
+                <div id="struct1" class="ml-5 mr-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v1 Sturcture</h1>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                        ID3v1 is a 128-byte metadata container primarily used with MP3 files to store basic catalog information. This initial release can store the artist name, song title, album title, release year, user comment, and genre. ID3v1 is identified by the 3-byte magic number 0x54 0x41 0x47 or in ASCII, TAG, and is located at 128 bytes from the end of an MP3. Following the identifier are the following fields in order song title, artist, album, year, comment, and genere.
+                    </p>
                     <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
-                        ID3v1 is made up of 5 text frames with the Latin1 (ISO-8859-1) character set and 1 integer field. The text fields consist of 4 30 byte fields which are title, artist, album, and comment with 1 4 byte field consisting of the year.
-                        All text fields are followed by a single genre byte with all compatible genres listed <a href="index.html#genres">here</a>.
+                        ID3v1 is made up of 5 text frames with the Latin1 (ISO-8859-1) character set and 1 integer field. The text fields consist of 4 30-byte fields which are title, artist, album, and comment, and 1 4-byte field consisting of the year. All text fields are followed by a single genre byte with all compatible genres listed <a class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline" href="index.html#genres">here</a>.
                     </p>
                 </div>
-                <div id="struct11" class="ml-5">
+                <div id="struct11" class="ml-5 mr-5">
                     <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v1.1 Structure</h1>
 
-                    <div class="flex justify-center items-center">
-                        <img src="img/ID3v1_1_structure.png">
-                    </div>
                     <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
-                        ID3v1.1 follows the exact same structure as the previous version except the comment field is shortend to make room for an extra integer. 
-                        In this version the comment field is truncated by 2 bytes making its capacity now 28 bytes.
-                        The first byte (ex 29th byte) is used to store a null character to indicate that the following character contains a track number.
+                        ID3v1.1 follows the exact same structure as the previous version except the comment field is shortened to make room for an extra integer. In this version, the comment field is truncated by 2 bytes making its capacity now 28 bytes. The first byte (ex 29th byte) is used to store a null character to indicate that the following byte contains a track number.
                     </p>
                 </div>
                 
-                <div id="genres" class="mt-10 ml-5">
+                
+                <div id="id3v2" class="mt-10">
+                    <div class="ml-5 mr-5 flex flex-wrap grid-cols-1 grid-rows-1">
+                        <div class="flex-wrap">
+                            <h1 class="mb-4 text-3xl text-gray-900 dark:text-white md:text-4xl lg:text-5xl">ID3v2</h1>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="struct2" class="ml-5 mr-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v2 Sturcture</h1>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mb-2">
+                        ID3v2 is a variable byte metadata container primarily used with MP3 files to store complex information along with audio settings in a 
+                        structured way. Version 2 is completely different when compared to its first iteration and usually starts at the beginning of an MP3 file. 
+                        As of October 2023, there are 3 drafted versions of ID3v2 these being: ID3v2.2, ID3v2.3, and ID3v2.4 where each adds new or discards features.  
+
+                    </p>
+
+                    <div class="flex justify-center items-center">
+                        <img src="img/ID3v2_structure.png">
+                    </div>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-4">
+                        The first draft of Id3v2 is known as Id3v2.2 and lays the groundwork for future ID3v2 version's base structure. This version features a 
+                        10-byte header followed by a frame section composed of n frames. Each frame contains different data about the MP3 file such as song title, 
+                        album title, and disc number. ID3v2.3 expands upon the structure of the container by adding an optional extended header and more supported 
+                        frames. The purpose of the extended header in this version, however, is quite limited but can add more context to the audio file or extra 
+                        metadata features. The final version is ID3v2.4, this version adds a padding section and footer which are both optional along with replacing 
+                        frames with new drafts. Each version uses different character sets ID3v2.2 only supports Latin 1(ISO-8859-1) and UTF-16le, ID3v2.3 supports 
+                        Latin 1(ISO-8859-1), UTF-16le, and UTF16be, and finally, ID3v2.4 supports all before mentioned encodings plus UTF8. 
+                    </p>
+                </div>
+
+                <!-- general header info-->
+                <div id="header" class="ml-5 mr-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v2 Header</h1>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mb-5">
+                        Each ID3v2 version has a 10-byte header to identify the container to any ID3v2 decoder. The header is very similar in each version with only
+                        slight alterations.
+                    </p>
+
+                    <div class="flex justify-center items-center">
+                        <img src="img/ID3v2_tagHeader.png">
+                    </div>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-5">
+                        The first three bytes of the tag are always "ID3" to indicate that
+                        this is an ID3 tag, directly followed by the two version bytes. The
+                        first byte of ID3 version is it's major version, while the second byte
+                        is its revision number. All revisions are backwards compatible while
+                        major versions are not. Version and revision will never be $FF. Directly
+                        Followed by the revision is the flag byte which contains a variety of
+                        options. finally, an ID3 tag size is encoded with four bytes where the 
+                        first bit (bit 7) is set to zero in every byte, making a total of 28 bits. 
+                        The zeroed bits are ignored, so a 257 bytes long tag is represented as $00 00 02
+                        01. This is also known as a <a href="#syncsafe" class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline">Syncsafe Integer</a>.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-5">
+                        An ID3v2 tag can be detected with the following pattern: $49 44 33 yy yy xx zz zz zz zz
+                      Where yy is less than $FF, xx is the 'flags' byte and zz is less than
+                      $80
+                    </p>
+                </div>
+
+                <!-- ID3v2.2 header-->
+                <div id="header22" class="ml-5 mr-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v2.2 Header</h1>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        ID3v2.4 is identified by version $02 and contains two different flags located within a headers 6th byte with all other undifined bits not set. Below are the definitions for them within this draft: 
+                    </p>
+                    
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>a - Unsynchronisation</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        Bit 7 in the 'ID3v2 flags' indicates whether or not
+                        unsynchronisation is used (see unsynchronisation in the side bar); a set bit
+                        indicates usage.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>b - Compression</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        The second bit (bit 6) is indicating whether or not compression is
+                        used; a set bit indicates usage. Since no compression scheme has been
+                        decided in this draft, the ID3 decoder should just ignore the entire
+                        tag if the compression bit is set.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        The ID3v2.2 tag size is the size of the complete tag after
+                        unsychronisation, including padding, excluding the header (total tag
+                        size - 10). The reason to use 28 bits (representing up to 256MB) for
+                        size description is that we don't want to run out of space here.
+                    </p>
+                </div>
+
+                <!-- Id3v2.3 header-->
+                <div id="header23" class="ml-5 mr-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v2.3 Header</h1>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        ID3v2.3 is identified by version $03 and contains three different flags located within a headers 6th byte with all other undifined bits not set. Below are the definitions for them within this draft: 
+                    </p>
+                    
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>a - Unsynchronisation</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        Bit 7 in the 'ID3v2 flags' indicates whether or not
+                        unsynchronisation is used (see unsynchronisation in the side bar); a set bit
+                        indicates usage.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>b - Extended header</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        The second bit (bit 6) indicates whether or not the header is
+                        followed by an <a href="#extendedheader23" class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline">extended header</a>.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>c - Experimental indicator</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        The third bit (bit 5) should be used as an 'experimental
+                        indicator'. This flag should always be set when the tag is in an
+                        experimental stage.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        The ID3v2.3 tag size is the size of the complete tag after
+                        unsychronisation, including padding, excluding the header but not
+                        excluding the extended header (total tag size - 10). Only 28 bits
+                        (representing up to 256MB) are used in the size description to avoid
+                        the introducuction of 'false syncsignals'.
+                    </p>
+                </div>
+
+                <!--- ID3v2.4 header-->
+                <div id="header24" class="ml-5 mr-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v2.4 Header</h1>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        ID3v2.4 is identified by version $04 and contains four different flags located within a headers 6th byte with all other undifined bits not set. Below are the definitions for them within this draft: 
+                    </p>
+                    
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>a - Unsynchronisation</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        Bit 7 in the 'ID3v2 flags' indicates whether or not
+                        unsynchronisation is used (see unsynchronisation in the side bar); a set bit
+                        indicates usage.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>b - Extended header</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        The second bit (bit 6) indicates whether or not the header is
+                        followed by an <a href="#extendedheader24" class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline">extended header</a>.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>c - Experimental indicator</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        The third bit (bit 5) should be used as an 'experimental
+                        indicator'. This flag should always be set when the tag is in an
+                        experimental stage.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>d - Footer</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        The fourth bit (bit 4) indicates that a <a href="#footer" class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline">footer</a> is present at the very
+                        end of the tag. A set bit indicates the presence of a footer.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        The ID3v2 tag size is the sum of the byte length of the extended
+                        header, the padding and the frames after unsynchronisation. If a
+                        footer is present this equals to ('total size' - 20) bytes, otherwise
+                        ('total size' - 10) bytes.
+                    </p>
+                </div>
+
+                <!-- extended header general info-->
+                <div id="extendedHeaders" class="mt-10 ml-5 mr-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v2 Extended Header</h1>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-5">
+                        The extended header contains information that can provide further
+                        insight in the structure of the tag, but is not vital to the correct
+                        parsing of the tag information; hence the extended header is
+                        optional.
+                    </p>
+                    <div class="flex justify-center items-center">
+                        <img src="img/ID3v2_extendedHeader.png">
+                    </div>
+                </div>
+
+                <!-- ID3v2.3 extended header-->
+                <div id="extendedheader23" class="ml-5 mr-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v2.3 Extended Header</h1>
+                    
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        The 'Extended header size' is 6 or 10 bytes, excluding
+                        itself. The 'Size of padding' is simply the total tag size excluding
+                        the frames and the headers, in other words the <a href="#padding" class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline">padding</a>. The extended
+                        header is considered separate from the header proper, and as such is
+                        subject to unsynchronisation.
+                    </p>
+                
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        The extended flags are a secondary flag set which describes further
+                        attributes of the tag. These attributes are currently defined as
+                        follows:
+                    </p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        %x0000000 00000000
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>x - CRC data present</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        If this flag is set four bytes of CRC-32 data ($xx xx xx xx) is appended to the
+                        extended header. The CRC should be calculated before
+                        unsynchronisation on the data between the extended header and the
+                        padding, i.e. the frames and only the frames.
+                    </p>
+                </div>
+
+                <!-- ID3v2.4 extended header-->
+                <div id="extendedheader24" class="ml-5 mr-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v2.4 Extended Header</h1>
+                    
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        Where the 'Extended header size' is the size of the whole extended
+                        header, stored as a 32 bit synchsafe integer. An extended header can
+                        thus never have a size of fewer than six bytes. The extended flags field, 
+                        with its size described by 'Number of flags', is defined as:
+                    </p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        %0bcd0000
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        Each flag that is set in the extended header has data attached, which
+                        comes in the order in which the flags are encountered (i.e. the data
+                        for flag 'b' comes before the data for flag 'c'). Unset flags cannot
+                        have any attached data. All unknown flags must be unset and their
+                        corresponding data removed when a tag is modified.
+                     
+                        Every set flag's data starts with a length byte, which contains a
+                        value between 0 and 128 ($00 - $7f), followed by data that has the
+                        field length indicated by the length byte. If a flag has no attached
+                        data, the value $00 is used as length byte.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>b - Tag is an update</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        If this flag is set, the present tag is an update of a tag found
+                        earlier in the present file or stream. If frames defined as unique
+                        are found in the present tag, they are to override any
+                        corresponding ones found in the earlier tag. This flag has no
+                        corresponding data and thus does not increase the 'Number of flag'.
+                    </p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>c - CRC data present</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        If this flag is set, a CRC-32 [ISO-3309] data is included in the
+                        extended header. The CRC is calculated on all the data between the
+                        header and footer as indicated by the header's tag length field,
+                        minus the extended header. Note that this includes the padding (if
+                        there is any), but excludes the footer. The CRC-32 is stored as an
+                        35 bit synchsafe integer, leaving the upper four bits always
+                        zeroed.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        Number of flag bytes is increased by 5.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        Total frame CRC format : 5 * %0xxxxxxx
+                    </p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>d - Tag restrictions</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        For some applications it might be desired to restrict a tag in more
+                        ways than imposed by the ID3v2 specification. Note that the
+                        presence of these restrictions does not affect how the tag is
+                        decoded, merely how it was restricted before encoding. If this flag
+                        is set the tag is restricted as follows:
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        Number of flag bytes is increased by 1.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        Restrictions format : %ppqrrstt
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">
+                        p - Tag size restrictions
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">$00 = No more than 128 frames and 1 MB total tag size.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">$01 = No more than 64 frames and 128 KB total tag size.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">$10 = No more than 32 frames and 40 KB total tag size.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">$11 = No more than 32 frames and 4 KB total tag size.</p>
+                    
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">
+                        q - Text encoding restrictions
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">0 = No restrictions.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">1 = Strings are only encoded with ISO-8859-1 [ISO-8859-1] or UTF-8 [UTF-8].</p>
+                    
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">
+                        r - Text fields size restrictions
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">$00 = No restrictions.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">$01 = No string is longer than 1024 characters.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">$10 = No string is longer than 128 characters.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">$11 = No string is longer than 30 characters.</p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">
+                        s - Image encoding restrictions
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">0 = No restrictions.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">1 = Images are encoded only with PNG [PNG] or JPEG [JFIF].</p>
+                    
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">
+                        t - Image size restrictions
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">$00 = No restrictions.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">$01 = All images are 256x256 pixels or smaller.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">$10 = All images are 64x64 pixels or smaller.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">$11 = All images are exactly 64x64 pixels, unless required otherwise.</p>
+                </div>
+
+                <!--frame structure-->
+                <div id="framestructure" class="ml-5 mr-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v2 Frame Structure</h1>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-5">
+                        All ID3v2 frames consists of one frame header followed by one or more
+                        fields containing the actual information. 
+                    </p>
+
+                    <div class="flex justify-center items-center">
+                        <img src="img/ID3v2_frameStructure.png">
+                    </div>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-5">
+                        The frame ID is made out of the characters capital A-Z and 0-9.
+                        Identifiers beginning with "X", "Y" and "Z" are for experimental
+                        frames and free for everyone to use, without the need to set the
+                        experimental bit in the tag header. Bear in mind that someone else
+                        might have used the same identifier as you. All other identifiers are
+                        either used or reserved for future use.
+                    </p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        The frame ID is followed by a size descriptor containing the size of
+                        the data in the final frame, after encryption, compression and
+                        unsynchronisation. The size is excluding the frame headers total size.
+                    </p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        There is no fixed order of the frames' appearance in the tag,
+                        although it is desired that the frames are arranged in order of
+                        significance concerning the recognition of the file. An ID3v2.4 example of
+                        such order: UFID, TIT2, MCDI, TRCK ... . Each tag will contain a minimum of
+                        one frame with a minimum of one byte in its content.
+                    </p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        Strings, including numeric strings and URLs [URL], are represented in
+                        Latin1 (ISO-8859-1) characters in the range $20 - $FF. If
+                        nothing else is said the newline character is forbidden. In Latin1 a
+                        newline is represented with '\n'($0A) only. 
+                    </p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-5">
+                        Strings dependent on an encoding must be within a frame with a pesent encoding 
+                        byte. These encodings are UTF-8, UTF-16le, UTF-16be, and ISO-8859-1 which also
+                        will have '\n'($0A) forbidden unless otherwise stated. Any empty UTF-16 string must
+                        have a Byte Order Mark (BOM) prepended followed by NULL ($FF FE 00 00 or $FE FF 00 00).
+                        This rule regarding empty strings does not apply to ISO-8859-1 and UTF-8 encodings.
+                        These encodings must have a NULL ($00) character when empty. 
+                        Bellow are defined encodings and their definitions per version:
+                    </p>
+
+                    <div class="flex justify-center items-center">
+                        
+                        <div id="detailed-pricing" class="w-full overflow-x-auto">
+                            <div class="overflow-hidden min-w-max">
+                                <div class="grid grid-cols-4 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                    <div class="flex items-center">Encodings</div>
+                                    <div>ID3v2.2</div>
+                                    <div>ID3v2.3</div>
+                                    <div>ID3v2.4</div>
+                                </div>
+                                <div class="grid grid-cols-4 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                    <div class="text-gray-500 dark:text-gray-400">ISO-8859-1</div>
+                                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                            Encoded as : $00
+                                        </p>
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                            Encoded as : $00
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                            Encoded as : $00
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-4 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                    <div class="text-gray-500 dark:text-gray-400">UTF-16le</div>
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                            Encoded as : $01
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                            Encoded as : $01
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                            Encoded as : $01
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-4 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                    <div class="text-gray-500 dark:text-gray-400">UTF-16be</div>
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                            Encoded as : $01
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                            Encoded as : $01
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                            Encoded as : $02
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-4 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                    <div class="text-gray-500 dark:text-gray-400">UTF-8</div>
+                                    <div>
+                                        <svg class="w-3 h-3 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <svg class="w-3 h-3 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                            Encoded as : $03
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-5 mb-2">
+                        Many frames include a language identifier to tell the user the language of the frame.
+                        These identifiers are three byte language codes acording to ISO-639-2 and will be manditory
+                        in supported frames.
+                    </p>
+                </div>
+
+                <div id="frameheader22" class="ml-5 mr-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v2.2 Header</h1>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-5 mb-2">
+                        Compared to other versions of this metadata container ID3v2.2 contains the simplest frame header.
+                        A frame header in this version contains a 3-byte frame ID followed by a 3-byte frame size is represented
+                        as a 24-bit integer. The frame size notably only represents the number of bytes present in the frames content
+                        and excludes the total header bytes. An example header could look like the following:
+                    </p>
+                    <div class="mockup-code">
+                        <pre data-prefix=" "><code>Frame ID = TAL         (3-bytes)</code></pre> 
+                        <pre data-prefix=" "><code>Frame Size = $00 00 06 (3-bytes)</code></pre> 
+                        <pre data-prefix=" "><code>Encoding = $00         (1 byte)</code></pre> 
+                        <pre data-prefix=" "><code>Information = "4:44"   (5-bytes)</code></pre>
+                        <pre data-prefix=" "><code>-----------------------------------------------------------------------</code></pre>
+                        <pre data-prefix=" "><code>Layout in hex = $54 41 4C 00 00 06 00 34 3A 34 34 00</code></pre>
+                        <pre data-prefix=" "><code>Total Bytes = Frame ID + Frame Size + Encoding + Information = 12-Bytes</code></pre>
+                        <pre data-prefix=" "><code>Frame Size = Encoding + Information = 6-Bytes</code></pre>  
+                    </div>
+                </div>
+
+                <div id="frameheader23" class="ml-5 mr-5 mt-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v2.3 Header</h1>
+                    
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-5 mb-2">
+                        ID3v2.3 Headers contain a 4-byte identifier followed by a 4-byte frame size and finally, a 2-byte flag
+                        section. this makes the total header size 10-bytes the size is calculated as frame
+                        size excluding frame header (frame size - 10).
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                        In the frame header the size descriptor is followed by two flags
+                        bytes. All unused flags must be cleared. The first byte is for
+                        'status messages' and the second byte is for encoding purposes. If an
+                        unknown flag is set in the first byte the frame may not be changed
+                        without the bit cleared. If an unknown flag is set in the second byte
+                        it is likely to not be readable. The flags field is defined as
+                        follows:
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        %abc00000 %ijk00000
+                    </p>
+                
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>a - Tag alter preservation</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag tells the software what to do with this frame if it is
+                        unknown and the tag is altered in any way. This applies to all
+                        kinds of alterations, including adding more padding and reordering
+                        the frames.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame should be preserved.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame should be discarded.</p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>b - File alter preservation</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag tells the software what to do with this frame if it is
+                        unknown and the file, excluding the tag, is altered. This does not
+                        apply when the audio is completely replaced with other audio data.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame should be preserved.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame should be discarded.</p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>c - Read only</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag, if set, tells the software that the contents of this
+                        frame is intended to be read only. Changing the contents might
+                        break something, e.g. a signature. If the contents are changed,
+                        without knowledge in why the frame was flagged read only and
+                        without taking the proper means to compensate, e.g. recalculating
+                        the signature, the bit should be cleared.
+                    </p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>i - Compression</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag indicates whether or not the frame is compressed.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame is not compressed.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame is compressed using zlib [zlib] with 4 bytes for 'decompressed size' appended to the frame header.</p>
+                
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>j - Encryption</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag indicates wether or not the frame is enrypted. If set
+                        one byte indicating with which method it was encrypted will be
+                        appended to the frame header. Check out the encryption method registration <a href="#Encryptionmethodregistration" class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline">frame</a> for more
+                        information about encryption method registration.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame is not encrypted.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame is encrypted.</p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>k - Grouping identity</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag indicates whether or not this frame belongs in a group
+                        with other frames. If set a group identifier byte is added to the
+                        frame header. Every frame with the same group identifier belongs
+                        to the same group.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame does not contain group information.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame contains group information.</p>
+                    
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-5">
+                        Some flags indicates that the frame header is extended with
+                        additional information. This information will be added to the frame
+                        header in the same order as the flags indicating the additions. I.e.
+                        the four bytes of decompressed size will preceed the encryption
+                        method byte. These additions to the frame header, while not included
+                        in the frame header size but are included in the 'frame size' field,
+                        are not subject to encryption or compression. However, by default all
+                        flags should not be set such that the section equates to $00 00. An 
+                        example header can be found below:
+                    </p>
+
+                    <div class="mockup-code">
+                        <pre data-prefix=" " class="bg-warning text-warning-content"><code>Example 1:</code></pre>
+                        <pre data-prefix=" "><code>Frame ID = WCOM                    (4-bytes)</code></pre> 
+                        <pre data-prefix=" "><code>Frame Size = $00 00 00 0C          (4-bytes)</code></pre>
+                        <pre data-prefix=" "><code>Frame Flags = $20 E0               (2-bytes)</code></pre> 
+                        <pre data-prefix=" "><code>Decompressed Size = $00 00 00 04   (4-bytes)</code></pre> 
+                        <pre data-prefix=" "><code>Encryption = $01                   (1 byte)</code></pre> 
+                        <pre data-prefix=" "><code>Grouping Identity = $01            (1 byte)</code></pre> 
+                        <pre data-prefix=" "><code>Information = $2B 4D 2B 29 05 00   (6-bytes)</code></pre>
+                        <pre data-prefix=" "><code>----------------------------------------------------------------------------------</code></pre>
+                        <pre data-prefix=" "><code>Layout in hex = $57 43 4F 4D 00 00 00 0C 20 E0 00 00 00 04 01 01 2B 4D 2B 29 05 00</code></pre>
+                        <pre data-prefix=" "><code>Total Bytes = Frame ID + Frame Size + Frame Flags + Decompressed Size + Encryption 
+                            + Grouping Identity + Information = 20-Bytes</code></pre>
+                        <pre data-prefix=" "><code>Frame Size = Decompressed Size + Encryption + Grouping Identity + Information = 10-Bytes</code></pre>  
+                        <pre data-prefix=" " class="bg-warning text-warning-content"><code>Example 2:</code></pre>
+                        <pre data-prefix=" "><code>Frame ID = WCOM                               (4-bytes)</code></pre> 
+                        <pre data-prefix=" "><code>Frame Size = $00 00 00 1E                     (4-bytes)</code></pre>
+                        <pre data-prefix=" "><code>Frame Flags = $00 00                          (2-bytes)</code></pre> 
+                        <pre data-prefix=" "><code>Information = https://www.apple.com/itunes/   (30-bytes)</code></pre>
+                        <pre data-prefix=" "><code>----------------------------------------------------------------------------------</code></pre>
+                        <pre data-prefix=" "><code>Layout in hex = $57 43 4F 4D 00 00 00 1E 00 00 68 74 74 70 73 3A 2F 2F 77 77 77 2E
+                             61 70 70 6C 65 2E 63 6F 6D 2F 69 74 75 6E 65 73 2F 00</code></pre>
+                        <pre data-prefix=" "><code>Total Bytes = Frame ID + Frame Size + Frame Flags + Information = 40-Bytes</code></pre>
+                        <pre data-prefix=" "><code>Frame Size = Information = 30-Bytes</code></pre>
+                    </div>
+                </div>
+             
+                  
+                <div id="frameheader24" class="ml-5 mr-5 mt-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v2.4 Header</h1>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-5">
+                        ID3v2.4 Headers contain a 4-byte identifier followed by a 4-byte frame size and finally, a 2-byte flag
+                        section. this makes the total header size 10-bytes the size is calculated as frame
+                        size excluding frame header (frame size - 10).
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        In the frame header the size descriptor is followed by two flag
+                        bytes. All unused flags must be cleared. The first byte is for
+                        'status messages' and the second byte is a format description. If an
+                        unknown flag is set in the first byte the frame must not be changed
+                        without that bit cleared. If an unknown flag is set in the second
+                        byte the frame is likely to not be readable. Some flags in the second
+                        byte indicates that extra information is added to the header. These
+                        fields of extra information is ordered as the flags that indicates
+                        them. The flags field is defined as follows (l and o left out because
+                        ther resemblence to one and zero):
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        %0abc0000 %0h00kmnp
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        Some frame format flags indicate that additional information fields
+                        are added to the frame. This information is added after the frame
+                        header and before the frame data in the same order as the flags that
+                        indicates them. I.e. the four bytes of decompressed size will precede
+                        the encryption method byte. These additions affects the 'frame size'
+                        field, but are not subject to encryption or compression. 
+                        The default status flags setting for a frame is, unless stated
+                        otherwise, 'preserved if tag is altered' and 'preserved if file is
+                        altered', i.e. %00000000. The flags field is defined as follows: 
+                    </p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>a - Tag alter preservation</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag tells the software what to do with this frame if it is
+                        unknown and the tag is altered in any way. This applies to all
+                        kinds of alterations, including adding more padding and reordering
+                        the frames.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame should be preserved.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame should be discarded.</p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>b - File alter preservation</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag tells the tag parser what to do with this frame if it is
+                        unknown and the file, excluding the tag, is altered. This does not
+                        apply when the audio is completely replaced with other audio data.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame should be preserved.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame should be discarded.</p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>c - Read only</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag, if set, tells the software that the contents of this
+                        frame are intended to be read only. Changing the contents might
+                        break something, e.g. a signature. If the contents are changed,
+                        without knowledge of why the frame was flagged read only and
+                        without taking the proper means to compensate, e.g. recalculating
+                        the signature, the bit must be cleared.
+                    </p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>h - Grouping identity</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag indicates whether or not this frame belongs in a group
+                        with other frames. If set, a group identifier byte is added to the
+                        frame. Every frame with the same group identifier belongs to the
+                        same group.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame does not contain group information.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame contains group information.</p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>k - Compression</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag indicates whether or not the frame is compressed.
+                        A 'Data Length Indicator' byte must be included in the frame.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame is not compressed.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame is compressed using zlib [zlib] deflate method.
+                        If set, this requires the 'Data Length Indicator' bit
+                        to be set as well.</p>
+                    
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>m - Encryption</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag indicates whether or not the frame is encrypted. If set,
+                        one byte indicating with which method it was encrypted will be
+                        added to the frame. See description of the <a href="#Encryptionmethodregistration" class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline">ENCR frame</a> for more
+                        information about encryption method registration. Encryption
+                        should be done after compression. Whether or not setting this flag
+                        requires the presence of a 'Data Length Indicator' depends on the
+                        specific algorithm used.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame is not encrypted.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame is encrypted.</p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>n - Unsynchronisation</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag indicates whether or not unsynchronisation was applied
+                        to this frame. See section 6 for details on unsynchronisation.
+                        If this flag is set all data from the end of this header to the
+                        end of this frame has been unsynchronised. Although desirable, the
+                        presence of a 'Data Length Indicator' is not made mandatory by
+                        unsynchronisation.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = Frame has not been unsynchronised.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">1 = Frame has been unsyrchronised.</p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <b>p - Data length indicator</b>
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        This flag indicates that a data length indicator has been added to
+                        the frame. The data length indicator is the value one would write
+                        as the 'Frame length' if all of the frame format flags were
+                        zeroed, represented as a 32 bit synchsafe integer.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">0 = There is no Data Length Indicator.</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2 mb-5">1 = A data length Indicator has been added to the frame.</p>
+
+                    <div class="mockup-code">
+                        <pre data-prefix=" " class="bg-warning text-warning-content"><code>Example 1:</code></pre>
+                        <pre data-prefix=" "><code>Frame ID = UFID                        (4-bytes)</code></pre> 
+                        <pre data-prefix=" "><code>Frame Size = $00 00 00 2D              (4-bytes)</code></pre>
+                        <pre data-prefix=" "><code>Frame Flags = $10 4D                   (2-bytes)</code></pre>
+                        <pre data-prefix=" "><code>Grouping Identity = $01                (1 byte)</code></pre> 
+                        <pre data-prefix=" "><code>Data Length Indicator = $00 00 00 1F   (4-bytes)</code></pre> 
+                        <pre data-prefix=" "><code>Encryption = $01                       (1 byte)</code></pre> 
+                        <pre data-prefix=" "><code>Information = $C3 8B C2 AB 52 28 2B C3 8E 7D C2 BF 7F 6F 66 69 69 C2 A1 C2 95 C2 BE
+                             7E 45 45 C2 85 5E 56 C2 AA C2 B1 5E 41 71 06 00 (39-bytes)</code></pre>
+                        <pre data-prefix=" "><code>-------------------------------------------------------------------------------------</code></pre>
+                        <pre data-prefix=" "><code>Layout in hex = $55 46 49 44 00 00 00 2D 10 4D 01 00 00 00 1F 01 C3 8B C2 AB 52 28 2B 
+                            C3 8E 7D C2 BF 7F 6F 66 69 69 C2 A1 C2 95 C2 BE 7E 45 45 C2 85 
+                            5E 56 C2 AA C2 B1 5E 41 71 06 00</code></pre>
+                        <pre data-prefix=" "><code>Total Bytes = Frame ID + Frame Size + Frame Flags + Data Length Indicator + Encryption
+                            + Grouping Identity + Information = 55-Bytes</code></pre>
+                        <pre data-prefix=" "><code>Frame Size = Data Length Indicator + Encryption + Grouping Identity + Information 
+                            = 45-Bytes</code></pre>  
+                        <pre data-prefix=" " class="bg-warning text-warning-content"><code>Example 2:</code></pre>
+                        <pre data-prefix=" "><code>Frame ID = TALB                        (4-bytes)</code></pre> 
+                        <pre data-prefix=" "><code>Frame Size = $00 00 00 19              (4-bytes)</code></pre>
+                        <pre data-prefix=" "><code>Frame Flags = $00 00                   (2-bytes)</code></pre>
+                        <pre data-prefix=" "><code>Encoding = $01                         (1 byte)</code></pre>
+                        <pre data-prefix=" "><code>Information = The Suburbs              (24-bytes)</code></pre>
+                        <pre data-prefix=" "><code>-------------------------------------------------------------------------------------</code></pre>
+                        <pre data-prefix=" "><code>Layout in hex = $54 41 4C 42 00 00 00 19 00 00 01 FF FE 54 00 68 00 65 00 20 00 53 00 
+                            75 00 62 00 75 00 72 00 62 00 73 00</code></pre>
+                        <pre data-prefix=" "><code>Total Bytes = Frame ID + Frame Size + Frame Flags + Encoding + Information = 35-Bytes</code></pre>
+                        <pre data-prefix=" "><code>Frame Size = Encoding + Information = 25-Bytes</code></pre> 
+                    </div>
+                </div>
+
+
+                <!--frames-->
+                <div id="frames" class="ml-5 mr-5">
+                    <h1 class="mt-2 mb-4 text-xl text-gray-900 dark:text-white md:text-2xl lg:text-4xl">ID3v2 Frames</h1>
+
+
+                </div>
+
+                <div id="Albumsortorder" class="ml-5 mr-5">
+                    <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Album Sort Order</h1>
+                    <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                        ID3v2.2 
+                        <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                      </span>
+                      <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                        ID3v2.3
+                        <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                      </span>
+                      <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                        ID3v2.4
+                        <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                        </svg>
+                      </span>
+
+                      <div class="flex justify-center items-center mt-2">
+                        
+                        <div id="detailed-pricing" class="w-full overflow-x-auto">
+                            <div class="overflow-hidden min-w-max">
+                                <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                    <div class="flex items-center">Frame ID</div>
+                                    <div>Version</div>
+                                </div>
+                                <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                    <div>
+                                        <svg class="w-3 h-3 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                            ID3v2.2
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                    <div>
+                                        <svg class="w-3 h-3 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                            ID3v2.3
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                    <div class="text-gray-500 dark:text-gray-400">TSOA</div>
+                                    <div>
+                                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                            ID3v2.4
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                      <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        The 'Album sort order' frame defines a string which should be used
+                        instead of the album name (<a href="#AlbumMovieShowtitle" class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline">TALB</a>) for sorting purposes. E.g. an album
+                        named "A Soundtrack" might preferably be sorted as "Soundtrack".
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        This frame is formated as:
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                        Encoding = $xx
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                        Information = [n bytes of encoded data]
+                    </p>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                        See below for an example of what this frame could look like:
+                    </p>
+
+                    <div class="mockup-code">
+                        <pre data-prefix=" "><code>Frame ID = TSOA            (4-bytes)</code></pre> 
+                        <pre data-prefix=" "><code>Frame Size = $00 00 00 17  (4-bytes)</code></pre> 
+                        <pre data-prefix=" "><code>Encoding = $03             (1 byte)</code></pre> 
+                        <pre data-prefix=" "><code>Information = "Soundtrack" (22-bytes)</code></pre>
+                    </div>
+                </div>
+                <!--genre table-->
+                <div id="genres" class="mt-10 ml-5 mr-5">
 
                     <h1 class="mb-4 text-3xl text-gray-900 dark:text-white md:text-4xl lg:text-5xl">Genres</h1>
 
                     <div class="mockup-code">
-                        <pre data-prefix="1"><code>BLUES_GENRE</code></pre>           
-                        <pre data-prefix="2"><code>CLASSIC_ROCK_GENRE</code></pre>      
-                        <pre data-prefix="3"><code>COUNTRY_GENRE</code></pre>          
-                        <pre data-prefix="4"><code>DANCE_GENRE</code></pre>          
-                        <pre data-prefix="5"><code>DISCO_GENRE</code></pre>           
-                        <pre data-prefix="6"><code>PUNK_GENRE</code></pre>            
-                        <pre data-prefix="7"><code>GRUNGE_GENRE</code></pre>           
-                        <pre data-prefix="8"><code>HIP_HOP_GENRE</code></pre>         
-                        <pre data-prefix="9"><code>JAZZ_GENRE</code></pre>           
-                        <pre data-prefix="10"><code>METAL_GENRE</code></pre>      
-                        <pre data-prefix="11"><code>NEW_AGE_GENRE</code></pre>          
-                        <pre data-prefix="12"><code>OLDIES_GENRE</code></pre>      
-                        <pre data-prefix="13" class="bg-warning text-warning-content"><code>OTHER_GENRE (default in ID3dev)</code></pre>       
-                        <pre data-prefix="14"><code>POP_GENRE</code></pre>           
-                        <pre data-prefix="15"><code>RHYTHM_AND_BLUES_GENRE</code></pre> 
-                        <pre data-prefix="16"><code>RAP_GENRE</code></pre>              
-                        <pre data-prefix="17"><code>REGGAE_GENRE</code></pre>        
-                        <pre data-prefix="18"><code>ROCK_GENRE</code></pre>            
-                        <pre data-prefix="19"><code>TECHNO_GENRE</code></pre>         
-                        <pre data-prefix="20"><code>INDUSTRIAL_GENRE</code></pre>       
-                        <pre data-prefix="21"><code>ALTERNATIVE_GENRE</code></pre>    
-                        <pre data-prefix="22"><code>SKA_GENRE</code></pre>               
-                        <pre data-prefix="23"><code>EATH_METAL_GENRE</code></pre>        
-                        <pre data-prefix="24"><code>PRANKS_GENRE</code></pre>
-                        <pre data-prefix="25"><code>SOUNDTRACK_GENRE</code></pre>
-                        <pre data-prefix="26"><code>EURO_TECHNO_GENRE</code></pre>
-                        <pre data-prefix="27"><code>AMBIENT_GENRE</code></pre>
-                        <pre data-prefix="28"><code>TRIP_HOP_GENRE</code></pre>
-                        <pre data-prefix="29"><code>VOCAL_GENRE</code></pre>
-                        <pre data-prefix="30"><code>JAZZ_AND_FUNK_GENRE</code></pre>
-                        <pre data-prefix="31"><code>FUSION_GENRE</code></pre>
-                        <pre data-prefix="32"><code>TRANCE_GENRE</code></pre>
-                        <pre data-prefix="33"><code>CLASSICAL_GENRE</code></pre>
-                        <pre data-prefix="34"><code>INSTRUMENTAL_GENRE</code></pre>
-                        <pre data-prefix="35"><code>ACID_GENRE</code></pre>
-                        <pre data-prefix="36"><code>HOUSE_GENRE</code></pre>
-                        <pre data-prefix="37"><code>GAME_GENRE</code></pre>
-                        <pre data-prefix="38"><code>SOUND_CLIP_GENRE</code></pre>
-                        <pre data-prefix="39"><code>GOSPEL_GENRE</code></pre>
-                        <pre data-prefix="40"><code>NOISE_GENRE</code></pre>
-                        <pre data-prefix="41"><code>ALTERNATIVE_ROCK_GENRE</code></pre>
-                        <pre data-prefix="42"><code>BASS_GENRE</code></pre>
-                        <pre data-prefix="43"><code>SOUL_GENRE</code></pre>
-                        <pre data-prefix="44"><code>PUNK_GENRE</code></pre>
-                        <pre data-prefix="45"><code>SPACE_GENRE</code></pre>
-                        <pre data-prefix="46"><code>MEDITATIVE_GENRE</code></pre>
-                        <pre data-prefix="47"><code>INSTRUMENTAL_POP_GENRE</code></pre>
-                        <pre data-prefix="48"><code>INSTRUMENTAL_ROCK_GENRE</code></pre>
-                        <pre data-prefix="49"><code>ETHNIC_GENRE</code></pre>
-                        <pre data-prefix="50"><code>GOTHIC_GENRE</code></pre>
-                        <pre data-prefix="51"><code>DARKWAVE_GENRE</code></pre>
-                        <pre data-prefix="52"><code>TECHNO_INDUSTRIAL_GENRE</code></pre>
-                        <pre data-prefix="53"><code>ELECTRONIC_GENRE</code></pre>
-                        <pre data-prefix="54"><code>POP_FOLK_GENRE</code></pre>
-                        <pre data-prefix="55"><code>EURODANCE_GENRE</code></pre>
-                        <pre data-prefix="56"><code>DREAM_GENRE</code></pre>
-                        <pre data-prefix="57"><code>SOUTHERN_ROCK_GENRE</code></pre>
-                        <pre data-prefix="58"><code>COMEDY_GENRE</code></pre>
-                        <pre data-prefix="59"><code>CULT_GENRE</code></pre>
-                        <pre data-prefix="60"><code>GANGSTA_GENRE</code></pre>
-                        <pre data-prefix="61"><code>TOP_40_GENRE</code></pre>
-                        <pre data-prefix="62"><code>CHRISTIAN_RAP_GENRE</code></pre>
-                        <pre data-prefix="63"><code>POP_FUNK_GENRE</code></pre>
-                        <pre data-prefix="64"><code>JUNGLE_MUSIC_GENRE</code></pre>
-                        <pre data-prefix="65"><code>NATIVE_US_GENRE</code></pre>
-                        <pre data-prefix="66"><code>CABARET_GENRE</code></pre>
-                        <pre data-prefix="67"><code>NEW_WAVE_GENRE</code></pre>
-                        <pre data-prefix="68"><code>PSYCHEDELIC_GENRE</code></pre>
-                        <pre data-prefix="69"><code>RAVE_GENRE</code></pre>
-                        <pre data-prefix="70"><code>SHOWTUNES_GENRE</code></pre>
-                        <pre data-prefix="71"><code>TRAILER_GENRE</code></pre>
-                        <pre data-prefix="72"><code>LO_FI_GENRE</code></pre>
-                        <pre data-prefix="73"><code>TRIBAL_GENRE</code></pre>
-                        <pre data-prefix="74"><code>ACID_PUNK_GENRE</code></pre>
-                        <pre data-prefix="75"><code>ACID_JAZZ_GENRE</code></pre>
-                        <pre data-prefix="76"><code>POLKA_GENRE</code></pre>
-                        <pre data-prefix="77"><code>RETRO_GENRE</code></pre>
-                        <pre data-prefix="78"><code>MUSICAL_GENRE</code></pre>
-                        <pre data-prefix="79"><code>ROCKNROLL_GENRE</code></pre>
-                        <pre data-prefix="80"><code>HARD_ROCK_GENRE</code></pre>
-                        <pre data-prefix="81"><code>FOLK_GENRE</code></pre>
-                        <pre data-prefix="82"><code>FOLK_ROCK_GENRE</code></pre>
-                        <pre data-prefix="83"><code>NATIONAL_FOLK_GENRE</code></pre>
-                        <pre data-prefix="84"><code>SWING_GENRE</code></pre>
-                        <pre data-prefix="85"><code>FAST_FUSION_GENRE</code></pre>
-                        <pre data-prefix="86"><code>BEBOP_GENRE</code></pre>
-                        <pre data-prefix="87"><code>LATIN_GENRE</code></pre>
-                        <pre data-prefix="88"><code>REVIVAL_GENRE</code></pre>
-                        <pre data-prefix="89"><code>CELTIC_GENRE</code></pre>
-                        <pre data-prefix="90"><code>BLUEGRASS_GENRE</code></pre>
-                        <pre data-prefix="91"><code>AVANTGARDE_GENRE</code></pre>
-                        <pre data-prefix="92"><code>GOTHIC_ROCK_GENRE</code></pre>
-                        <pre data-prefix="93"><code>PROGRESSIVE_ROCK_GENRE</code></pre>
-                        <pre data-prefix="94"><code>PSYCHEDELIC_ROCK_GENRE</code></pre>                        
-                        <pre data-prefix="95"><code>SYMPHONIC_ROCK_GENRE</code></pre>
-                        <pre data-prefix="96"><code>SLOW_ROCK_GENRE</code></pre>
-                        <pre data-prefix="97"><code>BIG_BAND_GENRE</code></pre>
-                        <pre data-prefix="98"><code>CHORUS_GENRE</code></pre>
-                        <pre data-prefix="99"><code>EASY_LISTENING_GENRE</code></pre>
-                        <pre data-prefix="100"><code>ACOUSTIC_GENRE</code></pre>
-                        <pre data-prefix="101"><code>HUMOUR_GENRE</code></pre>
-                        <pre data-prefix="102"><code>SPEECH_GENRE</code></pre>
-                        <pre data-prefix="103"><code>CHANSON_GENRE</code></pre>
-                        <pre data-prefix="104"><code>OPERA_GENRE</code></pre>
-                        <pre data-prefix="105"><code>CHAMBER_MUSIC_GENRE</code></pre>
-                        <pre data-prefix="106"><code>SONATA_GENRE</code></pre>
-                        <pre data-prefix="107"><code>SYMPHONY_GENRE</code></pre>
-                        <pre data-prefix="108"><code>BOOTY_BASS_GENRE</code></pre>
-                        <pre data-prefix="109"><code>PRIMUS_GENRE</code></pre>
-                        <pre data-prefix="110"><code>PORN_GROOVE_GENRE</code></pre>
-                        <pre data-prefix="111"><code>SATIRE_GENRE</code></pre>
-                        <pre data-prefix="112"><code>SLOW_JAM_GENRE</code></pre>
-                        <pre data-prefix="113"><code>CLUB_GENRE</code></pre>
-                        <pre data-prefix="114"><code>TANGO_GENRE</code></pre>
-                        <pre data-prefix="115"><code>SAMBA_GENRE</code></pre>
-                        <pre data-prefix="116"><code>FOLKLORE_GENRE</code></pre>
-                        <pre data-prefix="117"><code>BALLAD_GENRE</code></pre>
-                        <pre data-prefix="118"><code>POWER_BALLAD_GENRE</code></pre>
-                        <pre data-prefix="119"><code>RHYTHMIC_SOUL_GENRE</code></pre>
-                        <pre data-prefix="120"><code>FREESTYLE_GENRE</code></pre>
-                        <pre data-prefix="121"><code>DUET_GENRE</code></pre>
-                        <pre data-prefix="122"><code>PUNK_ROCK_GENRE</code></pre>
-                        <pre data-prefix="123"><code>DRUM_SOLO_GENRE</code></pre>
-                        <pre data-prefix="124"><code>A_CAPPELLA_GENRE</code></pre>
-                        <pre data-prefix="125"><code>EURO_HOUSE_GENRE</code></pre>
-                        <pre data-prefix="126"><code>DANCE_HALL_GENRE</code></pre>
-                        <pre data-prefix="127"><code>GOA_MUSIC_GENRE</code></pre>
-                        <pre data-prefix="128"><code>DRUM_AND_BASS_GENRE</code></pre>
-                        <pre data-prefix="129"><code>CLUB_HOUSE_GENRE</code></pre>
-                        <pre data-prefix="130"><code>HARDCORE_TECHNO_GENRE</code></pre>
-                        <pre data-prefix="131"><code>TERROR_GENRE</code></pre>
-                        <pre data-prefix="132"><code>INDIE_GENRE</code></pre>
-                        <pre data-prefix="133"><code>BRITPOP_GENRE</code></pre>
-                        <pre data-prefix="134"><code>NEGERPUNK_GENRE</code></pre>
-                        <pre data-prefix="135"><code>POLSK_PUNK_GENRE</code></pre>
-                        <pre data-prefix="136"><code>BEAT_GENRE</code></pre>
-                        <pre data-prefix="137"><code>CHRISTIAN_GANGSTA_RAP_GENRE</code></pre>
-                        <pre data-prefix="138"><code>HEAVY_METAL_GENRE</code></pre>
-                        <pre data-prefix="139"><code>BLACK_METAL_GENRE</code></pre>
-                        <pre data-prefix="140"><code>CROSSOVER_GENRE</code></pre>
-                        <pre data-prefix="141"><code>CONTEMPORARY_CHRISTIAN_GENRE</code></pre>
-                        <pre data-prefix="142"><code>CHRISTIAN_ROCK_GENRE</code></pre>
-                        <pre data-prefix="143"><code>MERENGUE_GENRE</code></pre>
-                        <pre data-prefix="144"><code>SALSA_GENRE</code></pre>                        
-                        <pre data-prefix="145"><code>THRASH_METAL_GENRE</code></pre>
-                        <pre data-prefix="146"><code>ANIME_GENRE</code></pre>                        
-                        <pre data-prefix="147"><code>JPOP_GENRE</code></pre>
-                        <pre data-prefix="148"><code>SYNTHPOP_GENRE</code></pre>
-                        <pre data-prefix="149"><code>ABSTRACT_GENRE</code></pre>
-                        <pre data-prefix="150"><code>ART_ROCK_GENRE</code></pre>
-                        <pre data-prefix="151"><code>BAROQUE_GENRE</code></pre>
-                        <pre data-prefix="152"><code>BHANGRA_GENRE</code></pre>
-                        <pre data-prefix="153"><code>BIG_BEAT_GENRE</code></pre>
-                        <pre data-prefix="154"><code>BREAKBEAT_GENRE</code></pre>
-                        <pre data-prefix="155"><code>CHILLOUT_GENRE</code></pre>
-                        <pre data-prefix="156"><code>DOWNTEMPO_GENRE</code></pre>
-                        <pre data-prefix="157"><code>DUB_GENRE</code></pre>
-                        <pre data-prefix="158"><code>EBM_GENRE</code></pre>
-                        <pre data-prefix="159"><code>ECLECTIC_GENRE</code></pre>
-                        <pre data-prefix="160"><code>ELECTRO_GENRE</code></pre>
-                        <pre data-prefix="161"><code>ELECTROCLASH_GENRE</code></pre>
-                        <pre data-prefix="162"><code>EMO_GENRE</code></pre>
-                        <pre data-prefix="163"><code>EXPERIMENTAL_GENRE</code></pre>
-                        <pre data-prefix="164"><code>GARAGE_GENRE</code></pre>
-                        <pre data-prefix="165"><code>GLOBAL_GENRE</code></pre>
-                        <pre data-prefix="166"><code>IDM_GENRE</code></pre>
-                        <pre data-prefix="167"><code>ILLBIENT_GENRE</code></pre>
-                        <pre data-prefix="168"><code>INDUSTRO_GOTH_GENRE</code></pre>
-                        <pre data-prefix="169"><code>JAM_BAND_GENRE</code></pre>
-                        <pre data-prefix="170"><code>KRAUTROCK_GENRE</code></pre>
-                        <pre data-prefix="171"><code>LEFTFIELD_GENRE</code></pre>
-                        <pre data-prefix="172"><code>LOUNGE_GENRE</code></pre>
-                        <pre data-prefix="173"><code>MATH_ROCK_GENRE</code></pre>
-                        <pre data-prefix="174"><code>NEW_ROMANTIC_GENRE</code></pre>
-                        <pre data-prefix="175"><code>NU_BREAKZ_GENRE</code></pre>
-                        <pre data-prefix="176"><code>POST_PUNK_GENRE</code></pre>
-                        <pre data-prefix="177"><code>POST_ROCK_GENRE</code></pre>
-                        <pre data-prefix="178"><code>PSYTRANCE_GENRE</code></pre>
-                        <pre data-prefix="179"><code>SHOEGAZE_GENRE</code></pre>
-                        <pre data-prefix="180"><code>SPACE_ROCK_GENRE</code></pre>
-                        <pre data-prefix="181"><code>TROP_ROCK_GENRE</code></pre>
-                        <pre data-prefix="182"><code>WORLD_MUSIC_GENRE</code></pre>
-                        <pre data-prefix="183"><code>NEOCLASSICAL_GENRE</code></pre>
-                        <pre data-prefix="184"><code>AUDIOBOOK_GENRE</code></pre>
-                        <pre data-prefix="185"><code>AUDIO_THEATRE_GENRE</code></pre>
-                        <pre data-prefix="186"><code>NEUE_DEUTSCHE_WELLE_GENRE</code></pre>
-                        <pre data-prefix="187"><code>PODCAST_GENRE</code></pre>
-                        <pre data-prefix="189"><code>INDIE_ROCK_GENRE</code></pre>
-                        <pre data-prefix="190"><code>G_FUNK_GENRE</code></pre>
-                        <pre data-prefix="191"><code>DUBSTEP_GENRE</code></pre>
-                        <pre data-prefix="192"><code>GARAGE_ROCK_GENRE</code></pre>
-                        <pre data-prefix="193"><code>PSYBIENT_GENRE</code></pre>
+                        <pre data-prefix="000"><code>Blues</code></pre>           
+                        <pre data-prefix="001"><code>Classic Rock</code></pre>      
+                        <pre data-prefix="002"><code>Country</code></pre>          
+                        <pre data-prefix="003"><code>Dance</code></pre>          
+                        <pre data-prefix="004"><code>Disco</code></pre>           
+                        <pre data-prefix="005"><code>Funk</code></pre>            
+                        <pre data-prefix="006"><code>Grunge</code></pre>           
+                        <pre data-prefix="007"><code>Hip-Hop</code></pre>         
+                        <pre data-prefix="008"><code>Jazz</code></pre>           
+                        <pre data-prefix="009"><code>Metal</code></pre>      
+                        <pre data-prefix="010"><code>New Age</code></pre>          
+                        <pre data-prefix="011"><code>Oldies</code></pre>      
+                        <pre data-prefix="012" class="bg-warning text-warning-content"><code>Other (default in ID3dev)</code></pre>       
+                        <pre data-prefix="013"><code>Pop</code></pre>           
+                        <pre data-prefix="014"><code>Rhythm and Blues</code></pre> 
+                        <pre data-prefix="015"><code>Rap</code></pre>              
+                        <pre data-prefix="016"><code>Reggae</code></pre>        
+                        <pre data-prefix="017"><code>Rock</code></pre>            
+                        <pre data-prefix="018"><code>Techno</code></pre>         
+                        <pre data-prefix="019"><code>Industrial</code></pre>       
+                        <pre data-prefix="020"><code>Alternative</code></pre>    
+                        <pre data-prefix="021"><code>Ska</code></pre>               
+                        <pre data-prefix="022"><code>Death Metal</code></pre>        
+                        <pre data-prefix="023"><code>Pranks</code></pre>
+                        <pre data-prefix="024"><code>Soundtrack</code></pre>
+                        <pre data-prefix="025"><code>Euro-techno</code></pre>
+                        <pre data-prefix="026"><code>Ambient</code></pre>
+                        <pre data-prefix="027"><code>Trip-hop</code></pre>
+                        <pre data-prefix="028"><code>Vocal</code></pre>
+                        <pre data-prefix="029"><code>Jazz & Funk</code></pre>
+                        <pre data-prefix="030"><code>Fusion</code></pre>
+                        <pre data-prefix="031"><code>Trance</code></pre>
+                        <pre data-prefix="032"><code>Classical</code></pre>
+                        <pre data-prefix="033"><code>Instrumental</code></pre>
+                        <pre data-prefix="034"><code>Acid</code></pre>
+                        <pre data-prefix="035"><code>House</code></pre>
+                        <pre data-prefix="036"><code>Game</code></pre>
+                        <pre data-prefix="037"><code>Sounc Clip</code></pre>
+                        <pre data-prefix="038"><code>Gospel</code></pre>
+                        <pre data-prefix="039"><code>Noise</code></pre>
+                        <pre data-prefix="040"><code>Alternative Rock</code></pre>
+                        <pre data-prefix="041"><code>Bass</code></pre>
+                        <pre data-prefix="042"><code>Soul</code></pre>
+                        <pre data-prefix="043"><code>Punk</code></pre>
+                        <pre data-prefix="044"><code>Space</code></pre>
+                        <pre data-prefix="045"><code>Meditative</code></pre>
+                        <pre data-prefix="046"><code>Instrumental Pop</code></pre>
+                        <pre data-prefix="047"><code>Instrumental Rock</code></pre>
+                        <pre data-prefix="048"><code>Ethnic</code></pre>
+                        <pre data-prefix="049"><code>Gothic</code></pre>
+                        <pre data-prefix="050"><code>Darkwave</code></pre>
+                        <pre data-prefix="051"><code>Techno-industrial</code></pre>
+                        <pre data-prefix="052"><code>Electronic</code></pre>
+                        <pre data-prefix="053"><code>Pop-folk</code></pre>
+                        <pre data-prefix="054"><code>Eurodance</code></pre>
+                        <pre data-prefix="055"><code>Dream</code></pre>
+                        <pre data-prefix="056"><code>Southern Rock</code></pre>
+                        <pre data-prefix="057"><code>Comedy</code></pre>
+                        <pre data-prefix="058"><code>Cult</code></pre>
+                        <pre data-prefix="059"><code>Gangsta</code></pre>
+                        <pre data-prefix="060"><code>Top 40</code></pre>
+                        <pre data-prefix="061"><code>Christian Rap</code></pre>
+                        <pre data-prefix="062"><code>Pop/Funk</code></pre>
+                        <pre data-prefix="063"><code>Jungle Music</code></pre>
+                        <pre data-prefix="064"><code>Native US</code></pre>
+                        <pre data-prefix="065"><code>Cabaret</code></pre>
+                        <pre data-prefix="066"><code>New Wave</code></pre>
+                        <pre data-prefix="067"><code>Psychedelic</code></pre>
+                        <pre data-prefix="068"><code>Rave</code></pre>
+                        <pre data-prefix="069"><code>Showtunes</code></pre>
+                        <pre data-prefix="070"><code>Trailer</code></pre>
+                        <pre data-prefix="071"><code>Lo-fi</code></pre>
+                        <pre data-prefix="072"><code>Tribal</code></pre>
+                        <pre data-prefix="073"><code>Acid Punk</code></pre>
+                        <pre data-prefix="074"><code>Acid Jazz</code></pre>
+                        <pre data-prefix="075"><code>Polka</code></pre>
+                        <pre data-prefix="076"><code>Retro</code></pre>
+                        <pre data-prefix="077"><code>Musical</code></pre>
+                        <pre data-prefix="078"><code>Rock n Roll</code></pre>
+                        <pre data-prefix="079"><code>Hard Rock</code></pre>
+                        <pre data-prefix="080"><code>Folk</code></pre>
+                        <pre data-prefix="081"><code>Folk Rock</code></pre>
+                        <pre data-prefix="082"><code>National Folk</code></pre>
+                        <pre data-prefix="083"><code>Swing</code></pre>
+                        <pre data-prefix="084"><code>Fast Fusion</code></pre>
+                        <pre data-prefix="085"><code>Bebop</code></pre>
+                        <pre data-prefix="086"><code>Latin</code></pre>
+                        <pre data-prefix="087"><code>Revival</code></pre>
+                        <pre data-prefix="088"><code>Celtic</code></pre>
+                        <pre data-prefix="089"><code>Bluegrass</code></pre>
+                        <pre data-prefix="090"><code>Avantgarde</code></pre>
+                        <pre data-prefix="091"><code>Gothic Rock</code></pre>
+                        <pre data-prefix="092"><code>Progressive Rock</code></pre>
+                        <pre data-prefix="093"><code>Psychedelic Rock</code></pre>                        
+                        <pre data-prefix="094"><code>Symphonic Rock</code></pre>
+                        <pre data-prefix="095"><code>Slow Rock</code></pre>
+                        <pre data-prefix="096"><code>Big Band</code></pre>
+                        <pre data-prefix="097"><code>Chorus</code></pre>
+                        <pre data-prefix="098"><code>Easy Listening</code></pre>
+                        <pre data-prefix="099"><code>Acoustic</code></pre>
+                        <pre data-prefix="100"><code>Humour</code></pre>
+                        <pre data-prefix="101"><code>Speech</code></pre>
+                        <pre data-prefix="102"><code>Chanson</code></pre>
+                        <pre data-prefix="103"><code>Opera</code></pre>
+                        <pre data-prefix="104"><code>Chamber Music</code></pre>
+                        <pre data-prefix="105"><code>Sonata</code></pre>
+                        <pre data-prefix="106"><code>Symphony</code></pre>
+                        <pre data-prefix="107"><code>Booty Bass</code></pre>
+                        <pre data-prefix="108"><code>Primus</code></pre>
+                        <pre data-prefix="109"><code>Porn Groove</code></pre>
+                        <pre data-prefix="110"><code>Satire</code></pre>
+                        <pre data-prefix="111"><code>Slow Jam</code></pre>
+                        <pre data-prefix="112"><code>Club</code></pre>
+                        <pre data-prefix="113"><code>Tango</code></pre>
+                        <pre data-prefix="114"><code>Samba</code></pre>
+                        <pre data-prefix="115"><code>Folklore</code></pre>
+                        <pre data-prefix="116"><code>Ballad</code></pre>
+                        <pre data-prefix="117"><code>Power Ballad</code></pre>
+                        <pre data-prefix="118"><code>Rhythmic Soul</code></pre>
+                        <pre data-prefix="119"><code>Freestyle</code></pre>
+                        <pre data-prefix="120"><code>Duet</code></pre>
+                        <pre data-prefix="121"><code>Punk Rock</code></pre>
+                        <pre data-prefix="122"><code>Drum Solo</code></pre>
+                        <pre data-prefix="123"><code>A Cappella</code></pre>
+                        <pre data-prefix="124"><code>Euro-house</code></pre>
+                        <pre data-prefix="125"><code>Dance Hall</code></pre>
+                        <pre data-prefix="126"><code>Goa Music</code></pre>
+                        <pre data-prefix="127"><code>Drum & Bass</code></pre>
+                        <pre data-prefix="128"><code>Club House</code></pre>
+                        <pre data-prefix="129"><code>Hardcore Techno</code></pre>
+                        <pre data-prefix="130"><code>Terror</code></pre>
+                        <pre data-prefix="131"><code>Indie</code></pre>
+                        <pre data-prefix="132"><code>Britpop</code></pre>
+                        <pre data-prefix="133"><code>Negerpunk</code></pre>
+                        <pre data-prefix="134"><code>Polsk Punk</code></pre>
+                        <pre data-prefix="135"><code>Beat</code></pre>
+                        <pre data-prefix="136"><code>Christain Gangsta Rap</code></pre>
+                        <pre data-prefix="137"><code>Heavy Metal</code></pre>
+                        <pre data-prefix="138"><code>Black Metal</code></pre>
+                        <pre data-prefix="139"><code>Crossover</code></pre>
+                        <pre data-prefix="140"><code>Contemporary Christian</code></pre>
+                        <pre data-prefix="141"><code>Christian Rock</code></pre>
+                        <pre data-prefix="142"><code>Merengue</code></pre>
+                        <pre data-prefix="143"><code>Salsa</code></pre>                        
+                        <pre data-prefix="144"><code>Thrash Metal</code></pre>
+                        <pre data-prefix="145"><code>Anime</code></pre>                        
+                        <pre data-prefix="146"><code>JPop</code></pre>
+                        <pre data-prefix="147"><code>Synthpop</code></pre>
+                        <pre data-prefix="148"><code>Christmas</code></pre>
+                        <pre data-prefix="149"><code>Art Rock</code></pre>
+                        <pre data-prefix="150"><code>Baroque</code></pre>
+                        <pre data-prefix="151"><code>Bhangra</code></pre>
+                        <pre data-prefix="152"><code>Big Beat</code></pre>
+                        <pre data-prefix="153"><code>Breakbeat</code></pre>
+                        <pre data-prefix="154"><code>Chillout</code></pre>
+                        <pre data-prefix="155"><code>Downtempo</code></pre>
+                        <pre data-prefix="156"><code>Dub</code></pre>
+                        <pre data-prefix="157"><code>EBM</code></pre>
+                        <pre data-prefix="158"><code>Eclectic</code></pre>
+                        <pre data-prefix="159"><code>Electro</code></pre>
+                        <pre data-prefix="160"><code>Electroclash</code></pre>
+                        <pre data-prefix="161"><code>Emo</code></pre>
+                        <pre data-prefix="162"><code>Experimental</code></pre>
+                        <pre data-prefix="163"><code>Garbage</code></pre>
+                        <pre data-prefix="164"><code>Global</code></pre>
+                        <pre data-prefix="165"><code>IDM</code></pre>
+                        <pre data-prefix="166"><code>Illbient</code></pre>
+                        <pre data-prefix="167"><code>Industro-Goth</code></pre>
+                        <pre data-prefix="168"><code>Jam Band</code></pre>
+                        <pre data-prefix="169"><code>Krautrock</code></pre>
+                        <pre data-prefix="170"><code>Leftfield</code></pre>
+                        <pre data-prefix="171"><code>Lounge</code></pre>
+                        <pre data-prefix="172"><code>Math Rock</code></pre>
+                        <pre data-prefix="173"><code>New Romantic</code></pre>
+                        <pre data-prefix="174"><code>Nu-breakz</code></pre>
+                        <pre data-prefix="175"><code>Post-punk</code></pre>
+                        <pre data-prefix="176"><code>Post-rock</code></pre>
+                        <pre data-prefix="177"><code>Psytrance</code></pre>
+                        <pre data-prefix="178"><code>Shoegaze</code></pre>
+                        <pre data-prefix="179"><code>Space Rock</code></pre>
+                        <pre data-prefix="180"><code>Trop Rock</code></pre>
+                        <pre data-prefix="181"><code>World Music</code></pre>
+                        <pre data-prefix="182"><code>Neoclassical</code></pre>
+                        <pre data-prefix="183"><code>Audiobook</code></pre>
+                        <pre data-prefix="184"><code>Audio Theatre</code></pre>
+                        <pre data-prefix="185"><code>Neue Deutsche Welle</code></pre>
+                        <pre data-prefix="186"><code>Podcast</code></pre>
+                        <pre data-prefix="187"><code>Indie-rock</code></pre>
+                        <pre data-prefix="188"><code>G-Funk</code></pre>
+                        <pre data-prefix="189"><code>Dubstep</code></pre>
+                        <pre data-prefix="190"><code>Garage Rock</code></pre>
+                        <pre data-prefix="191"><code>Psybient</code></pre>
                     </div>
+                </div>
+                <!--synchronization (yikes)-->
+                <div id="unsync" class="mt-10 ml-5 mr-5">
+                    <h1 class="mb-4 text-3xl text-gray-900 dark:text-white md:text-4xl lg:text-5xl">Unsynchronisation (no support)</h1>
+
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        Whenever a false synchronisation is found within the tag, one zeroed
+                        byte is inserted after the first false synchronisation byte. The
+                        format of synchronisations that should be altered by ID3 encoders is
+                        as follows:
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        &emsp;%11111111 111xxxxx
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        and should be replaced with:
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        &emsp;%11111111 00000000 111xxxxx
+                    </p>                         
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        This has the side effect that all $FF 00 combinations have to be
+                        altered, so they will not be affected by the decoding process.
+                        Therefore all the $FF 00 combinations have to be replaced with the
+                        $FF 00 00 combination during the unsynchronisation.
+                    </p>                     
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        To indicate usage of the unsynchronisation, the unsynchronisation
+                        flag in the frame header should be set. This bit must be set if the
+                        frame was altered by the unsynchronisation and SHOULD NOT be set if
+                        unaltered. If all frames in the tag are unsynchronised the
+                        unsynchronisation flag in the tag header should be set. It must not
+                        be set if the tag has a frame which is not unsynchronised.
+                    </p>             
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        Assume the first byte of the audio to be $FF. The special case when
+                        the last byte of the last frame is $FF and no padding nor footer is
+                        used will then introduce a false synchronisation. This can be solved
+                        by adding a footer, adding padding or unsynchronising the frame and
+                        add $00 to the end of the frame data, thus adding more byte to the
+                        frame size than a normal unsynchronisation would. Although not
+                        preferred, it is allowed to apply the last method on all frames
+                        ending with $FF.
+                    </p>                       
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        It is preferred that the tag is either completely unsynchronised or
+                        not unsynchronised at all. A completely unsynchronised tag has no 
+                        false synchonisations in it, as defined above, and does not end with
+                        $FF. A completely non-unsynchronised tag contains no unsynchronised
+                        frames, and thus the unsynchronisation flag in the header is cleared.
+                    </p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        Do bear in mind, that if compression or encryption is used, the
+                        unsynchronisation scheme MUST be applied afterwards. When decoding an
+                        unsynchronised frame, the unsynchronisation scheme MUST be reversed
+                        first, encryption and decompression afterwards.
+                    </p>      
+                </div>
+                <!--sync ints-->
+                <div id="syncsafe" class="mt-10 ml-5 mr-5">
+                    <h1 class="mb-4 text-3xl text-gray-900 dark:text-white md:text-4xl lg:text-5xl">Synchsafe Integers</h1>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        In some parts of the tag it is inconvenient to use the
+                        unsychronisation scheme because the size of unsynchronised data is
+                        not known in advance, which is particularly problematic with size
+                        descriptors. The solution in ID3v2 is to use synchsafe integers, in
+                        which there can never be any false synchs. Synchsafe integers are
+                        integers that keep its highest bit (bit 7) zeroed, making seven bits
+                        out of eight available. Thus a 32 bit synchsafe integer can store 28
+                        bits of information.
+                    </p>
+                    <div class="mockup-code mt-5 mb-2">
+                        <pre data-prefix=" "><code>Example:</code></pre> 
+                        <pre data-prefix=" "><code>&emsp;255 (%11111111) encoded as a 16 bit synchsafe integer is 383 (%00000001 01111111).</code></pre> 
+                    </div>  
+                </div>
+
+                <!---padding-->
+                <div id="padding" class="mt-10 ml-5 mr-5">
+                    <h1 class="mb-4 text-3xl text-gray-900 dark:text-white md:text-4xl lg:text-5xl">Padding</h1>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-5">
+                        It is permitted to include padding after all the final frame (at the
+                        end of the ID3 tag), making the size of all the frames together
+                        smaller than the size given in the head of the tag however, this is only supported in version 3 and 4. A possible
+                        purpose of this padding is to allow for adding a few additional
+                        frames or enlarge existing frames within the tag without having to
+                        rewrite the entire file. The value of the padding bytes must be $00.
+                    </p> 
                 </div>
             </div> 
             <div class="drawer-side">
@@ -332,12 +1307,136 @@
                 <li class="text-xl"><a href="#about">About</a></li>
                 <li class="flex-wrap grid-cols-1 grid-rows-1">
                     <p class="text-xl"><a href="#id3v1">ID3v1</a></p>
-                    <ul class="menu bg-base-200">
-                        <li><a href="#struct1">Id3v1 Structure</a></li>
-                        <li><a href="#struct11">Id3v1.1 Structure</a></li>
+                    <ul class="menu bg-base-200 w-6">
+                        <li><a href="#struct1">ID3v1 Structure</a></li>
+                        <li><a href="#struct11">ID3v1.1 Structure</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <p class="text-xl"><a href="#id3v2">ID3v2</a></p>
+                    <ul class="menu bg-base-200 w-6">
+                        
+                        <li><a href="#struct2">ID3v2 Structure</a></li>
+                        
+                        <li><a href="#header">ID3v2 Headers</a></li>
+                        <ul class="menu bg-base-200 w-6">
+                            <li><a href="#header22">ID3v2.2 Header</a></li>
+                            <li><a href="#header23">ID3v2.3 Header</a></li>
+                            <li><a href="#header24">ID3v2.4 Header</a></li>
+                        </ul>
+
+                        <li><a href="#extendedHeaders">ID3v2 Extended Headers</a></li>
+                        <ul class="menu bg-base-200 w-6">
+                            <li><a href="#extendedheader23">ID3v2.3 Extended Header</a></li>
+                            <li><a href="#extendedheader24">ID3v2.4 Extended Header</a></li>
+                        </ul>
+
+                        <li><a href="#framestructure">ID3v2 Frame Structure</a></li>
+                        <ul class="menu bg-base-200 w-6">
+                            <li><a href="#frameheader22">ID3v2.2 Frame Header</a></li>
+                            <li><a href="#frameheader23">ID3v2.3 Frame Header</a></li>
+                            <li><a href="#frameheader24">ID3v2.4 Frame Header</a></li>
+                        </ul>
+
+                        <li><a href="#frames">ID3v2 Frames</a></li>
+                        <ul class="menu bg-base-200 w-6">
+                            <li><a href="#Albumsortorder">Album Sort Order</a></li>
+                            <li><a href="#AlbumMovieShowtitle">Album/Movie/Show Title</a></li>
+                            <li><a href="#Attachedpicture">Attached Picture</a></li>
+                            <li><a href="#Audioencryption">Audio Encryption</a></li>
+                            <li><a href="#BPM">BPM (Beats Per Minute)</a></li>
+                            <li><a href="#Bandorchestraaccompaniment">Band/Orchestra/Accompaniment</a></li>
+                            <li><a href="#Comments">Comments</a></li>
+                            <li><a href="#Commercialframe">Commercial Frame</a></li>
+                            <li><a href="#Commercialinformation">Commercial Information</a></li>
+                            <li><a href="#Composer">Composer</a></li>
+                            <li><a href="#Conductorperformerrefinement">Conductor/Performer Refinement</a></li>
+                            <li><a href="#Contentgroupdescription">Content Group Description</a></li>
+                            <li><a href="#Contenttype">Content Type</a></li>
+                            <li><a href="#Copyrightmessage">Copyright Message</a></li>
+                            <li><a href="#CopyrightLegalinformation">Copyright/Legal Information</a></li>
+                            <li><a href="#Date">Date</a></li>
+                            <li><a href="#Encodedby">Encoded By</a></li>
+                            <li><a href="#Encodingtime">Encoding Time</a></li>
+                            <li><a href="#Encryptedmetaframe">Encrypted Meta Frame</a></li>
+                            <li><a href="#Encryptionmethodregistration">Encryption Method Registration</a></li>
+                            <li><a href="#Equalization">Equalization</a></li>
+                            <li><a href="#Eventtimingcodes">Event Timing Codes</a></li>
+                            <li><a href="#Filetype">File Type</a></li>
+                            <li><a href="#FileownerLicensee">File owner/Licensee</a></li>
+                            <li><a href="#Generalencapsulatedobject">General Encapsulated Object</a></li>
+                            <li><a href="#Groupidentificationregistration">Group Identification Registration</a></li>
+                            <li><a href="#ISRC">ISRC</a></li>
+                            <li><a href="#Initialkey">Initial Key</a></li>
+                            <li><a href="#Internetradiostationname">Internet Radio Station Name</a></li>
+                            <li><a href="#Internetradiostationowner">Internet Radio Station Owner</a></li>
+                            <li><a href="#Interpretedremixedormodifiedby">Interpreted, Remixed, or Modified By</a></li>
+                            <li><a href="#Involvedpeoplelist">Involved People List</a></li>
+                            <li><a href="#Languages">Language(s)</a></li>
+                            <li><a href="#LeadperformersSoloists">Lead Performer(s)/Soloist(s)</a></li>
+                            <li><a href="#Length">Length</a></li>
+                            <li><a href="#Linkedinformation">Linked Information</a></li>
+                            <li><a href="#Lyricisttextwriter">Lyricist/Text Writer</a></li>
+                            <li><a href="#MPEGlocationlookuptable">MPEG Location Lookup Table</a></li>
+                            <li><a href="#Mediatype">Media Type</a></li>
+                            <li><a href="#Mood">Mood</a></li>
+                            <li><a href="#MusicCDidentifier">Music CD Identifier</a></li>
+                            <li><a href="#OfficialInternetradiostationhomepage">Official Internet Radio Station Page</a></li>
+                            <li><a href="#artistperformerwebpage">Official Artist/Performer Webpage</a></li>
+                            <li><a href="#Officialaudiofilewebpage">Official Audio File Webpage</a></li>
+                            <li><a href="#Officialaudiosourcewebpage">Official Audio Source Webpage</a></li>
+                            <li><a href="#Originalalbummovieshowtitle">Original Album/Movie/Show Title</a></li>
+                            <li><a href="#Originalartistsperformers">Original Artist(s)/Performer(s)</a></li>
+                            <li><a href="#Originalfilename">Original Filename</a></li>
+                            <li><a href="#Originallyriciststextwriters">Original Lyricist(s)/Text Writer(s)</a></li>
+                            <li><a href="#Originalreleasetime">Original Release Time</a></li>
+                            <li><a href="#Originalreleaseyear">Original Release Year</a></li>
+                            <li><a href="#Ownershipframe">Ownership Frame</a></li>
+                            <li><a href="#Partofaset">Part of a Set</a></li>
+                            <li><a href="#Payment">Payment</a></li>
+                            <li><a href="#Performersortorder">Performer Sort Order</a></li>
+                            <li><a href="#Playcounter">Play Counter</a></li>
+                            <li><a href="#Playlistdelay">Playlist Delay</a></li>
+                            <li><a href="#Popularimeter">Popularimeter</a></li>
+                            <li><a href="#Positionsynchronisationframe">Position Synchronisation Frame</a></li>
+                            <li><a href="#Privateframe">Private Frame</a></li>
+                            <li><a href="#Producednotice">Produced Notice</a></li>
+                            <li><a href="#Publisher">Publisher</a></li>
+                            <li><a href="#Publishersofficialwebpage">Publishers Official Webpage</a></li>
+                            <li><a href="#Recommendedbuffersize">Recommended Buffer Size</a></li>
+                            <li><a href="#Recordingdates">Recording Dates</a></li>
+                            <li><a href="#Recordingtime">Recording Time</a></li>
+                            <li><a href="#Relativevolumeadjustment">Relative Volume Adjustment</a></li>
+                            <li><a href="#Releasetime">Release Time</a></li>
+                            <li><a href="#Reverb">Reverb</a></li>
+                            <li><a href="#Seekframe">Seek Frame</a></li>
+                            <li><a href="#Seekpointindex">Seek Point Index</a></li>
+                            <li><a href="#Setsubtitle">Set Subtitle</a></li>
+                            <li><a href="#Signatureframe">Signature Frame</a></li>
+                            <li><a href="#Size">Size</a></li>
+                            <li><a href="#SoftwareHardwareandsettingsusedforencoding">Software/Hardware Encoding Settings</a></li>
+                            <li><a href="#SubtitleDescriptionrefinement">Subtitle/Description Refinement</a></li>
+                            <li><a href="#Synchronisedlyrictext">Synchronised Lyric/Text</a></li>
+                            <li><a href="#Synchronisedtempocodes">Synchronised Tempo Codes</a></li>
+                            <li><a href="#Taggingtime">Tagging Time</a></li>
+                            <li><a href="#Termsofuse">Terms of Use</a></li>
+                            <li><a href="#Time">Time</a></li>
+                            <li><a href="#Titlesortorder">Title Sort Order</a></li>
+                            <li><a href="#Titlesongnamecontentdescription">Title/Songname/Content Description</a></li>
+                            <li><a href="#TracknumberPositioninset">Track Number/Position In Set</a></li>
+                            <li><a href="#Uniquefileidentifier">Unique File Identifier</a></li>
+                            <li><a href="#Unsynchronisedlyrictexttranscription">Unsynchronised Lyric Transcription</a></li>
+                            <li><a href="#UserdefinedURLlinkframe">User Defined URL Link Frame</a></li>
+                            <li><a href="#Userdefinedtextinformationframe">User Defined Text Information Frame</a></li>
+                            <li><a href="#Year">Year</a></li>
+                        </ul>
+                        <li><a href="#footer">ID3v2 Footer</a></li>
                     </ul>
                 </li>
                 <li class="text-xl"><a href="#genres">Genres</a></li>
+                <li class="text-xl"><a href="#unsync">Unsynchronisation</a></li>
+                <li class="text-xl"><a href="#syncsafe">Synchsafe Integers</a></li>
+                <li class="text-xl"><a href="#padding">Padding</a></li>
               </ul>
             
             </div>

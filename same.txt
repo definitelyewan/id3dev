@@ -1,0 +1,92 @@
+-----------------------------------------------same
+                                                |2.4 |2.3 |2.2|
+Audio encryption                                |AENC|AENC|CRA|
+Attached picture                                |APIC|APIC|PIC|
+seek point index                                |ASPI|    |   |
+Comments                                        |COMM|COMM|COM|
+Commercial frame                                |COMR|COMR|   |
+Encryption method registration                  |ENCR|ENCR|   |
+Equalization                                    |EQU2|EQUA|EQU|
+Event timing codes                              |ETCO|ETCO|ETC|
+General encapsulated object                     |GEOB|GEOB|GEO|
+Group identification registration               |GRID|GRID|   |
+Linked information                              |LINK|LINK|LNK|
+Music CD identifier                             |MCDI|MCDI|MCI|
+MPEG location lookup table                      |MLLT|MLLT|MLL|
+Ownership frame                                 |OWNE|OWNE|   |
+Private frame                                   |PRIV|PRIV|   |
+Play counter                                    |PCNT|PCNT|CNT|
+Popularimeter                                   |POPM|POPM|POP|
+Position synchronisation frame                  |POSS|POSS|   |
+Recommended buffer size                         |RBUF|RBUF|BUF|
+Relative volume adjustment                      |RVA2|RVAD|RVA|
+Reverb                                          |RVRB|RVRB|REV|
+Seek frame                                      |SEEK|    |   |
+Signature frame                                 |SIGN|    |   |
+Synchronised lyric/text                         |SYLT|SYLT|SLT|
+Synchronised tempo codes                        |SYTC|SYTC|STC|
+Album/Movie/Show title                          |TALB|TALB|TAL|
+BPM (beats per minute)                          |TBPM|TBPM|TBP|
+Composer                                        |TCOM|TCOM|TCM|
+Content type                                    |TCON|TCON|TCO|
+Copyright message                               |TCOP|TCOP|TCR|
+Encoding time                                   |TDEN|    |   |
+Playlist delay                                  |TDLY|TDLY|TDY|
+Original release time                           |TDOR|    |   |
+Recording time                                  |TDRC|    |   |
+Release time                                    |TDRL|    |
+Tagging time                                    |TDTG|    |
+Encoded by                                      |TENC|TENC|TEN|
+Lyricist/Text writer                            |TEXT|TEXT|TXT|
+FIle type                                       |TFLT|TFLT|TFT|
+Involved people list                            |TIPL|IPLS|IPL|
+Content group description                       |TIT1|TIT1|TT1|
+Title/songname/content description              |TIT2|TIT2|TT2|
+Subtitle/Description refinement                 |TIT3|TIT3|TT3|
+Initial key                                     |TKEY|TKEY|TKE|
+Language(s)                                     |TLAN|TLAN|TLA|
+Length                                          |TLEN|TLEN|TLE|
+Musician credits list                           |TMCL|    |
+Media type                                      |TMED|TMED|TMT|
+Mood                                            |TMOO|    |
+Original album/movie/show title                 |TOAL|TOAL|TOT|
+Original filename                               |TOFN|TOFN|TOF|
+Original lyricist(s)/text writer(s)             |TOLY|TOLY|TOL|
+Original artist(s)/performer(s)                 |TOPE|TOPE|TOA|
+File owner/licensee                             |TOWN|TOWN|
+Lead performer(s)/Soloist(s)                    |TPE1|TPE1|TP1|
+Band/orchestra/accompaniment                    |TPE2|TPE2|TP2|
+Conductor/performer refinement                  |TPE3|TPE3|TP3|
+Interpreted, remixed, or otherwise modified by  |TPE4|TPE4|TP4|
+Part of a set                                   |TPOS|TPOS|TPA|
+Produced notice                                 |TPRO|    |
+Publisher                                       |TPUB|TPUB|TPB|
+Track number/Position in set                    |TRCK|TRCK|TRK|
+Internet radio station name                     |TRSN|TRSN|
+Internet radio station owner                    |TRSO|TRSO|
+Album sort order                                |TSOA|    |
+Performer sort order                            |TSOP|    |
+Title sort order                                |TSOT|    |
+ISRC (international standard recording code)    |TSRC|TSRC|TRC|
+Software/Hardware and settings used for encoding|TSSE|TSSE|TSS|
+Set subtitle                                    |TSST|    |
+User defined text information frame             |TXXX|TXXX|TXX|
+Unique file identifier                          |UFID|UFID|UFI|
+Terms of use                                    |USER|USER|
+Unsynchronised lyric/text transcription         |USLT|USLT|ULT|
+Commercial information                          |WCOM|WCOM|WCM|
+Copyright/Legal information                     |WCOP|WCOP|WCP|
+Official audio file webpage                     |WOAF|WOAF|WAF|
+Official artist/performer webpage               |WOAR|WOAR|WAR|
+Official audio source webpage                   |WOAS|WOAS|WAS|
+Official Internet radio station homepage        |WORS|WORS|
+Payment                                         |WPAY|WPAY|
+Publishers official webpage                     |WPUB|WPUB|WPB|
+User defined URL link frame                     |WXXX|WXXX|WXX|
+Date                                            |    |TDAT|TDA|
+Time                                            |    |TIME|TIM|
+Original release year                           |    |TORY|TOR|
+Recording dates                                 |    |TRDA|TRD|
+Size                                            |    |TSIZ|TSI|
+Year                                            |    |TYER|TYE|
+Encrypted meta frame                            |    |    |CRM|
