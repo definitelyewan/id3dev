@@ -1146,5 +1146,6 @@ int main(){
 
     };
 
+    printf("%d\n",byteSyncintEncode((unsigned int)5300048));
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
