@@ -13,10 +13,10 @@ Linked information                              |LINK|LINK|LNK|X|
 Music CD identifier                             |MCDI|MCDI|MCI|X|
 MPEG location lookup table                      |MLLT|MLLT|MLL|X|
 Ownership frame                                 |OWNE|OWNE|   |X|
-Private frame                                   |PRIV|PRIV|   |
-Play counter                                    |PCNT|PCNT|CNT|
-Popularimeter                                   |POPM|POPM|POP|
-Position synchronisation frame                  |POSS|POSS|   |
+Private frame                                   |PRIV|PRIV|   |X|
+Play counter                                    |PCNT|PCNT|CNT|X|
+Popularimeter                                   |POPM|POPM|POP|X|
+Position synchronisation frame                  |POSS|POSS|   |X|
 Recommended buffer size                         |RBUF|RBUF|BUF|
 Relative volume adjustment                      |RVA2|RVAD|RVA|
 Reverb                                          |RVRB|RVRB|REV|
@@ -30,7 +30,7 @@ Composer                                        |TCOM|TCOM|TCM|X|
 Content type                                    |TCON|TCON|TCO|X|
 Copyright message                               |TCOP|TCOP|TCR|X|
 Encoding time                                   |TDEN|    |   |X|
-Playlist delay                                  |TDLY|TDLY|TDY|
+Playlist delay                                  |TDLY|TDLY|TDY|X|
 Original release time                           |TDOR|    |   |
 Recording time                                  |TDRC|    |   |
 Release time                                    |TDRL|    |   |X|
@@ -57,14 +57,14 @@ Lead performer(s)/Soloist(s)                    |TPE1|TPE1|TP1|X|
 Band/orchestra/accompaniment                    |TPE2|TPE2|TP2|X|
 Conductor/performer refinement                  |TPE3|TPE3|TP3|X|
 Interpreted, remixed, or otherwise modified by  |TPE4|TPE4|TP4|X|
-Part of a set                                   |TPOS|TPOS|TPA|
+Part of a set                                   |TPOS|TPOS|TPA|X|
 Produced notice                                 |TPRO|    |   |X|
 Publisher                                       |TPUB|TPUB|TPB|
 Track number/Position in set                    |TRCK|TRCK|TRK|
 Internet radio station name                     |TRSN|TRSN|   |X|
 Internet radio station owner                    |TRSO|TRSO|   |X|
 Album sort order                                |TSOA|    |   |X|
-Performer sort order                            |TSOP|    |
+Performer sort order                            |TSOP|    |   |X|
 Title sort order                                |TSOT|    |
 ISRC (international standard recording code)    |TSRC|TSRC|TRC|X|
 Software/Hardware and settings used for encoding|TSSE|TSSE|TSS|
@@ -79,7 +79,7 @@ Official audio file webpage                     |WOAF|WOAF|WAF|X|
 Official artist/performer webpage               |WOAR|WOAR|WAR|X|
 Official audio source webpage                   |WOAS|WOAS|WAS|X|
 Official Internet radio station homepage        |WORS|WORS|   |X|
-Payment                                         |WPAY|WPAY|
+Payment                                         |WPAY|WPAY|   |X|
 Publishers official webpage                     |WPUB|WPUB|WPB|
 User defined URL link frame                     |WXXX|WXXX|WXX|
 Date                                            |    |TDAT|TDA|X|
