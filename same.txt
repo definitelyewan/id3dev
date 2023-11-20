@@ -12,7 +12,7 @@ Group identification registration               |GRID|GRID|   |X|
 Linked information                              |LINK|LINK|LNK|X|
 Music CD identifier                             |MCDI|MCDI|MCI|X|
 MPEG location lookup table                      |MLLT|MLLT|MLL|X|
-Ownership frame                                 |OWNE|OWNE|   |
+Ownership frame                                 |OWNE|OWNE|   |X|
 Private frame                                   |PRIV|PRIV|   |
 Play counter                                    |PCNT|PCNT|CNT|
 Popularimeter                                   |POPM|POPM|POP|
@@ -33,7 +33,7 @@ Encoding time                                   |TDEN|    |   |X|
 Playlist delay                                  |TDLY|TDLY|TDY|
 Original release time                           |TDOR|    |   |
 Recording time                                  |TDRC|    |   |
-Release time                                    |TDRL|    |
+Release time                                    |TDRL|    |   |X|
 Tagging time                                    |TDTG|    |
 Encoded by                                      |TENC|TENC|TEN|X|
 Lyricist/Text writer                            |TEXT|TEXT|TXT|X|
@@ -48,17 +48,17 @@ Length                                          |TLEN|TLEN|TLE|X|
 Musician credits list                           |TMCL|    |
 Media type                                      |TMED|TMED|TMT|X|
 Mood                                            |TMOO|    |   |X|
-Original album/movie/show title                 |TOAL|TOAL|TOT|
-Original filename                               |TOFN|TOFN|TOF|
-Original lyricist(s)/text writer(s)             |TOLY|TOLY|TOL|
-Original artist(s)/performer(s)                 |TOPE|TOPE|TOA|
+Original album/movie/show title                 |TOAL|TOAL|TOT|X|
+Original filename                               |TOFN|TOFN|TOF|X|
+Original lyricist(s)/text writer(s)             |TOLY|TOLY|TOL|X|
+Original artist(s)/performer(s)                 |TOPE|TOPE|TOA|X|
 File owner/licensee                             |TOWN|TOWN|   |X|
 Lead performer(s)/Soloist(s)                    |TPE1|TPE1|TP1|X|
 Band/orchestra/accompaniment                    |TPE2|TPE2|TP2|X|
 Conductor/performer refinement                  |TPE3|TPE3|TP3|X|
 Interpreted, remixed, or otherwise modified by  |TPE4|TPE4|TP4|X|
 Part of a set                                   |TPOS|TPOS|TPA|
-Produced notice                                 |TPRO|    |
+Produced notice                                 |TPRO|    |   |X|
 Publisher                                       |TPUB|TPUB|TPB|
 Track number/Position in set                    |TRCK|TRCK|TRK|
 Internet radio station name                     |TRSN|TRSN|   |X|
@@ -75,16 +75,16 @@ Terms of use                                    |USER|USER|
 Unsynchronised lyric/text transcription         |USLT|USLT|ULT|
 Commercial information                          |WCOM|WCOM|WCM|X|
 Copyright/Legal information                     |WCOP|WCOP|WCP|X|
-Official audio file webpage                     |WOAF|WOAF|WAF|
-Official artist/performer webpage               |WOAR|WOAR|WAR|
-Official audio source webpage                   |WOAS|WOAS|WAS|
-Official Internet radio station homepage        |WORS|WORS|
+Official audio file webpage                     |WOAF|WOAF|WAF|X|
+Official artist/performer webpage               |WOAR|WOAR|WAR|X|
+Official audio source webpage                   |WOAS|WOAS|WAS|X|
+Official Internet radio station homepage        |WORS|WORS|   |X|
 Payment                                         |WPAY|WPAY|
 Publishers official webpage                     |WPUB|WPUB|WPB|
 User defined URL link frame                     |WXXX|WXXX|WXX|
 Date                                            |    |TDAT|TDA|X|
 Time                                            |    |TIME|TIM|
-Original release year                           |    |TORY|TOR|
+Original release year                           |    |TORY|TOR|X|
 Recording dates                                 |    |TRDA|TRD|
 Size                                            |    |TSIZ|TSI|
 Year                                            |    |TYER|TYE|
