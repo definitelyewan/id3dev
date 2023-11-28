@@ -5254,7 +5254,7 @@
                         </div>
                     </div>
 
-                    <div id="Mood">
+                    <div id="Mood" class="mt-5">
                         <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Mood</h1>
                         <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
                             ID3v2.2 
@@ -6101,7 +6101,7 @@
                         </div>
                     </div>
 
-                    <div id="Originalreleasetime">
+                    <div id="Originalreleasetime" class="mt-5">
                         <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Original Release Time</h1>
                         <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
                             ID3v2.2 
@@ -6155,7 +6155,7 @@
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
-                                        <div class="text-gray-500 dark:text-gray-400">TDRL</div>
+                                        <div class="text-gray-500 dark:text-gray-400">TDOR</div>
                                         <div>
                                             <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
                                                 ID3v2.4
@@ -6165,12 +6165,11 @@
                                 </div>
                             </div>
                         </div>
-    
-    
-                          <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
-                            The 'Release time' frame contains a timestamp describing when the
-                            audio was first released. Timestamp format is defined as follows
-                            yyyy-MM-ddTHH:mm:ss.
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            The 'Original release time' frame contains a timestamp describing
+                            when the original recording of the audio was released. Timestamp 
+                            format is defined as follows yyyy-MM-ddTHH:mm:ss or a subset of the
+                            format.
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
                             This frame is formated as:
@@ -6187,7 +6186,7 @@
                         </p>
     
                         <div class="mockup-code">
-                            <pre data-prefix=" "><code>Frame ID = TDRL                      (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame ID = TDOR                      (4-bytes)</code></pre> 
                             <pre data-prefix=" "><code>Frame Size = $00 00 00 14            (4-bytes)</code></pre> 
                             <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
                             <pre data-prefix=" "><code>Encoding = $03                       (1 byte)</code></pre> 
@@ -6391,7 +6390,7 @@
                         </div>
                     </div>
 
-                    <div id="Partofaset">
+                    <div id="Partofaset" class="mt-5">
                         <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Part of a Set</h1>
                         <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
                             ID3v2.2 
@@ -6564,7 +6563,7 @@
                         </div>
                     </div>
 
-                    <div id="Performersortorder">
+                    <div id="Performersortorder" class="mt-5">
                         <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Performer Sort Order</h1>
                         <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
                             ID3v2.2 
@@ -6657,7 +6656,7 @@
                         </div>
                     </div>
 
-                    <div id="Playcounter">
+                    <div id="Playcounter" class="mt-5">
                         <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Play Counter</h1>
                         <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
                             ID3v2.2 
@@ -6749,7 +6748,7 @@
                         </div>
                     </div>
 
-                    <div id="Playlistdelay">
+                    <div id="Playlistdelay" class="mt-5">
                         <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Playlist Delay</h1>
                         <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
                             ID3v2.2 
@@ -6842,7 +6841,7 @@
                         </div>
                     </div>
 
-                    <div id="Popularimeter">
+                    <div id="Popularimeter" class="mt-5">
                         <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Popularimeter</h1>
                         <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
                             ID3v2.2 
@@ -7138,7 +7137,7 @@
                         </div>
                     </div>
 
-                    <div id="Producednotice">
+                    <div id="Producednotice" class="mt-5">
                         <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Produced Notice</h1>
                         <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
                             ID3v2.2 
@@ -7235,6 +7234,2000 @@
                             <pre data-prefix=" "><code>Frame Flags = $00 00             (2-bytes)</code></pre>
                             <pre data-prefix=" "><code>Encoding = $02                   (1 byte)</code></pre> 
                             <pre data-prefix=" "><code>Information = "Produced ⓟ Arca" (32-bytes)</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="Publisher" class="mt-5">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Publisher</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+    
+                          <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TPB</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TPUB</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TPUB</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    
+    
+                          <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            The 'Publisher' frame simply contains the name of the label or
+                            publisher.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            This frame is formated as:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                            Encoding = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Information = [n bytes of encoded data]
+                        </p>
+    
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+    
+                        <div class="mockup-code">
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = TPB                       (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Size = $00 00 22               (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Encoding = $00                       (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Information = "Death Row Records"    (17-bytes)</code></pre>
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = TPUB                      (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 10            (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Encoding = $00                       (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Information = "Bad Boy Records"      (15-bytes)</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="Publishersofficialwebpage" class="mt-5">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Publishers Official Webpage</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                        </span>
+                        <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">WPB</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">WPUB</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">WPUB</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            The 'Publishers official webpage' frame is a URL pointing at the
+                            official webpage for the publisher.
+                            The frames format is as follows:
+
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            URL = [ISO-8859-1 encoded string]
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+                        <div class="mockup-code">
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = WPB                               (3-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 21                       (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>URL = "https://www.deathrowofficial.com/"    (33-bytes)</code></pre>
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = WPUB                                          (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 2E                                (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Flags = $00 00                                     (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>URL = "https://combsglobal.com/bad-boy-entertainment/"   (46-bytes)</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="Recommendedbuffersize" class="mt-5">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Recommended Buffer Size</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                        </span>
+                        <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">BUF</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">RBUF</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">RBUF</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            Sometimes the server from which an audio file is streamed is aware of
+                            transmission or coding problems resulting in interruptions in the
+                            audio stream. In these cases, the size of the buffer can be
+                            recommended by the server using this frame. If the 'embedded info
+                            flag' is set then this indicates that an ID3 tag with the
+                            maximum size described in 'Buffer size' may occur in the audio
+                            stream. In such case the tag should reside between two MPEG
+                            frames, if the audio is MPEG encoded. If the position of the next tag
+                            is known, 'offset to next tag' may be used. The offset is calculated
+                            from the end of tag in which this frame resides to the first byte of
+                            the header in the next. This field may be omitted. Embedded tags are
+                            generally not recommended since this could render unpredictable
+                            behaviour from present software/hardware.
+
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            For applications like streaming audio it might be an idea to embed
+                            tags into the audio stream though. If the clients connects to
+                            individual connections like HTTP and there is a possibility to begin
+                            every transmission with a tag, then this tag should include a
+                            'recommended buffer size' frame. If the client is connected to a
+                            arbitrary point in the stream, such as radio or multicast, then the
+                            'recommended buffer size' frame should be included in every tag.
+                            The frames format is as follows:
+
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Buffer size = $xx xx xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Embedded info flag = %0000000x
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Offset to next tag = $xx xx xx xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+                        <div class="mockup-code">
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = BUF                   (3-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 04           (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Buffer Size = 00 01 F4           (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Embedded Into Flag = %00000001   (1 byte)</code></pre>
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = RBUF                      (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 00            (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Buffer Size = 00 01 F4               (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Embedded Into Flag = %00000001       (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Offset To Next Tag = $00 01 5F 90    (4-bytes)</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="Recordingdates" class="mt-5">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Recording Dates</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                          </span>
+    
+                          <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TRD</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TRDA</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                        </svg>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    
+    
+                          <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            The 'Recording dates' frame is a intended to be used as complement to
+                            the <a href="#Year" class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline">Year</a>, 
+                            <a href="#Date" class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline">Date</a> and 
+                            <a href="#Time" class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline">Time</a> frames. E.g. "4th-7th June, 12th June"
+                            in combination with the <a href="#Year" class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline">Year frame</a>.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            This frame is formated as:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                            Encoding = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Information = [n bytes of encoded data]
+                        </p>
+    
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+    
+                        <div class="mockup-code">
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = TRD                           (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Size = $00 00 18                   (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Encoding = $00                           (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Information = "4th-7th June, 12th June"  (17-bytes)</code></pre>
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = TRDA                  (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 10        (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Flags = $00 00             (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Encoding = $00                   (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Information = "15th-20th April"  (15-bytes)</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="Recordingtime" class="mt-5">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Recording Time</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+    
+                          <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                        </svg>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                        </svg>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TDRC</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    
+    
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            The 'Recording time' frame contains a timestamp describing when the
+                            audio was recorded. Timestamp format is described in as yyyy-MM-ddTHH:mm:ss
+                            or a subset of the stated format.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            This frame is formated as:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                            Encoding = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Information = [n bytes of encoded data]
+                        </p>
+    
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+    
+                        <div class="mockup-code">
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.4 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = TDRC                  (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 0B        (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Flags = $00 00             (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Encoding = $03                   (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Information = "1999-01-06"       (10-bytes)</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="Relativevolumeadjustment" class="mt-5">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Relative Volume Adjustment</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+    
+                          <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">RVA</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">RVAD</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">RVA2</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            The purpose of this frame is to allow the tagger to define a set volume level 
+                            for the sake of the end user. However, this frame has a different definition 
+                            depending on the desired standard. formats for this frame will be listed in 
+                            ascending order from ID3v2.2 to ID3v2.4.  
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            ID3v2.2 and ID3v2.3 have a similar definition for the 'Relative volume adjustment' 
+                            frame with the only difference being that ID3v2.3 offers more options. It allows
+                            the user to say how much he or she wants to increase/decrease the volume on
+                            each channel while the file is played. The purpose is to be able to
+                            align all files to a reference volume, so that you don't have to
+                            change the volume constantly. This frame may also be used to balance
+                            or adjust the audio. If the volume peak levels are known then this could
+                            be described with the 'Peak volume right' and 'Peak volume left'
+                            field. If Peakvolume is not known these fields could be left zeroed
+                            or, if no other data follows, be completely omitted. There may only
+                            be one 'Relative volume adjustment' frame in each tag.
+                            This version of the frame is formated as:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                            Increment/decrement = %00yyyyxx <i>*</i>
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Bits used for volume descr. = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Relative volume change, right = $xx xx (xx ...)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Relative volume change, left = $xx xx (xx ...)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Peak volume right = $xx xx (xx ...)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Peak volume left = $xx xx (xx ...)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            <i>*options labeled as 'y' are only available in ID3v2.3 and will be ignored by an ID3v2.2 decoder</i>
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            In the 'Increment/decrement' field bit 0 is used to indicate the right
+                            channel and bit 1 is used to indicate the left channel. 1 is
+                            increment and 0 is decrement. These bits are labeled as 'x' in the frames
+                            format above. The 'Bits used for volume descr.' field is normally $10 (16
+                            bits) for MPEG 2 layer I, II, III, and MPEG 2.5. This value
+                            may not be $00. The volume is always represented with whole bytes,
+                            padded in the beginning (highest bits) when 'Bits used for volume
+                            descr.' is not a multiple of eight.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            As stated prior ID3v2.3 has more options when compared to ID3v2.2 and can be accessed 
+                            by setting the bits marked with 'y' in the Increment/decrement section, These are defined below.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            The datablock is then optionally followed by a volume definition for
+                            the left and right back channels. If this information is appended to
+                            the frame the first two channels will be treated as front channels.
+                            In the 'Increment/decrement' field bit 2 is used to indicate the right
+                            back channel and bit 3 for the left back channel.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10">
+                            Relative volume change, right back = $xx xx (xx ...)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Relative volume change, left back = $xx xx (xx ...)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Peak volume right = $xx xx (xx ...)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Peak volume left = $xx xx (xx ...)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            If the center channel adjustment is present the following is appended
+                            to the existing frame, after the left and right back channels. The
+                            center channel is represented by bit 4 in the 'Increase/decrement'
+                            field.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10">
+                            Relative volume change, center = $xx xx (xx ...)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Peak volume center = $xx xx (xx ...)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            If the bass channel adjustment is present the following is appended
+                            to the existing frame, after the center channel. The bass channel is
+                            represented by bit 5 in the 'Increase/decrement' field.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10">
+                            Relative volume change, bass = $xx xx (xx ...)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Peak volume bass = $xx xx (xx ...)
+                        </p>
+
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            In ID3v2.4 all of the above information is discarded in favour of a redefinition 
+                            of the 'Relative volume adjustment' frame. It's goal is the exact same except, 
+                            The volume adjustment is encoded as a fixed point decibel value, 16 bit signed integer 
+                            representing (adjustment*512), giving +/- 64 dB with a precision of 0.001953125 dB. 
+                            E.g. +2 dB is stored as $04 00 and -2 dB is $FC 00. There may be more than one 'Relative 
+                            volume adjustment' frame in each tag, but only one with the same identification string.
+                            The 'identification' string is used to identify the situation and/or device where this 
+                            adjustment should apply. 'Bits representing peak' can be any number between 0 and 255. 0 means
+                            that there is no 'Peak volume' field. The peak volume field is always padded to whole 
+                            bytes, setting the most significant bits to zero. This version of the frame is formated as:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                            Identification = [ISO-8859-1 encoded string] $00
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16">
+                            Type of channel = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16">
+                            Volume adjustment = $xx xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16">
+                            Bits representing peak = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16">
+                            Peak volume = $xx xx (xx ...)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16">
+                            <i>* one to many adjustments may be present</i>
+                        </p>
+
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            They type of adjustment field is defined below:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            $00 = Other
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            $01 = Master volume
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            $02 = Front right
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            $03 = Front left
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            $04 = Back right
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            $05 = Back left
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            $06 = Front centre
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            $07 = Back centre
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            $08 = Subwoofer
+                        </p>
+    
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+                        <div class="mockup-code">
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = RVA                           (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Size = $00 00 0A                   (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Increment/Decrement = %00000011          (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Bits Used For Volume Descr. = $10        (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Relative Volume Change, Right = $42 48   (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Relative Volume Change, Left = $42 48    (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Peak Volume Right = $78 00               (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Peak Volume Left = $78 00                (2-bytes)</code></pre>
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = RVAB                              (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 16                    (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Flags = $00 00                         (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Increment/Decrement = %00101111              (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Bits Used For Volume Descr. = $10            (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Relative Volume Change, Right Front = $42 48 (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Relative Volume Change, Front Front = $42 48 (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Peak Volume Right = $78 00                   (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Peak Volume Left = $78 00                    (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Relative Volume Change, Right Back = $42 4B  (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Relative Volume Change, Left Back = $42 4B   (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Peak Volume Right = $78 00                   (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Peak Volume Left = $78 00                    (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Relative Volume Change, Bass = $52 53        (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Peak Volume Bass = $78 00                    (2-bytes)</code></pre>
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.4 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = RVA2              (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 16    (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Flags = $00 00         (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Identification = "iPod" $00  (5-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Type of Channel = $01        (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Bits Representing Peak = $10 (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Peak Volume = $FC 00         (2-bytes)</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div id="Releasetime" class="mt-5">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Release Time</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+    
+                          <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div>
+                                            <svg class="w-3 h-3 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div>
+                                            <svg class="w-3 h-3 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TDRL</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    
+    
+                          <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            The 'Release time' frame contains a timestamp describing when the
+                            audio was first released. Timestamp format is defined as follows
+                            yyyy-MM-ddTHH:mm:ss.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            This frame is formated as:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                            Encoding = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Information = [n bytes of encoded data]
+                        </p>
+    
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+    
+                        <div class="mockup-code">
+                            <pre data-prefix=" "><code>Frame ID = TDRL                      (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 14            (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Encoding = $03                       (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Information = "2022-04-15T13:15:02"  (19-bytes)</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="Reverb" class="mt-5">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Reverb</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+    
+                          <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">REV</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">RVRB</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">RVRB</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    
+    
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            Yet another subjective frame, with which you can adjust echoes of
+                            different kinds. Reverb left/right is the delay between every bounce
+                            in ms. Reverb bounces left/right is the number of bounces that should
+                            be made. $FF equals an infinite number of bounces. Feedback is the
+                            amount of volume that should be returned to the next echo bounce. $00
+                            is 0%, $FF is 100%. If this value were $7F, there would be 50% volume
+                            reduction on the first bounce, 50% of that on the second and so on.
+                            Left to left means the sound from the left bounce to be played in the
+                            left speaker, while left to right means sound from the left bounce to
+                            be played in the right speaker.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            'Premix left to right' is the amount of left sound to be mixed in the
+                            right before any reverb is applied, where $00 id 0% and $FF is 100%.
+                            'Premix right to left' does the same thing, but right to left.
+                            Setting both premix to $FF would result in a mono output (if the
+                            reverb is applied symmetric). There may only be one "RVRB" frame in
+                            each tag.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            This frame is formated as:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                            Reverb left (ms) = $xx xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Reverb right (ms) = $xx xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Reverb bounces, left = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Reverb bounces, right = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Reverb feedback, left to left = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Reverb feedback, left to right = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Reverb feedback, right to right = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Reverb feedback, right to left = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Premix left to right = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Premix right to left = $xx 
+                        </p>
+
+    
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+    
+                        <div class="mockup-code">
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = REV                           (3-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 0C                   (3-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Reverb left (ms) = $00 64                (2-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Reverb right (ms) = $00 C8               (2-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Reverb bounces, left = $05               (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Reverb bounces, right = $0A              (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Reverb feedback, left to left = $7F      (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Reverb feedback, left to right = $3F     (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Reverb feedback, right to right = $7F    (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Reverb feedback, right to left = $3F     (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Premix left to right = $7F               (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Premix right to left = $00               (1 byte)</code></pre> 
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = RVRB                          (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 0C                (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Flags = $00 00                     (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Reverb left (ms) = $00 3E                (2-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Reverb right (ms) = $00 78               (2-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Reverb bounces, left = $03               (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Reverb bounces, right = $04              (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Reverb feedback, left to left = $80      (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Reverb feedback, left to right = $40     (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Reverb feedback, right to right = $80    (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Reverb feedback, right to left = $40     (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Premix left to right = $80               (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Premix right to left = $00               (1 byte)</code></pre> 
+                        </div>
+                    </div>
+
+                    <div id="Seekframe" class="mt-5">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Seek Frame</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                        </span>
+                        <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                        </svg>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                        </svg>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">SEEK</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            This frame indicates where other tags in a file/stream can be found.
+                            The 'minimum offset to next tag' is calculated from the end of this
+                            tag to the beginning of the next. There may only be one 'seek frame'
+                            in a tag.
+
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            The frames format is as follows:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Minimum offset to next tag  = $xx xx xx xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+                        <div class="mockup-code">
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.4 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = SEEK                           (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 04                 (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Flags = $00 00                      (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Minimum Offset To Next Tag = $00 01 30 F5 (4-bytes)</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="Seekpointindex" class="mt-5">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Seek Point Index</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                        </span>
+                        <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                        </svg>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                        </svg>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">ASPI</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            Audio files with variable bit rates are intrinsically difficult to
+                            deal with in the case of seeking within the file. The 'audio seek point index' frame
+                            makes seeking easier by providing a list of seek points within the
+                            audio file. The seek points are a fractional offset within the audio
+                            data, providing a starting point from which to find an appropriate
+                            point to start decoding. The presence of an 'audio seek point index' frame requires the
+                            existence of a <a href="#Length" class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline">Length frame</a>, indicating the duration of the file in
+                            milliseconds. There may only be one 'audio seek point index' frame in
+                            a tag.
+
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            The frames format is as follows:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Indexed data start (S) = $xx xx xx xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Indexed data length (L) = $xx xx xx xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Number of index points (N) = $xx xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Bits per index point (b) = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-16 mb-2">
+                            Fraction at index (Fi) = $xx (xx)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-16 mb-2">
+                            <i>* there may be one to many Fractions</i>
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            'Indexed data start' is a byte offset from the beginning of the file.
+                            'Indexed data length' is the byte length of the audio data being
+                            indexed. 'Number of index points' is the number of index points, as
+                            the name implies. The recommended number is 100. 'Bits per index
+                            point' is 8 or 16, depending on the chosen precision. 8 bits works
+                            well for short files (less than 5 minutes of audio), while 16 bits is
+                            advantageous for long files. 'Fraction at index' is the numerator of
+                            the fraction representing a relative position in the data. The
+                            denominator is 2 to the power of b.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            Here are the algorithms to be used in the calculation. The known data
+                            must be the offset of the start of the indexed data (S), the offset
+                            of the end of the indexed data (E), the number of index points (N),
+                            the offset at index i (Oi). We calculate the fraction at index i
+                            (Fi).
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            Oi is the offset of the frame whose start is soonest after the point
+                            for which the time offset is (i/N * duration).
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            The frame data should be calculated as follows:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Fi = Oi/L * 2^b    (rounded down to the nearest integer)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            Offset calculation should be calculated as follows from data in the
+                            frame:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Oi = (Fi/2^b)*L    (rounded up to the nearest integer)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+                        <div class="mockup-code">
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.4 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = ASPI                      (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 00            (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Indexed Data Start = $00 00 00 00    (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Indexed Data Length = $00 00 A0 00   (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Number Of Index Points = $00 03      (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Bits Per Index Point = $08           (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Fraction At Index = 00 10            (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Fraction At Index = 00 20            (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Fraction At Index = 00 30            (2-bytes)</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="Setsubtitle">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Set Subtitle</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+    
+                          <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div>
+                                            <svg class="w-3 h-3 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div>
+                                            <svg class="w-3 h-3 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TSST</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    
+    
+                          <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            The 'Set subtitle' frame is intended for the subtitle of the part of
+                            a set this track belongs to.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            This frame is formated as:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                            Encoding = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Information = [n bytes of encoded data]
+                        </p>
+    
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+    
+                        <div class="mockup-code">
+                            <pre data-prefix=" "><code>Frame ID = TSST            (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 17  (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Flags = $00 00       (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Encoding = $03             (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Information = "Soundtrack" (22-bytes)</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="Signatureframe">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Signature Frame</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+    
+                          <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div>
+                                            <svg class="w-3 h-3 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div>
+                                            <svg class="w-3 h-3 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">SIGN</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+    
+    
+                          <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            This frame enables a group of frames, grouped with the <a href="#Groupidentificationregistration" class="font-medium text-blue-600 underline dark:text-blue-500 hover:no-underline">Group identification registration</a>, to be signed. Although signatures can
+                            reside inside the registration frame, it might be desired to store
+                            the signature elsewhere, e.g. in watermarks. There may be more than
+                            one 'signature frame' in a tag, but no two may be identical.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                            This frame is formated as:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
+                            Group symbol = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Signature = [n bytes of binary data]
+                        </p>
+    
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+    
+                        <div class="mockup-code">
+                            <pre data-prefix=" "><code>Frame ID = SIGN            (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 6B  (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Flags = $00 00       (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Group Symbol = $09         (1 byte)</code></pre> 
+                            <pre data-prefix=" "><code>Signature = ...            (106-bytes)</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="Size" class="mt-5">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Size</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                            </svg>
+                        </span>
+                        <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TSI</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TSIZ</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <svg class="w-3 h-3 ml-1.5 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                        </svg>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            The 'Size' frame contains the size of the audiofile in bytes
+                            excluding the tag, represented as a numeric string.
+
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            The frames format is as follows:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Encoding = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Information = [n bytes of encoded data]
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+                        <div class="mockup-code">
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = TSI               (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Size = $00 00 11       (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Encoding = $01               (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Information = "3670016"      (16-bytes)</code></pre>
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = TSIZ              (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 09    (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Flags = $00 00         (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Encoding = $00               (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Information = "10590617"     (8-bytes)</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="SoftwareHardwareandsettingsusedforencoding" class="mt-5">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Software/Hardware And Settings Used For Encoding</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                        </span>
+                        <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TSS</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TSSE</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TSSE</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            The 'Software/Hardware and settings used for encoding' frame
+                            includes the used audio encoder and its settings when the file was
+                            encoded. Hardware refers to hardware encoders, not the computer on
+                            which a program was run.
+
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            The frames format is as follows:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Encoding = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Information = [n bytes of encoded data]
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+                        <div class="mockup-code">
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = TSS                       (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Size = $00 00 12               (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Encoding = $00                       (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Information = "LAME 3.100 -b 320"    (17-bytes)</code></pre>
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = TSSE                  (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 0F        (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Flags = $00 00             (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Encoding = $00                   (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Information = "LAME 3.100 -V 0"  (15-bytes)</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="SubtitleDescriptionrefinement" class="mt-5">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Subtitle/Description Refinement</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                        </span>
+                        <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TT3</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TIT3</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">TIT3</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            The 'Subtitle/Description refinement' frame is used for information
+                            directly related to the contents title (e.g. "Op. 16" or "Performed
+                            live at Wembley").
+
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            The frames format is as follows:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Encoding = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Information = [n bytes of encoded data]
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+                        <div class="mockup-code">
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = TT3                               (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Size = $00 00 1A                       (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Encoding = $00                               (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Information = "Performed live at History"    (25-bytes)</code></pre>
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = TIT3                      (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 15            (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Encoding = $00                       (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Information = "Opener from Scilence" (20-bytes)</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="Synchronisedlyrictext" class="mt-5">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Synchronised Lyric/Text</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                        </span>
+                        <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">SLT</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">SYLT</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">SYLT</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            This is a way of incorporating the words, said or sung lyrics,
+                            in the audio file as text, this time, however, in sync with the
+                            audio. It might also be used to describing events e.g. occurring on a
+                            stage or on the screen in sync with the audio. The header includes a
+                            content descriptor, represented with as terminated text string. If no
+                            descriptor is entered, 'Content descriptor' is $00 (00) only.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            The frames format is as follows:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Encoding = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Language = $xx xx xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Time stamp format = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Content type = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Content descriptor = [n bytes of encoded data]
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Language = [n bytes of encoded data] $00 (00)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            Time stamp format is defined as:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            $01 = Absolute time, 32 bit sized, using MPEG frames as unit
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            $02 = Absolute time, 32 bit sized, using milliseconds as unit
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            Absolute time means that every stamp contains the time from the
+                            beginning of the file.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            Content type is defined as:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            $00 = other
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            $01 = lyrics
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            $02 = text transcription
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            $03 = movement/part name (e.g. "Adagio")
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            $04 = events (e.g. "Don Quijote enters the stage")
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            $05 = chord (e.g. "Bb F Fsus")
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            $06 = trivia/'pop up' information
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            $07 = URLs to webpages
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            $08 = URLs to images
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            Each syllable (or whatever size of text is considered to be convenient 
+                            by the encoder) is a null terminated string followed by a time stamp
+                            denoting where in the sound file it belongs. Each sync thus has the
+                            following structure:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Terminated text to be synced (typically a syllable) = [n bytes of encoded data]
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Sync identifier (terminator to above string) = $00 (00)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Time stamp = $xx (xx ...)
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            The 'Time stamp' is set to zero or the whole sync is omitted if
+                            located directly at the beginning of the sound. All time stamps
+                            should be sorted in chronological order. The sync can be considered
+                            as a validator of the subsequent string.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            Newline characters are allowed in this frame and must be used
+                            after every entry (name, event etc.) when content type
+                            $03 - $04 is used.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            A few considerations regarding whitespace characters: Whitespace
+                            separating words should mark the beginning of a new word, thus
+                            occurring in front of the first syllable of a new word. This is also
+                            valid for new line characters. A syllable followed by a comma should
+                            not be broken apart with a sync (both the syllable and the comma
+                            should be before the sync).
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            There may be more than one 'Synchronised Lyric/Text' frame in each tag, but only one
+                            with the same language and content descriptor.
+                        </p>
+
+
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+                        <div class="mockup-code">
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = SLT                               (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Size = $00 00 6C                       (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Encoding = $01                               (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>language = "eng"                             (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp Format = $00                      (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Content Type = $01                           (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Content Descriptor = "Journey" $00 00        (18-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Sync = "Strang"                              (14-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Sync Identifier = $00 00                     (2-byte)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 00                    (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Sync = "ers"                                 (8-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Sync Identifier = $00 00                     (2-byte)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 25                    (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Sync = " in"                                 (8-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Sync Identifier = $00 00                     (2-byte)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 89                    (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Sync = " the"                                (10-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Sync Identifier = $00 00                     (2-byte)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 95                    (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Sync = " night"                              (14-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Sync Identifier = $00 00                     (2-byte)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 A9                    (4-bytes)</code></pre>
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = SYLT                              (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 45                    (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Flags = $00 00                         (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Encoding = $00                               (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>language = "eng"                             (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp Format = $02                      (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Content Type = $01                           (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Content Descriptor = "wheels on the bus" $00 (18-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Sync = "wheels on the bus"                   (17-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Sync Identifier = $00                        (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 00                    (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Sync = "go round and round"                  (18-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Sync Identifier = $00                        (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 25                    (4-bytes)</code></pre>
+                        </div>
+                    </div>
+
+                    <div id="Synchronisedtempocodes" class="mt-5">
+                        <h1 class="mt-2 mb-2 text-xl text-gray-900 dark:text-white md:text-xl lg:text-2xl">Synchronised Tempo Codes</h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.2 
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.3
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                          </span>
+                          <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-blue-400 border border-blue-400">
+                            ID3v2.4
+                            <svg class="w-3 h-3 ml-1.5 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 12">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5.917 5.724 10.5 15 1.5"/>
+                            </svg>
+                        </span>
+                        <div class="flex justify-center items-center mt-2">
+                            
+                            <div id="detailed-pricing" class="w-full overflow-x-auto">
+                                <div class="overflow-hidden min-w-max">
+                                    <div class="grid grid-cols-2 p-4 text-sm font-medium text-gray-900 bg-gray-100 border-t border-b border-gray-200 gap-x-16 dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                                        <div class="flex items-center">Frame ID</div>
+                                        <div>Version</div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">STC</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.2
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">SYTC</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.3
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
+                                        <div class="text-gray-500 dark:text-gray-400">SYTC</div>
+                                        <div>
+                                            <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
+                                                ID3v2.4
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            For a more accurate description of the tempo of a musical piece, this
+                            frame might be used. After the header follows one byte describing
+                            which time stamp format should be used. Then follows one or more
+                            tempo codes. Each tempo code consists of one tempo part and one time
+                            part. The tempo is in BPM described with one or two bytes. If the
+                            first byte has the value $FF, one more byte follows, which is added
+                            to the first giving a range from 2 - 510 BPM, since $00 and $01 is
+                            reserved. $00 is used to describe a beat-free time period, which is
+                            not the same as a music-free time period. $01 is used to indicate one
+                            single beat-stroke followed by a beat-free period.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            The tempo descriptor is followed by a time stamp. Every time the
+                            tempo in the music changes, a tempo descriptor may indicate this for
+                            the player. All tempo descriptors MUST be sorted in chronological
+                            order. The first beat-stroke in a time-period is at the same time as
+                            the beat description occurs. There may only be one "SYTC" frame in
+                            each tag.
+
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            The frames format is as follows:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Time stamp format = $xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-16 mb-2">
+                            Tempo = [n bytes of encoded data]
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-16 mb-2">
+                            Time stamp = $xx xx xx xx
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-16 mb-2">
+                            <i>* there may be one to many tempo codes</i>
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            Where time stamp format is:
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            $01 = Absolute time, 32 bit sized, using MPEG frames as unit
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            $02 = Absolute time, 32 bit sized, using milliseconds as unit
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            Absolute time means that every stamp contains the time from the
+                            beginning of the file.
+                        </p>
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
+                            See below for an example of what this frame could look like:
+                        </p>
+                        <div class="mockup-code">
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = STC                               (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Size = $00 00 11                       (3-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp Format = $01                      (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Tempo = $7F                                  (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 00                    (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Tempo = $FF 03                               (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp = $00 00 1F 40                    (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Tempo = $64                                  (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp = $00 00 3E 80                    (4-bytes)</code></pre>
+                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
+                            <pre data-prefix=" "><code>Frame ID = SYTC                      (4-bytes)</code></pre> 
+                            <pre data-prefix=" "><code>Frame Size = $00 00 00 11            (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp Format = $02              (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Tempo = $80                          (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 00            (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Tempo = $FF 02                       (2-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp = $00 00 0F A0            (4-bytes)</code></pre>
+                            <pre data-prefix=" "><code>Tempo = $60                          (1 byte)</code></pre>
+                            <pre data-prefix=" "><code>Time Stamp = $00 00 13 88            (4-bytes)</code></pre>
                         </div>
                     </div>
 

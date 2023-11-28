@@ -1146,6 +1146,9 @@ int main(){
 
     };
 
-    printf("%d\n",byteSyncintEncode((unsigned int)804));
+    //printf("%d\n",byteSyncintEncode((unsigned int)804));
+    uint16_t test = 120.0;
+    uint16_t *testp = &test;
+    printf("%x %x\n",testp[0], testp[1]);
     return cmocka_run_group_tests(tests, NULL, NULL);
 }
