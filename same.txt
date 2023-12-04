@@ -34,18 +34,18 @@ Playlist delay                                  |TDLY|TDLY|TDY|X|
 Original release time                           |TDOR|    |   |X|
 Recording time                                  |TDRC|    |   |X|
 Release time                                    |TDRL|    |   |X|
-Tagging time                                    |TDTG|    |
+Tagging time                                    |TDTG|    |   |X|
 Encoded by                                      |TENC|TENC|TEN|X|
 Lyricist/Text writer                            |TEXT|TEXT|TXT|X|
 FIle type                                       |TFLT|TFLT|TFT|X|
 Involved people list                            |TIPL|IPLS|IPL|X|
 Content group description                       |TIT1|TIT1|TT1|X|
-Title/songname/content description              |TIT2|TIT2|TT2|
+Title/songname/content description              |TIT2|TIT2|TT2|X|
 Subtitle/Description refinement                 |TIT3|TIT3|TT3|X|
 Initial key                                     |TKEY|TKEY|TKE|X|
 Language(s)                                     |TLAN|TLAN|TLA|X|
 Length                                          |TLEN|TLEN|TLE|X|
-Musician credits list                           |TMCL|    |
+Musician credits list                           |TMCL|    |   |X|
 Media type                                      |TMED|TMED|TMT|X|
 Mood                                            |TMOO|    |   |X|
 Original album/movie/show title                 |TOAL|TOAL|TOT|X|
@@ -60,19 +60,19 @@ Interpreted, remixed, or otherwise modified by  |TPE4|TPE4|TP4|X|
 Part of a set                                   |TPOS|TPOS|TPA|X|
 Produced notice                                 |TPRO|    |   |X|
 Publisher                                       |TPUB|TPUB|TPB|X|
-Track number/Position in set                    |TRCK|TRCK|TRK|
+Track number/Position in set                    |TRCK|TRCK|TRK|X|
 Internet radio station name                     |TRSN|TRSN|   |X|
 Internet radio station owner                    |TRSO|TRSO|   |X|
 Album sort order                                |TSOA|    |   |X|
 Performer sort order                            |TSOP|    |   |X|
-Title sort order                                |TSOT|    |
+Title sort order                                |TSOT|    |   |X|
 ISRC (international standard recording code)    |TSRC|TSRC|TRC|X|
 Software/Hardware and settings used for encoding|TSSE|TSSE|TSS|X|
 Set subtitle                                    |TSST|    |   |X|
-User defined text information frame             |TXXX|TXXX|TXX|
-Unique file identifier                          |UFID|UFID|UFI|
-Terms of use                                    |USER|USER|
-Unsynchronised lyric/text transcription         |USLT|USLT|ULT|
+User defined text information frame             |TXXX|TXXX|TXX|X|
+Unique file identifier                          |UFID|UFID|UFI|X|
+Terms of use                                    |USER|USER|   |X|
+Unsynchronised lyric/text transcription         |USLT|USLT|ULT|X|
 Commercial information                          |WCOM|WCOM|WCM|X|
 Copyright/Legal information                     |WCOP|WCOP|WCP|X|
 Official audio file webpage                     |WOAF|WOAF|WAF|X|
@@ -81,17 +81,17 @@ Official audio source webpage                   |WOAS|WOAS|WAS|X|
 Official Internet radio station homepage        |WORS|WORS|   |X|
 Payment                                         |WPAY|WPAY|   |X|
 Publishers official webpage                     |WPUB|WPUB|WPB|X|
-User defined URL link frame                     |WXXX|WXXX|WXX|
+User defined URL link frame                     |WXXX|WXXX|WXX|X|
 Date                                            |    |TDAT|TDA|X|
-Time                                            |    |TIME|TIM|
+Time                                            |    |TIME|TIM|X|
 Original release year                           |    |TORY|TOR|X|
 Recording dates                                 |    |TRDA|TRD|X|
 Size                                            |    |TSIZ|TSI|X|
-Year                                            |    |TYER|TYE|
+Year                                            |    |TYER|TYE|X|
 Encrypted meta frame                            |    |    |CRM|X|
 
 
 TODO:
-    1. make sure all ID3V2.4 timestamps are mentioned as a subset
+    1. make sure all ID3v2.4 timestamps are mentioned as a subset
     2. change example container to something better that doesnt look like a code block
     3. create a homepage for the current page that links to doxygen somehow
