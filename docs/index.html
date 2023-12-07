@@ -8783,27 +8783,45 @@
                             The frames format is as follows:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Encoding = $xx<br>
                             Information = [n bytes of encoded data]
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TSI               (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 11       (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $01               (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "3670016"      (16-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TSIZ              (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 09    (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00         (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00               (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "10590617"     (8-bytes)</code></pre>
-                        </div>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = TSI</span><br>
+                                        <span> &emsp; Frame Size = $00 00 11</span><br>
+                                        <span> &emsp; Encoding = $01</span><br>
+                                        <span> &emsp; Information = "3670016"</span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = TSIZ</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 09</span><br>
+                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Information = "10590617"</span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>16</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>8</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="SoftwareHardwareandsettingsusedforencoding" class="mt-5">
@@ -8872,27 +8890,46 @@
                             The frames format is as follows:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Encoding = $xx<br>
                             Information = [n bytes of encoded data]
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TSS                       (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 12               (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00                       (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "LAME 3.100 -b 320"    (17-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TSSE                  (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 0F        (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00             (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00                   (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "LAME 3.100 -V 0"  (15-bytes)</code></pre>
-                        </div>
+
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = TSS</span><br>
+                                        <span> &emsp; Frame Size = $00 00 12</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Information = "LAME 3.100 -b 320"</span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = TSSE</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 0F</span><br>
+                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Information = "LAME 3.100 -V 0"</span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>17</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>15</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="SubtitleDescriptionrefinement" class="mt-5">
@@ -8960,27 +8997,46 @@
                             The frames format is as follows:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Encoding = $xx<br>
                             Information = [n bytes of encoded data]
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TT3                               (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 1A                       (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00                               (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "Performed live at History"    (25-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TIT3                      (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 15            (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00                       (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "Opener from Scilence" (20-bytes)</code></pre>
-                        </div>
+
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = TT3</span><br>
+                                        <span> &emsp; Frame Size = $00 00 1A</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Information = "Performed live at History"</span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = TIT3</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 15</span><br>
+                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Information = "Opener from Scilence"</span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>25</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>20</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Synchronisedlyrictext" class="mt-5">
@@ -9050,30 +9106,18 @@
                             The frames format is as follows:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Language = $xx xx xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Time stamp format = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Content type = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Content descriptor = [n bytes of encoded data]
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Language = [n bytes of encoded data] $00 (00)
+                            Encoding = $xx<br>
+                            Language = $xx xx xx<br>
+                            Time stamp format = $xx<br>
+                            Content type = $xx<br>
+                            Content descriptor = [n bytes of encoded data]<br>
+                            Language = [n bytes of encoded data] $00 (00)<br>
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             Time stamp format is defined as:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            $01 = Absolute time, 32 bit sized, using MPEG frames as unit
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            $01 = Absolute time, 32 bit sized, using MPEG frames as unit<br>
                             $02 = Absolute time, 32 bit sized, using milliseconds as unit
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
@@ -9084,31 +9128,15 @@
                             Content type is defined as:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            $00 = other
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            $01 = lyrics
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            $02 = text transcription
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            $03 = movement/part name (e.g. "Adagio")
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            $04 = events (e.g. "Don Quijote enters the stage")
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            $05 = chord (e.g. "Bb F Fsus")
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            $06 = trivia/'pop up' information
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            $07 = URLs to webpages
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            $08 = URLs to images
+                            $00 = other<br>
+                            $01 = lyrics<br>
+                            $02 = text transcription<br>
+                            $03 = movement/part name (e.g. "Adagio")<br>
+                            $04 = events (e.g. "Don Quijote enters the stage")<br>
+                            $05 = chord (e.g. "Bb F Fsus")<br>
+                            $06 = trivia/'pop up' information<br>
+                            $07 = URLs to webpages<br>
+                            $08 = URLs to images<br>
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             Each syllable (or whatever size of text is considered to be convenient 
@@ -9117,12 +9145,8 @@
                             following structure:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Terminated text to be synced (typically a syllable) = [n bytes of encoded data]
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Sync identifier (terminator to above string) = $00 (00)
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Terminated text to be synced (typically a syllable) = [n bytes of encoded data]<br>
+                            Sync identifier (terminator to above string) = $00 (00)<br>
                             Time stamp = $xx (xx ...)
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
@@ -9149,50 +9173,97 @@
                             with the same language and content descriptor.
                         </p>
 
-
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = SLT                               (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 6C                       (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $01                               (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>language = "eng"                             (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp Format = $00                      (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Content Type = $01                           (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Content Descriptor = "Journey" $00 00        (18-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Sync = "Strang"                              (14-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Sync Identifier = $00 00                     (2-byte)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 00                    (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Sync = "ers"                                 (8-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Sync Identifier = $00 00                     (2-byte)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 25                    (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Sync = " in"                                 (8-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Sync Identifier = $00 00                     (2-byte)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 89                    (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Sync = " the"                                (10-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Sync Identifier = $00 00                     (2-byte)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 95                    (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Sync = " night"                              (14-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Sync Identifier = $00 00                     (2-byte)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 A9                    (4-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = SYLT                              (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 45                    (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                         (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00                               (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>language = "eng"                             (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp Format = $02                      (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Content Type = $01                           (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Content Descriptor = "wheels on the bus" $00 (18-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Sync = "wheels on the bus"                   (17-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Sync Identifier = $00                        (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 00                    (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Sync = "go round and round"                  (18-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Sync Identifier = $00                        (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 25                    (4-bytes)</code></pre>
-                        </div>
+
+
+                         <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = SLT                               </span><br>
+                                        <span> &emsp; Frame Size = $00 00 6C                       </span><br>
+                                        <span> &emsp; Encoding = $01                               </span><br>
+                                        <span> &emsp; language = "eng"                             </span><br>
+                                        <span> &emsp; Time Stamp Format = $00                      </span><br>
+                                        <span> &emsp; Content Type = $01                           </span><br>
+                                        <span> &emsp; Content Descriptor = "Journey" $00 00        </span><br>
+                                        <span> &emsp; Sync = "Strang"                              </span><br>
+                                        <span> &emsp; Sync Identifier = $00 00                     </span><br>
+                                        <span> &emsp; Time Stamp = $00 00 00 00                    </span><br>
+                                        <span> &emsp; Sync = "ers"                                 </span><br>
+                                        <span> &emsp; Sync Identifier = $00 00                     </span><br>
+                                        <span> &emsp; Time Stamp = $00 00 00 25                    </span><br>
+                                        <span> &emsp; Sync = " in"                                 </span><br>
+                                        <span> &emsp; Sync Identifier = $00 00                     </span><br>
+                                        <span> &emsp; Time Stamp = $00 00 00 89                    </span><br>
+                                        <span> &emsp; Sync = " the"                                </span><br>
+                                        <span> &emsp; Sync Identifier = $00 00                     </span><br>
+                                        <span> &emsp; Time Stamp = $00 00 00 95                    </span><br>
+                                        <span> &emsp; Sync = " night"                              </span><br>
+                                        <span> &emsp; Sync Identifier = $00 00                     </span><br>
+                                        <span> &emsp; Time Stamp = $00 00 00 A9                    </span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Frame ID = SYLT                              </span><br> 
+                                        <span> &emsp; Frame Size = $00 00 00 45                    </span><br>
+                                        <span> &emsp; Frame Flags = $00 00                         </span><br>
+                                        <span> &emsp; Encoding = $00                               </span><br>
+                                        <span> &emsp; language = "eng"                             </span><br>
+                                        <span> &emsp; Time Stamp Format = $02                      </span><br>
+                                        <span> &emsp; Content Type = $01                           </span><br>
+                                        <span> &emsp; Content Descriptor = "wheels on the bus" $00 </span><br>
+                                        <span> &emsp; Sync = "wheels on the bus"                   </span><br>
+                                        <span> &emsp; Sync Identifier = $00                        </span><br>
+                                        <span> &emsp; Time Stamp = $00 00 00 00                    </span><br>
+                                        <span> &emsp; Sync = "go round and round"                  </span><br>
+                                        <span> &emsp; Sync Identifier = $00                        </span><br>
+                                        <span> &emsp; Time Stamp = $00 00 00 25                    </span>
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>1</span><br>
+                                    <span>18</span><br>
+                                    <span>14</span><br>
+                                    <span>2</span><br>
+                                    <span>4</span><br>
+                                    <span>8</span><br>
+                                    <span>2</span><br>
+                                    <span>4</span><br>
+                                    <span>8</span><br>
+                                    <span>2</span><br>
+                                    <span>4</span><br>
+                                    <span>10</span><br>
+                                    <span>2</span><br>
+                                    <span>4</span><br>
+                                    <span>14</span><br>
+                                    <span>2</span><br>
+                                    <span>4</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>1</span><br>
+                                    <span>8</span><br>
+                                    <span>7</span><br>
+                                    <span>1</span><br>
+                                    <span>4</span><br>
+                                    <span>8</span><br>
+                                    <span>1</span><br>
+                                    <span>4</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Synchronisedtempocodes" class="mt-5">
@@ -9278,21 +9349,15 @@
                             Time stamp format = $xx
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-16 mb-2">
-                            Tempo = [n bytes of encoded data]
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-16 mb-2">
-                            Time stamp = $xx xx xx xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-16 mb-2">
+                            Tempo = [n bytes of encoded data]<br>
+                            Time stamp = $xx xx xx xx<br>
                             <i>* there may be one to many tempo codes</i>
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             Where time stamp format is:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            $01 = Absolute time, 32 bit sized, using MPEG frames as unit
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            $01 = Absolute time, 32 bit sized, using MPEG frames as unit<br>
                             $02 = Absolute time, 32 bit sized, using milliseconds as unit
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
@@ -9302,29 +9367,60 @@
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = STC                               (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 11                       (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp Format = $01                      (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Tempo = $7F                                  (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 00                    (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Tempo = $FF 03                               (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp = $00 00 1F 40                    (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Tempo = $64                                  (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp = $00 00 3E 80                    (4-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = SYTC                      (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 11            (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp Format = $02              (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Tempo = $80                          (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp = $00 00 00 00            (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Tempo = $FF 02                       (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp = $00 00 0F A0            (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Tempo = $60                          (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Time Stamp = $00 00 13 88            (4-bytes)</code></pre>
-                        </div>
+
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = STC</span><br>
+                                        <span> &emsp; Frame Size = $00 00 11</span><br>
+                                        <span> &emsp; Time Stamp Format = $01</span><br>
+                                        <span> &emsp; Tempo = $7F</span><br>
+                                        <span> &emsp; Time Stamp = $00 00 00 00</span><br>
+                                        <span> &emsp; Tempo = $FF 03</span><br>
+                                        <span> &emsp; Time Stamp = $00 00 1F 40</span><br>
+                                        <span> &emsp; Tempo = $64</span><br>
+                                        <span> &emsp; Time Stamp = $00 00 3E 80</span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Frame ID = SYTC</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 11</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
+                                        <span> &emsp; Time Stamp Format = $02</span><br>
+                                        <span> &emsp; Tempo = $80</span><br>
+                                        <span> &emsp; Time Stamp = $00 00 00 00</span><br>
+                                        <span> &emsp; Tempo = $FF 02</span><br>
+                                        <span> &emsp; Time Stamp = $00 00 0F A0</span><br>
+                                        <span> &emsp; Tempo = $60</span><br>
+                                        <span> &emsp; Time Stamp = $00 00 13 88</span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>1</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>4</span><br>
+                                    <span>1</span><br>
+                                    <span>4</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>1</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>4</span><br>
+                                    <span>1</span><br>
+                                    <span>4</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Taggingtime" class="mt-5">
@@ -9402,23 +9498,36 @@
                             This frame is formated as:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Encoding = $xx<br>
                             Information = [n bytes of encoded data]
                         </p>
     
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-    
-                        <div class="mockup-code">
-                            <pre data-prefix=" "><code>Frame ID = TDTG            (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 08  (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Flags = $00 00       (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $03             (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Information = "1998-01"    (7-bytes)</code></pre>
-                        </div>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = TDTG</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 08</span><br>
+                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Encoding = $03</span><br>
+                                        <span> &emsp; Information = "1998-01"</span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>7</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Termsofuse" class="mt-5">
@@ -9490,26 +9599,38 @@
                             The frames format is as follows:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Language = $xx xx xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Encoding = $xx<br>
+                            Language = $xx xx xx<br>
                             Information = [n bytes of encoded data]
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = USER            (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 0D  (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00       (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00             (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Language = eng             (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Information = "no license" (10-bytes)</code></pre>
-                        </div>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = USER</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 0D</span><br>
+                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Language = eng</span><br>
+                                        <span> &emsp; Information = "no license"</span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>3</span><br>
+                                    <span>10</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
                     
                     <div id="Time" class="mt-5">
@@ -9579,27 +9700,46 @@
                             The frames format is as follows:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Encoding = $xx<br>
                             Information = [n bytes of encoded data]
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TIM               (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 05       (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $01               (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "0404"         (4-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TIME            (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 05  (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00       (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00             (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "0910"       (4-bytes)</code></pre>
-                        </div>
+
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = TIM</span><br>
+                                        <span> &emsp; Frame Size = $00 00 05</span><br>
+                                        <span> &emsp; Encoding = $01</span><br>
+                                        <span> &emsp; Information = "0404"</span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = TIME</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 05</span><br>
+                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Information = "0910"</span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>4</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>4</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Titlesortorder" class="mt-5">
@@ -9676,23 +9816,36 @@
                             This frame is formated as:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Encoding = $xx<br>
                             Information = [n bytes of encoded data]
                         </p>
     
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-    
-                        <div class="mockup-code">
-                            <pre data-prefix=" "><code>Frame ID = TSOT            (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 06  (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Flags = $00 00       (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $03             (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Information = "Clash"      (5-bytes)</code></pre>
-                        </div>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = TSOT</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 06</span><br>
+                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Encoding = $03</span><br>
+                                        <span> &emsp; Information = "Clash"</span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>5</span>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Titlesongnamecontentdescription" class="mt-5">
@@ -9759,27 +9912,45 @@
                             The frames format is as follows:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Encoding = $xx<br>
                             Information = [n bytes of encoded data]
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TT2            (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 0F    (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $01            (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "Adagio"    (14-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TIT2                      (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 10            (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00                       (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "Hurricane Donna"      (15-bytes)</code></pre>
-                        </div>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = TT2</span><br>
+                                        <span> &emsp; Frame Size = $00 00 0F</span><br>
+                                        <span> &emsp; Encoding = $01</span><br>
+                                        <span> &emsp; Information = "Adagio"</span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = TIT2</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 10</span><br>
+                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Information = "Hurricane Donna"</span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>14</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>15</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="TracknumberPositioninset" class="mt-5">
@@ -9849,27 +10020,45 @@
                             The frames format is as follows:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Encoding = $xx<br>
                             Information = [n bytes of encoded data]
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TRK            (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 0F    (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00            (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "1"         (1 byte)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TRCK              (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 0B    (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00         (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $01               (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "5/15"         (10-bytes)</code></pre>
-                        </div>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = TRK</span><br>
+                                        <span> &emsp; Frame Size = $00 00 0F</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Information = "1"</span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = TRCK</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 0B</span><br>
+                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Encoding = $01</span><br>
+                                        <span> &emsp; Information = "1/15"</span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>1</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>10</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Uniquefileidentifier" class="mt-5">
@@ -9947,27 +10136,45 @@
                             The frames format is as follows:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Owner identifier = [ISO-8859-1 encoded string] $00
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Owner identifier = [ISO-8859-1 encoded string] $00<br>
                             Identifier = [up to 64 bytes of encoded data]
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = UFI                                           (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 23                                   (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Owner identifier = "http://www.id3.org/dummy/ufid.html"  (34-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Identifier = $00                                         (1 byte)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TRCK                          (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 4C                (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                     (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Owner identifier = "example.com/db.html" (19-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Identifier = ...                         (57-bytes)</code></pre>
-                        </div>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = UFI</span><br>
+                                        <span> &emsp; Frame Size = $00 00 23</span><br>
+                                        <span> &emsp; Owner identifier = "http://www.id3.org/dummy/ufid.html"</span><br>
+                                        <span> &emsp; Identifier = $00</span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = UFID</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 4C</span><br>
+                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Owner identifier = "example.com/db.html"</span><br>
+                                        <span> &emsp; Identifier = ...</span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>34</span><br>
+                                    <span>1</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>19</span><br>
+                                    <span>57</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Unsynchronisedlyrictexttranscription" class="mt-5">
@@ -10040,69 +10247,119 @@
                             The frames format is as follows:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Language = $xx xx xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Content descriptor = [n bytes of encoded data] $00 (00)
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Encoding = $xx<br>
+                            Language = $xx xx xx<br>
+                            Content descriptor = [n bytes of encoded data] $00 (00)<br>
                             Lyrics/Text = [n bytes of encoded data]
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = ULT                                   (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 58                           (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $01                                   (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Language = eng                                   (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Content Descriptor = "you suffer press 1" $00 00 (40-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text = "You suffer, but why?"             (44-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = USLT                                            (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 05 16                                  (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                                       (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $01                                             (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Language = jpn                                             (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Content Descriptor = "オリジナルの歌詞" $00 00                (20-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text = "待ちぼうけさ" 00 0x0A                         (16-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "追い掛けても" 00 0x0A                   (16-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "遠ざかっていく日も見えない" 0x00 0A       (30-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "あの声はどこから来て" 0x00 0A            (24-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "どこへ消えていくのだろう、いつも" 0x00 0A  (36-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "待ちぼうけさ" 0x00 0A                   (16-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "追い掛けても" 0x00 0A                   (16-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "遠ざかっていく日も見えない" 0x00 0A       (30-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "あの声はどこから来て" 0x00 0A            (24-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "どこへ消えていくのだろう、いつも" 0x00 0A  (36-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "焦がれて" 0x00 0A                      (12-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "抱いたら" 0x00 0A                      (12-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "壊れてしまったよ" 0x00 0A               (20-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "愛とかなしみに" 0x00 0A                 (18-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "焦がれてしまったよ" 0x00 0A              (22-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "そこまでは遠いため" 0x00 0A              (22-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "問いかける、あの日を" 0x00 0A            (24-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "どこまでも続く、と" 0x00 0A              (22-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "ここでまだ待ってる、と" 0x00 0A           (26-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "あの声はどこから来て" 0x00 0A             (24-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "どこへ消えていくのだろう、いつも" 0x00 0A   (36-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "焦がれて" 0x00 0A                       (12-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "抱いたら" 0x00 0A                       (12-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "壊れてしまったよ" 0x00 0A                (20-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "愛とかなしみに" 0x00 0A                  (18-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "焦がれてしまったよ" 0x00 0A               (22-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "ひとり歩く、歩道はさびて" 0x00 0A          (28-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "青い、濃い、橙色の日" 0x00 0A             (24-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "居たい、きみの横、そっと" 0x00 0A          (28-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "色、なくしても" 0x00 0A                   (18-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "焦がれて" 0x00 0A                        (12-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "抱いたら" 0x00 0A                        (12-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Lyrics/Text cont. = "壊れてしまったよ"                          (18-bytes)</code></pre>
-                        </div>
+
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = ULT</span><br>
+                                        <span> &emsp; Frame Size = $00 00 58</span><br>
+                                        <span> &emsp; Encoding = $01</span><br>
+                                        <span> &emsp; Language = eng</span><br>
+                                        <span> &emsp; Content Descriptor = "you suffer press 1" $00 00</span><br>
+                                        <span> &emsp; Lyrics/Text = "You suffer, but why?"</span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Frame ID = USLT</span><br>
+                                        <span> &emsp; Frame Size = $00 00 05 16</span><br>                                  
+                                        <span> &emsp; Frame Flags = $00 00</span><br>                              
+                                        <span> &emsp; Encoding = $01</span><br>                                   
+                                        <span> &emsp; Language = jpn</span><br>                                         
+                                        <span> &emsp; Content Descriptor = "オリジナルの歌詞" $00 00</span><br>                
+                                        <span> &emsp; Lyrics/Text = "待ちぼうけさ" 00 0x0A</span><br>           
+                                        <span> &emsp; Lyrics/Text cont. = "追い掛けても" 00 0x0A</span><br>                   
+                                        <span> &emsp; Lyrics/Text cont. = "遠ざかっていく日も見えない" 0x00 0A</span><br>       
+                                        <span> &emsp; Lyrics/Text cont. = "あの声はどこから来て" 0x00 0A</span><br>  
+                                        <span> &emsp; Lyrics/Text cont. = "どこへ消えていくのだろう、いつも" 0x00 0A</span><br>  
+                                        <span> &emsp; Lyrics/Text cont. = "待ちぼうけさ" 0x00 0A</span><br>
+                                        <span> &emsp; Lyrics/Text cont. = "追い掛けても" 0x00 0A</span><br>               
+                                        <span> &emsp; Lyrics/Text cont. = "遠ざかっていく日も見えない" 0x00 0A</span><br>       
+                                        <span> &emsp; Lyrics/Text cont. = "あの声はどこから来て" 0x00 0A</span><br>  
+                                        <span> &emsp; Lyrics/Text cont. = "どこへ消えていくのだろう、いつも" 0x00 0A</span><br>  
+                                        <span> &emsp; Lyrics/Text cont. = "焦がれて" 0x00 0A</span><br>
+                                        <span> &emsp; Lyrics/Text cont. = "抱いたら" 0x00 0A</span><br>                  
+                                        <span> &emsp; Lyrics/Text cont. = "壊れてしまったよ" 0x00 0A</span><br>               
+                                        <span> &emsp; Lyrics/Text cont. = "愛とかなしみに" 0x00 0A</span><br>                 
+                                        <span> &emsp; Lyrics/Text cont. = "焦がれてしまったよ" 0x00 0A</span><br>              
+                                        <span> &emsp; Lyrics/Text cont. = "そこまでは遠いため" 0x00 0A</span><br>              
+                                        <span> &emsp; Lyrics/Text cont. = "問いかける、あの日を" 0x00 0A</span><br>            
+                                        <span> &emsp; Lyrics/Text cont. = "どこまでも続く、と" 0x00 0A</span><br>              
+                                        <span> &emsp; Lyrics/Text cont. = "ここでまだ待ってる、と" 0x00 0A</span><br>           
+                                        <span> &emsp; Lyrics/Text cont. = "あの声はどこから来て" 0x00 0A</span><br>             
+                                        <span> &emsp; Lyrics/Text cont. = "どこへ消えていくのだろう、いつも" 0x00 0A</span><br>
+                                        <span> &emsp; Lyrics/Text cont. = "焦がれて" 0x00 0A</span><br>                       
+                                        <span> &emsp; Lyrics/Text cont. = "抱いたら" 0x00 0A</span><br>                       
+                                        <span> &emsp; Lyrics/Text cont. = "壊れてしまったよ" 0x00 0A</span><br>                
+                                        <span> &emsp; Lyrics/Text cont. = "愛とかなしみに" 0x00 0A</span><br>                  
+                                        <span> &emsp; Lyrics/Text cont. = "焦がれてしまったよ" 0x00 0A</span><br>               
+                                        <span> &emsp; Lyrics/Text cont. = "ひとり歩く、歩道はさびて" 0x00 0A</span><br>          
+                                        <span> &emsp; Lyrics/Text cont. = "青い、濃い、橙色の日" 0x00 0A</span><br>     
+                                        <span> &emsp; Lyrics/Text cont. = "居たい、きみの横、そっと" 0x00 0A</span><br>          
+                                        <span> &emsp; Lyrics/Text cont. = "色、なくしても" 0x00 0A</span><br>     
+                                        <span> &emsp; Lyrics/Text cont. = "焦がれて" 0x00 0A</span><br>                        
+                                        <span> &emsp; Lyrics/Text cont. = "抱いたら" 0x00 0A</span><br>                        
+                                        <span> &emsp; Lyrics/Text cont. = "壊れてしまったよ"</span>                          
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>3</span><br>
+                                    <span>40</span><br>
+                                    <span>44</span><br>
+                                    <br>
+                                    <span>4</span><br> 
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>3</span><br>
+                                    <span>20</span><br>
+                                    <span>16</span><br>
+                                    <span>16</span><br>
+                                    <span>30</span><br>
+                                    <span>24</span><br>
+                                    <span>36</span><br>
+                                    <span>16</span><br>
+                                    <span>16</span><br>
+                                    <span>30</span><br>
+                                    <span>24</span><br>
+                                    <span>36</span><br>
+                                    <span>12</span><br>
+                                    <span>12</span><br>
+                                    <span>20</span><br>
+                                    <span>18</span><br>
+                                    <span>22</span><br>
+                                    <span>22</span><br>
+                                    <span>24</span><br>
+                                    <span>22</span><br>
+                                    <span>26</span><br>
+                                    <span>24</span><br>
+                                    <span>36</span><br>
+                                    <span>12</span><br>
+                                    <span>12</span><br>
+                                    <span>20</span><br>
+                                    <span>18</span><br>
+                                    <span>22</span><br>
+                                    <span>28</span><br>
+                                    <span>24</span><br>
+                                    <span>28</span><br>
+                                    <span>18</span><br>
+                                    <span>12</span><br>
+                                    <span>12</span><br>
+                                    <span>18</span>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="UserdefinedURLlinkframe" class="mt-5">
@@ -10173,31 +10430,49 @@
                             The frames format is as follows:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Description = [n bytes of encoded data] $00 (00)
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Encoding = $xx<br>
+                            Description = [n bytes of encoded data] $00 (00)<br>
                             URL = [ISO-8859-1 encoded string]
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = WXX                       (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 29               (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00                       (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Description = "calculator" $00       (11-bytes)</code></pre>
-                            <pre data-prefix=" "><code>URL = "https://www.rapidtables.com"  (27-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = WXXX                      (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 2D            (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00                       (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Description = "music map output" $00 (17-bytes)</code></pre>
-                            <pre data-prefix=" "><code>URL = "https://www.music-map.com/"   (26-bytes)</code></pre>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = WXX</span><br>
+                                        <span> &emsp; Frame Size = $00 00 29</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Description = "calculator" $00</span><br>
+                                        <span> &emsp; URL = "https://www.rapidtables.com"</span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Frame ID = WXXX</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 2D</span><br>
+                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Description = "music map output" $00</span><br>
+                                        <span> &emsp; URL = "https://www.music-map.com/"</span>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>11</span><br>
+                                    <span>27</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>17</span><br>
+                                    <span>26</span><br>
+                                </span>
+                            </code>
                         </div>
                     </div>
 
@@ -10268,32 +10543,50 @@
                             The frames format is as follows:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Description = [n bytes of encoded data] $00 (00)
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Encoding = $xx<br>
+                            Description = [n bytes of encoded data] $00 (00)<br>
                             Information = [n bytes of encoded data]
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TXX               (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 12       (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00               (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Description = "found on" $00 (9-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Information = "05052001"     (8-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TXXX                      (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 17            (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00                       (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Description = "realted artist" $00   (15-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Information = "Alvvays"              (7-bytes)</code></pre>
-                        </div>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = TXX</span><br>
+                                        <span> &emsp; Frame Size = $00 00 12</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Description = "found on" $00</span><br>
+                                        <span> &emsp; Information = "05052001"</span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Frame ID = TXXX</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 17</span><br>
+                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Description = "realted artist" $00</span><br>
+                                        <span> &emsp; Information = "Alvvays" $00</span>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>9</span><br>
+                                    <span>8</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>15</span><br>
+                                    <span>7</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Year" class="mt-5">
@@ -10362,27 +10655,45 @@
                             The frames format is as follows:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Encoding = $xx<br>
                             Information = [n bytes of encoded data]
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TYE               (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 05       (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00               (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "2014"         (4-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TYER            (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 05  (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00       (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00             (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "1980"       (4-bytes)</code></pre>
-                        </div>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = TYE</span><br>
+                                        <span> &emsp; Frame Size = $00 00 05</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Information = "2014"</span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = TYER</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 05</span><br>
+                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Information = "1980"</span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>4</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>4</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                 </div>
@@ -10409,201 +10720,205 @@
                 <div id="genres" class="mt-10 ml-5 mr-5">
 
                     <h1 class="mb-4 text-3xl text-gray-900 dark:text-white md:text-4xl lg:text-5xl">Genres</h1>
-
-                    <div class="mockup-code">
-                        <pre data-prefix="000"><code>Blues</code></pre>           
-                        <pre data-prefix="001"><code>Classic Rock</code></pre>      
-                        <pre data-prefix="002"><code>Country</code></pre>          
-                        <pre data-prefix="003"><code>Dance</code></pre>          
-                        <pre data-prefix="004"><code>Disco</code></pre>           
-                        <pre data-prefix="005"><code>Funk</code></pre>            
-                        <pre data-prefix="006"><code>Grunge</code></pre>           
-                        <pre data-prefix="007"><code>Hip-Hop</code></pre>         
-                        <pre data-prefix="008"><code>Jazz</code></pre>           
-                        <pre data-prefix="009"><code>Metal</code></pre>      
-                        <pre data-prefix="010"><code>New Age</code></pre>          
-                        <pre data-prefix="011"><code>Oldies</code></pre>      
-                        <pre data-prefix="012" class="bg-warning text-warning-content"><code>Other (default in ID3dev)</code></pre>       
-                        <pre data-prefix="013"><code>Pop</code></pre>           
-                        <pre data-prefix="014"><code>Rhythm and Blues</code></pre> 
-                        <pre data-prefix="015"><code>Rap</code></pre>              
-                        <pre data-prefix="016"><code>Reggae</code></pre>        
-                        <pre data-prefix="017"><code>Rock</code></pre>            
-                        <pre data-prefix="018"><code>Techno</code></pre>         
-                        <pre data-prefix="019"><code>Industrial</code></pre>       
-                        <pre data-prefix="020"><code>Alternative</code></pre>    
-                        <pre data-prefix="021"><code>Ska</code></pre>               
-                        <pre data-prefix="022"><code>Death Metal</code></pre>        
-                        <pre data-prefix="023"><code>Pranks</code></pre>
-                        <pre data-prefix="024"><code>Soundtrack</code></pre>
-                        <pre data-prefix="025"><code>Euro-techno</code></pre>
-                        <pre data-prefix="026"><code>Ambient</code></pre>
-                        <pre data-prefix="027"><code>Trip-hop</code></pre>
-                        <pre data-prefix="028"><code>Vocal</code></pre>
-                        <pre data-prefix="029"><code>Jazz & Funk</code></pre>
-                        <pre data-prefix="030"><code>Fusion</code></pre>
-                        <pre data-prefix="031"><code>Trance</code></pre>
-                        <pre data-prefix="032"><code>Classical</code></pre>
-                        <pre data-prefix="033"><code>Instrumental</code></pre>
-                        <pre data-prefix="034"><code>Acid</code></pre>
-                        <pre data-prefix="035"><code>House</code></pre>
-                        <pre data-prefix="036"><code>Game</code></pre>
-                        <pre data-prefix="037"><code>Sounc Clip</code></pre>
-                        <pre data-prefix="038"><code>Gospel</code></pre>
-                        <pre data-prefix="039"><code>Noise</code></pre>
-                        <pre data-prefix="040"><code>Alternative Rock</code></pre>
-                        <pre data-prefix="041"><code>Bass</code></pre>
-                        <pre data-prefix="042"><code>Soul</code></pre>
-                        <pre data-prefix="043"><code>Punk</code></pre>
-                        <pre data-prefix="044"><code>Space</code></pre>
-                        <pre data-prefix="045"><code>Meditative</code></pre>
-                        <pre data-prefix="046"><code>Instrumental Pop</code></pre>
-                        <pre data-prefix="047"><code>Instrumental Rock</code></pre>
-                        <pre data-prefix="048"><code>Ethnic</code></pre>
-                        <pre data-prefix="049"><code>Gothic</code></pre>
-                        <pre data-prefix="050"><code>Darkwave</code></pre>
-                        <pre data-prefix="051"><code>Techno-industrial</code></pre>
-                        <pre data-prefix="052"><code>Electronic</code></pre>
-                        <pre data-prefix="053"><code>Pop-folk</code></pre>
-                        <pre data-prefix="054"><code>Eurodance</code></pre>
-                        <pre data-prefix="055"><code>Dream</code></pre>
-                        <pre data-prefix="056"><code>Southern Rock</code></pre>
-                        <pre data-prefix="057"><code>Comedy</code></pre>
-                        <pre data-prefix="058"><code>Cult</code></pre>
-                        <pre data-prefix="059"><code>Gangsta</code></pre>
-                        <pre data-prefix="060"><code>Top 40</code></pre>
-                        <pre data-prefix="061"><code>Christian Rap</code></pre>
-                        <pre data-prefix="062"><code>Pop/Funk</code></pre>
-                        <pre data-prefix="063"><code>Jungle Music</code></pre>
-                        <pre data-prefix="064"><code>Native US</code></pre>
-                        <pre data-prefix="065"><code>Cabaret</code></pre>
-                        <pre data-prefix="066"><code>New Wave</code></pre>
-                        <pre data-prefix="067"><code>Psychedelic</code></pre>
-                        <pre data-prefix="068"><code>Rave</code></pre>
-                        <pre data-prefix="069"><code>Showtunes</code></pre>
-                        <pre data-prefix="070"><code>Trailer</code></pre>
-                        <pre data-prefix="071"><code>Lo-fi</code></pre>
-                        <pre data-prefix="072"><code>Tribal</code></pre>
-                        <pre data-prefix="073"><code>Acid Punk</code></pre>
-                        <pre data-prefix="074"><code>Acid Jazz</code></pre>
-                        <pre data-prefix="075"><code>Polka</code></pre>
-                        <pre data-prefix="076"><code>Retro</code></pre>
-                        <pre data-prefix="077"><code>Musical</code></pre>
-                        <pre data-prefix="078"><code>Rock n Roll</code></pre>
-                        <pre data-prefix="079"><code>Hard Rock</code></pre>
-                        <pre data-prefix="080"><code>Folk</code></pre>
-                        <pre data-prefix="081"><code>Folk Rock</code></pre>
-                        <pre data-prefix="082"><code>National Folk</code></pre>
-                        <pre data-prefix="083"><code>Swing</code></pre>
-                        <pre data-prefix="084"><code>Fast Fusion</code></pre>
-                        <pre data-prefix="085"><code>Bebop</code></pre>
-                        <pre data-prefix="086"><code>Latin</code></pre>
-                        <pre data-prefix="087"><code>Revival</code></pre>
-                        <pre data-prefix="088"><code>Celtic</code></pre>
-                        <pre data-prefix="089"><code>Bluegrass</code></pre>
-                        <pre data-prefix="090"><code>Avantgarde</code></pre>
-                        <pre data-prefix="091"><code>Gothic Rock</code></pre>
-                        <pre data-prefix="092"><code>Progressive Rock</code></pre>
-                        <pre data-prefix="093"><code>Psychedelic Rock</code></pre>                        
-                        <pre data-prefix="094"><code>Symphonic Rock</code></pre>
-                        <pre data-prefix="095"><code>Slow Rock</code></pre>
-                        <pre data-prefix="096"><code>Big Band</code></pre>
-                        <pre data-prefix="097"><code>Chorus</code></pre>
-                        <pre data-prefix="098"><code>Easy Listening</code></pre>
-                        <pre data-prefix="099"><code>Acoustic</code></pre>
-                        <pre data-prefix="100"><code>Humour</code></pre>
-                        <pre data-prefix="101"><code>Speech</code></pre>
-                        <pre data-prefix="102"><code>Chanson</code></pre>
-                        <pre data-prefix="103"><code>Opera</code></pre>
-                        <pre data-prefix="104"><code>Chamber Music</code></pre>
-                        <pre data-prefix="105"><code>Sonata</code></pre>
-                        <pre data-prefix="106"><code>Symphony</code></pre>
-                        <pre data-prefix="107"><code>Booty Bass</code></pre>
-                        <pre data-prefix="108"><code>Primus</code></pre>
-                        <pre data-prefix="109"><code>Porn Groove</code></pre>
-                        <pre data-prefix="110"><code>Satire</code></pre>
-                        <pre data-prefix="111"><code>Slow Jam</code></pre>
-                        <pre data-prefix="112"><code>Club</code></pre>
-                        <pre data-prefix="113"><code>Tango</code></pre>
-                        <pre data-prefix="114"><code>Samba</code></pre>
-                        <pre data-prefix="115"><code>Folklore</code></pre>
-                        <pre data-prefix="116"><code>Ballad</code></pre>
-                        <pre data-prefix="117"><code>Power Ballad</code></pre>
-                        <pre data-prefix="118"><code>Rhythmic Soul</code></pre>
-                        <pre data-prefix="119"><code>Freestyle</code></pre>
-                        <pre data-prefix="120"><code>Duet</code></pre>
-                        <pre data-prefix="121"><code>Punk Rock</code></pre>
-                        <pre data-prefix="122"><code>Drum Solo</code></pre>
-                        <pre data-prefix="123"><code>A Cappella</code></pre>
-                        <pre data-prefix="124"><code>Euro-house</code></pre>
-                        <pre data-prefix="125"><code>Dance Hall</code></pre>
-                        <pre data-prefix="126"><code>Goa Music</code></pre>
-                        <pre data-prefix="127"><code>Drum & Bass</code></pre>
-                        <pre data-prefix="128"><code>Club House</code></pre>
-                        <pre data-prefix="129"><code>Hardcore Techno</code></pre>
-                        <pre data-prefix="130"><code>Terror</code></pre>
-                        <pre data-prefix="131"><code>Indie</code></pre>
-                        <pre data-prefix="132"><code>Britpop</code></pre>
-                        <pre data-prefix="133"><code>Negerpunk</code></pre>
-                        <pre data-prefix="134"><code>Polsk Punk</code></pre>
-                        <pre data-prefix="135"><code>Beat</code></pre>
-                        <pre data-prefix="136"><code>Christain Gangsta Rap</code></pre>
-                        <pre data-prefix="137"><code>Heavy Metal</code></pre>
-                        <pre data-prefix="138"><code>Black Metal</code></pre>
-                        <pre data-prefix="139"><code>Crossover</code></pre>
-                        <pre data-prefix="140"><code>Contemporary Christian</code></pre>
-                        <pre data-prefix="141"><code>Christian Rock</code></pre>
-                        <pre data-prefix="142"><code>Merengue</code></pre>
-                        <pre data-prefix="143"><code>Salsa</code></pre>                        
-                        <pre data-prefix="144"><code>Thrash Metal</code></pre>
-                        <pre data-prefix="145"><code>Anime</code></pre>                        
-                        <pre data-prefix="146"><code>JPop</code></pre>
-                        <pre data-prefix="147"><code>Synthpop</code></pre>
-                        <pre data-prefix="148"><code>Christmas</code></pre>
-                        <pre data-prefix="149"><code>Art Rock</code></pre>
-                        <pre data-prefix="150"><code>Baroque</code></pre>
-                        <pre data-prefix="151"><code>Bhangra</code></pre>
-                        <pre data-prefix="152"><code>Big Beat</code></pre>
-                        <pre data-prefix="153"><code>Breakbeat</code></pre>
-                        <pre data-prefix="154"><code>Chillout</code></pre>
-                        <pre data-prefix="155"><code>Downtempo</code></pre>
-                        <pre data-prefix="156"><code>Dub</code></pre>
-                        <pre data-prefix="157"><code>EBM</code></pre>
-                        <pre data-prefix="158"><code>Eclectic</code></pre>
-                        <pre data-prefix="159"><code>Electro</code></pre>
-                        <pre data-prefix="160"><code>Electroclash</code></pre>
-                        <pre data-prefix="161"><code>Emo</code></pre>
-                        <pre data-prefix="162"><code>Experimental</code></pre>
-                        <pre data-prefix="163"><code>Garbage</code></pre>
-                        <pre data-prefix="164"><code>Global</code></pre>
-                        <pre data-prefix="165"><code>IDM</code></pre>
-                        <pre data-prefix="166"><code>Illbient</code></pre>
-                        <pre data-prefix="167"><code>Industro-Goth</code></pre>
-                        <pre data-prefix="168"><code>Jam Band</code></pre>
-                        <pre data-prefix="169"><code>Krautrock</code></pre>
-                        <pre data-prefix="170"><code>Leftfield</code></pre>
-                        <pre data-prefix="171"><code>Lounge</code></pre>
-                        <pre data-prefix="172"><code>Math Rock</code></pre>
-                        <pre data-prefix="173"><code>New Romantic</code></pre>
-                        <pre data-prefix="174"><code>Nu-breakz</code></pre>
-                        <pre data-prefix="175"><code>Post-punk</code></pre>
-                        <pre data-prefix="176"><code>Post-rock</code></pre>
-                        <pre data-prefix="177"><code>Psytrance</code></pre>
-                        <pre data-prefix="178"><code>Shoegaze</code></pre>
-                        <pre data-prefix="179"><code>Space Rock</code></pre>
-                        <pre data-prefix="180"><code>Trop Rock</code></pre>
-                        <pre data-prefix="181"><code>World Music</code></pre>
-                        <pre data-prefix="182"><code>Neoclassical</code></pre>
-                        <pre data-prefix="183"><code>Audiobook</code></pre>
-                        <pre data-prefix="184"><code>Audio Theatre</code></pre>
-                        <pre data-prefix="185"><code>Neue Deutsche Welle</code></pre>
-                        <pre data-prefix="186"><code>Podcast</code></pre>
-                        <pre data-prefix="187"><code>Indie-rock</code></pre>
-                        <pre data-prefix="188"><code>G-Funk</code></pre>
-                        <pre data-prefix="189"><code>Dubstep</code></pre>
-                        <pre data-prefix="190"><code>Garage Rock</code></pre>
-                        <pre data-prefix="191"><code>Psybient</code></pre>
-                    </div>
+                    <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                        <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                            <span class="flex gap-4">
+                                <span class="flex-1">
+                                    <span>001 &emsp; Classic Rock</span><br>      
+                                    <span>002 &emsp; Country</span><br>          
+                                    <span>003 &emsp; Dance</span><br>          
+                                    <span>004 &emsp; Disco</span><br>           
+                                    <span>005 &emsp; Funk</span><br>            
+                                    <span>006 &emsp; Grunge</span><br>           
+                                    <span>007 &emsp; Hip-Hop</span><br>         
+                                    <span>008 &emsp; Jazz</span><br>           
+                                    <span>009 &emsp; Metal</span><br>      
+                                    <span>010 &emsp; New Age</span><br>          
+                                    <span>011 &emsp; Oldies</span><br>      
+                                    <span>012 &emsp; Other</span><br>       
+                                    <span>013 &emsp; Pop</span><br>           
+                                    <span>014 &emsp; Rhythm and Blues</span><br> 
+                                    <span>015 &emsp; Rap</span><br>              
+                                    <span>016 &emsp; Reggae</span><br>        
+                                    <span>017 &emsp; Rock</span><br>            
+                                    <span>018 &emsp; Techno</span><br>         
+                                    <span>019 &emsp; Industrial</span><br>       
+                                    <span>020 &emsp; Alternative</span><br>    
+                                    <span>021 &emsp; Ska</span><br>               
+                                    <span>022 &emsp; Death Metal</span><br>        
+                                    <span>023 &emsp; Pranks</span><br>
+                                    <span>024 &emsp; Soundtrack</span><br>
+                                    <span>025 &emsp; Euro-techno</span><br>
+                                    <span>026 &emsp; Ambient</span><br>
+                                    <span>027 &emsp; Trip-hop</span><br>
+                                    <span>028 &emsp; Vocal</span><br>
+                                    <span>029 &emsp; Jazz & Funk</span><br>
+                                    <span>030 &emsp; Fusion</span><br>
+                                    <span>031 &emsp; Trance</span><br>
+                                    <span>032 &emsp; Classical</span><br>
+                                    <span>033 &emsp; Instrumental</span><br>
+                                    <span>034 &emsp; Acid</span><br>
+                                    <span>035 &emsp; House</span><br>
+                                    <span>036 &emsp; Game</span><br>
+                                    <span>037 &emsp; Sounc Clip</span><br>
+                                    <span>038 &emsp; Gospel</span><br>
+                                    <span>039 &emsp; Noise</span><br>
+                                    <span>040 &emsp; Alternative Rock</span><br>
+                                    <span>041 &emsp; Bass</span><br>
+                                    <span>042 &emsp; Soul</span><br>
+                                    <span>043 &emsp; Punk</span><br>
+                                    <span>044 &emsp; Space</span><br>
+                                    <span>045 &emsp; Meditative</span><br>
+                                    <span>046 &emsp; Instrumental Pop</span><br>
+                                    <span>047 &emsp; Instrumental Rock</span><br>
+                                    <span>048 &emsp; Ethnic</span><br>
+                                    <span>049 &emsp; Gothic</span><br>
+                                    <span>050 &emsp; Darkwave</span><br>
+                                    <span>051 &emsp; Techno-industrial</span><br>
+                                    <span>052 &emsp; Electronic</span><br>
+                                    <span>053 &emsp; Pop-folk</span><br>
+                                    <span>054 &emsp; Eurodance</span><br>
+                                    <span>055 &emsp; Dream</span><br>
+                                    <span>056 &emsp; Southern Rock</span><br>
+                                    <span>057 &emsp; Comedy</span><br>
+                                    <span>058 &emsp; Cult</span><br>
+                                    <span>059 &emsp; Gangsta</span><br>
+                                    <span>060 &emsp; Top 40</span><br>
+                                    <span>061 &emsp; Christian Rap</span><br>
+                                    <span>062 &emsp; Pop/Funk</span><br>
+                                    <span>063 &emsp; Jungle Music</span><br>
+                                    <span>064 &emsp; Native US</span><br>
+                                    <span>065 &emsp; Cabaret</span><br>
+                                    <span>066 &emsp; New Wave</span><br>
+                                    <span>067 &emsp; Psychedelic</span><br>
+                                    <span>068 &emsp; Rave</span><br>
+                                    <span>069 &emsp; Showtunes</span><br>
+                                    <span>070 &emsp; Trailer</span><br>
+                                    <span>071 &emsp; Lo-fi</span><br>
+                                    <span>072 &emsp; Tribal</span><br>
+                                    <span>073 &emsp; Acid Punk</span><br>
+                                    <span>074 &emsp; Acid Jazz</span><br>
+                                    <span>075 &emsp; Polka</span><br>
+                                    <span>076 &emsp; Retro</span><br>
+                                    <span>077 &emsp; Musical</span><br>
+                                    <span>078 &emsp; Rock n Roll</span><br>
+                                    <span>079 &emsp; Hard Rock</span><br>
+                                    <span>080 &emsp; Folk</span><br>
+                                    <span>081 &emsp; Folk Rock</span><br>
+                                    <span>082 &emsp; National Folk</span><br>
+                                    <span>083 &emsp; Swing</span><br>
+                                    <span>084 &emsp; Fast Fusion</span><br>
+                                    <span>085 &emsp; Bebop</span><br>
+                                    <span>086 &emsp; Latin</span><br>
+                                    <span>087 &emsp; Revival</span><br>
+                                    <span>088 &emsp; Celtic</span><br>
+                                    <span>089 &emsp; Bluegrass</span><br>
+                                    <span>090 &emsp; Avantgarde</span><br>
+                                    <span>091 &emsp; Gothic Rock</span><br>
+                                    <span>092 &emsp; Progressive Rock</span><br>
+                                    <span>093 &emsp; Psychedelic Rock</span><br>                        
+                                    <span>094 &emsp; Symphonic Rock</span><br>
+                                    <span>095 &emsp; Slow Rock</span><br>
+                                    <span>096 &emsp; Big Band</span><br>
+                                    <span>097 &emsp; Chorus</span><br>
+                                    <span>098 &emsp; Easy Listening</span><br>
+                                    <span>099 &emsp; Acoustic</span><br>
+                                    <span>100 &emsp; Humour</span><br>
+                                    <span>101 &emsp; Speech</span><br>
+                                    <span>102 &emsp; Chanson</span><br>
+                                    <span>103 &emsp; Opera</span><br>
+                                    <span>104 &emsp; Chamber Music</span><br>
+                                    <span>105 &emsp; Sonata</span><br>
+                                    <span>106 &emsp; Symphony</span><br>
+                                    <span>107 &emsp; Booty Bass</span><br>
+                                    <span>108 &emsp; Primus</span><br>
+                                    <span>109 &emsp; Porn Groove</span><br>
+                                    <span>110 &emsp; Satire</span><br>
+                                    <span>111 &emsp; Slow Jam</span><br>
+                                    <span>112 &emsp; Club</span><br>
+                                    <span>113 &emsp; Tango</span><br>
+                                    <span>114 &emsp; Samba</span><br>
+                                    <span>115 &emsp; Folklore</span><br>
+                                    <span>116 &emsp; Ballad</span><br>
+                                    <span>117 &emsp; Power Ballad</span><br>
+                                    <span>118 &emsp; Rhythmic Soul</span><br>
+                                    <span>119 &emsp; Freestyle</span><br>
+                                    <span>120 &emsp; Duet</span><br>
+                                    <span>121 &emsp; Punk Rock</span><br>
+                                    <span>122 &emsp; Drum Solo</span><br>
+                                    <span>123 &emsp; A Cappella</span><br>
+                                    <span>124 &emsp; Euro-house</span><br>
+                                    <span>125 &emsp; Dance Hall</span><br>
+                                    <span>126 &emsp; Goa Music</span><br>
+                                    <span>127 &emsp; Drum & Bass</span><br>
+                                    <span>128 &emsp; Club House</span><br>
+                                    <span>129 &emsp; Hardcore Techno</span><br>
+                                    <span>130 &emsp; Terror</span><br>
+                                    <span>131 &emsp; Indie</span><br>
+                                    <span>132 &emsp; Britpop</span><br>
+                                    <span>133 &emsp; Negerpunk</span><br>
+                                    <span>134 &emsp; Polsk Punk</span><br>
+                                    <span>135 &emsp; Beat</span><br>
+                                    <span>136 &emsp; Christain Gangsta Rap</span><br>
+                                    <span>137 &emsp; Heavy Metal</span><br>
+                                    <span>138 &emsp; Black Metal</span><br>
+                                    <span>139 &emsp; Crossover</span><br>
+                                    <span>140 &emsp; Contemporary Christian</span><br>
+                                    <span>141 &emsp; Christian Rock</span><br>
+                                    <span>142 &emsp; Merengue</span><br>
+                                    <span>143 &emsp; Salsa</span><br>                        
+                                    <span>144 &emsp; Thrash Metal</span><br>
+                                    <span>145 &emsp; Anime</span><br>                        
+                                    <span>146 &emsp; JPop</span><br>
+                                    <span>147 &emsp; Synthpop</span><br>
+                                    <span>148 &emsp; Christmas</span><br>
+                                    <span>149 &emsp; Art Rock</span><br>
+                                    <span>150 &emsp; Baroque</span><br>
+                                    <span>151 &emsp; Bhangra</span><br>
+                                    <span>152 &emsp; Big Beat</span><br>
+                                    <span>153 &emsp; Breakbeat</span><br>
+                                    <span>154 &emsp; Chillout</span><br>
+                                    <span>155 &emsp; Downtempo</span><br>
+                                    <span>156 &emsp; Dub</span><br>
+                                    <span>157 &emsp; EBM</span><br>
+                                    <span>158 &emsp; Eclectic</span><br>
+                                    <span>159 &emsp; Electro</span><br>
+                                    <span>160 &emsp; Electroclash</span><br>
+                                    <span>161 &emsp; Emo</span><br>
+                                    <span>162 &emsp; Experimental</span><br>
+                                    <span>163 &emsp; Garbage</span><br>
+                                    <span>164 &emsp; Global</span><br>
+                                    <span>165 &emsp; IDM</span><br>
+                                    <span>166 &emsp; Illbient</span><br>
+                                    <span>167 &emsp; Industro-Goth</span><br>
+                                    <span>168 &emsp; Jam Band</span><br>
+                                    <span>169 &emsp; Krautrock</span><br>
+                                    <span>170 &emsp; Leftfield</span><br>
+                                    <span>171 &emsp; Lounge</span><br>
+                                    <span>172 &emsp; Math Rock</span><br>
+                                    <span>173 &emsp; New Romantic</span><br>
+                                    <span>174 &emsp; Nu-breakz</span><br>
+                                    <span>175 &emsp; Post-punk</span><br>
+                                    <span>176 &emsp; Post-rock</span><br>
+                                    <span>177 &emsp; Psytrance</span><br>
+                                    <span>178 &emsp; Shoegaze</span><br>
+                                    <span>179 &emsp; Space Rock</span><br>
+                                    <span>180 &emsp; Trop Rock</span><br>
+                                    <span>181 &emsp; World Music</span><br>
+                                    <span>182 &emsp; Neoclassical</span><br>
+                                    <span>183 &emsp; Audiobook</span><br>
+                                    <span>184 &emsp; Audio Theatre</span><br>
+                                    <span>185 &emsp; Neue Deutsche Welle</span><br>
+                                    <span>186 &emsp; Podcast</span><br>
+                                    <span>187 &emsp; Indie-rock</span><br>
+                                    <span>188 &emsp; G-Funk</span><br>
+                                    <span>189 &emsp; Dubstep</span><br>
+                                    <span>190 &emsp; Garage Rock</span><br>
+                                    <span>191 &emsp; Psybient</span>
+                                </span>
+                            </span>
+                        </code>
+                     </div> 
                 </div>
                 
                 <!--synchronization (yikes)-->
@@ -10658,7 +10973,7 @@
                     </p>
                     <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
                         Do bear in mind, that if compression or encryption is used, the
-                        unsynchronisation scheme MUST be applied afterwards. When decoding an
+                        unsynchronisation scheme must be applied afterwards. When decoding an
                         unsynchronised frame, the unsynchronisation scheme must be reversed
                         first, encryption and decompression afterwards.
                     </p>      
@@ -10677,10 +10992,20 @@
                         out of eight available. Thus a 32 bit synchsafe integer can store 28
                         bits of information.
                     </p>
-                    <div class="mockup-code mt-5 mb-2">
-                        <pre data-prefix=" "><code>Example:</code></pre> 
-                        <pre data-prefix=" "><code>&emsp;255 (%11111111) encoded as a 16 bit synchsafe integer is 383 (%00000001 01111111).</code></pre> 
-                    </div>  
+                    <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                        <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                            <span class="flex gap-4">
+                                <span class="flex-1">
+                                    <span class="text-blue-500">
+                                        Example: <br>
+                                     </span>
+                                    <span>
+                                        &emsp; 255 (%11111111) encoded as a 16 bit synchsafe integer is 383 (%00000001 01111111).
+                                    </span>
+                                </span>
+                            </span>
+                        </code>
+                     </div>  
                 </div>
 
                 <!---padding-->
