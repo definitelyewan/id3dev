@@ -7389,8 +7389,6 @@
                                 </div>
                             </div>
                         </div>
-    
-    
                           <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
                             The 'Publisher' frame simply contains the name of the label or
                             publisher.
@@ -7399,29 +7397,46 @@
                             This frame is formated as:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Encoding = $xx<br>
                             Information = [n bytes of encoded data]
                         </p>
     
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-    
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TPB                       (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 22               (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00                       (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "Death Row Records"    (17-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TPUB                      (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 10            (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00                       (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "Bad Boy Records"      (15-bytes)</code></pre>
-                        </div>
+
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = TPB                   </span><br>
+                                        <span> &emsp; Frame Size = $00 00 22           </span><br>
+                                        <span> &emsp; Encoding = $00                   </span><br>
+                                        <span> &emsp; Information = "Death Row Records"</span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Frame ID = TPUB                      </span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 10            </span><br>
+                                        <span> &emsp; Frame Flags = $00 00                 </span><br>
+                                        <span> &emsp; Encoding = $00                       </span><br>
+                                        <span> &emsp; Information = "Bad Boy Records"      </span><br>
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>17</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>15</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Publishersofficialwebpage" class="mt-5">
@@ -7491,17 +7506,34 @@
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = WPB                               (3-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 21                       (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>URL = "https://www.deathrowofficial.com/"    (33-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = WPUB                                          (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 2E                                (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                                     (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>URL = "https://combsglobal.com/bad-boy-entertainment/"   (46-bytes)</code></pre>
-                        </div>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = WPB                           </span><br>
+                                        <span> &emsp; Frame Size = $00 00 21                   </span><br>
+                                        <span> &emsp; URL = "https://www.deathrowofficial.com/"</span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Frame ID = WPUB                                       </span><br>   
+                                        <span> &emsp; Frame Size = $00 00 00 2E                             </span><br>   
+                                        <span> &emsp; Frame Flags = $00 00                                  </span><br>   
+                                        <span> &emsp; URL = "https://combsglobal.com/bad-boy-entertainment/"</span><br>   
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>33</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>46</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Recommendedbuffersize" class="mt-5">
@@ -7598,20 +7630,42 @@
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = BUF                   (3-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 04           (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Buffer Size = 00 01 F4           (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Embedded Into Flag = %00000001   (1 byte)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = RBUF                      (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 00            (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Buffer Size = 00 01 F4               (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Embedded Into Flag = %00000001       (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Offset To Next Tag = $00 01 5F 90    (4-bytes)</code></pre>
-                        </div>
+
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = BUF               </span><br>
+                                        <span> &emsp; Frame Size = $00 00 04       </span><br>
+                                        <span> &emsp; Buffer Size = 00 01 F4       </span><br>
+                                        <span> &emsp; Embedded Into Flag = %00000001</span><br>
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Frame ID = RBUF                  </span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 00        </span><br>
+                                        <span> &emsp; Frame Flags = $00 00             </span><br>
+                                        <span> &emsp; Buffer Size = 00 01 F4           </span><br>
+                                        <span> &emsp; Embedded Into Flag = %00000001   </span><br>
+                                        <span> &emsp; Offset To Next Tag = $00 01 5F 90</span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>4</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Recordingdates" class="mt-5">
@@ -7694,20 +7748,40 @@
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-    
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TRD                           (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 18                   (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00                           (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "4th-7th June, 12th June"  (17-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TRDA                  (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 10        (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00             (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $00                   (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "15th-20th April"  (15-bytes)</code></pre>
-                        </div>
+
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = TRD</span><br>
+                                        <span> &emsp; Frame Size = $00 00 18</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Information = "4th-7th June, 12th June"</span><br>
+                                        <span class="text-blue-500">ID3v2.3 Example:</span><br>
+                                        <span> &emsp; Information = TRDA</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 10</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
+                                        <span> &emsp; Encoding = $00</span><br>
+                                        <span> &emsp; Information = "15th-20th April"</span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>
+                                    <span>3</span><br>
+                                    <span>1</span><br>
+                                    <span>17</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>15</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Recordingtime" class="mt-5">
@@ -7781,24 +7855,36 @@
                             This frame is formated as:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Encoding = $xx<br>
                             Information = [n bytes of encoded data]
                         </p>
     
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-    
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = TDRC                  (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 0B        (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00             (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $03                   (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Information = "1999-01-06"       (10-bytes)</code></pre>
-                        </div>
+
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = TDRC</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 0B</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
+                                        <span> &emsp; Encoding = $03</span><br>
+                                        <span> &emsp; Information = "1999-01-06"</span><br>
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>10</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Relativevolumeadjustment" class="mt-5">
@@ -7879,24 +7965,12 @@
                             This version of the frame is formated as:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
-                            Increment/decrement = %00yyyyxx <i>*</i>
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            Bits used for volume descr. = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            Relative volume change, right = $xx xx (xx ...)
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            Relative volume change, left = $xx xx (xx ...)
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            Peak volume right = $xx xx (xx ...)
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            Peak volume left = $xx xx (xx ...)
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Increment/decrement = %00yyyyxx <i>*</i><br>
+                            Bits used for volume descr. = $xx<br>
+                            Relative volume change, right = $xx xx (xx ...)<br>
+                            Relative volume change, left = $xx xx (xx ...)<br>
+                            Peak volume right = $xx xx (xx ...)<br>
+                            Peak volume left = $xx xx (xx ...)<br>
                             <i>*options labeled as 'y' are only available in ID3v2.3 and will be ignored by an ID3v2.2 decoder</i>
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
@@ -7921,15 +7995,9 @@
                             back channel and bit 3 for the left back channel.
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10">
-                            Relative volume change, right back = $xx xx (xx ...)
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            Relative volume change, left back = $xx xx (xx ...)
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            Peak volume right = $xx xx (xx ...)
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Relative volume change, right back = $xx xx (xx ...)<br>
+                            Relative volume change, left back = $xx xx (xx ...)<br>
+                            Peak volume right = $xx xx (xx ...)<br>
                             Peak volume left = $xx xx (xx ...)
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
@@ -7939,9 +8007,7 @@
                             field.
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10">
-                            Relative volume change, center = $xx xx (xx ...)
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Relative volume change, center = $xx xx (xx ...)<br>
                             Peak volume center = $xx xx (xx ...)
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
@@ -7950,9 +8016,7 @@
                             represented by bit 5 in the 'Increase/decrement' field.
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10">
-                            Relative volume change, bass = $xx xx (xx ...)
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Relative volume change, bass = $xx xx (xx ...)<br>
                             Peak volume bass = $xx xx (xx ...)
                         </p>
 
@@ -7972,18 +8036,10 @@
                             Identification = [ISO-8859-1 encoded string] $00
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16">
-                            Type of channel = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16">
-                            Volume adjustment = $xx xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16">
-                            Bits representing peak = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16">
-                            Peak volume = $xx xx (xx ...)
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16">
+                            Type of channel = $xx<br>
+                            Volume adjustment = $xx xx<br>
+                            Bits representing peak = $xx<br>
+                            Peak volume = $xx xx (xx ...)<br>
                             <i>* one to many adjustments may be present</i>
                         </p>
 
@@ -7991,71 +8047,98 @@
                             They type of adjustment field is defined below:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            $00 = Other
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            $01 = Master volume
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            $02 = Front right
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            $03 = Front left
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            $04 = Back right
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            $05 = Back left
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            $06 = Front centre
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            $07 = Back centre
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            $00 = Other<br>
+                            $01 = Master volume<br>
+                            $02 = Front right<br>
+                            $03 = Front left<br>
+                            $04 = Back right<br>
+                            $05 = Back left<br>
+                            $06 = Front centre<br>
+                            $07 = Back centre<br>
                             $08 = Subwoofer
                         </p>
     
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = RVA                           (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Size = $00 00 0A                   (3-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Increment/Decrement = %00000011          (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Bits Used For Volume Descr. = $10        (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Relative Volume Change, Right = $42 48   (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Relative Volume Change, Left = $42 48    (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Peak Volume Right = $78 00               (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Peak Volume Left = $78 00                (2-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = RVAB                              (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 16                    (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                         (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Increment/Decrement = %00101111              (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Bits Used For Volume Descr. = $10            (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Relative Volume Change, Right Front = $42 48 (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Relative Volume Change, Front Front = $42 48 (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Peak Volume Right = $78 00                   (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Peak Volume Left = $78 00                    (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Relative Volume Change, Right Back = $42 4B  (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Relative Volume Change, Left Back = $42 4B   (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Peak Volume Right = $78 00                   (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Peak Volume Left = $78 00                    (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Relative Volume Change, Bass = $52 53        (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Peak Volume Bass = $78 00                    (2-bytes)</code></pre>
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = RVA2              (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 16    (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00         (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Identification = "iPod" $00  (5-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Type of Channel = $01        (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Bits Representing Peak = $10 (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Peak Volume = $FC 00         (2-bytes)</code></pre>
-                        </div>
+
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span> &emsp; Frame ID = RVA                        </span><br>   
+                                        <span> &emsp; Frame Size = $00 00 0A                </span><br>   
+                                        <span> &emsp; Increment/Decrement = %00000011       </span><br>   
+                                        <span> &emsp; Bits Used For Volume Descr. = $10     </span><br>   
+                                        <span> &emsp; Relative Volume Change, Right = $42 48</span><br>   
+                                        <span> &emsp; Relative Volume Change, Left = $42 48 </span><br>   
+                                        <span> &emsp; Peak Volume Right = $78 00            </span><br>   
+                                        <span> &emsp; Peak Volume Left = $78 00             </span><br>   
+                                        <span class="text-blue-500">ID3v2.3 Example:</span><br>
+                                        <span> &emsp; Frame ID = RVAB                             </span><br> 
+                                        <span> &emsp; Frame Size = $00 00 00 16                   </span><br> 
+                                        <span> &emsp; Frame Flags = $00 00                        </span><br> 
+                                        <span> &emsp; Increment/Decrement = %00101111             </span><br> 
+                                        <span> &emsp; Bits Used For Volume Descr. = $10           </span><br> 
+                                        <span> &emsp; Relative Volume Change, Right Front = $42 48</span><br> 
+                                        <span> &emsp; Relative Volume Change, Front Front = $42 48</span><br> 
+                                        <span> &emsp; Peak Volume Right = $78 00                  </span><br> 
+                                        <span> &emsp; Peak Volume Left = $78 00                   </span><br> 
+                                        <span> &emsp; Relative Volume Change, Right Back = $42 4B </span><br> 
+                                        <span> &emsp; Relative Volume Change, Left Back = $42 4B  </span><br> 
+                                        <span> &emsp; Peak Volume Right = $78 00                  </span><br> 
+                                        <span> &emsp; Peak Volume Left = $78 00                   </span><br> 
+                                        <span> &emsp; Relative Volume Change, Bass = $52 53       </span><br> 
+                                        <span> &emsp; Peak Volume Bass = $78 00                   </span><br> 
+                                        <span class="text-blue-500">ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Frame ID = RVA2             </span><br> 
+                                        <span> &emsp; Frame Size = $00 00 00 16   </span><br> 
+                                        <span> &emsp; Frame Flags = $00 00        </span><br> 
+                                        <span> &emsp; Identification = "iPod" $00 </span><br> 
+                                        <span> &emsp; Type of Channel = $01       </span><br> 
+                                        <span> &emsp; Bits Representing Peak = $10</span><br> 
+                                        <span> &emsp; Peak Volume = $FC 00        </span> 
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>   
+                                    <span>3</span><br>   
+                                    <span>1</span><br>   
+                                    <span>1</span><br>   
+                                    <span>2</span><br>   
+                                    <span>2</span><br>   
+                                    <span>2</span><br>   
+                                    <span>2</span><br> 
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>1</span><br>
+                                    <span>2</span><br>
+                                    <span>2</span><br>
+                                    <span>2</span><br>
+                                    <span>2</span><br>
+                                    <span>2</span><br>
+                                    <span>2</span><br>
+                                    <span>2</span><br>
+                                    <span>2</span><br>
+                                    <span>2</span><br>
+                                    <span>2</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>5</span><br>
+                                    <span>1</span><br>
+                                    <span>1</span><br>
+                                    <span>2</span>
+                                </span>
+                            </code>
+                         </div>
                     </div>
                     
                     <div id="Releasetime" class="mt-5">
@@ -8122,9 +8205,7 @@
                                 </div>
                             </div>
                         </div>
-    
-    
-                          <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
+                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2">
                             The 'Release time' frame contains a timestamp describing when the
                             audio was first released. Timestamp format is defined as
                             yyyy-MM-ddTHH:mm:ss or a subset.
@@ -8133,23 +8214,35 @@
                             This frame is formated as:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Encoding = $xx<br>
                             Information = [n bytes of encoded data]
                         </p>
     
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-    
-                        <div class="mockup-code">
-                            <pre data-prefix=" "><code>Frame ID = TDRL                      (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 14            (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $03                       (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Information = "2022-04-15T13:15:02"  (19-bytes)</code></pre>
-                        </div>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = TDRL</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 14</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
+                                        <span> &emsp; Encoding = $03</span><br>
+                                        <span> &emsp; Information = "2022-04-15T13:15:02"</span><br>
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>19</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Reverb" class="mt-5">
@@ -8234,33 +8327,15 @@
                             This frame is formated as:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
-                            Reverb left (ms) = $xx xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            Reverb right (ms) = $xx xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            Reverb bounces, left = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            Reverb bounces, right = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            Reverb feedback, left to left = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            Reverb feedback, left to right = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            Reverb feedback, right to right = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            Reverb feedback, right to left = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
-                            Premix left to right = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Reverb left (ms) = $xx xx<br>
+                            Reverb right (ms) = $xx xx<br>
+                            Reverb bounces, left = $xx<br>
+                            Reverb bounces, right = $xx<br>
+                            Reverb feedback, left to left = $xx<br>
+                            Reverb feedback, left to right = $xx<br>
+                            Reverb feedback, right to right = $xx<br>
+                            Reverb feedback, right to left = $xx<br>
+                            Premix left to right = $xx<br>
                             Premix right to left = $xx 
                         </p>
 
@@ -8268,36 +8343,71 @@
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-    
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.2 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = REV                           (3-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 0C                   (3-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Reverb left (ms) = $00 64                (2-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Reverb right (ms) = $00 C8               (2-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Reverb bounces, left = $05               (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Reverb bounces, right = $0A              (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Reverb feedback, left to left = $7F      (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Reverb feedback, left to right = $3F     (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Reverb feedback, right to right = $7F    (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Reverb feedback, right to left = $3F     (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Premix left to right = $7F               (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Premix right to left = $00               (1 byte)</code></pre> 
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.3 & ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = RVRB                          (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 0C                (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                     (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Reverb left (ms) = $00 3E                (2-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Reverb right (ms) = $00 78               (2-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Reverb bounces, left = $03               (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Reverb bounces, right = $04              (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Reverb feedback, left to left = $80      (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Reverb feedback, left to right = $40     (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Reverb feedback, right to right = $80    (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Reverb feedback, right to left = $40     (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Premix left to right = $80               (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Premix right to left = $00               (1 byte)</code></pre> 
-                        </div>
+
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.2 Example:</span><br>
+                                        <span>Frame ID = REV                       </span><br>    
+                                        <span>Frame Size = $00 00 0C               </span><br>    
+                                        <span>Reverb left (ms) = $00 64            </span><br>    
+                                        <span>Reverb right (ms) = $00 C8           </span><br>    
+                                        <span>Reverb bounces, left = $05           </span><br>    
+                                        <span>Reverb bounces, right = $0A          </span><br>    
+                                        <span>Reverb feedback, left to left = $7F  </span><br>    
+                                        <span>Reverb feedback, left to right = $3F </span><br>    
+                                        <span>Reverb feedback, right to right = $7F</span><br>    
+                                        <span>Reverb feedback, right to left = $3F </span><br>    
+                                        <span>Premix left to right = $7F           </span><br>    
+                                        <span>Premix right to left = $00           </span><br>     
+                                        <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
+                                        <span>Frame ID = RVRB                      </span><br>     
+                                        <span>Frame Size = $00 00 00 0C            </span><br>     
+                                        <span>Frame Flags = $00 00                 </span><br>    
+                                        <span>Reverb left (ms) = $00 3E            </span><br>     
+                                        <span>Reverb right (ms) = $00 78           </span><br>     
+                                        <span>Reverb bounces, left = $03           </span><br>     
+                                        <span>Reverb bounces, right = $04          </span><br>     
+                                        <span>Reverb feedback, left to left = $80  </span><br>     
+                                        <span>Reverb feedback, left to right = $40 </span><br>     
+                                        <span>Reverb feedback, right to right = $80</span><br>     
+                                        <span>Reverb feedback, right to left = $40 </span><br>     
+                                        <span>Premix left to right = $80           </span><br>     
+                                        <span>Premix right to left = $00           </span><br>     
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>3</span><br>    
+                                    <span>3</span><br>    
+                                    <span>2</span><br>    
+                                    <span>2</span><br>    
+                                    <span>1</span><br>    
+                                    <span>1</span><br>    
+                                    <span>1</span><br>    
+                                    <span>1</span><br>    
+                                    <span>1</span><br>    
+                                    <span>1</span><br>    
+                                    <span>1</span><br>    
+                                    <span>1</span><br>
+                                    <br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>2</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>1</span><br>
+                                    <span>1</span><br>
+                                    <span>1</span><br>
+                                    <span>1</span><br>
+                                    <span>1</span><br>
+                                    <span>1</span><br>
+                                    <span>1</span>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Seekframe" class="mt-5">
@@ -8375,13 +8485,26 @@
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = SEEK                           (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 04                 (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                      (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Minimum Offset To Next Tag = $00 01 30 F5 (4-bytes)</code></pre>
-                        </div>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = SEEK</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 04</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
+                                        <span> &emsp; Minimum Offset To Next Tag = $00 01 30 F5</span><br>
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>4</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Seekpointindex" class="mt-5">
@@ -8459,21 +8582,13 @@
                             The frames format is as follows:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Indexed data start (S) = $xx xx xx xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Indexed data length (L) = $xx xx xx xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
-                            Number of index points (N) = $xx xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-10 mb-2">
+                            Indexed data start (S) = $xx xx xx xx<br>
+                            Indexed data length (L) = $xx xx xx xx<br>
+                            Number of index points (N) = $xx xx<br>
                             Bits per index point (b) = $xx
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-16 mb-2">
-                            Fraction at index (Fi) = $xx (xx)
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 ml-16 mb-2">
+                            Fraction at index (Fi) = $xx (xx)<br>
                             <i>* there may be one to many Fractions</i>
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
@@ -8514,19 +8629,39 @@
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-                        <div class="mockup-code">
-                            <pre data-prefix=" " class="bg-warning text-warning-content"><code>ID3v2.4 Example:</code></pre>
-                            <pre data-prefix=" "><code>Frame ID = ASPI                      (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 00            (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Frame Flags = $00 00                 (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Indexed Data Start = $00 00 00 00    (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Indexed Data Length = $00 00 A0 00   (4-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Number Of Index Points = $00 03      (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Bits Per Index Point = $08           (1 byte)</code></pre>
-                            <pre data-prefix=" "><code>Fraction At Index = 00 10            (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Fraction At Index = 00 20            (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Fraction At Index = 00 30            (2-bytes)</code></pre>
-                        </div>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = ASPI</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 11</span><br>
+                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Indexed Data Start = $00 00 00 00    </span><br>
+                                        <span> &emsp; Indexed Data Length = $00 00 A0 00   </span><br>
+                                        <span> &emsp; Number Of Index Points = $00 03      </span><br>
+                                        <span> &emsp; Bits Per Index Point = $08           </span><br>
+                                        <span> &emsp; Fraction At Index = 00 10            </span><br>
+                                        <span> &emsp; Fraction At Index = 00 20            </span><br>
+                                        <span> &emsp; Fraction At Index = 00 30            </span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>2</span><br>
+                                    <span>2</span><br>
+                                    <span>2</span>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Setsubtitle" class="mt-5">
@@ -8603,23 +8738,35 @@
                             This frame is formated as:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
-                            Encoding = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Encoding = $xx<br>
                             Information = [n bytes of encoded data]
                         </p>
     
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             See below for an example of what this frame could look like:
                         </p>
-    
-                        <div class="mockup-code">
-                            <pre data-prefix=" "><code>Frame ID = TSST            (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 17  (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Flags = $00 00       (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Encoding = $03             (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Information = "Soundtrack" (22-bytes)</code></pre>
-                        </div>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = TSST</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 17</span><br>
+                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Encoding = $03</span><br>
+                                        <span> &emsp; Information = "Soundtrack"</span><br>
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>22</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Signatureframe" class="mt-5">
@@ -8698,9 +8845,7 @@
                             This frame is formated as:
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10 mt-2">
-                            Group symbol = $xx
-                        </p>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-10">
+                            Group symbol = $xx<br>
                             Signature = [n bytes of binary data]
                         </p>
     
@@ -8708,13 +8853,29 @@
                             See below for an example of what this frame could look like:
                         </p>
     
-                        <div class="mockup-code">
-                            <pre data-prefix=" "><code>Frame ID = SIGN            (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Size = $00 00 00 6B  (4-bytes)</code></pre> 
-                            <pre data-prefix=" "><code>Frame Flags = $00 00       (2-bytes)</code></pre>
-                            <pre data-prefix=" "><code>Group Symbol = $09         (1 byte)</code></pre> 
-                            <pre data-prefix=" "><code>Signature = ...            (106-bytes)</code></pre>
-                        </div>
+                        <div class="flex flex-grow bg-base-200 light:text-black dark:text-white rounded-lg p-4 pl-6 mt-5 mb-2">
+                            <code class="text-sm sm:text-base inline-flex text-left items-center space-x-4">
+                                <span class="flex gap-4">
+                                    <span class="flex-1">
+                                        <span class="text-blue-500">ID3v2.4 Example:</span><br>
+                                        <span> &emsp; Information = SIGN</span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 6B</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
+                                        <span> &emsp; group Synbol = $09</span><br>
+                                        <span> &emsp; Information = ...</span><br>
+                                        
+                                    </span>
+                                </span>
+                                <span class="flex-1">
+                                    <span class="text-blue-500">Bytes:</span><br>
+                                    <span>4</span><br>
+                                    <span>4</span><br>
+                                    <span>2</span><br>
+                                    <span>1</span><br>
+                                    <span>106</span><br>
+                                </span>
+                            </code>
+                         </div>
                     </div>
 
                     <div id="Size" class="mt-5">
@@ -9512,7 +9673,7 @@
                                         <span class="text-blue-500">ID3v2.4 Example:</span><br>
                                         <span> &emsp; Information = TDTG</span><br>
                                         <span> &emsp; Frame Size = $00 00 00 08</span><br>
-                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
                                         <span> &emsp; Encoding = $03</span><br>
                                         <span> &emsp; Information = "1998-01"</span><br>
                                         
@@ -9613,7 +9774,7 @@
                                         <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
                                         <span> &emsp; Information = USER</span><br>
                                         <span> &emsp; Frame Size = $00 00 00 0D</span><br>
-                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
                                         <span> &emsp; Encoding = $00</span><br>
                                         <span> &emsp; Language = eng</span><br>
                                         <span> &emsp; Information = "no license"</span><br>
@@ -9719,7 +9880,7 @@
                                         <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
                                         <span> &emsp; Information = TIME</span><br>
                                         <span> &emsp; Frame Size = $00 00 00 05</span><br>
-                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
                                         <span> &emsp; Encoding = $00</span><br>
                                         <span> &emsp; Information = "0910"</span><br>
                                         
@@ -9830,7 +9991,7 @@
                                         <span class="text-blue-500">ID3v2.4 Example:</span><br>
                                         <span> &emsp; Information = TSOT</span><br>
                                         <span> &emsp; Frame Size = $00 00 00 06</span><br>
-                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
                                         <span> &emsp; Encoding = $03</span><br>
                                         <span> &emsp; Information = "Clash"</span><br>
                                         
@@ -9930,7 +10091,7 @@
                                         <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
                                         <span> &emsp; Information = TIT2</span><br>
                                         <span> &emsp; Frame Size = $00 00 00 10</span><br>
-                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
                                         <span> &emsp; Encoding = $00</span><br>
                                         <span> &emsp; Information = "Hurricane Donna"</span><br>
                                         
@@ -10038,7 +10199,7 @@
                                         <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
                                         <span> &emsp; Information = TRCK</span><br>
                                         <span> &emsp; Frame Size = $00 00 00 0B</span><br>
-                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
                                         <span> &emsp; Encoding = $01</span><br>
                                         <span> &emsp; Information = "1/15"</span><br>
                                         
@@ -10154,7 +10315,7 @@
                                         <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
                                         <span> &emsp; Information = UFID</span><br>
                                         <span> &emsp; Frame Size = $00 00 00 4C</span><br>
-                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
                                         <span> &emsp; Owner identifier = "example.com/db.html"</span><br>
                                         <span> &emsp; Identifier = ...</span><br>
                                         
@@ -10450,7 +10611,7 @@
                                         <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
                                         <span> &emsp; Frame ID = WXXX</span><br>
                                         <span> &emsp; Frame Size = $00 00 00 2D</span><br>
-                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
                                         <span> &emsp; Encoding = $00</span><br>
                                         <span> &emsp; Description = "music map output" $00</span><br>
                                         <span> &emsp; URL = "https://www.music-map.com/"</span>
@@ -10563,7 +10724,7 @@
                                         <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
                                         <span> &emsp; Frame ID = TXXX</span><br>
                                         <span> &emsp; Frame Size = $00 00 00 17</span><br>
-                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
                                         <span> &emsp; Encoding = $00</span><br>
                                         <span> &emsp; Description = "realted artist" $00</span><br>
                                         <span> &emsp; Information = "Alvvays" $00</span>
@@ -10673,7 +10834,7 @@
                                         <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
                                         <span> &emsp; Information = TYER</span><br>
                                         <span> &emsp; Frame Size = $00 00 00 05</span><br>
-                                        <span> &emsp; Frame Flags = $00 00"</span><br>
+                                        <span> &emsp; Frame Flags = $00 00</span><br>
                                         <span> &emsp; Encoding = $00</span><br>
                                         <span> &emsp; Information = "1980"</span><br>
                                         
