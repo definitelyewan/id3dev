@@ -16,5 +16,6 @@
         "intrin.h": "c",
         "string.h": "c",
         "bytestream.h": "c"
-    }
+    },
+    "cmake.configureOnOpen": false
 }
