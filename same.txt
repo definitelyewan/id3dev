@@ -92,6 +92,5 @@ Encrypted meta frame                            |    |    |CRM|X|
 
 
 TODO:
-    1. make sure all ID3v2.4 timestamps are mentioned as a subset
-    2. change example container to something better that doesnt look like a code block
-    3. create a homepage for the current page that links to doxygen somehow
+    1. change example container to something better that doesnt look like a code block
+    2. create a homepage for the current page that links to doxygen somehow

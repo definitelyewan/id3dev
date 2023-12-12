@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.22.1)
 project(Id3dev VERSION 1.0.0.0)
 
-option(BUILD_SHARED_LIBS "building a shared lib" ON)
-option(BUILD_ID3_TESTS "build tests" ON)
-option(DEDUB_SYMBOLS "enables debugging" ON)
+option(BUILD_SHARED_LIBS "building a shared lib" OFF)
+option(BUILD_ID3_DOCS "build docs" OFF)
+option(BUILD_ID3_TESTS "build tests" OFF)
+option(DEDUB_SYMBOLS "enables debugging" OFF)
 
 set(ID3V1_HEADERS
   "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v1/id3v1.h"
@@ -16,6 +17,9 @@ set(ID3V1_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v1/id3v1Parser.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v1/id3v1.c"
 )
+
+set(ID3DEV_HEADERS "${ID3V1_HEADERS}")
+set(ID3DEV_SRC "${ID3V1_SRC}")
 
 if(DEBUG_SYMBOLS)
   set(CMAKE_C_FLAGS "-g")
@@ -35,4 +39,8 @@ add_subdirectory("modules/ByteStream")
 
 if(BUILD_ID3_TESTS)
   add_subdirectory(tests)
+endif()
+
+if(BUILD_ID3_DOCS)
+  add_subdirectory("docs")
 endif()
