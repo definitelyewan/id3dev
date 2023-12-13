@@ -15,9 +15,9 @@ else:
 #build with cmake
 try:
     if platform == "linux" or platform == "linux2" or "darwin":
-        subprocess.call(["cmake", "-S", ".", "-B", "./build", "-DBUILD_ID3_TESTS=ON"])
+        subprocess.call(["cmake", "-S", ".", "-B", "./build", "-DBUILD_ID3_TESTS=ON", "-DBUILD_SHARED_LIBS=ON","-DDEBUG_ID3_SYMBOLS=ON"])
     elif platform == "win32":
-        subprocess.call(["cmake", "-S", ".", "-B", ".\\build", "-DBUILD_ID3_TESTS=ON"])
+        subprocess.call(["cmake", "-S", ".", "-B", ".\\build", "-DBUILD_ID3_TESTS=ON", "-DBUILD_SHARED_LIBS=ON","-DDEBUG_ID3_SYMBOLS=ON"])
 
 except OSError as e:
     if e.errno == errno.ENOENT:

@@ -626,7 +626,7 @@ char *id3v1GenreFromTable(Genre val){
  * @return char* 
  */
 char *id3v1ReadTitle(Id3v1Tag *tag){
-    return tag->title;
+    return (char *)tag->title;
 }
 
 /**
@@ -636,7 +636,7 @@ char *id3v1ReadTitle(Id3v1Tag *tag){
  * @return char* 
  */
 char *id3v1ReadArtist(Id3v1Tag *tag){
-    return tag->artist;
+    return (char *)tag->artist;
 }
 
 /**
@@ -646,7 +646,7 @@ char *id3v1ReadArtist(Id3v1Tag *tag){
  * @return char* 
  */
 char *id3v1ReadAlbum(Id3v1Tag *tag){
-    return tag->albumTitle;
+    return (char *)tag->albumTitle;
 }
 
 /**
@@ -666,7 +666,7 @@ int id3v1ReadYear(Id3v1Tag *tag){
  * @return char* 
  */
 char *id3v1ReadComment(Id3v1Tag *tag){
-    return tag->comment;
+    return (char *)tag->comment;
 }
 
 /**
@@ -793,9 +793,7 @@ int id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag){
         //get file size
         fseek(fp, 0, SEEK_END);
         size_t index = ftell(fp);
-        size_t offset = 0;
         unsigned char *buffer[ID3V1_MAX_SIZE];
-
 
         //seek to tag start
         //if the file is less then 128 bytes then we can catch that here.

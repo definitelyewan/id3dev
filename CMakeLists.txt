@@ -4,7 +4,7 @@ project(Id3dev VERSION 1.0.0.0)
 option(BUILD_SHARED_LIBS "building a shared lib" OFF)
 option(BUILD_ID3_DOCS "build docs" OFF)
 option(BUILD_ID3_TESTS "build tests" OFF)
-option(DEDUB_SYMBOLS "enables debugging" OFF)
+option(DEDUB_ID3_SYMBOLS "enables debugging" ON)
 
 set(ID3V1_HEADERS
   "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v1/id3v1.h"
@@ -21,24 +21,28 @@ set(ID3V1_SRC
 set(ID3DEV_HEADERS "${ID3V1_HEADERS}")
 set(ID3DEV_SRC "${ID3V1_SRC}")
 
-if(DEBUG_SYMBOLS)
-  set(CMAKE_C_FLAGS "-g")
-  set(CMAKE_C_FLAGS "-Wall")
 
+if(DEBUG_ID3_SYMBOLS)
+  if (MSVC)
+      add_compile_options("/W4")
+  else()
+    add_compile_options("-Wall")
+    add_compile_options("-g")
+  endif()
 endif()
 
 add_library(Id3dev ${ID3V1_HEADERS} ${ID3V1_SRC})
-target_link_libraries(Id3dev ByteStream)
-target_link_libraries(Id3dev m)
+target_link_libraries(Id3dev ByteStream) #byte stream library
+target_link_libraries(Id3dev m) #math library
 
-target_include_directories(Id3dev PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v1")
+target_include_directories(Id3dev PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v1" "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2")
 set_target_properties(Id3dev PROPERTIES C_STANDARD 99)
 
 
 add_subdirectory("modules/ByteStream")
 
 if(BUILD_ID3_TESTS)
-  add_subdirectory(tests)
+  add_subdirectory("tests")
 endif()
 
 if(BUILD_ID3_DOCS)

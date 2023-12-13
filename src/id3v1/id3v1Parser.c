@@ -48,7 +48,7 @@ Id3v1Tag *id3v1NewTag(uint8_t *title, uint8_t *artist, uint8_t *albumTitle, int 
     
     //set values
     if(title != NULL){
-        memcpy(tag->title, title, ((strlen((char *)title) == ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : strlen((char *)title)));
+        memcpy(tag->title, title, ((strlen((char *)title) == ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : strlen((char *)title)));  
     }
     
     if(artist != NULL){
@@ -121,7 +121,7 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
     uint8_t holdArtist[ID3V1_FIELD_SIZE];
     uint8_t holdAlbum[ID3V1_FIELD_SIZE];
     uint8_t holdComment[ID3V1_FIELD_SIZE];
-    unsigned char year[ID3V1_YEAR_SIZE];
+    uint8_t year[ID3V1_YEAR_SIZE + 1]; //must be +1. without it holdtitle gets overwritten somehow
     Genre genre;
     ByteStream *stream = NULL;
 
@@ -137,7 +137,6 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
         byteStreamDestroy(stream);
         return id3v1NewTag(NULL, NULL, NULL, 0, 0, NULL, OTHER_GENRE);
     }
-
     //get song title and set index for next tag
     memset(holdTitle, 0, ID3V1_FIELD_SIZE);    
     if(!byteStreamRead(stream, holdTitle, ID3V1_FIELD_SIZE)){
@@ -151,14 +150,12 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
         byteStreamDestroy(stream);
         return id3v1NewTag(holdTitle, NULL, NULL, 0, 0, NULL, OTHER_GENRE);
     }
-
     //get album title and set index for next tag
     memset(holdAlbum, 0, ID3V1_FIELD_SIZE); 
     if(!byteStreamRead(stream, holdAlbum, ID3V1_FIELD_SIZE)){
         byteStreamDestroy(stream);
         return id3v1NewTag(holdTitle, holdArtist, NULL, 0, 0, NULL, OTHER_GENRE);
     }
-
     //get year and set index for next tag
     memset(year, 0, ID3V1_YEAR_SIZE);
     if(!byteStreamRead(stream, year, ID3V1_YEAR_SIZE)){
@@ -166,15 +163,14 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
         return id3v1NewTag(holdTitle, holdArtist, holdAlbum, 0, 0, NULL, OTHER_GENRE);
     }else{
         if(memcmp(year,"\x00\x00\x00\x00\x00",ID3V1_YEAR_SIZE) != 0){
-            
+ 
             int i = 0;
             for(i = 0; year[i] == 0 && i < ID3V1_YEAR_SIZE; i++);
-            
             year[ID3V1_YEAR_SIZE] = '\0';
             nYear = atoi((char *) (year + i));
         }
     }
-    
+
     //check for a track number, ID3V1.1 has the 28th bit nulled so that the 29th can be a track number
     if(!byteStreamSeek(stream, ID3V1_FIELD_SIZE - 2, SEEK_CUR)){
         byteStreamDestroy(stream);
@@ -193,7 +189,8 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
         byteStreamDestroy(stream);
         return id3v1NewTag(holdTitle, holdArtist, holdAlbum, nYear, 0, NULL, 0);
     }
-    
+
+
     //read and set track number + move index
     if(trackno){
         if((trackno = byteStreamGetCh(stream)) == EOF){
@@ -217,6 +214,5 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
     }
 
     byteStreamDestroy(stream);
-
     return id3v1NewTag(holdTitle, holdArtist, holdAlbum, nYear, trackno, holdComment, genre);
 }
