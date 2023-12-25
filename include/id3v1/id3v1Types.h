@@ -17,7 +17,6 @@ extern "C"{
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdint.h>
 
 
 //! The size of the id3v1 and id3v1.1 tag identifier "TAG"

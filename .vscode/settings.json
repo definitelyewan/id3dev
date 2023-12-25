@@ -15,7 +15,8 @@
         "windows.h": "c",
         "intrin.h": "c",
         "string.h": "c",
-        "bytestream.h": "c"
+        "bytestream.h": "c",
+        "id3v2types.h": "c"
     },
     "cmake.configureOnOpen": false
 }

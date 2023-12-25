@@ -74,7 +74,8 @@ except OSError as e:
 #call test execs
 try:
     if platform == "linux" or platform == "linux2" or "darwin":
-        subprocess.call(["valgrind","--leak-check=full", "--show-leak-kinds=all","./id3v1_test"])
+        #subprocess.call(["valgrind","--leak-check=full", "--show-leak-kinds=all","./id3v1_test"])
+        subprocess.call(["valgrind","--leak-check=full", "--show-leak-kinds=all","./id3v2_tag_identity_test"])
     elif platform == "win32":
         if os.path.exists("Release"):
             os.chdir("Release")

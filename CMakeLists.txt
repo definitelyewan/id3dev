@@ -12,14 +12,19 @@ set(ID3V1_HEADERS
   "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v1/id3v1Types.h"
 )
 
-
 set(ID3V1_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v1/id3v1Parser.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v1/id3v1.c"
 )
 
-set(ID3DEV_HEADERS "${ID3V1_HEADERS}")
-set(ID3DEV_SRC "${ID3V1_SRC}")
+set(ID3V2_SRC
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v2/id3v2TagIdentity.c"
+)
+
+
+
+set(ID3DEV_HEADERS "${ID3V1_HEADERS}" "${ID3V2_HEADERS}")
+set(ID3DEV_SRC "${ID3V1_SRC}" "${ID3V2_SRC}")
 
 
 if(DEBUG_ID3_SYMBOLS)
@@ -31,7 +36,7 @@ if(DEBUG_ID3_SYMBOLS)
   endif()
 endif()
 
-add_library(Id3dev ${ID3V1_HEADERS} ${ID3V1_SRC})
+add_library(Id3dev ${ID3DEV_HEADERS} ${ID3DEV_SRC})
 target_link_libraries(Id3dev ByteStream) #byte stream library
 target_link_libraries(Id3dev m) #math library
 
