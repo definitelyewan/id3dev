@@ -4,3 +4,7 @@
 [submodule "modules/ByteStream"]
 	path = modules/ByteStream
 	url = https://github.com/definitelyewan/ByteStream.git
+[submodule "modules/cmocka"]
+	path = modules/cmocka
+	url = https://gitlab.com/cmocka/cmocka.git
+	branch = stable-1.1
