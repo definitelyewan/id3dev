@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.22.1)
 
-find_library(CMOCKA_LIBRARIES REQUIRED NAMES cmocka)
-if(CMOCKA_LIBRARIES)
-    message(STATUS "cmocka library found: ${CMOCKA_LIBRARIES}")
-else()
-    #cmocka not found
-    message(FATAL_ERROR "cmocka library not found please install cmocka to run these tests")
-endif()
+# find_library(CMOCKA_LIBRARIES REQUIRED NAMES cmocka)
+# if(CMOCKA_LIBRARIES)
+#     message(STATUS "cmocka library found: ${CMOCKA_LIBRARIES}")
+# else()
+#     #cmocka not found
+#     message(FATAL_ERROR "cmocka library not found please install cmocka to run these tests")
+# endif()
 
 set(TEST_ID3V1 "${CMAKE_CURRENT_SOURCE_DIR}/id3v1Functions.c")
 set(TEST_ID3V2_TAG_IDENTITY_ID3V2 "${CMAKE_CURRENT_SOURCE_DIR}/id3v2TagIdentityFunctions.c")
@@ -23,6 +23,7 @@ set(TEST_ASSETS
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/sorry4dying.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/null.mp3"
 )
+
 
 #id3v1 tests
 add_executable(id3v1_test ${TEST_ID3V1})

@@ -331,7 +331,7 @@ bool id3v2WriteTextEncodingRestriction(Id3v2TagHeader *header, bool bit){
         return false;
     }
 
-    if(header != ID3V2_TAG_VERSION_4){
+    if(header->majorVersion != ID3V2_TAG_VERSION_4){
         return false;
     }
 
@@ -344,4 +344,5 @@ bool id3v2WriteTextEncodingRestriction(Id3v2TagHeader *header, bool bit){
 
     header->extendedHeader->restrictions = setBit(header->extendedHeader->restrictions, 5, bit);
 
+    return 0;//avoid warning
 }
