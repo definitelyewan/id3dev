@@ -44,7 +44,7 @@ try:
 except OSError as e:
     if e.errno == errno.ENOENT:
         #program was not found
-        print("failed to build benchmarks either make or MSBuild was not found in PATH or it was not installed")
+        print("failed to build tests either make or MSBuild was not found in PATH or it was not installed")
         quit()
     else:
         #program output
@@ -73,9 +73,14 @@ except OSError as e:
 
 #call test execs
 try:
-    if platform == "linux" or platform == "linux2" or "darwin":
-        #subprocess.call(["valgrind","--leak-check=full", "--show-leak-kinds=all","./id3v1_test"])
+    if platform == "linux" or platform == "linux2":
+        subprocess.call(["valgrind","--leak-check=full", "--show-leak-kinds=all","./id3v1_test"])
         subprocess.call(["valgrind","--leak-check=full", "--show-leak-kinds=all","./id3v2_tag_identity_test"])
+    elif platform == "darwin":
+        os.environ["MallocStackLogging"] = "1"
+        subprocess.call(["leaks","--atExit","--list","--","./id3v1_test"])
+        subprocess.call(["leaks","--atExit","--list","--","./id3v2_tag_identity_test"])
+        os.environ["MallocStackLogging"] = "0"
     elif platform == "win32":
         if os.path.exists("Release"):
             os.chdir("Release")

@@ -449,9 +449,9 @@ static void id3v1TagFromFile_readValidTag(void **state){
     Id3v1Tag *tag = id3v1TagFromFile("assets/dannybrown.mp3");
 
     assert_non_null(tag);
-    assert_string_equal(tag->title, "Ain't It Funny");
-    assert_string_equal(tag->artist, "Danny Brown");
-    assert_string_equal(tag->albumTitle, "Atrocity Exhibition");
+    assert_string_equal((char *)tag->title, "Ain't It Funny");
+    assert_string_equal((char *)tag->artist, "Danny Brown");
+    assert_string_equal((char *)tag->albumTitle, "Atrocity Exhibition");
     assert_int_equal(tag->year, 2016);
     assert_int_equal(tag->track, 6);
     assert_int_equal(tag->genre, 255);
@@ -499,7 +499,7 @@ static void id3v1WriteTitle_WithBigTitle(void **state){
 
     assert_true(id3v1WriteTitle("this is a string that is over 30 bytes", tag));
 
-    assert_string_equal(tag->title, "this is a string that is over ");
+    assert_string_equal((char *)tag->title, "this is a string that is over ");
 
 
     id3v1DestroyTag(&tag);
@@ -1146,6 +1146,6 @@ int main(){
         cmocka_unit_test(id3v1WriteTagToFile_appendFileBig),
 
     };
-
+    
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

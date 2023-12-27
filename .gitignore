@@ -8,7 +8,7 @@ vgcore.*
 .vscode
 *.json
 build/
-
+.DS_Store
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json

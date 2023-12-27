@@ -47,6 +47,10 @@ set_target_properties(Id3dev PROPERTIES C_STANDARD 99)
 add_subdirectory("modules/ByteStream")
 
 if(BUILD_ID3_TESTS)
+  #dont build cmocka tests or examples
+  option(UNIT_TESTING OFF)
+  option(WITH_EXAMPLES OFF)
+  add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/modules/cmocka/")
   add_subdirectory("tests")
 endif()
 

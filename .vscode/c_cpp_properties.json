@@ -8,7 +8,8 @@
                 "${workspaceFolder}/include/util",
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/include",
-                "${workspaceFolder}/include/util"
+                "${workspaceFolder}/include/util",
+                "${workspaceFolder}/modules/cmocka/include"
             ],
             "defines": [
                 "_DEBUG",

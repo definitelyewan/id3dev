@@ -8,6 +8,8 @@ cmake_minimum_required(VERSION 3.22.1)
 #     message(FATAL_ERROR "cmocka library not found please install cmocka to run these tests")
 # endif()
 
+#add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/../modules/cmocka/")
+
 set(TEST_ID3V1 "${CMAKE_CURRENT_SOURCE_DIR}/id3v1Functions.c")
 set(TEST_ID3V2_TAG_IDENTITY_ID3V2 "${CMAKE_CURRENT_SOURCE_DIR}/id3v2TagIdentityFunctions.c")
 
@@ -26,6 +28,7 @@ set(TEST_ASSETS
 
 
 #id3v1 tests
+#target_include_directories(id3v1_test PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/../modules/include/")
 add_executable(id3v1_test ${TEST_ID3V1})
 set_target_properties(id3v1_test PROPERTIES C_STANDARD 99)
 target_link_libraries(id3v1_test PRIVATE Id3dev)
