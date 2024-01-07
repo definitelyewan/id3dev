@@ -307,7 +307,7 @@ bool id3v2WriteTagSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
         return false;
     }
 
-    if(header->majorVersion != ID3V2_TAG_VERSION_4 && readBit(header->flags, 6) != 1){
+    if(header->majorVersion != ID3V2_TAG_VERSION_4){
         return false;
     }
 
@@ -325,6 +325,14 @@ bool id3v2WriteTagSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
     return true;
 }
 
+/**
+ * @brief writes the value of bit to the correct possition in the restrictions.
+ * @details if this function fails it will return 0 otherwise, 1
+ * @param header 
+ * @param bit 
+ * @return true 
+ * @return false 
+ */
 bool id3v2WriteTextEncodingRestriction(Id3v2TagHeader *header, bool bit){
 
     if(!header){
@@ -340,9 +348,202 @@ bool id3v2WriteTextEncodingRestriction(Id3v2TagHeader *header, bool bit){
         header->extendedHeader = extendedHeader;
     }
 
+    //will set as true every time
     header->extendedHeader->tagRestrictions = true;
 
     header->extendedHeader->restrictions = setBit(header->extendedHeader->restrictions, 5, bit);
 
-    return 0;//avoid warning
+    return true;//avoid warning
+}
+
+/**
+ * @brief sets the text fields size restriction within an extended headers bits.
+ * @details this function returns 0 if it fails and 1 otherwise.
+ * @param header 
+ * @param bits 
+ * @return true 
+ * @return false 
+ */
+bool id3v2WriteTextFieldsSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
+    //0b00, 0b01, 0b10, 0b11 making the max option 0x03
+    if(!header || bits > 0x03){
+        return false;
+    }
+
+    if(header->majorVersion != ID3V2_TAG_VERSION_4){
+        return false;
+    }
+
+    if(!header->extendedHeader){
+        Id3v2ExtendedTagHeader *extendedHeader = id3v2NewExtendedTagHeader(0,0,0,0,0);
+        header->extendedHeader = extendedHeader;
+    }
+
+    //i dont care it will get set every time
+    header->extendedHeader->tagRestrictions = true;
+
+    header->extendedHeader->restrictions = setBit(header->extendedHeader->restrictions, 4, readBit(bits, 1));
+    header->extendedHeader->restrictions = setBit(header->extendedHeader->restrictions, 3, readBit(bits, 0));
+
+    return true;
+}
+
+/**
+ * @brief sets the image encoding restriction to the value of bit within an extended headers restrictions.
+ * @details this function returns 0 if it fails and 1 otherwise.
+ * @param header 
+ * @param bit 
+ * @return true 
+ * @return false 
+ */
+bool id3v2WriteImageEncodingRestriction(Id3v2TagHeader *header, bool bit){
+
+    if(!header){
+        return false;
+    }
+
+    if(header->majorVersion != ID3V2_TAG_VERSION_4){
+        return false;
+    }
+
+    if(!header->extendedHeader){
+        Id3v2ExtendedTagHeader *extendedHeader = id3v2NewExtendedTagHeader(0,0,0,0,0);
+        header->extendedHeader = extendedHeader;
+    }
+
+    //will set as true every time
+    header->extendedHeader->tagRestrictions = true;
+
+    header->extendedHeader->restrictions = setBit(header->extendedHeader->restrictions, 2, bit);
+
+    return true;//avoid warning
+}
+
+/**
+ * @brief sets the imagesize restriction to the value of bits within an extended tag headers restrictions
+ * @details this function returns 0 if it fails and 1 otherwise
+ * @param header 
+ * @param bits 
+ * @return true 
+ * @return false 
+ */
+bool id3v2WriteImageSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
+    //0b00, 0b01, 0b10, 0b11 making the max option 0x03
+    if(!header || bits > 0x03){
+        return false;
+    }
+
+    if(header->majorVersion != ID3V2_TAG_VERSION_4){
+        return false;
+    }
+
+    if(!header->extendedHeader){
+        Id3v2ExtendedTagHeader *extendedHeader = id3v2NewExtendedTagHeader(0,0,0,0,0);
+        header->extendedHeader = extendedHeader;
+    }
+
+    //i dont care it will get set every time
+    header->extendedHeader->tagRestrictions = true;
+
+    header->extendedHeader->restrictions = setBit(header->extendedHeader->restrictions, 1, readBit(bits, 1));
+    header->extendedHeader->restrictions = setBit(header->extendedHeader->restrictions, 0, readBit(bits, 0));
+
+    return true;
+}
+
+int id3v2ReadTagSizeRestriction(Id3v2TagHeader *header){
+
+    if(!header){
+        return -1;
+    }
+
+    if(!header->extendedHeader){
+        return -1;
+    }
+
+    //build an int from bits
+    uint8_t ret = 0;
+
+    setBit(ret, 0, readBit(header->extendedHeader->restrictions, 7));
+    setBit(ret, 1, readBit(header->extendedHeader->restrictions, 6));
+
+    return (int)ret;
+}
+
+int id3v2ReadTextEncodingRestriction(Id3v2TagHeader *header){
+
+    if(!header){
+        return -1;
+    }
+
+    if(!header->extendedHeader){
+        return -1;
+    }
+
+    return (int)readBit(header->extendedHeader->restrictions, 5);
+}
+
+int id3v2ReadTextFieldsSizeRestriction(Id3v2TagHeader *header){
+
+    if(!header){
+        return -1;
+    }
+
+    if(!header->extendedHeader){
+        return -1;
+    }
+
+    //build an int from bits
+    uint8_t ret = 0;
+
+    setBit(ret, 0, readBit(header->extendedHeader->restrictions, 4));
+    setBit(ret, 1, readBit(header->extendedHeader->restrictions, 3));
+
+    return (int)ret;
+}
+
+int id3v2ReadImageEncodingRestriction(Id3v2TagHeader *header){
+    if(!header){
+        return -1;
+    }
+
+    if(!header->extendedHeader){
+        return -1;
+    }
+
+    return (int)readBit(header->extendedHeader->restrictions, 2);
+} 
+
+int id3v2ReadImageSizeRestriction(Id3v2TagHeader *header){
+    if(!header){
+        return -1;
+    }
+
+    if(!header->extendedHeader){
+        return -1;
+    }
+
+    //build an int from bits
+    uint8_t ret = 0;
+
+    setBit(ret, 0, readBit(header->extendedHeader->restrictions, 1));
+    setBit(ret, 1, readBit(header->extendedHeader->restrictions, 0));
+
+    return (int)ret;
+}
+
+bool id3v2ClearTagRestrictions(Id3v2TagHeader *header){
+    if(!header){
+        return 0;
+    }
+
+    if(!header->extendedHeader){
+        return 0;
+    }
+
+    //remove value in flags so restrictions are gone
+    setBit(header->flags, 4, 0);
+    header->extendedHeader->restrictions = 0;
+    
+    return 1;
 }

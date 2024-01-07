@@ -1,5 +1,5 @@
-cmake -B build -S . -DDEDUB_SYMBOLS=ON -DBUILD_TESTS=ON -DBUILD_SHARED_LIBS=ON
+cmake -S . -B ./build -DBUILD_ID3_TESTS=ON -DBUILD_SHARED_LIBS=ON -DDEBUG_ID3_SYMBOLS=ON
 cd build
 make
 cd tests
-valgrind --leak-check=full ./id3v1_test
+leaks --atExit --list -- ./id3v2_tag_identity_test

@@ -45,11 +45,11 @@ int id3v2ReadFooterIndicator(Id3v2TagHeader *header);
 */
 
 //mem functions
+
 Id3v2ExtendedTagHeader *id3v2NewExtendedTagHeader(uint32_t padding, uint32_t crc, bool update, bool tagRestrictions, uint8_t restrictions);
 void id3v2DestroyExtendedTagHeader(Id3v2ExtendedTagHeader **toDelete);
 
 //tag restriction functions
-
 
 bool id3v2WriteTagSizeRestriction(Id3v2TagHeader *header, uint8_t bits);
 bool id3v2WriteTextEncodingRestriction(Id3v2TagHeader *header, bool bit);

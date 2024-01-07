@@ -37,7 +37,6 @@ extern "C"{
  * hence the extended header is optional.
  * @details a programmer should never need to use this structure manually and it will be
  * created, accessed, and deleted automatically
- * 
  */
 typedef struct _Id3v2ExtendedTagHeader{
     
@@ -79,7 +78,7 @@ typedef struct _Id3v2TagHeader{
     //!frame flags %abcd0000
     uint8_t flags;
 
-    //extended header
+    //! extended header
     Id3v2ExtendedTagHeader *extendedHeader;
 
 }Id3v2TagHeader;
@@ -91,6 +90,7 @@ typedef struct _Id3v2TagHeader{
 typedef struct _Id3v2Tag{
 
     Id3v2TagHeader *tagHeader;
+    Id3v2TagHeader *tagFooter;
 
 }Id3v2Tag;
 

@@ -402,14 +402,218 @@ static void id3v2WriteTagSizeRestriction_wrongVersion(void **state){
 
 }
 
-    // printf("%d%d%d%d%d%d%d%d\n",readBit(header->extendedHeader->restrictions, 7),
-    //                             readBit(header->extendedHeader->restrictions, 6),
-    //                             readBit(header->extendedHeader->restrictions, 5),
-    //                             readBit(header->extendedHeader->restrictions, 4),
-    //                             readBit(header->extendedHeader->restrictions, 3),
-    //                             readBit(header->extendedHeader->restrictions, 2),
-    //                             readBit(header->extendedHeader->restrictions, 1),
-    //                             readBit(header->extendedHeader->restrictions, 0));
+static void id3v2WriteTagSizeRestriction_notAOption(void **state){
+    
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,192);
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_false(id3v2WriteTagSizeRestriction(header, 9));
+    assert_int_equal(header->extendedHeader->restrictions, 192);
+    id3v2DestroyTagHeader(&header);
+
+}
+
+static void id3v2WriteTextEncodingRestriction_noExtAlready(void **state){
+    
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, NULL);
+
+    assert_true(id3v2WriteTextEncodingRestriction(header, 1));
+
+    assert_non_null(header->extendedHeader);
+    assert_true(header->extendedHeader->tagRestrictions);
+    assert_int_equal(header->extendedHeader->restrictions, 32);
+
+    id3v2DestroyTagHeader(&header);
+}
+
+static void id3v2WriteTextEncodingRestriction_changeCurrentValue(void **state){
+    
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,32);
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_true(id3v2WriteTextEncodingRestriction(header, 0));
+
+    assert_non_null(header->extendedHeader);
+    assert_true(header->extendedHeader->tagRestrictions);
+    assert_int_equal(header->extendedHeader->restrictions, 0);
+
+    id3v2DestroyTagHeader(&header);
+}
+
+static void id3v2WriteTextEncodingRestriction_wrongVersion(void **state){
+    
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,32);
+    Id3v2TagHeader *header = id3v2NewTagHeader(2, 0, 64, ext);
+
+    assert_false(id3v2WriteTagSizeRestriction(header, 0));
+
+    id3v2DestroyTagHeader(&header);
+}
+
+static void id3v2WriteTextEncodingRestriction_notAOption(void **state){
+    
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,32);
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_false(id3v2WriteTagSizeRestriction(header, 100));
+    assert_int_equal(header->extendedHeader->restrictions, 32);
+    id3v2DestroyTagHeader(&header);
+}
+
+
+static void id3v2WriteTextFieldsSizeRestriction_noExtAlready(void **state){
+    
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, NULL);
+
+    assert_true(id3v2WriteTextFieldsSizeRestriction(header, 2));
+
+    assert_non_null(header->extendedHeader);
+    assert_true(header->extendedHeader->tagRestrictions);
+    assert_int_equal(header->extendedHeader->restrictions, 16);
+
+    id3v2DestroyTagHeader(&header);
+}
+
+static void id3v2WriteTextFieldsSizeRestriction_changeCurrentValue(void **state){
+    
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,16);
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_true(id3v2WriteTextFieldsSizeRestriction(header, 3));
+
+    assert_non_null(header->extendedHeader);
+    assert_true(header->extendedHeader->tagRestrictions);
+    assert_int_equal(header->extendedHeader->restrictions, 24);
+
+    id3v2DestroyTagHeader(&header);
+}
+
+static void id3v2WriteTextFieldsSizeRestriction_wrongVersion(void **state){
+    
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,16);
+    Id3v2TagHeader *header = id3v2NewTagHeader(2, 0, 64, ext);
+
+    assert_false(id3v2WriteTextFieldsSizeRestriction(header, 0));
+
+    id3v2DestroyTagHeader(&header);
+}
+
+static void id3v2WriteTextFieldsSizeRestriction_notAOption(void **state){
+    
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,24);
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_false(id3v2WriteTagSizeRestriction(header, 100));
+    assert_int_equal(header->extendedHeader->restrictions, 24);
+    id3v2DestroyTagHeader(&header);
+}
+
+
+static void id3v2WriteImageEncodingRestriction_noExtAlready(void **state){
+    
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, NULL);
+
+    assert_true(id3v2WriteImageEncodingRestriction(header, 1));
+
+    assert_non_null(header->extendedHeader);
+    assert_true(header->extendedHeader->tagRestrictions);
+    assert_int_equal(header->extendedHeader->restrictions, 4);
+
+    id3v2DestroyTagHeader(&header);
+}
+
+static void id3v2WriteImageEncodingRestriction_changeCurrentValue(void **state){
+    
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,4);
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_true(id3v2WriteImageEncodingRestriction(header, 0));
+
+    assert_non_null(header->extendedHeader);
+    assert_true(header->extendedHeader->tagRestrictions);
+    assert_int_equal(header->extendedHeader->restrictions, 0);
+
+    id3v2DestroyTagHeader(&header);
+}
+
+static void id3v2WriteImageEncodingRestriction_wrongVersion(void **state){
+    
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,4);
+    Id3v2TagHeader *header = id3v2NewTagHeader(2, 0, 64, ext);
+    bool v = id3v2WriteImageEncodingRestriction(header, 0);
+    assert_false(v);
+
+    id3v2DestroyTagHeader(&header);
+}
+
+static void id3v2WriteImageSizeRestriction_noExtAlready(void **state){
+    
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, NULL);
+
+    assert_true(id3v2WriteImageSizeRestriction(header, 2));
+
+    assert_non_null(header->extendedHeader);
+    assert_true(header->extendedHeader->tagRestrictions);
+    assert_int_equal(header->extendedHeader->restrictions, 2);
+
+    id3v2DestroyTagHeader(&header);
+}
+
+static void id3v2WriteImageSizeRestriction_changeCurrentValue(void **state){
+    
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,2);
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_true(id3v2WriteImageSizeRestriction(header, 3));
+
+    assert_non_null(header->extendedHeader);
+    assert_true(header->extendedHeader->tagRestrictions);
+    assert_int_equal(header->extendedHeader->restrictions, 3);
+
+    id3v2DestroyTagHeader(&header);
+}
+
+static void id3v2WriteImageSizeRestriction_wrongVersion(void **state){
+    
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,3);
+    Id3v2TagHeader *header = id3v2NewTagHeader(2, 0, 64, ext);
+
+    assert_false(id3v2WriteImageSizeRestriction(header, 0));
+
+    id3v2DestroyTagHeader(&header);
+}
+
+static void id3v2WriteImageSizeRestriction_notAOption(void **state){
+    
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,3);
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_false(id3v2WriteImageSizeRestriction(header, 100));
+    assert_int_equal(header->extendedHeader->restrictions, 3);
+    id3v2DestroyTagHeader(&header);
+}
+
+
+// printf("%d%d%d%d%d%d%d%d\n",readBit(header->extendedHeader->restrictions, 7),
+//                             readBit(header->extendedHeader->restrictions, 6),
+//                             readBit(header->extendedHeader->restrictions, 5),
+//                             readBit(header->extendedHeader->restrictions, 4),
+//                             readBit(header->extendedHeader->restrictions, 3),
+//                             readBit(header->extendedHeader->restrictions, 2),
+//                             readBit(header->extendedHeader->restrictions, 1),
+//                             readBit(header->extendedHeader->restrictions, 0));
 
 
 int main(){
@@ -482,11 +686,34 @@ int main(){
         cmocka_unit_test(id3v2DestroyExtendedTagHeader_DestroyStruct),
         cmocka_unit_test(id3v2DestroyExtendedTagHeader_tryFreeNULL),
 
-        //id3v2WriteTagSizeRestriction
+        //id3v2WriteTagSizeRestriction tests
         cmocka_unit_test(id3v2WriteTagSizeRestriction_noExtAlready),
         cmocka_unit_test(id3v2WriteTagSizeRestriction_changeCurrentValue),
         cmocka_unit_test(id3v2WriteTagSizeRestriction_wrongVersion),
+        cmocka_unit_test(id3v2WriteTagSizeRestriction_notAOption),
 
+        //id3v2WriteTextEncodingRestriction tests
+        cmocka_unit_test(id3v2WriteTextEncodingRestriction_noExtAlready),
+        cmocka_unit_test(id3v2WriteTextEncodingRestriction_changeCurrentValue),
+        cmocka_unit_test(id3v2WriteTextEncodingRestriction_wrongVersion),
+        cmocka_unit_test(id3v2WriteTextEncodingRestriction_notAOption),
+
+        //id3v2WriteTextFieldsSizeRestriction tests
+        cmocka_unit_test(id3v2WriteTextFieldsSizeRestriction_noExtAlready),
+        cmocka_unit_test(id3v2WriteTextFieldsSizeRestriction_changeCurrentValue),
+        cmocka_unit_test(id3v2WriteTextFieldsSizeRestriction_wrongVersion),
+        cmocka_unit_test(id3v2WriteTextFieldsSizeRestriction_notAOption),
+
+        //id3v2WriteImageEncodingRestriction
+        cmocka_unit_test(id3v2WriteImageEncodingRestriction_noExtAlready),
+        cmocka_unit_test(id3v2WriteImageEncodingRestriction_changeCurrentValue),
+        cmocka_unit_test(id3v2WriteImageEncodingRestriction_wrongVersion),
+
+        //id3v2WriteImageSizeRestriction
+        cmocka_unit_test(id3v2WriteImageSizeRestriction_noExtAlready),
+        cmocka_unit_test(id3v2WriteImageSizeRestriction_changeCurrentValue),
+        cmocka_unit_test(id3v2WriteImageSizeRestriction_wrongVersion),
+        cmocka_unit_test(id3v2WriteTextFieldsSizeRestriction_notAOption)
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
