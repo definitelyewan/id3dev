@@ -5,7 +5,7 @@
 #include "id3v2TagIdentity.h"
 
 /**
- * @brief creates an inits a tag header structure
+ * @brief Creates an inits a tag header structure.
  * 
  * @param majorVersion 
  * @param minorVersion 
@@ -26,7 +26,7 @@ Id3v2TagHeader *id3v2NewTagHeader(uint8_t majorVersion, uint8_t minorVersion, ui
 }
 
 /**
- * @brief frees a tag header structure
+ * @brief Frees a tag header structure.
  * 
  * @param toDelete 
  */
@@ -42,8 +42,8 @@ void id3v2DestroyTagHeader(Id3v2TagHeader **toDelete){
 }
 
 /**
- * @brief sets the unsynchronisation indicator found in the header of a tag
- * @details if this function is successful it will return 1 otherwise, 0
+ * @brief Sets the unsynchronisation indicator found in the header of a tag.
+ * @details If this function is successful it will return 1 otherwise, 0.
  * @param header 
  * @param bit 
  * @return int 
@@ -60,8 +60,8 @@ bool id3v2WriteUnsynchronisationIndicator(Id3v2TagHeader *header, bool bit){
 }
 
 /**
- * @brief sets the compression indicator in the header of a tag
- * @details if this function is successful it will return 1 otherwise, 0
+ * @brief Sets the compression indicator in the header of a tag.
+ * @details If this function is successful it will return 1 otherwise, 0.
  * @param header 
  * @param bit 
  * @return int 
@@ -81,8 +81,8 @@ bool id3v2WriteCompressionIndicator(Id3v2TagHeader *header, bool bit){
 }
 
 /**
- * @brief sets the extended header indicator in the tag header
- * @details if this function fails it returns 0 otherwise, it returns 1
+ * @brief Sets the extended header indicator in the tag header.
+ * @details If this function fails it returns 0 otherwise, it returns 1.
  * @param header 
  * @param bit 
  * @return int 
@@ -107,8 +107,8 @@ bool id3v2WriteExtendedHeaderIndicator(Id3v2TagHeader *header, bool bit){
 }
 
 /**
- * @brief sets the experimental indicator in the tag header
- * @details if this function fails it returns 0 otherwise, 1
+ * @brief Sets the experimental indicator in the tag header.
+ * @details If this function fails it returns 0 otherwise, 1.
  * @param header 
  * @param bit 
  * @return int 
@@ -133,8 +133,8 @@ bool id3v2WriteExperimentalIndicator(Id3v2TagHeader *header, bool bit){
 }
 
 /**
- * @brief sets the footer indicator in the tag header
- * @details if this function fails it returns 0 otherwise, 1
+ * @brief Sets the footer indicator in the tag header.
+ * @details If this function fails it returns 0 otherwise, 1.
  * @param header 
  * @param bit 
  * @return int 
@@ -157,8 +157,8 @@ bool id3v2WriteFooterIndicator(Id3v2TagHeader *header, bool bit){
 }
 
 /**
- * @brief reads the unsynchronisation indicator from a tag header
- * @details returns the indicator value if successful and -1 otherwise
+ * @brief Reads the unsynchronisation indicator from a tag header.
+ * @details Returns the indicator value if successful and -1 otherwise.
  * @param header 
  * @return int 
  */
@@ -172,8 +172,8 @@ int id3v2ReadUnsynchronisationIndicator(Id3v2TagHeader *header){
 }
 
 /**
- * @brief reads the compression indicator found in a version 2 tag header
- * @details returns the indicator value if successfull and -1 otherwise
+ * @brief Reads the compression indicator found in a version 2 tag header.
+ * @details Returns the indicator value if successfull and -1 otherwise.
  * @param header 
  * @return int 
  */
@@ -191,8 +191,8 @@ int id3v2ReadCompressionIndicator(Id3v2TagHeader *header){
 }
 
 /**
- * @brief reads the extended header indicator found in the tag header
- * @details returns the indicator value on success and -1 otherwise
+ * @brief Reads the extended header indicator found in the tag header.
+ * @details Returns the indicator value on success and -1 otherwise.
  * @param header 
  * @return int 
  */
@@ -214,8 +214,8 @@ int id3v2ReadExtendedHeaderIndicator(Id3v2TagHeader *header){
 }
 
 /**
- * @brief reads the experimental indicator found in the tag header
- * @details returns the indicator value on success and -1 otherwise
+ * @brief Reads the experimental indicator found in the tag header.
+ * @details Returns the indicator value on success and -1 otherwise.
  * @param header 
  * @return int 
  */
@@ -237,8 +237,8 @@ int id3v2ReadExperimentalIndicator(Id3v2TagHeader *header){
 }
 
 /**
- * @brief reads the footer indicator found in the tag header
- * @details returns the indicator value on success and -1 otherwise
+ * @brief Reads the footer indicator found in the tag header.
+ * @details Returns the indicator value on success and -1 otherwise.
  * @param header 
  * @return int 
  */
@@ -256,8 +256,8 @@ int id3v2ReadFooterIndicator(Id3v2TagHeader *header){
 }
 
 /**
- * @brief creates an extended header strcuture
- * @details you should never need to use this structure, it will be handled by a header
+ * @brief Creates an extended header strcuture.
+ * @details You should never need to use this structure, it will be handled by a header.
  * @param padding 
  * @param crc 
  * @param update 
@@ -281,7 +281,7 @@ Id3v2ExtendedTagHeader *id3v2NewExtendedTagHeader(uint32_t padding, uint32_t crc
 }
 
 /**
- * @brief frees an extended header structure
+ * @brief Frees an extended header structure.
  * @param toDelete 
  */
 void id3v2DestroyExtendedTagHeader(Id3v2ExtendedTagHeader **toDelete){
@@ -294,8 +294,8 @@ void id3v2DestroyExtendedTagHeader(Id3v2ExtendedTagHeader **toDelete){
 }
 
 /**
- * @brief writes bits to an extended headers restrictions
- * @details returns 1 on success and 0 otherwise
+ * @brief Writes bits to an extended headers restrictions.
+ * @details Returns 1 on success and 0 otherwise.
  * @param header 
  * @param bits 
  * @return true 
@@ -326,8 +326,8 @@ bool id3v2WriteTagSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
 }
 
 /**
- * @brief writes the value of bit to the correct possition in the restrictions.
- * @details if this function fails it will return 0 otherwise, 1
+ * @brief Writes the value of bit to the correct possition in the restrictions.
+ * @details If this function fails it will return 0 otherwise, 1.
  * @param header 
  * @param bit 
  * @return true 
@@ -357,8 +357,8 @@ bool id3v2WriteTextEncodingRestriction(Id3v2TagHeader *header, bool bit){
 }
 
 /**
- * @brief sets the text fields size restriction within an extended headers bits.
- * @details this function returns 0 if it fails and 1 otherwise.
+ * @brief Sets the text fields size restriction within an extended headers bits.
+ * @details This function returns 0 if it fails and 1 otherwise.
  * @param header 
  * @param bits 
  * @return true 
@@ -389,8 +389,8 @@ bool id3v2WriteTextFieldsSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
 }
 
 /**
- * @brief sets the image encoding restriction to the value of bit within an extended headers restrictions.
- * @details this function returns 0 if it fails and 1 otherwise.
+ * @brief Sets the image encoding restriction to the value of bit within an extended headers restrictions.
+ * @details This function returns 0 if it fails and 1 otherwise.
  * @param header 
  * @param bit 
  * @return true 
@@ -420,8 +420,8 @@ bool id3v2WriteImageEncodingRestriction(Id3v2TagHeader *header, bool bit){
 }
 
 /**
- * @brief sets the imagesize restriction to the value of bits within an extended tag headers restrictions
- * @details this function returns 0 if it fails and 1 otherwise
+ * @brief Sets the imagesize restriction to the value of bits within an extended tag headers restrictions.
+ * @details This function returns 0 if it fails and 1 otherwise.
  * @param header 
  * @param bits 
  * @return true 
@@ -451,6 +451,12 @@ bool id3v2WriteImageSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
     return true;
 }
 
+/**
+ * @brief Reads the tag size restriction from the restriction byte held within the extended header.
+ * @details If this function fails it will return -1 otherwise it will return the value of the tag size restriction.
+ * @param header 
+ * @return int 
+ */
 int id3v2ReadTagSizeRestriction(Id3v2TagHeader *header){
 
     if(!header){
@@ -460,16 +466,24 @@ int id3v2ReadTagSizeRestriction(Id3v2TagHeader *header){
     if(!header->extendedHeader){
         return -1;
     }
-
+    
     //build an int from bits
-    uint8_t ret = 0;
+    int lsb = 0;
+    int msb = 0;
 
-    setBit(ret, 0, readBit(header->extendedHeader->restrictions, 7));
-    setBit(ret, 1, readBit(header->extendedHeader->restrictions, 6));
+    msb = readBit(header->extendedHeader->restrictions, 7);
+    lsb = readBit(header->extendedHeader->restrictions, 6);
 
-    return (int)ret;
+    //combine into an int
+    return (msb << 1) | lsb;
 }
 
+/**
+ * @brief Reads the text encoding restriction from the restriction byte held by the extended header.
+ * @details If this function fails it will return -1 otherwise, it will return the value of the indicator.
+ * @param header 
+ * @return int 
+ */
 int id3v2ReadTextEncodingRestriction(Id3v2TagHeader *header){
 
     if(!header){
@@ -480,9 +494,15 @@ int id3v2ReadTextEncodingRestriction(Id3v2TagHeader *header){
         return -1;
     }
 
-    return (int)readBit(header->extendedHeader->restrictions, 5);
+    return readBit(header->extendedHeader->restrictions, 5);
 }
 
+/**
+ * @brief Reads the text field size restriction from the restriction byte held by the extended header.
+ * @details If this function fails it will return -1 otherwise, it will return the value of the indicator. 
+ * @param header 
+ * @return int 
+ */
 int id3v2ReadTextFieldsSizeRestriction(Id3v2TagHeader *header){
 
     if(!header){
@@ -494,14 +514,22 @@ int id3v2ReadTextFieldsSizeRestriction(Id3v2TagHeader *header){
     }
 
     //build an int from bits
-    uint8_t ret = 0;
+    int lsb = 0;
+    int msb = 0;
 
-    setBit(ret, 0, readBit(header->extendedHeader->restrictions, 4));
-    setBit(ret, 1, readBit(header->extendedHeader->restrictions, 3));
+    msb = readBit(header->extendedHeader->restrictions, 4);
+    lsb = readBit(header->extendedHeader->restrictions, 3);
 
-    return (int)ret;
+    //combine into an int
+    return (msb << 1) | lsb;
 }
 
+/**
+ * @brief Reads the Image Encoding restriction from the restriction byte held by the extended header.
+ * @details If this function fails it will return -1 otherwise, it will return the value of the indicator. 
+ * @param header 
+ * @return int 
+ */
 int id3v2ReadImageEncodingRestriction(Id3v2TagHeader *header){
     if(!header){
         return -1;
@@ -514,6 +542,12 @@ int id3v2ReadImageEncodingRestriction(Id3v2TagHeader *header){
     return (int)readBit(header->extendedHeader->restrictions, 2);
 } 
 
+/**
+ * @brief Reads the Image Size restriction from the restriction byte held by the extended header.
+ * @details If this function fails it will return -1 otherwise, it will return the value of the indicator.
+ * @param header 
+ * @return int 
+ */
 int id3v2ReadImageSizeRestriction(Id3v2TagHeader *header){
     if(!header){
         return -1;
@@ -524,14 +558,22 @@ int id3v2ReadImageSizeRestriction(Id3v2TagHeader *header){
     }
 
     //build an int from bits
-    uint8_t ret = 0;
+    int lsb = 0;
+    int msb = 0;
 
-    setBit(ret, 0, readBit(header->extendedHeader->restrictions, 1));
-    setBit(ret, 1, readBit(header->extendedHeader->restrictions, 0));
+    lsb = readBit(header->extendedHeader->restrictions, 0);
+    msb = readBit(header->extendedHeader->restrictions, 1);
 
-    return (int)ret;
+    return (msb << 1) | lsb;
 }
 
+/**
+ * @brief Clears all restrictions along with the flag in the tag header.
+ * @details if this function fails it returns 0 and 1 otherwise.
+ * @param header 
+ * @return true 
+ * @return false 
+ */
 bool id3v2ClearTagRestrictions(Id3v2TagHeader *header){
     if(!header){
         return 0;
@@ -541,8 +583,7 @@ bool id3v2ClearTagRestrictions(Id3v2TagHeader *header){
         return 0;
     }
 
-    //remove value in flags so restrictions are gone
-    setBit(header->flags, 4, 0);
+    header->extendedHeader->tagRestrictions = false;
     header->extendedHeader->restrictions = 0;
     
     return 1;

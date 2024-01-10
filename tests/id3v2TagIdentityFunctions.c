@@ -605,6 +605,136 @@ static void id3v2WriteImageSizeRestriction_notAOption(void **state){
     id3v2DestroyTagHeader(&header);
 }
 
+static void id3v2ReadTagSizeRestriction_readBits(void **state){
+    
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 192);
+    //11000000
+
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_int_equal(3, id3v2ReadTagSizeRestriction(header));
+
+    id3v2DestroyTagHeader(&header);
+}
+
+static void id3v2ReadTagSizeRestriction_readBits2(void **state){
+    
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 128);
+    //11000000
+
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_int_equal(2, id3v2ReadTagSizeRestriction(header));
+
+    id3v2DestroyTagHeader(&header);
+}
+
+static void id3v2ReadTextEncodingRestriction_readBit(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 32);
+    //00100000
+
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_int_equal(1, id3v2ReadTextEncodingRestriction(header));
+
+    id3v2DestroyTagHeader(&header); 
+}
+
+static void id3v2ReadTextEncodingRestriction_readBit2(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 0);
+    //00000000
+
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_int_equal(0, id3v2ReadTextEncodingRestriction(header));
+
+    id3v2DestroyTagHeader(&header); 
+}
+
+static void id3v2ReadTextFieldsSizeRestriction_readBit(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 24);
+    //00011000
+
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_int_equal(3, id3v2ReadTextFieldsSizeRestriction(header));
+
+    id3v2DestroyTagHeader(&header); 
+}
+
+static void id3v2ReadTextFieldsSizeRestriction_readBit2(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 8);
+    //00001000
+
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_int_equal(1, id3v2ReadTextFieldsSizeRestriction(header));
+
+    id3v2DestroyTagHeader(&header); 
+}
+
+static void id3v2ReadImageEncodingRestriction_readBit(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 4);
+    //00000100
+
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_int_equal(1, id3v2ReadImageEncodingRestriction(header));
+
+    id3v2DestroyTagHeader(&header); 
+}
+
+static void id3v2ReadImageEncodingRestriction_readBit2(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 0);
+    //00000000
+
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_int_equal(0, id3v2ReadImageEncodingRestriction(header));
+
+    id3v2DestroyTagHeader(&header); 
+}
+
+static void id3v2ReadImageSizeRestriction_readBit(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 3);
+    //00000011
+
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_int_equal(3, id3v2ReadImageSizeRestriction(header));
+
+    id3v2DestroyTagHeader(&header); 
+}
+
+static void id3v2ReadImageSizeRestriction_readBit2(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 1);
+    //00000001
+
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+
+    assert_int_equal(1, id3v2ReadImageSizeRestriction(header));
+
+    id3v2DestroyTagHeader(&header); 
+}
+
+static void id3v2ClearTagRestrictions_clear(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 1);
+    //00000001
+
+    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    assert_true(id3v2ClearTagRestrictions(header));
+    assert_false(header->extendedHeader->tagRestrictions);
+    id3v2DestroyTagHeader(&header); 
+}
 
 // printf("%d%d%d%d%d%d%d%d\n",readBit(header->extendedHeader->restrictions, 7),
 //                             readBit(header->extendedHeader->restrictions, 6),
@@ -704,16 +834,40 @@ int main(){
         cmocka_unit_test(id3v2WriteTextFieldsSizeRestriction_wrongVersion),
         cmocka_unit_test(id3v2WriteTextFieldsSizeRestriction_notAOption),
 
-        //id3v2WriteImageEncodingRestriction
+        //id3v2WriteImageEncodingRestriction tests
         cmocka_unit_test(id3v2WriteImageEncodingRestriction_noExtAlready),
         cmocka_unit_test(id3v2WriteImageEncodingRestriction_changeCurrentValue),
         cmocka_unit_test(id3v2WriteImageEncodingRestriction_wrongVersion),
 
-        //id3v2WriteImageSizeRestriction
+        //id3v2WriteImageSizeRestriction tests
         cmocka_unit_test(id3v2WriteImageSizeRestriction_noExtAlready),
         cmocka_unit_test(id3v2WriteImageSizeRestriction_changeCurrentValue),
         cmocka_unit_test(id3v2WriteImageSizeRestriction_wrongVersion),
-        cmocka_unit_test(id3v2WriteTextFieldsSizeRestriction_notAOption)
+        cmocka_unit_test(id3v2WriteImageSizeRestriction_notAOption),
+
+        //id3v2ReadTagSizeRestriction tests
+        cmocka_unit_test(id3v2ReadTagSizeRestriction_readBits),
+        cmocka_unit_test(id3v2ReadTagSizeRestriction_readBits2),
+
+        //id3v2ReadTextEncodingRestriction tests
+        cmocka_unit_test(id3v2ReadTextEncodingRestriction_readBit),
+        cmocka_unit_test(id3v2ReadTextEncodingRestriction_readBit2),
+
+        //id3v2ReadTextFieldsSizeRestriction tests
+        cmocka_unit_test(id3v2ReadTextFieldsSizeRestriction_readBit),
+        cmocka_unit_test(id3v2ReadTextFieldsSizeRestriction_readBit2),
+
+        //id3v2ReadImageEncodingRestriction tests
+        cmocka_unit_test(id3v2ReadImageEncodingRestriction_readBit),
+        cmocka_unit_test(id3v2ReadImageEncodingRestriction_readBit2),
+
+        //id3v2ReadImageSizeRestriction test
+        cmocka_unit_test(id3v2ReadImageSizeRestriction_readBit),
+        cmocka_unit_test(id3v2ReadImageSizeRestriction_readBit2),
+
+        //id3v2ClearTagRestrictions test
+        cmocka_unit_test(id3v2ClearTagRestrictions_clear)
+
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

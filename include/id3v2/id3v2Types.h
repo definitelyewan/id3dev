@@ -84,7 +84,7 @@ typedef struct _Id3v2TagHeader{
 }Id3v2TagHeader;
 
 /**
- * @brief An ID3V2.x tag
+ * @brief An ID3v2.x tag
  * 
  */
 typedef struct _Id3v2Tag{
