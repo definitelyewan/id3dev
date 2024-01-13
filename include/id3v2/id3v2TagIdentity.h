@@ -9,8 +9,8 @@
  * 
  */
 
-#ifndef ID3V1_TYPES
-#define ID3V1_TYPES
+#ifndef ID3V2_TAGIDENTITY
+#define ID3V2_TAGIDENTITY
 
 #ifdef __cplusplus
 extern "C"{

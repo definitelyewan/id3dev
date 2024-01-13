@@ -12,6 +12,13 @@ set(ID3V1_HEADERS
   "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v1/id3v1Types.h"
 )
 
+set(ID3V2_HEADERS 
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2/id3v2.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2/id3v2Parser.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2/id3v2TagIdentity.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2/id3v2Types.h"
+)
+
 set(ID3V1_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v1/id3v1Parser.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v1/id3v1.c"
@@ -38,6 +45,7 @@ endif()
 
 add_library(Id3dev ${ID3DEV_HEADERS} ${ID3DEV_SRC})
 target_link_libraries(Id3dev ByteStream) #byte stream library
+target_link_libraries(Id3dev LinkedList) #linked list library
 target_link_libraries(Id3dev m) #math library
 
 target_include_directories(Id3dev PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v1" "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2")
@@ -45,6 +53,7 @@ set_target_properties(Id3dev PROPERTIES C_STANDARD 99)
 
 
 add_subdirectory("modules/ByteStream")
+add_subdirectory("modules/LinkedListLib")
 
 if(BUILD_ID3_TESTS)
   #dont build cmocka tests or examples

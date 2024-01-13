@@ -18,6 +18,8 @@ extern "C"{
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "id3v1Types.h"
+#include "LinkedList.h"
 
 //! size of ID3v2 tag identifier "ID3" or "3DI"
 #define ID3V2_TAG_ID_SIZE 3
@@ -89,7 +91,13 @@ typedef struct _Id3v2TagHeader{
  */
 typedef struct _Id3v2Tag{
 
+    //! Header of a tag
     Id3v2TagHeader *tagHeader;
+
+    //! Frames 
+    List *frames;
+
+    //! Footer of a tag
     Id3v2TagHeader *tagFooter;
 
 }Id3v2Tag;
