@@ -12,3 +12,4 @@ build/
 .vscode/
 .cache/
 .fleet/
+scripts/common/__pycache__

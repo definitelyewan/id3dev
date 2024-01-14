@@ -70,11 +70,8 @@ try:
 
 
     elif platform == "win32":
-        if os.path.exists("Release"):
-            os.chdir("Release")
-
-        subprocess.call(".\\id3v1_test.exe")
-        subprocess.call(".\\id3v2_tag_identity_test.exe")
+        subprocess.call("id3v1_test.exe")
+        subprocess.call("id3v2_tag_identity_test.exe")
         
 except OSError as e:
     if e.errno == errno.ENOENT:

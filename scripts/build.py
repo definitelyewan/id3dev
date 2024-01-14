@@ -9,7 +9,7 @@ replace_folder("build")
 
 # build with cmake
 update.message("Running Cmake")
-cmake_build(".", "build", ["-DBUILD_SHARED_LIBS=ON"])
+cmake_build(".", "build", ["-DBUILD_SHARED_LIBS=ON", "-DDEDUB_ID3_SYMBOLS=OFF"])
     
 # move to the build folder
 update.message("moving to build dir")

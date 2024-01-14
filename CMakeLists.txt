@@ -1,5 +1,14 @@
 cmake_minimum_required(VERSION 3.22.1)
+
+# if(WIN32)
+#   set(CMAKE_GENERATOR "MinGW Makefiles")
+#   set(CMAKE_CXX_COMPILER "C:/MinGW-W64/mingw64/bin/g++.exe")
+#   set(CMAKE_C_COMPILER "C:/MinGW-W64/mingw64/bin/gcc.exe")
+#   set(CMAKE_MAKE_PROGRAM mingw32-make)
+# endif()
+
 project(Id3dev VERSION 1.0.0.0)
+
 
 option(BUILD_SHARED_LIBS "building a shared lib" OFF)
 option(BUILD_ID3_DOCS "build docs" OFF)
@@ -34,9 +43,10 @@ set(ID3DEV_HEADERS "${ID3V1_HEADERS}" "${ID3V2_HEADERS}")
 set(ID3DEV_SRC "${ID3V1_SRC}" "${ID3V2_SRC}")
 
 
+
 if(DEBUG_ID3_SYMBOLS)
   if (MSVC)
-      add_compile_options("/W4")
+    add_compile_options("/W4")
   else()
     add_compile_options("-Wall")
     add_compile_options("-g")

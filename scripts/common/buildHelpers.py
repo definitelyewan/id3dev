@@ -21,13 +21,24 @@ def cmake_build(src, build, options):
     update = Inform(1)
 
     # generate an array to pass to subprocess
-    command = ["cmake", "-S", src, "-B"]
+    command = ["cmake"]
+
+    if platform == "win32":
+        command.append("-DCMAKE_CXX_COMPILER=g++")
+        command.append("-DCMAKE_C_COMPILER=gcc")
+        command.append("-G")
+        command.append("MinGW Makefiles")
+
+    command.append("-S")
+    command.append(src)
+    command.append("-B")
     
     if platform == "linux" or platform == "linux2" or "darwin":
         command.append("./" + build)
     elif platform == "win32":
         command.append(".\\" + build)
-    
+
+
     for option in options:
         command.append(option)
 
@@ -45,19 +56,18 @@ def cmake_build(src, build, options):
             # program output
             raise
 
-
 # compiles code with make or msbuild
 def compile_code(project_name):
     try:
-        if platform == "linux" or platform == "linux2" or platform == "darwin":
+        if platform == "win32":
+            subprocess.call(["mingw32-make", project_name])
+        else:
             subprocess.call(["make", project_name])
-        elif platform == "win32":
-            subprocess.call(["MSBuild.exe", project_name + ".vcxproj"])
-    
+
     except OSError as e:
         if e.errno == errno.ENOENT:
             # program was not found
-            print("failed to build tests either make or MSBuild was not found in PATH or it was not installed")
+            print("failed to build tests either make or minGW was not found in PATH or it was not installed")
             quit()
         else:
             # program output
