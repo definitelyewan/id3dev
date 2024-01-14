@@ -1,91 +1,85 @@
-import os
-from sys import platform
-import subprocess
-import errno
-import shutil
+from common.buildHelpers import *
+from common.InformUser import *
 
-#mk build
-print("Creating build dir")
-if not os.path.exists("build"):
-    os.mkdir("build")
-else:
-    shutil.rmtree("build")
-    os.mkdir("build")
+update = Inform(1)
 
-#build with cmake
-try:
-    if platform == "linux" or platform == "linux2" or "darwin":
-        subprocess.call(["cmake", "-S", ".", "-B", "./build", "-DBUILD_ID3_TESTS=ON"])
-    elif platform == "win32":
-        subprocess.call(["cmake", "-S", ".", "-B", ".\\build", "-DBUILD_ID3_TESTS=ON"])
+# mk build
+update.message("Creating build dir ..")
+replace_folder("build")
 
-except OSError as e:
-    if e.errno == errno.ENOENT:
-        #program was not found
-        print("cmake was not found or not installed")
-        quit()
-    else:
-        #program output
-        raise
+# build with cmake
+update.message("Running Cmake")
+cmake_build(".", "build", ["-DBUILD_ID3_TESTS=ON", "-DBUILD_SHARED_LIBS=ON","-DDEBUG_ID3_SYMBOLS=ON"])
 
-
-#build lib
+# move to build
+update.message("Moving to build dir")
 if os.path.exists("build"):
     os.chdir("build")
 else:
     quit()
 
-try:
-    if platform == "linux" or platform == "linux2" or platform == "darwin":
-        subprocess.call("make")
-    elif platform == "win32":
-        subprocess.call(["MSBuild.exe","Id3dev.vcxproj"])
+# compile the code
+update.message("Compiling libraries")
+compile_code("Id3dev")
 
-except OSError as e:
-    if e.errno == errno.ENOENT:
-        #program was not found
-        print("failed to build benchmarks either make or MSBuild was not found in PATH or it was not installed")
-        quit()
-    else:
-        #program output
-        raise
-
-#build tests
+# move to tests
+update.message("Moving to tests")
 if os.path.exists("tests"):
     os.chdir("tests")
 else:
     quit()
 
+# compile code
+update.message("Compiling id3v1_test program")
+compile_code("id3v1_test")
+update.message("Compiling id3v2_tag_identity_test program")
+compile_code("id3v2_tag_identity_test")
+
+
+# call test execs
 try:
-    if platform == "linux" or platform == "linux2" or platform == "darwin":
-        subprocess.call("make")
+    if platform == "linux" or platform == "linux2":
+        
+        if(is_command("valgrind")):
+            subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v1_test"])
+            subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v2_tag_identity_test"])
+        else:
+            subprocess.call(["./id3v1_test"])
+            subprocess.call(["./id3v2_tag_identity_test"])
+        
+    elif platform == "darwin":
+
+        if(is_command("leaks")):
+            
+            malloc_stack_logging = False
+
+            if(os.environ.get("MallocStackLogging") != "0"):
+                malloc_stack_logging = True
+
+            # will get changed back but just in case it needs to be set
+            os.environ["MallocStackLogging"] = "1"
+
+            subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v1_test"])
+            subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_tag_identity_test"])
+
+            if(malloc_stack_logging == False):
+                os.environ["MallocStackLogging"] = "0"
+        else:
+            subprocess.call(["./id3v1_test"])
+            subprocess.call(["./id3v2_tag_identity_test"])
+
+
     elif platform == "win32":
-        subprocess.call(["MSBuild.exe","/p:DebugType=None","/p:Configuration=Release","id3v1_test.vcxproj"])
-except OSError as e:
-    if e.errno == errno.ENOENT:
-        #program was not found
-        print("failed to build tests either make or MSbuild was not found in PATH or it was not installed")
-        quit()
-    else:
-        #program output
-        raise
-
-
-#call test execs
-try:
-    if platform == "linux" or platform == "linux2" or "darwin":
-        subprocess.call(["valgrind","--leak-check=full", "--show-leak-kinds=all","./id3v1_test"])
-    elif platform == "win32":
-        if os.path.exists("Release"):
-            os.chdir("Release")
-
-        subprocess.call(".\\id3v1_test.exe")
+        subprocess.call("id3v1_test.exe")
+        subprocess.call("id3v2_tag_identity_test.exe")
         
 except OSError as e:
     if e.errno == errno.ENOENT:
-        #program was not found
+        # program was not found
         print("failed to run a test")
         quit()
     else:
-        #program output
+        # program output
         raise
+
+update.message("Done!")

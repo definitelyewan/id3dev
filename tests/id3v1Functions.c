@@ -449,9 +449,9 @@ static void id3v1TagFromFile_readValidTag(void **state){
     Id3v1Tag *tag = id3v1TagFromFile("assets/dannybrown.mp3");
 
     assert_non_null(tag);
-    assert_string_equal(tag->title, "Ain't It Funny");
-    assert_string_equal(tag->artist, "Danny Brown");
-    assert_string_equal(tag->albumTitle, "Atrocity Exhibition");
+    assert_string_equal((char *)tag->title, "Ain't It Funny");
+    assert_string_equal((char *)tag->artist, "Danny Brown");
+    assert_string_equal((char *)tag->albumTitle, "Atrocity Exhibition");
     assert_int_equal(tag->year, 2016);
     assert_int_equal(tag->track, 6);
     assert_int_equal(tag->genre, 255);
@@ -499,7 +499,7 @@ static void id3v1WriteTitle_WithBigTitle(void **state){
 
     assert_true(id3v1WriteTitle("this is a string that is over 30 bytes", tag));
 
-    assert_string_equal(tag->title, "this is a string that is over ");
+    assert_string_equal((char *)tag->title, "this is a string that is over ");
 
 
     id3v1DestroyTag(&tag);
@@ -816,7 +816,7 @@ static void id3v1ToJSON_fullTag(void **state){
                                 (uint8_t *)"charli",
                                 4,
                                 2019,
-                                "pretty good song",
+                                (uint8_t *)"pretty good song",
                                 POP_GENRE);
 
 
@@ -841,7 +841,7 @@ static void id3v1ToJSON_noGenere(void **state){
                                 (uint8_t *)"charli",
                                 4,
                                 2019,
-                                "pretty good song",
+                                (uint8_t *)"pretty good song",
                                 12);
 
 
@@ -865,7 +865,7 @@ static void id3v1ToJSON_noYear(void **state){
                                 (uint8_t *)"charli",
                                 4,
                                 0,
-                                "pretty good song",
+                                (uint8_t *)"pretty good song",
                                 POP_GENRE);
 
 
@@ -890,7 +890,7 @@ static void id3v1ToJSON_noTitle(void **state){
                                 (uint8_t *)"charli",
                                 4,
                                 2019,
-                                "pretty good song",
+                                (uint8_t *)"pretty good song",
                                 POP_GENRE);
 
 
@@ -921,7 +921,7 @@ static void id3v1WriteTagToFile_CreateFile(void **state){
                             (uint8_t *)"charli",
                             2019,
                             4,
-                            "pretty good song",
+                            (uint8_t *)"pretty good song",
                             POP_GENRE);
     Id3v1Tag *tag2 = NULL;
 
@@ -950,7 +950,7 @@ static void id3v1WriteTagToFile_editExistingFile(void **state){
                             (uint8_t *)"charli",
                             2019,
                             4,
-                            "pretty good song",
+                            (uint8_t *)"pretty good song",
                             POP_GENRE);
 
 
@@ -1115,6 +1115,7 @@ int main(){
 
         //id3v1CompareTag tests
         cmocka_unit_test(id3v1CompareTag_noTags),
+        cmocka_unit_test(id3v1CompareTag_oneTag),
         cmocka_unit_test(id3v1CompareTag_diffGenere),
         cmocka_unit_test(id3v1CompareTag_diffTrack),
         cmocka_unit_test(id3v1CompareTag_diffYear),
@@ -1145,8 +1146,6 @@ int main(){
         cmocka_unit_test(id3v1WriteTagToFile_appendFileBig),
 
     };
-
-    printf("%d\n",byteSyncintEncode((unsigned int)1096));
-
+    
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

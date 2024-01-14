@@ -8,10 +8,8 @@ vgcore.*
 .vscode
 *.json
 build/
-
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
+.DS_Store
+.vscode/
+.cache/
+.fleet/
+scripts/common/__pycache__
