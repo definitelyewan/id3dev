@@ -39,13 +39,36 @@ compile_code("id3v2_tag_identity_test")
 # call test execs
 try:
     if platform == "linux" or platform == "linux2":
-        subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v1_test"])
-        subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v2_tag_identity_test"])
+        
+        if(is_command("valgrind")):
+            subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v1_test"])
+            subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v2_tag_identity_test"])
+        else:
+            subprocess.call(["./id3v1_test"])
+            subprocess.call(["./id3v2_tag_identity_test"])
+        
     elif platform == "darwin":
-        os.environ["MallocStackLogging"] = "1"
-        subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v1_test"])
-        subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_tag_identity_test"])
-        os.environ["MallocStackLogging"] = "0"
+
+        if(is_command("leaks")):
+            
+            malloc_stack_logging = False
+
+            if(os.environ.get("MallocStackLogging") != "0"):
+                malloc_stack_logging = True
+
+            # will get changed back but just in case it needs to be set
+            os.environ["MallocStackLogging"] = "1"
+
+            subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v1_test"])
+            subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_tag_identity_test"])
+
+            if(malloc_stack_logging == False):
+                os.environ["MallocStackLogging"] = "0"
+        else:
+            subprocess.call(["./id3v1_test"])
+            subprocess.call(["./id3v2_tag_identity_test"])
+
+
     elif platform == "win32":
         if os.path.exists("Release"):
             os.chdir("Release")

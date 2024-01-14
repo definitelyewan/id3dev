@@ -1,3 +1,4 @@
+
 class Inform:
 
     def __init__(self, step):

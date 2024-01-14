@@ -3,6 +3,7 @@ from sys import platform
 import subprocess
 import errno
 import shutil
+from .InformUser import Inform
 
 
 # replaces a folder
@@ -17,6 +18,8 @@ def replace_folder(foldername):
 # builds a cmake project on different platforms
 def cmake_build(src, build, options):
     
+    update = Inform(1)
+
     # generate an array to pass to subprocess
     command = ["cmake", "-S", src, "-B"]
     
@@ -36,7 +39,7 @@ def cmake_build(src, build, options):
     except OSError as e:
         if e.errno == errno.ENOENT:
             # program was not found
-            print("cmake was not found or not installed")
+            print("Cmake is not installed or could not be found")
             quit()
         else:
             # program output
@@ -47,7 +50,7 @@ def cmake_build(src, build, options):
 def compile_code(project_name):
     try:
         if platform == "linux" or platform == "linux2" or platform == "darwin":
-            subprocess.call("make")
+            subprocess.call(["make", project_name])
         elif platform == "win32":
             subprocess.call(["MSBuild.exe", project_name + ".vcxproj"])
     
@@ -59,3 +62,7 @@ def compile_code(project_name):
         else:
             # program output
             raise
+
+# checks to see if a program is installed on the host
+def is_command(tool):
+        return shutil.which(tool) is not None
