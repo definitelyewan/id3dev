@@ -7045,10 +7045,10 @@
                                     <span class="flex-1">
                                         <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
                                         <span> &emsp; Frame ID = OWNE            </span><br>
-                                        <span> &emsp; Frame Size = $00 00 00 1A  </span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 1B  </span><br>
                                         <span> &emsp; Frame Flags = $00 00       </span><br>
                                         <span> &emsp; Encoding = $01             </span><br>
-                                        <span> &emsp; Price Payed = "CAD0.99"    </span><br>
+                                        <span> &emsp; Price Payed = "CAD0.99" $00</span><br>
                                         <span> &emsp; Date of Purch. = "20010520"</span><br>
                                         <span> &emsp; Seller = "iTunes"          </span><br>
                                     </span>
@@ -7059,7 +7059,7 @@
                                     <span>4</span><br>
                                     <span>2</span><br>
                                     <span>1</span><br>
-                                    <span>7</span><br>
+                                    <span>8</span><br>
                                     <span>4</span><br>
                                     <span>14</span><br>
                                 </span>
@@ -7749,7 +7749,7 @@
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
-                                        <div class="text-gray-500 dark:text-gray-400">WPAY</div>
+                                        <div class="text-gray-500 dark:text-gray-400">POSS</div>
                                         <div>
                                             <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
                                                 ID3v2.3
@@ -7757,7 +7757,7 @@
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
-                                        <div class="text-gray-500 dark:text-gray-400">WPAY</div>
+                                        <div class="text-gray-500 dark:text-gray-400">POSS</div>
                                         <div>
                                             <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
                                                 ID3v2.4
@@ -9964,8 +9964,7 @@
                             Language = $xx xx xx<br>
                             Time stamp format = $xx<br>
                             Content type = $xx<br>
-                            Content descriptor = [n bytes of encoded data]<br>
-                            Language = [n bytes of encoded data] $00 (00)<br>
+                            Content descriptor = [n bytes of encoded data] $00 (00)<br>
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             Time stamp format is defined as:

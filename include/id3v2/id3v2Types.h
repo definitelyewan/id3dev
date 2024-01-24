@@ -21,41 +21,47 @@ extern "C"{
 #include "id3v1Types.h"
 #include "LinkedList.h"
 
-//! size of ID3v2 tag identifier "ID3" or "3DI"
+//! Size of ID3v2 tag identifier "ID3" or "3DI"
 #define ID3V2_TAG_ID_SIZE 3
 
-//! major version for ID3v2.2
+//! Major version for ID3v2.2
 #define ID3V2_TAG_VERSION_2 2
 
-//! major version for ID3v2.3
+//! Major version for ID3v2.3
 #define ID3V2_TAG_VERSION_3 3
 
-//! major version for ID3v2.4
+//! Major version for ID3v2.4
 #define ID3V2_TAG_VERSION_4 4
+
+/**
+ * @brief The max size a frame id or size can be in bytes. 
+ * @details ID3v2.2 uses an ID and size that is only 3 bytes in size where ID3v2.3 & ID3v2.4 use a 4 byte version 
+ */
+#define ID3V2_FRAME_ID_MAX_SIZE 4
 
 /**
  * @brief The extended header contains information that can provide further insight in the 
  * structure of the tag, but is not vital to the correct parsing of the tag information; 
  * hence the extended header is optional.
- * @details a programmer should never need to use this structure manually and it will be
+ * @details A programmer should never need to use this structure manually and it will be
  * created, accessed, and deleted automatically
  */
 typedef struct _Id3v2ExtendedTagHeader{
     
-    //!size of the extended header as a 32bit int or a sync safe int depending on version
+    //!Size of the extended header as a 32bit int or a sync safe int depending on version
     uint32_t padding;
 
-    //!crc of the audio data
+    //!Crc of the audio data
     uint32_t crc;
 
-    //!marks a tag as an update
+    //!Marks a tag as an update
     bool update;
 
-    //!tag restriction mark, if set restrictions are used
+    //!Tag restriction mark, if set restrictions are used
     bool tagRestrictions;
 
     /**
-     * @brief designates restrictions used by this tag in format: %ppqrrstt.
+     * @brief Designates restrictions used by this tag in format: %ppqrrstt.
      * pp is a Tag Size Restriction, q is an Encoding restriction, rr is a
      * Text Fields Size Restriction, s is an Image Encoding Restriction, and
      * tt is an Image size restriction.  
@@ -66,39 +72,155 @@ typedef struct _Id3v2ExtendedTagHeader{
 }Id3v2ExtendedTagHeader;
 
 /**
- * @brief vital information used to parse and define an ID3 tag
+ * @brief Vital information used to parse and define an ID3 tag
  * 
  */
 typedef struct _Id3v2TagHeader{
 
-    //!major version number
+    //! Major version number
     uint8_t majorVersion;
 
-    //!minor version number (patch number)
+    //! Minor version number (patch number)
     uint8_t minorVersion;
 
-    //!frame flags %abcd0000
+    //! Frame flags %abcd0000
     uint8_t flags;
 
-    //! extended header
+    //! Extended header
     Id3v2ExtendedTagHeader *extendedHeader;
 
 }Id3v2TagHeader;
 
+
 /**
- * @brief An ID3v2.x tag
+ * @brief Vital information used to parse and define a frames content
+ * 
+ */
+typedef struct _Id3v2FrameHeader{
+
+    //! The ID used to identify a frame e.g TIT2
+    uint8_t id[ID3V2_FRAME_ID_MAX_SIZE];
+
+    //! Marks the frame as unknown if the tag is altered
+    bool tagAlterPreservation;
+
+    //! Marks the frame as unkown if the file is altered
+    bool fileAlterPreservation;
+
+    //! Marks the frame as read only
+    bool readOnly;
+
+    //! zlib decompression size
+    uint32_t decompressionSize;
+
+    //! Encryption symbol used to define how the frame is encrypted
+    uint8_t encryptionSymbol;
+
+    //! Group symbol used to relate a frame to another
+    uint8_t groupSymbol;
+
+}Id3v2FrameHeader;
+
+/**
+ * @brief Represents possible types that can be used by a context
+ * 
+ */
+typedef enum _Id3v2ContextType{
+    
+    // error
+    unknown_context = -1,   // error context what is there is unreadable
+    
+    // generic
+    noEncoding_context,     // data that is to be read in sequence and has no defining end character e.g '\0'
+    binary_context,         // binary data
+
+    // text
+    encodedString_context,  // an encoded string that is defined by a previous context with the enumerated key "encoding"
+    latin1Encoding_context, // forces a latin1 encoded string with the ending of '\0'
+    
+    // numbers
+    numeric_context,        // integers of different sizes such as 8, 16, 32, or 64
+    precision_context,      // decimal values such as floats
+    bit_context,            // bits such as 1 or 0
+
+    // control
+    iter_context,            // allows for the iteration of previous frames with a defiend start and stop
+    adjustment_context       // if a context with the title "adjustment" exists it will use its parsed value as a max size
+}Id3v2ContextType;
+
+/**
+ * @brief Context used to determin how an entry in a frame should be handled
+ * 
+ */
+typedef struct _Id3v2ContentContext{
+
+    //! The type of value the parser will extract
+    Id3v2ContextType type;
+
+    //! Hashed string 
+    size_t key;
+    
+    /**
+     * @brief Smallest number of bytes that can represent this block of data. 
+     * If the bolck is an iter context this will be the min node when the iter 
+     * will start
+     */
+    size_t min;
+    
+    /**
+     * @brief Largest number of bytes that can represent this block of data.
+     * If this block is an iter context this will be max times this context 
+     * will execute.  
+     */
+    size_t max;
+
+}Id3v2ContentContext;
+
+
+/**
+ * @brief An entry in a frame
+ * @details There is no context to this structure and the struct with that information is external. This is done so a user could potentially program there own frames into the parser.
+ */
+typedef struct _Id3v2ContentEntry{
+    
+    //! The entry held within this frame
+    void *entry;
+
+    //! The size of the entry in this frame
+    size_t size;
+
+}Id3v2ContentEntry;
+
+
+/**
+ * @brief A frame of data defined by the ID3v2 standards
+ * 
+ */
+typedef struct _Id3v2Frame{
+    
+    //! Header used to identify the frame
+    Id3v2FrameHeader *header;
+
+    //! A list of context clues used to correctly handle entries
+    List *context;
+
+    //! A list of entires 
+    List *entries;
+
+}Id3v2Frame;
+
+
+/**
+ * @brief A representation of an ID3v2.x tag
  * 
  */
 typedef struct _Id3v2Tag{
 
-    //! Header of a tag
-    Id3v2TagHeader *tagHeader;
-
-    //! Frames 
+    //! Tag header
+    Id3v2TagHeader *tagHeader; //footers are a copy
+    
+    //! Frames contained within the tag
     List *frames;
-
-    //! Footer of a tag
-    Id3v2TagHeader *tagFooter;
 
 }Id3v2Tag;
 

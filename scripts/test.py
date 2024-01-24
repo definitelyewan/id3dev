@@ -31,9 +31,11 @@ else:
 
 # compile code
 update.message("Compiling id3v1_test program")
-compile_code("id3v1_test")
+#compile_code("id3v1_test")
 update.message("Compiling id3v2_tag_identity_test program")
-compile_code("id3v2_tag_identity_test")
+#compile_code("id3v2_tag_identity_test")
+update.message("Compiling id3v2_context_test program")
+compile_code("id3v2_context_test")
 
 
 # call test execs
@@ -41,11 +43,13 @@ try:
     if platform == "linux" or platform == "linux2":
         
         if(is_command("valgrind")):
-            subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v1_test"])
-            subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v2_tag_identity_test"])
+            #subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v1_test"])
+            #subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v2_tag_identity_test"])
+            subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v2_context_test"])
         else:
             subprocess.call(["./id3v1_test"])
             subprocess.call(["./id3v2_tag_identity_test"])
+            subprocess.call(["./id3v2_context_test"])
         
     elif platform == "darwin":
 
@@ -61,17 +65,20 @@ try:
 
             subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v1_test"])
             subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_tag_identity_test"])
+            subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_context_test"])
 
             if(malloc_stack_logging == False):
                 os.environ["MallocStackLogging"] = "0"
         else:
             subprocess.call(["./id3v1_test"])
             subprocess.call(["./id3v2_tag_identity_test"])
+            subprocess.call(["./id3v2_context_test"])
 
 
     elif platform == "win32":
         subprocess.call("id3v1_test.exe")
         subprocess.call("id3v2_tag_identity_test.exe")
+        subprocess.call(["id3v2_context_test.exe"])
         
 except OSError as e:
     if e.errno == errno.ENOENT:

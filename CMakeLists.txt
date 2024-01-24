@@ -1,12 +1,5 @@
 cmake_minimum_required(VERSION 3.22.1)
 
-# if(WIN32)
-#   set(CMAKE_GENERATOR "MinGW Makefiles")
-#   set(CMAKE_CXX_COMPILER "C:/MinGW-W64/mingw64/bin/g++.exe")
-#   set(CMAKE_C_COMPILER "C:/MinGW-W64/mingw64/bin/gcc.exe")
-#   set(CMAKE_MAKE_PROGRAM mingw32-make)
-# endif()
-
 project(Id3dev VERSION 1.0.0.0)
 
 
@@ -26,6 +19,7 @@ set(ID3V2_HEADERS
   "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2/id3v2Parser.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2/id3v2TagIdentity.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2/id3v2Types.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2/id3v2Context.h"
 )
 
 set(ID3V1_SRC
@@ -35,6 +29,7 @@ set(ID3V1_SRC
 
 set(ID3V2_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v2/id3v2TagIdentity.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v2/id3v2Context.c"
 )
 
 
