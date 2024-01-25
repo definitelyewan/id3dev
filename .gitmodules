@@ -8,3 +8,6 @@
 	path = modules/cmocka
 	url = https://gitlab.com/cmocka/cmocka.git
 	branch = stable-1.1
+[submodule "modules/HashTableLib"]
+	path = modules/HashTableLib
+	url = https://github.com/definitelyewan/HashTableLib.git
