@@ -7,7 +7,7 @@
 #include "byteStream.h"
 
 
-Id3v2ExtendedTagHeader *id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, bool unsynchronisation){
+Id3v2ExtendedTagHeader *id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version){
 
     if(!stream){
         return NULL;
@@ -21,41 +21,70 @@ Id3v2ExtendedTagHeader *id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t 
     uint8_t restrictions = 0;
 
     // values for parsing
-    uint32_t extSize = 0;
-    size_t retSize = 0;
     int8_t flags = 0;
+    uint8_t nBytes = 0;
+    bool hasCrc = false;
+    bool hasRestrictions = false;
 
     switch(version){
         
         // crc and padding
         case ID3V2_TAG_VERSION_3:
 
-            // // read ext size and return if 0
-            // if(!(extSize =  byteStreamReturnInt(stream))){
-            //     return NULL;
-            // }       
+            // read size
+            if(!(byteStreamReturnInt(stream))){
+                return NULL;
+            }       
 
-            // // read flags
-            // if((flags = byteStreamReadBit(stream, 7)) == -1){ // MSB -> 7
-            //     return NULL; // if -1 function failed
-            // }
+            // read flags
+            if((flags = byteStreamReadBit(stream, 7)) == -1){ // MSB -> 7
+                return NULL;
+            }
 
-            // // skip over flags
-            // byteStreamSeek(stream, 2, SEEK_CUR);
+            // skip over flags
+            byteStreamSeek(stream, 2, SEEK_CUR);
 
-            // // read padding
-            // if(!(padding = byteStreamReturnInt(stream))){
-            //     return NULL;
-            // }
+            // read padding
+            if(!(padding = byteStreamReturnInt(stream))){
+                return NULL;
+            }
             
-            // // check to see if a crc is there
-            // if(flags){
-            //     // an extra check is not needed because this is optional
-            //     crc = byteStreamReturnInt(stream);
-            // }
+            // check to see if a crc is there
+            if(flags){
+                // optional
+                crc = byteStreamReturnInt(stream);
+            }
 
-            break;
+            break; 
         case ID3V2_TAG_VERSION_4:
+            
+            // read size
+            if(!(byteStreamReturnInt(stream))){
+                return NULL;
+            }  
+
+            // number of flag bytes
+            if(!(nBytes = byteStreamGetCh(stream))){
+                break;
+            }
+            
+            if(byteStreamReadBit(stream, 6)){
+                update = true;
+            }
+
+            if(byteStreamReadBit(stream, 5)){
+                hasCrc = true;
+            }
+
+            if(byteStreamReadBit(stream, 4)){
+                hasRestrictions = true;
+            }
+
+
+            if(hasCrc){
+                
+            }
+
             break;
 
         // no extended header support
