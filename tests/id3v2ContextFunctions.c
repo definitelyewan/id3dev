@@ -35,6 +35,17 @@ static void id3v2CreateContentContext_validStruct(void **state){
     free(c);
 }
 
+static void id3v2CreateContextMap_validAllInOne(void **state){
+
+    Id3v2ContextMap *m = id3v2CreateContextMap((uint8_t *)"TIT2", id3v2CreateTextFrameContext());
+
+    assert_non_null(m);
+    assert_string_equal((char *)"TIT2", (char *)m->id);
+    assert_non_null(m->context);
+
+    id3v2DestroyContextMap(&m);
+}  
+
 static void id3v2DestroyContentContext_freeStruct(void **state){
     (void) state;
 
@@ -1221,10 +1232,6 @@ static void id3v2CreateUnsynchronisedLyricFrameContext_valid(void **state){
 
 }
 
-static void playGround(void **state){
-
-}
-
 int main(){
 
     const struct CMUnitTest tests[] = {
@@ -1326,7 +1333,8 @@ int main(){
         // id3v2CreateUnsynchronisedLyricFrameContext tests
         cmocka_unit_test(id3v2CreateUnsynchronisedLyricFrameContext_valid),
 
-        cmocka_unit_test(playGround)
+        // id3v2CreateContextMap
+        cmocka_unit_test(id3v2CreateContextMap_validAllInOne)
 
     };
 

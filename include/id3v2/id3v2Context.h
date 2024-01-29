@@ -20,7 +20,11 @@ extern "C"{
 //mem
 
 Id3v2ContentContext *id3v2CreateContentContext(Id3v2ContextType type, size_t key, size_t max, size_t min);
+Id3v2ContextMap *id3v2CreateContextMap(uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], List *context);
+
 void id3v2DestroyContentContext(Id3v2ContentContext **toDelete);
+void id3v2DestroyContextMap(Id3v2ContextMap **toDelete);
+
 
 // List API required functions
 
@@ -59,7 +63,6 @@ List *id3v2CreateSignatureFrameContext(void);
 List *id3v2CreateSynchronisedLyricFrameContext(void);
 List *id3v2CreateSynchronisedTempoCodesFrameContext(void);
 List *id3v2CreateUniqueFileIdentifierFrameContext(void);
-
 List *id3v2CreateUnsynchronisedLyricFrameContext(void);
 
 

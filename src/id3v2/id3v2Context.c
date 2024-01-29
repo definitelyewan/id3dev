@@ -17,7 +17,6 @@ static unsigned long djb2(char *str){
     return hash;
 }
 
-
 /**
  * @brief Creates a context
  * 
@@ -41,6 +40,24 @@ Id3v2ContentContext *id3v2CreateContentContext(Id3v2ContextType type, size_t key
 }
 
 /**
+ * @brief Creates a context map
+ * 
+ * @param id 
+ * @param context 
+ * @return Id3v2ContextMap* 
+ */
+Id3v2ContextMap *id3v2CreateContextMap(uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], List *context){
+
+    Id3v2ContextMap *map = malloc(sizeof(Id3v2ContextMap));
+
+    strncpy((char *)map->id, (char *)id, ID3V2_FRAME_ID_MAX_SIZE);
+    map->context = context;
+
+    return map;
+}
+
+
+/**
  * @brief Destroys a content context
  * 
  * @param toDelete 
@@ -52,6 +69,22 @@ void id3v2DestroyContentContext(Id3v2ContentContext **toDelete){
         *toDelete = NULL;
         toDelete = NULL;
     }
+}
+
+/**
+ * @brief Destroys a context map
+ * 
+ * @param toDelete 
+ */
+void id3v2DestroyContextMap(Id3v2ContextMap **toDelete){
+
+    if(*toDelete){
+        listFree((*toDelete)->context);
+        free(*toDelete);
+        *toDelete = NULL;
+        toDelete = NULL;
+    }
+
 }
 
 /**

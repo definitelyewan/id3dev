@@ -18,7 +18,9 @@ extern "C"{
 
 
 #include "id3v2Types.h"
+#include "byteTypes.h"
 
+Id3v2ExtendedTagHeader *id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, bool unsynchronisation);
 
 
 

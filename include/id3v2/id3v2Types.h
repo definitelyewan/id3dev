@@ -191,38 +191,19 @@ typedef struct _Id3v2ContentEntry{
 
 }Id3v2ContentEntry;
 
-
 /**
- * @brief A frame of data defined by the ID3v2 standards
+ * @brief A mapping between frame ID and context
  * 
  */
-typedef struct _Id3v2Frame{
-    
-    //! Header used to identify the frame
-    Id3v2FrameHeader *header;
+typedef struct _Id3v2ContextMap{
 
-    //! A list of context clues used to correctly handle entries
-    List *context;
+    //! bytes representing an ID
+    uint8_t id[ID3V2_FRAME_ID_MAX_SIZE];
 
-    //! A list of entires 
-    List *entries;
+    //! List of context needed to parse a frame
+    List *context;    
 
-}Id3v2Frame;
-
-
-/**
- * @brief A representation of an ID3v2.x tag
- * 
- */
-typedef struct _Id3v2Tag{
-
-    //! Tag header
-    Id3v2TagHeader *tagHeader; //footers are a copy
-    
-    //! Frames contained within the tag
-    List *frames;
-
-}Id3v2Tag;
+}Id3v2ContextMap;
 
 
 #ifdef __cplusplus

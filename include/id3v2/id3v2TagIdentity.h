@@ -24,7 +24,7 @@ extern "C"{
 */
 
 //mem functions
-Id3v2TagHeader *id3v2NewTagHeader(uint8_t majorVersion, uint8_t minorVersion, uint8_t flags, Id3v2ExtendedTagHeader *extendedHeader);
+Id3v2TagHeader *id3v2CreateTagHeader(uint8_t majorVersion, uint8_t minorVersion, uint8_t flags, Id3v2ExtendedTagHeader *extendedHeader);
 void id3v2DestroyTagHeader(Id3v2TagHeader **toDelete);
 
 //flag functions
@@ -46,7 +46,7 @@ int id3v2ReadFooterIndicator(Id3v2TagHeader *header);
 
 //mem functions
 
-Id3v2ExtendedTagHeader *id3v2NewExtendedTagHeader(uint32_t padding, uint32_t crc, bool update, bool tagRestrictions, uint8_t restrictions);
+Id3v2ExtendedTagHeader *id3v2CreateExtendedTagHeader(uint32_t padding, uint32_t crc, bool update, bool tagRestrictions, uint8_t restrictions);
 void id3v2DestroyExtendedTagHeader(Id3v2ExtendedTagHeader **toDelete);
 
 //tag restriction functions
