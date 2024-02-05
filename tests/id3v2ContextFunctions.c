@@ -34,17 +34,7 @@ static void id3v2CreateContentContext_validStruct(void **state){
     
     free(c);
 }
-
-static void id3v2CreateContextMap_validAllInOne(void **state){
-
-    Id3v2ContextMap *m = id3v2CreateContextMap((uint8_t *)"TIT2", id3v2CreateTextFrameContext());
-
-    assert_non_null(m);
-    assert_string_equal((char *)"TIT2", (char *)m->id);
-    assert_non_null(m->context);
-
-    id3v2DestroyContextMap(&m);
-}  
+  
 
 static void id3v2DestroyContentContext_freeStruct(void **state){
     (void) state;
@@ -305,6 +295,63 @@ static void id3v2CreateAttachedPictureFrameContext_version3(void **state){
 
     listFree(l);
 
+}
+
+static void id3v2CreateAudioencryptionContext_valid(void **state){
+
+    List* l = id3v2CreateAudioEncryptionFrameContext();
+
+    assert_non_null(l);
+
+    Node *n = l->head;
+
+    Id3v2ContentContext *c = (Id3v2ContentContext *) n->data;
+
+    assert_int_equal(c->type, latin1Encoding_context);
+    assert_int_equal(c->max, UINT_MAX);
+    assert_int_equal(c->min, 1);
+    assert_int_equal(c->key, djb2("identifier"));
+
+    c = (Id3v2ContentContext *) n->next->data;
+
+    assert_int_equal(c->type, numeric_context);
+    assert_int_equal(c->max, 2);
+    assert_int_equal(c->min, 2);
+    assert_int_equal(c->key, djb2("start"));
+
+    c = (Id3v2ContentContext *) n->next->next->data;
+
+    assert_int_equal(c->type, numeric_context);
+    assert_int_equal(c->max, 2);
+    assert_int_equal(c->min, 2);
+    assert_int_equal(c->key, djb2("length"));
+
+    c = (Id3v2ContentContext *) n->next->next->next->data;
+
+    assert_int_equal(c->type, binary_context);
+    assert_int_equal(c->max, UINT_MAX);
+    assert_int_equal(c->min, 1);
+    assert_int_equal(c->key, djb2("data"));
+
+    listFree(l);
+}
+
+static void id3v2CreateAudioSeekPointIndexFrameContext_valid(void **state){
+
+    List* l = id3v2CreateAudioSeekPointIndexFrameContext();
+
+    assert_non_null(l);
+
+    Node *n = l->head;
+
+    Id3v2ContentContext *c = (Id3v2ContentContext *) n->data;
+
+    assert_int_equal(c->type, binary_context);
+    assert_int_equal(c->max, UINT_MAX);
+    assert_int_equal(c->min, 1);
+    assert_int_equal(c->key, djb2("data"));
+
+    listFree(l);
 }
 
 static void id3v2CreateCommentFrameContext_valid(void **state){
@@ -1032,7 +1079,7 @@ static void id3v2CreateReverbFrameContext_valid(void **state){
 
 static void id3v2CreateSeekPointIndexFrameContext_valid(void **state){
     
-    List* l = id3v2CreateSeekPointIndexFrameContext();
+    List* l = id3v2CreateSeekFrameContext();
 
     assert_non_null(l);
 
@@ -1192,6 +1239,39 @@ static void id3v2CreateUniqueFileIdentifierFrameContext_valid(void **state){
 
 }
 
+static void id3v2CreateTermsOfUseFrameContext_valid(void **state){
+
+    List* l = id3v2CreateTermsOfUseFrameContext();
+
+    assert_non_null(l);
+
+    Node *n = l->head;
+
+    Id3v2ContentContext *c = (Id3v2ContentContext *) n->data;
+
+    assert_int_equal(c->type, numeric_context);
+    assert_int_equal(c->max, 1);
+    assert_int_equal(c->min, 1);
+    assert_int_equal(c->key, djb2("encoding"));
+
+    c = (Id3v2ContentContext *) n->next->data;
+
+    assert_int_equal(c->type, noEncoding_context);
+    assert_int_equal(c->max, 3);
+    assert_int_equal(c->min, 1);
+    assert_int_equal(c->key, djb2("language"));
+
+    c = (Id3v2ContentContext *) n->next->next->data;
+
+    assert_int_equal(c->type, encodedString_context);
+    assert_int_equal(c->max, UINT_MAX);
+    assert_int_equal(c->min, 1);
+    assert_int_equal(c->key, djb2("text"));
+
+    listFree(l);
+
+}
+
 static void id3v2CreateUnsynchronisedLyricFrameContext_valid(void **state){
 
     List* l = id3v2CreateUnsynchronisedLyricFrameContext();
@@ -1259,6 +1339,12 @@ int main(){
         cmocka_unit_test(id3v2CreateAttachedPictureFrameContext_version2),
         cmocka_unit_test(id3v2CreateAttachedPictureFrameContext_version3),
 
+        // id3v2CreateAudioencryptionContext tests
+        cmocka_unit_test(id3v2CreateAudioencryptionContext_valid),
+
+        // id3v2CreateAudioSeekPointIndexFrameContext tests
+        cmocka_unit_test(id3v2CreateAudioSeekPointIndexFrameContext_valid),
+
         // id3v2CreateCommentFrameContext tests
         cmocka_unit_test(id3v2CreateCommentFrameContext_valid),
 
@@ -1315,7 +1401,7 @@ int main(){
         // id3v2CreateRelativeVolumeAdjustmentFrameContext tests
         cmocka_unit_test(id3v2CreateReverbFrameContext_valid),
 
-        // id3v2CreateSeekPointIndexFrameContext tests
+        // id3v2CreateSeekFrameContext tests
         cmocka_unit_test(id3v2CreateSeekPointIndexFrameContext_valid),
 
         // id3v2CreateSignatureFrameContext tests
@@ -1330,11 +1416,11 @@ int main(){
         // id3v2CreateUniqueFileIdentifierFrameContext tests
         cmocka_unit_test(id3v2CreateUniqueFileIdentifierFrameContext_valid),
 
-        // id3v2CreateUnsynchronisedLyricFrameContext tests
-        cmocka_unit_test(id3v2CreateUnsynchronisedLyricFrameContext_valid),
+        // id3v2CreateTermsOfUseFrameContext
+        cmocka_unit_test(id3v2CreateTermsOfUseFrameContext_valid),
 
-        // id3v2CreateContextMap
-        cmocka_unit_test(id3v2CreateContextMap_validAllInOne)
+        // id3v2CreateUnsynchronisedLyricFrameContext tests
+        cmocka_unit_test(id3v2CreateUnsynchronisedLyricFrameContext_valid)
 
     };
 

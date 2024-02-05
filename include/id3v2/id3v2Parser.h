@@ -20,8 +20,10 @@ extern "C"{
 #include "id3v2Types.h"
 #include "byteTypes.h"
 
+
+
 uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2ExtendedTagHeader **extendedTagHeader);
-Id3v2TagHeader *id3v2ParseTagHeader(ByteStream *stream, uint32_t *tagBodySize);
+uint32_t id3v2ParseTagHeader(ByteStream *stream, Id3v2TagHeader **tagHeader, uint32_t *tagSize);
 
 
 

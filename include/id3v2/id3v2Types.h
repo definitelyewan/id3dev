@@ -19,10 +19,20 @@ extern "C"{
 #include <stdbool.h>
 #include <stdint.h>
 #include "id3v1Types.h"
+
+// data structures
+
 #include "LinkedList.h"
+#include "hashTable.h"
 
 //! Size of ID3v2 tag identifier "ID3" or "3DI"
 #define ID3V2_TAG_ID_SIZE 3
+
+//! Memory representation of the tag identifer "ID3"
+#define ID3V2_TAG_ID_MAGIC_NUMBER_H 0x494433
+
+//! Memory representation of the tag identifer "3DI"
+#define ID3V2_TAG_ID_MAGIC_NUMBER_F 0x334449
 
 //! Major version for ID3v2.2
 #define ID3V2_TAG_VERSION_2 2
@@ -191,19 +201,13 @@ typedef struct _Id3v2ContentEntry{
 
 }Id3v2ContentEntry;
 
-/**
- * @brief A mapping between frame ID and context
- * 
- */
-typedef struct _Id3v2ContextMap{
+typedef struct _Id3v2Frame{
 
-    //! bytes representing an ID
-    uint8_t id[ID3V2_FRAME_ID_MAX_SIZE];
+    Id3v2FrameHeader *header;
+    List *contexts;
+    List *entries;
 
-    //! List of context needed to parse a frame
-    List *context;    
-
-}Id3v2ContextMap;
+}Id3v2Frame;
 
 
 #ifdef __cplusplus

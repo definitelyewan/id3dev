@@ -40,24 +40,6 @@ Id3v2ContentContext *id3v2CreateContentContext(Id3v2ContextType type, size_t key
 }
 
 /**
- * @brief Creates a context map
- * 
- * @param id 
- * @param context 
- * @return Id3v2ContextMap* 
- */
-Id3v2ContextMap *id3v2CreateContextMap(uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], List *context){
-
-    Id3v2ContextMap *map = malloc(sizeof(Id3v2ContextMap));
-
-    strncpy((char *)map->id, (char *)id, ID3V2_FRAME_ID_MAX_SIZE);
-    map->context = context;
-
-    return map;
-}
-
-
-/**
  * @brief Destroys a content context
  * 
  * @param toDelete 
@@ -72,24 +54,8 @@ void id3v2DestroyContentContext(Id3v2ContentContext **toDelete){
 }
 
 /**
- * @brief Destroys a context map
  * 
- * @param toDelete 
- */
-void id3v2DestroyContextMap(Id3v2ContextMap **toDelete){
-
-    if(*toDelete){
-        listFree((*toDelete)->context);
-        free(*toDelete);
-        *toDelete = NULL;
-        toDelete = NULL;
-    }
-
-}
-
-/**
- * 
- * List API required functions
+ * List/Hash API required functions
  *  
  */
 
@@ -152,7 +118,6 @@ char *id3v2PrintContentContext(const void *toBePrinted){
     return str;
 }
 
-
 /**
  * @brief Performs a deep copy of a context
  * 
@@ -170,6 +135,85 @@ void *id3v2CopyContentContext(const void *toBeCopied){
     ret->type = copy->type;
     
     return (void *)ret;
+}
+
+/**
+ * @brief Frees an entry
+ * 
+ * @param toBeDeleted 
+ */
+void id3v2DeleteContentEntry(void *toBeDeleted){
+
+    Id3v2ContentEntry *e = (Id3v2ContentEntry *)toBeDeleted;
+
+    if(e->entry != NULL){
+        free(e->entry);
+    }
+}
+
+/**
+ * @brief Comparse two entries and returns the difference
+ * 
+ * @param first 
+ * @param second 
+ * @return int 
+ */
+int id3v2CompareContentEntry(const void *first, const void *second){
+
+    Id3v2ContentEntry *one = (Id3v2ContentEntry *)first;
+    Id3v2ContentEntry *two = (Id3v2ContentEntry *)second;
+
+    int diff = 0;
+    
+    diff = one->size - two->size;
+    if(diff != 0){
+        return diff;
+    }
+
+    diff = memcmp(one->entry,two->entry,one->size);
+    if(diff != 0){
+        return diff;
+    }
+
+    return 0;
+}
+
+/**
+ * @brief Generates a string that represents a context
+ * 
+ * @param toBePrinted 
+ * @return char* 
+ */
+char *id3v2PrintContentEntry(const void *toBePrinted){
+
+    Id3v2ContentEntry *e = (Id3v2ContentEntry *)toBePrinted; 
+
+    char *str = malloc((sizeof(char) * 16) + sizeof(long) + 8);
+
+    sprintf(str, "Size: %ld, data: %p\n",e->size, e->entry);
+
+    return str;
+}
+
+/**
+ * @brief Performs a deep copy of an entry
+ * 
+ * @param toBeCopied 
+ * @return void* 
+ */
+void *id3v2CopyContentEntry(const void *toBeCopied){
+
+    Id3v2ContentEntry *e = (Id3v2ContentEntry *)toBeCopied;
+    Id3v2ContentEntry *copy = malloc(sizeof(Id3v2ContentEntry));
+
+    copy->size = e->size;
+
+    if(e->size != 0 || e->entry != NULL){
+        memcpy(copy->entry, e->entry, e->size);
+    }
+    
+    return copy;
+
 }
 
 /**
@@ -265,7 +309,7 @@ List *id3v2CreateUserDefinedURLFrameContext(void){
 
 /**
  * @brief Generates the required contexts for an attached picture frame depending on the version on ID3v2
- * 
+ * @details will be underfined until i can find a better way or more contexts
  * @param version 
  * @return List* 
  */
@@ -304,6 +348,45 @@ List *id3v2CreateAttachedPictureFrameContext(unsigned int version){
 
     // desc
     toAdd = (void *) id3v2CreateContentContext(encodedString_context, djb2("desc"), UINT_MAX, 1);
+    listInsertBack(l, toAdd);
+
+    // data
+    toAdd = (void *) id3v2CreateContentContext(binary_context, djb2("data"), UINT_MAX, 1);
+    listInsertBack(l, toAdd);
+
+    return l;
+}
+
+List *id3v2CreateAudioSeekPointIndexFrameContext(void){
+
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+
+    // data
+    void *toAdd = (void *) id3v2CreateContentContext(binary_context, djb2("data"), UINT_MAX, 1);
+    listInsertBack(l, toAdd);
+
+    return l;
+}
+
+/**
+ * @brief generates the required context for an audio encryption frame
+ * 
+ * @return List* 
+ */
+List *id3v2CreateAudioEncryptionFrameContext(void){
+
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+
+    // identifier
+    void *toAdd = (void *) id3v2CreateContentContext(latin1Encoding_context, djb2("identifier"), UINT_MAX, 1);
+    listInsertBack(l, toAdd);
+
+    // preview start
+    toAdd = (void *) id3v2CreateContentContext(numeric_context, djb2("start"), 2, 2);
+    listInsertBack(l, toAdd);
+
+    // length
+    toAdd = (void *) id3v2CreateContentContext(numeric_context, djb2("length"), 2, 2);
     listInsertBack(l, toAdd);
 
     // data
@@ -854,7 +937,7 @@ List *id3v2CreateReverbFrameContext(void){
  * 
  * @return List* 
  */
-List *id3v2CreateSeekPointIndexFrameContext(void){
+List *id3v2CreateSeekFrameContext(void){
 
     List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
 
@@ -970,6 +1053,26 @@ List *id3v2CreateUniqueFileIdentifierFrameContext(void){
     return l;
 }
 
+List *id3v2CreateTermsOfUseFrameContext(void){
+
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+
+    // encoding
+    void *toAdd = (void *) id3v2CreateContentContext(numeric_context, djb2("encoding"), 1, 1);
+    listInsertBack(l, toAdd);
+
+    // language
+    toAdd = (void *) id3v2CreateContentContext(noEncoding_context, djb2("language"), 3, 1);
+    listInsertBack(l, toAdd);
+
+    // text
+    toAdd = (void *) id3v2CreateContentContext(encodedString_context, djb2("text"), UINT_MAX, 1);
+    listInsertBack(l, toAdd);
+
+    return l;
+}
+
+
 /**
  * @brief Generates the required contexts for a unsynced lyrics frame
  * 
@@ -979,7 +1082,7 @@ List *id3v2CreateUnsynchronisedLyricFrameContext(void){
 
     List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
 
-    // url
+    // encoding
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, djb2("encoding"), 1, 1);
     listInsertBack(l, toAdd);
 
@@ -998,3 +1101,317 @@ List *id3v2CreateUnsynchronisedLyricFrameContext(void){
     return l;
 
 }
+
+
+/**
+ * @brief Generates a default map of pairings between frame IDs and the context needed to parse them.
+ * This works for all major versions of ID3v2.
+ * 
+ * @param version 
+ * @return HashTable* 
+ */
+HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version){
+
+    size_t minFrameContexts = 63;
+    HashTable *table = hashTableCreate(minFrameContexts, id3v2DeleteContentContext, id3v2PrintContentContext, id3v2CopyContentContext);
+
+
+    switch(version){
+        
+        case ID3V2_TAG_VERSION_2:
+        
+            hashTableInsert(table, "BUF", id3v2CreateRecommendedBufferSizeFrameContext());
+
+            hashTableInsert(table, "CNT", id3v2CreatePlayCounterFrameContext());
+            
+            hashTableInsert(table, "COM", id3v2CreateCommentFrameContext());
+            hashTableInsert(table, "CRA", id3v2CreateAudioEncryptionFrameContext());
+            hashTableInsert(table, "CRM", id3v2CreateEncryptedMetaFrameContext());
+
+            hashTableInsert(table, "ETC", id3v2CreateEventTimingCodesFrameContext());
+            hashTableInsert(table, "EQU", id3v2CreateEqulizationFrameContext(version));
+
+            hashTableInsert(table, "GEO", id3v2CreateGeneralEncapsulatedObjectFrameContext());
+
+            hashTableInsert(table, "IPL", id3v2CreateInvolvedPeopleListFrameContext());
+
+            hashTableInsert(table, "LNK", id3v2CreateLinkedInformationFrameContext());
+
+            hashTableInsert(table, "MCI", id3v2CreateMusicCDIdentifierFrameContext());
+            hashTableInsert(table, "MLL", id3v2CreateMPEGLocationLookupTableFrameContext());
+
+            hashTableInsert(table, "PIC", id3v2CreateAttachedPictureFrameContext(version));
+            hashTableInsert(table, "POP", id3v2CreatePopularimeterFrameContext());
+
+            hashTableInsert(table, "REV", id3v2CreateReverbFrameContext());
+            hashTableInsert(table, "RVA", id3v2CreateRelativeVolumeAdjustmentFrameContext(version));
+
+            hashTableInsert(table, "SLT", id3v2CreateSynchronisedLyricFrameContext());
+            hashTableInsert(table, "STC", id3v2CreateSynchronisedTempoCodesFrameContext());
+
+            hashTableInsert(table, "TAL", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TBP", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TCM", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TCO", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TCR", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TDA", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TDY", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TEN", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TFT", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TIM", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TKE", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TLA", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TLE", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TMT", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TOA", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TOF", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TOL", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TOR", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TOT", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TP1", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TP2", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TP3", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TP4", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TPA", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TPB", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TRC", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TRD", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TRK", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TSI", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TSS", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TT1", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TT2", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TT3", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TXT", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TXX", id3v2CreateUserDefinedTextFrameContext());
+            hashTableInsert(table, "TYE", id3v2CreateTextFrameContext()); 
+
+            hashTableInsert(table, "UFI", id3v2CreateUniqueFileIdentifierFrameContext());
+            hashTableInsert(table, "ULT", id3v2CreateUnsynchronisedLyricFrameContext());
+
+            hashTableInsert(table, "WAF", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WAR", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WAS", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WCM", id3v2CreateURLFrameContext()); 
+            hashTableInsert(table, "WCP", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WPB", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WXX", id3v2CreateUserDefinedURLFrameContext());
+
+            break;
+        case ID3V2_TAG_VERSION_3:
+
+            hashTableInsert(table, "AENC", id3v2CreateAudioEncryptionFrameContext());
+            hashTableInsert(table, "APIC", id3v2CreateAttachedPictureFrameContext(version));
+
+            hashTableInsert(table, "COMM", id3v2CreateCommentFrameContext());
+            hashTableInsert(table, "COMR", id3v2CreateCommercialFrameContext());
+
+            hashTableInsert(table, "ENCR", id3v2CreateRegistrationFrameContext());
+            hashTableInsert(table, "EQUA", id3v2CreateEqulizationFrameContext(version));
+            hashTableInsert(table, "ETCO", id3v2CreateEventTimingCodesFrameContext());
+
+            hashTableInsert(table, "GEOB", id3v2CreateGeneralEncapsulatedObjectFrameContext());
+            hashTableInsert(table, "GRID", id3v2CreateRegistrationFrameContext());
+
+            hashTableInsert(table, "IPLS", id3v2CreateInvolvedPeopleListFrameContext());
+
+            hashTableInsert(table, "LINK", id3v2CreateLinkedInformationFrameContext());
+            
+            hashTableInsert(table, "MCDI", id3v2CreateMusicCDIdentifierFrameContext());
+            hashTableInsert(table, "MLLT", id3v2CreateMPEGLocationLookupTableFrameContext());
+            
+            hashTableInsert(table, "OWNE", id3v2CreateOwnershipFrameContext());
+            
+            hashTableInsert(table, "PRIV", id3v2CreatePrivateFrameContext());
+            hashTableInsert(table, "PCNT", id3v2CreatePlayCounterFrameContext());
+            hashTableInsert(table, "POPM", id3v2CreatePopularimeterFrameContext());
+            hashTableInsert(table, "POSS", id3v2CreatePositionSynchronisationFrameContext());
+
+            hashTableInsert(table, "RBUF", id3v2CreateRecommendedBufferSizeFrameContext());
+            hashTableInsert(table, "RVAD", id3v2CreateRelativeVolumeAdjustmentFrameContext(version));
+            hashTableInsert(table, "RVRB", id3v2CreateReverbFrameContext());
+
+            hashTableInsert(table, "SYLT", id3v2CreateSynchronisedLyricFrameContext());
+            hashTableInsert(table, "SYTC", id3v2CreateSynchronisedTempoCodesFrameContext());
+
+            hashTableInsert(table, "TALB", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TBPM", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TCOM", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TCON", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TCOP", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TDAT", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TDLY", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TENC", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TEXT", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TFLT", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TIME", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TIT1", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TIT2", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TIT3", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TKEY", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TLAN", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TLEN", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TMED", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TOAL", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TOFN", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TOLY", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TOPE", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TORY", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TOWN", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TPE1", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TPE2", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TPE3", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TPE4", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TPOS", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TPUB", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TRCK", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TRDA", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TRSN", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TRSO", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TSIZ", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TSRC", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TSSE", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TYER", id3v2CreateTextFrameContext()); 
+            hashTableInsert(table, "TXXX", id3v2CreateUserDefinedTextFrameContext());
+
+            hashTableInsert(table, "UFID", id3v2CreateUniqueFileIdentifierFrameContext());
+            hashTableInsert(table, "USER", id3v2CreateTermsOfUseFrameContext());
+            hashTableInsert(table, "USLT", id3v2CreateUnsynchronisedLyricFrameContext());
+
+            hashTableInsert(table, "WCOM", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WCOP", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WOAF", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WOAR", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WOAS", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WORS", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WPAY", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WPUB", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WXXX", id3v2CreateUserDefinedURLFrameContext());
+
+            break;
+        case ID3V2_TAG_VERSION_4:
+            hashTableInsert(table, "AENC", id3v2CreateAudioEncryptionFrameContext());
+            hashTableInsert(table, "APIC", id3v2CreateAttachedPictureFrameContext(version));
+            hashTableInsert(table, "ASPI", id3v2CreateAudioSeekPointIndexFrameContext());
+
+            hashTableInsert(table, "COMM", id3v2CreateCommentFrameContext());
+            hashTableInsert(table, "COMR", id3v2CreateCommercialFrameContext());
+
+            hashTableInsert(table, "ENCR", id3v2CreateRegistrationFrameContext());
+            hashTableInsert(table, "EQU2", id3v2CreateEqulizationFrameContext(version));
+            hashTableInsert(table, "ETCO", id3v2CreateEventTimingCodesFrameContext());
+
+            hashTableInsert(table, "GEOB", id3v2CreateGeneralEncapsulatedObjectFrameContext());
+            hashTableInsert(table, "GRID", id3v2CreateRegistrationFrameContext());
+
+            hashTableInsert(table, "LINK", id3v2CreateLinkedInformationFrameContext());
+
+            hashTableInsert(table, "MCDI", id3v2CreateMusicCDIdentifierFrameContext());
+            hashTableInsert(table, "MLLT", id3v2CreateMPEGLocationLookupTableFrameContext());
+
+            hashTableInsert(table, "OWNE", id3v2CreateOwnershipFrameContext());
+
+            hashTableInsert(table, "PRIV", id3v2CreatePrivateFrameContext());
+            hashTableInsert(table, "PCNT", id3v2CreatePlayCounterFrameContext());
+            hashTableInsert(table, "POPM", id3v2CreatePopularimeterFrameContext());
+            hashTableInsert(table, "POSS", id3v2CreatePositionSynchronisationFrameContext());
+
+            hashTableInsert(table, "RBUF", id3v2CreateRecommendedBufferSizeFrameContext());
+            hashTableInsert(table, "RVA2", id3v2CreateRelativeVolumeAdjustmentFrameContext(version));
+            hashTableInsert(table, "RVRB", id3v2CreateReverbFrameContext());
+
+            hashTableInsert(table, "SEEK", id3v2CreateSeekFrameContext());
+            hashTableInsert(table, "SIGN", id3v2CreateSignatureFrameContext());
+            hashTableInsert(table, "SYLT", id3v2CreateSynchronisedLyricFrameContext());
+            hashTableInsert(table, "SYTC", id3v2CreateSynchronisedTempoCodesFrameContext());
+
+            hashTableInsert(table, "TALB", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TBPM", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TCOM", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TCON", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TCOP", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TDEN", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TDLY", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TDOR", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TDRC", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TDRL", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TDTG", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TENC", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TEXT", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TFLT", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TIPL", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TIT1", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TIT2", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TIT3", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TKEY", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TLAN", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TLEN", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TMCL", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TMED", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TMOO", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TOAL", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TOFN", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TOLY", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TOPE", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TOWN", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TPE1", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TPE2", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TPE3", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TPE4", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TPOS", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TPRO", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TPUB", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TRCK", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TRSN", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TRSO", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TSOA", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TSOP", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TSOT", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TSRC", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TSSE", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TSST", id3v2CreateTextFrameContext());
+            hashTableInsert(table, "TXXX", id3v2CreateUserDefinedTextFrameContext());
+
+            hashTableInsert(table, "UFID", id3v2CreateUniqueFileIdentifierFrameContext());
+            hashTableInsert(table, "USER", id3v2CreateTermsOfUseFrameContext());
+            hashTableInsert(table, "USLT", id3v2CreateUnsynchronisedLyricFrameContext());
+
+            hashTableInsert(table, "WCOM", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WCOP", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WOAF", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WOAR", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WOAS", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WORS", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WPAY", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WPUB", id3v2CreateURLFrameContext());
+            hashTableInsert(table, "WXXX", id3v2CreateUserDefinedURLFrameContext());
+            
+            break;
+        default:
+            break;
+    }
+
+
+    return table;
+}
+
+/**
+ * @brief Inserts a new frame ID and context pairing into a map
+ * 
+ * @param identifierContextPairs 
+ * @param key 
+ * @param context 
+ * @return true 
+ * @return false 
+ */
+bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char key[ID3V2_FRAME_ID_MAX_SIZE], List *context){
+
+    if(!identifierContextPairs || !key || !context){
+        return false;
+    }
+
+    hashTableInsert(identifierContextPairs, key, context);
+
+    return true;
+}
+

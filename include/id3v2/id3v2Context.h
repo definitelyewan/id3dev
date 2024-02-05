@@ -20,25 +20,30 @@ extern "C"{
 //mem
 
 Id3v2ContentContext *id3v2CreateContentContext(Id3v2ContextType type, size_t key, size_t max, size_t min);
-Id3v2ContextMap *id3v2CreateContextMap(uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], List *context);
-
 void id3v2DestroyContentContext(Id3v2ContentContext **toDelete);
-void id3v2DestroyContextMap(Id3v2ContextMap **toDelete);
 
 
-// List API required functions
+// List/Hash API required functions
 
 void id3v2DeleteContentContext(void *toBeDeleted);
 int id3v2CompareContentContext(const void *first, const void *second);
 char *id3v2PrintContentContext(const void *toBePrinted);
 void *id3v2CopyContentContext(const void *toBeCopied);
 
+void id3v2DeleteContentEntry(void *toBeDeleted);
+int id3v2CompareContentEntry(const void *first, const void *second);
+char *id3v2PrintContentEntry(const void *toBePrinted);
+void *id3v2CopyContentEntry(const void *toBeCopied);
+
+// context generators
 
 List *id3v2CreateTextFrameContext(void);
 List *id3v2CreateUserDefinedTextFrameContext(void);
 List *id3v2CreateURLFrameContext(void);
 List *id3v2CreateUserDefinedURLFrameContext(void);
 List *id3v2CreateAttachedPictureFrameContext(unsigned int version);
+List *id3v2CreateAudioEncryptionFrameContext(void);
+List *id3v2CreateAudioSeekPointIndexFrameContext(void);
 List *id3v2CreateCommentFrameContext(void);
 List *id3v2CreateCommercialFrameContext(void); 
 List *id3v2CreateEncryptedMetaFrameContext(void);
@@ -58,18 +63,17 @@ List *id3v2CreatePrivateFrameContext(void);
 List *id3v2CreateRecommendedBufferSizeFrameContext(void);
 List *id3v2CreateRelativeVolumeAdjustmentFrameContext(unsigned int version);
 List *id3v2CreateReverbFrameContext(void);
-List *id3v2CreateSeekPointIndexFrameContext(void);
+List *id3v2CreateSeekFrameContext(void);
 List *id3v2CreateSignatureFrameContext(void);
 List *id3v2CreateSynchronisedLyricFrameContext(void);
 List *id3v2CreateSynchronisedTempoCodesFrameContext(void);
 List *id3v2CreateUniqueFileIdentifierFrameContext(void);
+List *id3v2CreateTermsOfUseFrameContext(void);
 List *id3v2CreateUnsynchronisedLyricFrameContext(void);
 
 
-
-
-
-
+HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version);
+bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char key[ID3V2_FRAME_ID_MAX_SIZE], List *context);
 
 #ifdef __cplusplus
 } //extern c end
