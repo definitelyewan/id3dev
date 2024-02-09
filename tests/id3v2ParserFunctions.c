@@ -320,32 +320,321 @@ static void id3v2ParseTagHeader_noVersions(void **state){
     byteStreamDestroy(stream);
 }
 
+static void id3v2ParseFrameHeader_noSupport(void **state){
+
+    uint8_t ext[6] = {'T','A','L',
+                      0x00,0x01,0x00,
+    };
+
+    ByteStream *stream = byteStreamCreate(ext, 6);
+    Id3v2FrameHeader *h;
+    uint32_t size = 0;
+    uint32_t v = id3v2ParseFrameHeader(stream, 99, &h, &size);
+
+    assert_null(h);
+    assert_int_equal(v, 0);
+    assert_int_equal(size, 0);
+
+
+    byteStreamDestroy(stream);
+
+}
+
+
+static void id3v2ParseFrameHeader_v2(void **state){
+
+    uint8_t ext[6] = {'T','A','L',
+                      0x00,0x01,0x00,
+    };
+
+    ByteStream *stream = byteStreamCreate(ext, 6);
+    Id3v2FrameHeader *h;
+    uint32_t size = 0;
+    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_2, &h, &size);
+
+    assert_non_null(h);
+    assert_memory_equal(h->id, "TAL", 3);
+    assert_int_equal(size, 256);
+    assert_int_equal(v, 6);
+
+
+    byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&h);
+
+}
+
+static void id3v2ParseFrameHeader_v2MissingSize(void **state){
+
+    uint8_t ext[3] = {'T','A','L'};
+
+    ByteStream *stream = byteStreamCreate(ext, 3);
+    Id3v2FrameHeader *h;
+    uint32_t size = 0;
+    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_2, &h, &size);
+
+    assert_null(h);
+    assert_int_equal(v, 3);
+
+
+    byteStreamDestroy(stream);
+
+}
+
+static void id3v2ParseFrameHeader_v3(void **state){
+
+    uint8_t ext[16] = {'T','A','L','B',
+                      0x00,0x00,0x00,0x64,
+                      0xE0,0xE0,
+                      0x00,0x00,0xEA,0x60,
+                      0xFF,
+                      0xFE
+    };
+
+    ByteStream *stream = byteStreamCreate(ext, 16);
+    Id3v2FrameHeader *h;
+    uint32_t size = 0;
+    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_3, &h, &size);
+
+    assert_non_null(h);
+    assert_int_equal(v, 16);
+    assert_int_equal(size, 94);
+
+    assert_true(h->tagAlterPreservation);
+    assert_true(h->fileAlterPreservation);
+    assert_true(h->readOnly);
+
+    assert_int_equal(h->decompressionSize, 0xEA60);
+    assert_int_equal(h->encryptionSymbol, 0xFF);
+    assert_int_equal(h->groupSymbol, 0xFE);
+
+
+    byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&h);
+
+}
+
+static void id3v2ParseFrameHeader_v3FlagsButNoSymbols(void **state){
+
+    uint8_t ext[14] = {'T','A','L','B',
+                      0x00,0x00,0x00,0x64,
+                      0xE0,0xE0,
+                      0x00,0x00,0xEA,0x60
+    };
+
+    ByteStream *stream = byteStreamCreate(ext, 14);
+    Id3v2FrameHeader *h;
+    uint32_t size = 0;
+    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_3, &h, &size);
+
+    assert_non_null(h);
+    assert_int_equal(v, 14);
+    assert_int_equal(size, 96);
+
+    assert_true(h->tagAlterPreservation);
+    assert_true(h->fileAlterPreservation);
+    assert_true(h->readOnly);
+
+    assert_int_equal(h->decompressionSize, 0xEA60);
+    assert_int_equal(h->encryptionSymbol, 0);
+    assert_int_equal(h->groupSymbol, 0);
+
+
+    byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&h);
+
+}
+
+static void id3v2ParseFrameHeader_v3noFlags(void **state){
+
+    uint8_t ext[10] = {'T','A','L','B',
+                      0x00,0x00,0x00,0x64,
+                      0x00,0x00
+    };
+
+    ByteStream *stream = byteStreamCreate(ext, 10);
+    Id3v2FrameHeader *h;
+    uint32_t size = 0;
+    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_3, &h, &size);
+
+    assert_non_null(h);
+    assert_int_equal(v, 10);
+    assert_int_equal(size, 100);
+
+    assert_false(h->tagAlterPreservation);
+    assert_false(h->fileAlterPreservation);
+    assert_false(h->readOnly);
+
+    assert_int_equal(h->decompressionSize, 0);
+    assert_int_equal(h->encryptionSymbol, 0);
+    assert_int_equal(h->groupSymbol, 0);
+
+
+    byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&h);
+
+}
+
+static void id3v2ParseFrameHeader_v3noFlagBytes(void **state){
+
+    uint8_t ext[8] = {'T','A','L','B',
+                      0x00,0x00,0x00,0x64
+    };
+
+    ByteStream *stream = byteStreamCreate(ext, 8);
+    Id3v2FrameHeader *h;
+    uint32_t size = 0;
+    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_3, &h, &size);
+
+    assert_null(h);
+    assert_int_equal(v, 8);
+    assert_int_equal(size, 100);
+
+
+    byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&h);
+
+}
+
+static void id3v2ParseFrameHeader_v4(void **state){
+
+    uint8_t ext[16] = {'T','I','T','2',
+                      0x00,0x00,0x02,0x00,
+                      0x70,0x4F,
+                      0xFF,
+                      0xFE,
+                      0x00, 0x01, 0x0F, 0x2C
+
+
+    };
+
+    ByteStream *stream = byteStreamCreate(ext, 16);
+    Id3v2FrameHeader *h;
+    uint32_t size = 0;
+    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_4, &h, &size);
+
+    assert_non_null(h);
+    assert_int_equal(v, 16);
+    assert_int_equal(size, 250);
+
+    assert_true(h->tagAlterPreservation);
+    assert_true(h->fileAlterPreservation);
+    assert_true(h->readOnly);
+
+    assert_int_equal(h->groupSymbol, 0xFF);
+    assert_int_equal(h->encryptionSymbol, 0xFE);
+    assert_int_equal(h->decompressionSize, byteSyncintDecode(69420));
+    assert_true(h->unsynchronisation);
+
+
+    byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&h);
+
+}
+
+static void id3v2ParseFrameHeader_v4SetFlagButNoContent(void **state){
+
+    uint8_t ext[12] = {'T','I','T','2',
+                      0x00,0x00,0x02,0x00,
+                      0x70,0x4F,
+                      0xFF,
+                      0xFE
+
+
+    };
+
+    ByteStream *stream = byteStreamCreate(ext, 12);
+    Id3v2FrameHeader *h;
+    uint32_t size = 0;
+    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_4, &h, &size);
+
+    assert_non_null(h);
+    assert_int_equal(v, 12);
+    assert_int_equal(size, 250);
+
+    assert_true(h->tagAlterPreservation);
+    assert_true(h->fileAlterPreservation);
+    assert_true(h->readOnly);
+
+    assert_int_equal(h->groupSymbol, 0xFF);
+    assert_int_equal(h->encryptionSymbol, 0xFE);
+    assert_int_equal(h->decompressionSize, 0);
+    assert_true(h->unsynchronisation);
+
+
+    byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&h);
+
+}
+
+static void id3v2ParseFrameHeader_v4NoSetFlagsButContent(void **state){
+
+    uint8_t ext[16] = {'T','I','T','2',
+                      0x00,0x00,0x02,0x00,
+                      0x00,0x00,
+                      0xFF,
+                      0xFE,
+                      0x00, 0x01, 0x0F, 0x2C
+
+
+    };
+
+    ByteStream *stream = byteStreamCreate(ext, 16);
+    Id3v2FrameHeader *h;
+    uint32_t size = 0;
+    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_4, &h, &size);
+
+    assert_non_null(h);
+    assert_int_equal(v, 10);
+    assert_int_equal(size, 256);
+
+    assert_false(h->tagAlterPreservation);
+    assert_false(h->fileAlterPreservation);
+    assert_false(h->readOnly);
+
+    assert_int_equal(h->groupSymbol, 0);
+    assert_int_equal(h->encryptionSymbol, 0);
+    assert_int_equal(h->decompressionSize, 0);
+    assert_false(h->unsynchronisation);
+
+
+    byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&h);
+
+}
 
 static void playground(void **state){
 
-    uint8_t ext[6] = {'I','D','3',
-                      2, 
-                      0,
-                      0};
-                       
+    uint8_t ext[16] = {'T','I','T','2',
+                      0x00,0x00,0x02,0x00,
+                      0x00,0x00,
+                      0xFF,
+                      0xFE,
+                      0x00, 0x01, 0x0F, 0x2C
 
-    ByteStream *stream = byteStreamCreate(ext, 6);
 
-    Id3v2TagHeader *h;
+    };
+
+    ByteStream *stream = byteStreamCreate(ext, 16);
+    Id3v2FrameHeader *h;
     uint32_t size = 0;
+    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_4, &h, &size);
 
-    uint32_t v = id3v2ParseTagHeader(stream, &h, &size);
-    assert_int_equal(stream->cursor, 0);
-    assert_int_equal(v,6);
     assert_non_null(h);
-    assert_int_equal(h->majorVersion, 2);
-    assert_int_equal(h->minorVersion, 0);
-    assert_int_equal(h->flags, 0);
-    assert_int_equal(h->extendedHeader, NULL);
-    assert_int_equal(size, 0);
+    assert_int_equal(v, 10);
+    assert_int_equal(size, 256);
 
-    id3v2DestroyTagHeader(&h);
+    assert_false(h->tagAlterPreservation);
+    assert_false(h->fileAlterPreservation);
+    assert_false(h->readOnly);
+
+    assert_int_equal(h->groupSymbol, 0);
+    assert_int_equal(h->encryptionSymbol, 0);
+    assert_int_equal(h->decompressionSize, 0);
+    assert_false(h->unsynchronisation);
+
+
     byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&h);
 
 }
 
@@ -372,6 +661,21 @@ int main(){
         cmocka_unit_test(id3v2ParseTagHeader_noTagSize),
         cmocka_unit_test(id3v2ParseTagHeader_noFlags),
         cmocka_unit_test(id3v2ParseTagHeader_noVersions),
+
+        // id3v2ParseFrameHeader tests
+        cmocka_unit_test(id3v2ParseFrameHeader_noSupport),
+
+        cmocka_unit_test(id3v2ParseFrameHeader_v2),
+        cmocka_unit_test(id3v2ParseFrameHeader_v2MissingSize),
+
+        cmocka_unit_test(id3v2ParseFrameHeader_v3),
+        cmocka_unit_test(id3v2ParseFrameHeader_v3FlagsButNoSymbols),
+        cmocka_unit_test(id3v2ParseFrameHeader_v3noFlags),
+        cmocka_unit_test(id3v2ParseFrameHeader_v3noFlagBytes),
+
+        cmocka_unit_test(id3v2ParseFrameHeader_v4),
+        cmocka_unit_test(id3v2ParseFrameHeader_v4SetFlagButNoContent),
+        cmocka_unit_test(id3v2ParseFrameHeader_v4NoSetFlagsButContent),
 
         cmocka_unit_test(playground)
 

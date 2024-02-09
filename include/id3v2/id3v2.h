@@ -20,6 +20,7 @@ extern "C"{
 #include "id3v2TagIdentity.h"
 #include "id3v2Parser.h"
 #include "id3v2Context.h"
+#include "id3v2Frame.h"
 
 
 #ifdef __cplusplus

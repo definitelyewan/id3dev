@@ -30,11 +30,6 @@ int id3v2CompareContentContext(const void *first, const void *second);
 char *id3v2PrintContentContext(const void *toBePrinted);
 void *id3v2CopyContentContext(const void *toBeCopied);
 
-void id3v2DeleteContentEntry(void *toBeDeleted);
-int id3v2CompareContentEntry(const void *first, const void *second);
-char *id3v2PrintContentEntry(const void *toBePrinted);
-void *id3v2CopyContentEntry(const void *toBeCopied);
-
 // context generators
 
 List *id3v2CreateTextFrameContext(void);

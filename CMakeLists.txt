@@ -20,6 +20,7 @@ set(ID3V2_HEADERS
   "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2/id3v2TagIdentity.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2/id3v2Types.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2/id3v2Context.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2/id3v2Frame.h"
 )
 
 set(ID3V1_SRC
@@ -31,6 +32,7 @@ set(ID3V2_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v2/id3v2TagIdentity.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v2/id3v2Context.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v2/id3v2Parser.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v2/id3v2Frame.c"
 )
 
 

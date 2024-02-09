@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "id3v2Context.h"
+#include "id3v2Frame.h"
 #include "id3v2Parser.h"
 #include "id3v2TagIdentity.h"
 #include "byteStream.h"
@@ -60,7 +61,7 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
 
         resetIndex = stream->cursor;
 
-        if(!(hSize = byteStreamReturnInt(stream))){
+        if(!(hSize = byteStreamReturnInt(stream))){  
             stream->cursor = resetIndex;
             *extendedTagHeader = NULL;
             return 0;
@@ -137,6 +138,7 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
 
             // read restrictions
             if(hasRestrictions){
+    
                 for(uint8_t k = 8; k > 0; k--){
                     
                     int bit = byteStreamReadBit(innerStream, k - 1);
@@ -249,12 +251,199 @@ uint32_t id3v2ParseTagHeader(ByteStream *stream, Id3v2TagHeader **tagHeader, uin
         break;
     }
 
-
-    walk = stream->cursor;
+    walk = stream->cursor - resetIndex;
     stream->cursor = resetIndex;
     *tagSize = hSize;
     *tagHeader = id3v2CreateTagHeader(major, minor, flags, NULL);
     return walk;
 }
+/**
+ * @brief Parses an ID3 version 2, 3 or 4 frame header. This function returns a couple values back to the caller, first
+ * it returns the number of bytes it read to to create a frame header structure. The structure itself is returned as a
+ * heap allocated structure which will need to be provided by the caller along with the size reported by the metadata.
+ * There are no error states but a frameSize of 0 and a NULL frameHeader will likely mean nothing useful was gathered. 
+ * 
+ * @param stream 
+ * @param version 
+ * @param frameHeader 
+ * @param frameSize 
+ * @return uint32_t 
+ */
+uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHeader **frameHeader, uint32_t *frameSize){
+
+    if(!stream){
+        *frameHeader = NULL;
+        return 0;
+    }
+
+    // values needed
+    uint8_t id[ID3V2_FRAME_ID_MAX_SIZE];
+    uint32_t tSize = 0;
+    bool tagAlter = false;
+    bool fileAlter = false;
+    bool readOnly = false;
+    bool unsync = false;
+    uint32_t decompressionSize = 0;
+    uint8_t encryptionSymbol = 0;
+    uint8_t groupSymbol = 0;
+
+    // values for parsing
+    uint8_t sizeBytes[ID3V2_FRAME_ID_MAX_SIZE]; 
+    uint8_t flagBytes[ID3V2_FRAME_FLAG_SIZE];
+    uint8_t flagOffset = 0;
+    size_t resetIndex = 0;
+    uint32_t walk = 0;
+    
 
 
+    resetIndex = stream->cursor;
+
+    switch(version){
+        case ID3V2_TAG_VERSION_2:
+
+            if(!byteStreamRead(stream, id, ID3V2_FRAME_ID_MAX_SIZE - 1)){
+                *frameHeader = NULL;
+                *frameSize = 0;
+                return 0;
+            }
+
+            if(!byteStreamRead(stream, sizeBytes, ID3V2_FRAME_ID_MAX_SIZE - 1)){
+                *frameHeader = NULL;
+                *frameSize = 0;
+                return ID3V2_FRAME_ID_MAX_SIZE - 1;
+            }
+
+            if(!(tSize = btoi(sizeBytes, ID3V2_FRAME_ID_MAX_SIZE - 1))){
+                break;
+            }
+
+            break;
+        case ID3V2_TAG_VERSION_3:
+            if(!byteStreamRead(stream, id, ID3V2_FRAME_ID_MAX_SIZE)){
+                *frameHeader = NULL;
+                *frameSize = 0;
+                return 0;
+            }
+
+            if(!(tSize = byteStreamReturnInt(stream))){
+                *frameHeader = NULL;
+                *frameSize = 0;
+                return ID3V2_FRAME_ID_MAX_SIZE;
+            }
+
+            if(!(byteStreamRead(stream, flagBytes, ID3V2_FRAME_FLAG_SIZE))){
+                *frameHeader = NULL;
+                *frameSize = tSize;
+                return ID3V2_FRAME_ID_MAX_SIZE * 2;
+            }
+
+            if(readBit(flagBytes[0], 7)){
+                tagAlter = true;
+            }
+
+            if(readBit(flagBytes[0], 6)){
+                fileAlter = true;
+            }
+
+            if(readBit(flagBytes[0], 5)){
+                readOnly = true;
+            }
+
+            if(readBit(flagBytes[1], 7)){
+                if(!(decompressionSize = byteStreamReturnInt(stream))){
+                    break;
+                }
+
+                flagOffset += sizeof(uint32_t);
+            }
+
+            if(readBit(flagBytes[1], 6)){
+                if(!(byteStreamRead(stream, &encryptionSymbol, 1))){
+                    break;
+                }
+
+                flagOffset++;
+            }
+
+            if(readBit(flagBytes[1], 5)){
+                if(!(byteStreamRead(stream, &groupSymbol, 1))){
+                    break;
+                }
+
+                flagOffset++;
+            }
+
+            break;
+        case ID3V2_TAG_VERSION_4:
+
+            if(!byteStreamRead(stream, id, ID3V2_FRAME_ID_MAX_SIZE)){
+                *frameHeader = NULL;
+                *frameSize = 0;
+                return 0;
+            }
+
+            if(!(tSize = byteStreamReturnSyncInt(stream))){
+                *frameHeader = NULL;
+                *frameSize = 0;
+                return ID3V2_FRAME_ID_MAX_SIZE;
+            }
+
+            if(!(byteStreamRead(stream, flagBytes, ID3V2_FRAME_FLAG_SIZE))){
+                *frameHeader = NULL;
+                *frameSize = tSize;
+                return ID3V2_FRAME_ID_MAX_SIZE * 2;
+            }
+
+            if(readBit(flagBytes[0], 6)){
+                tagAlter = true;
+            }
+
+            if(readBit(flagBytes[0], 5)){
+                fileAlter = true;
+            }
+
+            if(readBit(flagBytes[0], 4)){
+                readOnly = true;
+            }
+
+            if(readBit(flagBytes[1], 6)){
+                if(!byteStreamRead(stream, &groupSymbol, 1)){
+                    break;
+                }
+
+                flagOffset++;
+            }
+
+            if(readBit(flagBytes[1], 2)){
+                if(!byteStreamRead(stream, &encryptionSymbol, 1)){
+                    break;
+                }
+
+                flagOffset++;
+            }
+
+            if(readBit(flagBytes[1], 1)){
+                unsync = true;
+            }
+
+            if(readBit(flagBytes[1], 3) || encryptionSymbol || readBit(flagBytes[1], 0)){
+                decompressionSize = byteStreamReturnSyncInt(stream);
+
+                flagOffset += sizeof(uint32_t);
+            }
+
+            break;
+        
+        // no support
+        default:
+            *frameHeader = NULL;
+            *frameSize = 0;
+            return 0;
+    }
+
+    *frameHeader = id3v2CreateFrameHeader(id, tagAlter, fileAlter, readOnly, unsync, decompressionSize, encryptionSymbol, groupSymbol);
+    *frameSize = tSize - flagOffset;
+    walk = stream->cursor - resetIndex;
+    stream->cursor = resetIndex;
+    return walk;
+}
