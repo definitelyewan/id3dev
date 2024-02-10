@@ -134,7 +134,7 @@ static void id3v2ParseExtendedTagHeader_v3SmallSizeWithData(void **state){
     Id3v2ExtendedTagHeader *h;
     uint32_t v = id3v2ParseExtendedTagHeader(stream, ID3V2_TAG_VERSION_3, &h);
 
-    assert_int_equal(v, 10);
+    assert_int_equal(v, 6);
 
     assert_non_null(h);
     assert_int_equal(h->padding, 0);
@@ -626,7 +626,7 @@ static void playground(void **state){
     assert_non_null(f);
     assert_non_null(f->header);
     assert_memory_equal(f->header->id,"TALB",4);
-
+    assert_int_equal(frameSize, 77);
     assert_false(f->header->unsynchronisation);
     assert_false(f->header->readOnly);
     assert_false(f->header->tagAlterPreservation);
@@ -640,15 +640,10 @@ static void playground(void **state){
     
     assert_int_equal(((uint8_t *)e->entry)[0], 3);
     assert_int_equal(e->size, 1);
-
     e = (Id3v2ContentEntry *) f->entries->head->next->data;
-    
-    for(int i = 0; i < e->size; i++){
-        printf("[%x]",((uint8_t *)(e->entry))[i]);
-    }
 
     assert_memory_equal(e->entry, "The Powers That Butf8ÛȾℲⅧ♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏utf8",66);
-    assert_int_equal(e->size, 66);
+    assert_int_equal(e->size, 67);
 
     listFree(context);
     byteStreamDestroy(stream);

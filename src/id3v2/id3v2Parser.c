@@ -68,10 +68,10 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
             return 0;
         }
 
-        if(hSize > stream->bufferSize){
-            offset = hSize - stream->bufferSize;
+        if(hSize > (stream->bufferSize - stream->cursor)){
+            offset = hSize - (stream->bufferSize - stream->cursor);
         }
-        
+
         innerStream = byteStreamCreate(byteStreamCursor(stream), hSize - offset);
         stream->cursor = resetIndex;
     }
@@ -477,7 +477,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
     resetIndex = stream->cursor;
 
     expectedHeaderSize = id3v2ParseFrameHeader(stream, version, &header, &expectedContentSize);
-    
+    walk += expectedHeaderSize;
 
     if(!expectedHeaderSize){
         stream->cursor = resetIndex;
@@ -547,17 +547,18 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                     case BYTE_ASCII:
                     case BYTE_UTF8:
                         data = byteStreamReturnUtf8(innerSream, &dataSize);
-                        printf("%s %d\n",data,dataSize);
                         break;
                     case BYTE_UTF16BE:
                     case BYTE_UTF16LE:
-                        
+                        data = byteStreamReturnUtf16(innerSream, &dataSize);
+                        break;
                     default:
                         break;
+
                 }
 
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
-                //free(data);
+                free(data);
                 expectedContentSize = expectedContentSize - dataSize;
             }
                 break;      
@@ -605,142 +606,13 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
         }
 
         if(expectedContentSize == 0){
-            printf("EXIT\n");
             break;
         }
 
     }
 
-    walk = innerSream->cursor;
+    walk += innerSream->cursor;
     *frame = id3v2CreateFrame(header, listDeepCopy(context), entries);
     byteStreamDestroy(innerSream);
     return walk;
-
-    // while(n){
-
-    //     Id3v2ContentContext *cc = (Id3v2ContentContext *) n->data;
-
-    //     switch(cc->type){
-    //         case unknown_context:
-    //             break;
-    //         case noEncoding_context:
-    //             break;
-    //         case binary_context:
-    //             break;
-    //         case encodedString_context:{
-
-    //             size_t posce = 0;
-    //             size_t poscc = 0;
-    //             size_t clen = 0;
-    //             uint8_t encoding = 0;
-    //             ListIter contentContextIter = listCreateIterator(context); 
-    //             ListIter contentEntryIter = listCreateIterator(entries);
-    //             void *tmp = NULL;
-
-    //             while((tmp = listIteratorNext(&contentContextIter)) != NULL){
-
-    //                 if(((Id3v2ContentContext *)tmp)->type == iter_context){
-    //                     poscc--;
-    //                 }
-
-    //                 if(((Id3v2ContentContext *)tmp)->key == id3v2djb2("encoding")){
-    //                     break;
-    //                 }
-
-    //                 poscc++;
-    //             }
-
-    //             while((tmp = listIteratorNext(&contentEntryIter)) != NULL){
-
-    //                 if(poscc == posce){
-    //                     encoding = ((uint8_t *)((Id3v2ContentEntry *)tmp)->entry)[0];
-    //                 }
-
-    //                 posce++;
-    //             }
-                
-    //             clen = byteStrlen(encoding, byteStreamCursor(stream));
-    //             printf("%d\n",clen);
-    //             // incicates that we are at the end of a frame and reading into the next frame
-    //             if(expectedContentSize < clen){
-    //                 data = malloc(expectedContentSize);
-                    
-    //                 if(!byteStreamRead(stream, (uint8_t *)data, expectedContentSize)){
-    //                     memset(data, 0, expectedContentSize);
-    //                 }
-
-    //                 dataSize = expectedContentSize;
-
-    //             }else{
-    //                 printf("here\n");
-    //                 data = malloc(clen);
-                    
-    //                 if(!byteStreamRead(stream, (uint8_t *)data, clen)){
-    //                     memset(data, 0, clen);
-    //                 }
-
-    //                 dataSize = clen;
-    //             }
-
-    //             expectedContentSize = expectedContentSize - dataSize;
-
-    //             break;
-    //         }        
-    //         case latin1Encoding_context:
-    //             break;
-    //         case numeric_context:
-
-    //             if(cc->min == cc->max){
-    //                 dataSize = cc->min;
-    //             }else if(cc->min > cc->max){// no trust
-    //                 dataSize = cc->min;
-
-    //             }else{
-    //                 dataSize = cc->max;
-    //             }
-
-    //             if(dataSize > expectedContentSize){
-    //                 dataSize = expectedContentSize;
-    //             }
-
-    //             data = malloc(dataSize);
-
-    //             if(!byteStreamRead(stream, (uint8_t *)data, dataSize)){
-    //                 memset(data, 0, dataSize);
-    //             }
-
-    //             break;
-    //         case precision_context:
-    //             break;
-    //         case bit_context:
-    //             break;
-    //         case iter_context:
-    //             break;
-    //         case adjustment_context:
-    //             break;
-            
-    //         // no support
-    //         default:
-    //             break;
-    //     }
-
-
-    //     if(data != NULL){
-            
-    //         listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
-    //         free(data);
-
-    //         expectedContentSize = expectedContentSize - dataSize;
-    //         dataSize = 0;
-    //         data = NULL;
-    //     }
-    //     n = n->next;
-        
-
-    // }
-
-    // *frame = id3v2CreateFrame(header, listDeepCopy(context), entries);
-    // walk = stream->cursor - resetIndex;
-    // stream->cursor = resetIndex;
-    // return walk;
 }

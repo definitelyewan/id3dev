@@ -70,7 +70,7 @@ Id3v2ContentEntry *id3v2CreateContentEntry(void *entry, size_t size){
 
     }else{
 
-        void *tmp = malloc(sizeof(size));
+        void *tmp = malloc(size);
         memcpy(tmp, entry, size);
 
         ce->entry = tmp;
@@ -140,15 +140,8 @@ char *id3v2PrintContentEntry(const void *toBePrinted){
 void *id3v2CopyContentEntry(const void *toBeCopied){
 
     Id3v2ContentEntry *e = (Id3v2ContentEntry *)toBeCopied;
-    Id3v2ContentEntry *copy = malloc(sizeof(Id3v2ContentEntry));
-
-    copy->size = e->size;
-
-    if(e->size != 0 || e->entry != NULL){
-        memcpy(copy->entry, e->entry, e->size);
-    }
     
-    return copy;
+    return id3v2CreateContentEntry(e->entry, e->size);
 
 }
 
