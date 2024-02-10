@@ -20,15 +20,6 @@ extern "C"{
 #include "id3v2.h"
 
 
-typedef struct _ID3{
-
-    Id3v1Tag *id3v1Tag;
-
-    List *id3v2tags;
-
-}ID3;
-
-
 
 
 #ifdef __cplusplus

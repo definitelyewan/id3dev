@@ -604,37 +604,55 @@ static void id3v2ParseFrameHeader_v4NoSetFlagsButContent(void **state){
 
 static void playground(void **state){
 
-    uint8_t ext[16] = {'T','I','T','2',
-                      0x00,0x00,0x02,0x00,
-                      0x00,0x00,
-                      0xFF,
-                      0xFE,
-                      0x00, 0x01, 0x0F, 0x2C
-
-
+    uint8_t talb[77] = {0x54, 0x41, 0x4c, 0x42, 0x00, 0x00, 0x00, 0x43, 0x00, 0x00, 
+                        0x03, 0x54, 0x68, 0x65, 0x20, 0x50, 0x6f, 0x77, 0x65, 0x72, 
+                        0x73, 0x20, 0x54, 0x68, 0x61, 0x74, 0x20, 0x42, 0x75, 0x74, 
+                        0x66, 0x38, 0xc3, 0x9b, 0xc8, 0xbe, 0xe2, 0x84, 0xb2, 0xe2, 
+                        0x85, 0xa7, 0xe2, 0x99, 0x88, 0x20, 0xe2, 0x99, 0x89, 0x20, 
+                        0xe2, 0x99, 0x8a, 0x20, 0xe2, 0x99, 0x8b, 0x20, 0xe2, 0x99, 
+                        0x8c, 0x20, 0xe2, 0x99, 0x8d, 0x20, 0xe2, 0x99, 0x8e, 0x20, 
+                        0xe2, 0x99, 0x8f, 0x75, 0x74, 0x66, 0x38
     };
 
-    ByteStream *stream = byteStreamCreate(ext, 16);
-    Id3v2FrameHeader *h;
-    uint32_t size = 0;
-    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_4, &h, &size);
 
-    assert_non_null(h);
-    assert_int_equal(v, 10);
-    assert_int_equal(size, 256);
+    ByteStream *stream = byteStreamCreate(talb, 77);
+    Id3v2Frame *f;
+    List *context = id3v2CreateTextFrameContext();
+    uint32_t frameSize = 0;
 
-    assert_false(h->tagAlterPreservation);
-    assert_false(h->fileAlterPreservation);
-    assert_false(h->readOnly);
-
-    assert_int_equal(h->groupSymbol, 0);
-    assert_int_equal(h->encryptionSymbol, 0);
-    assert_int_equal(h->decompressionSize, 0);
-    assert_false(h->unsynchronisation);
+    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_4, &f);
 
 
+    assert_non_null(f);
+    assert_non_null(f->header);
+    assert_memory_equal(f->header->id,"TALB",4);
+
+    assert_false(f->header->unsynchronisation);
+    assert_false(f->header->readOnly);
+    assert_false(f->header->tagAlterPreservation);
+    assert_false(f->header->fileAlterPreservation);
+
+    assert_int_equal(f->header->decompressionSize, 0);
+    assert_int_equal(f->header->groupSymbol, 0);
+    assert_int_equal(f->header->encryptionSymbol, 0);
+
+    Id3v2ContentEntry *e = (Id3v2ContentEntry *) f->entries->head->data;
+    
+    assert_int_equal(((uint8_t *)e->entry)[0], 3);
+    assert_int_equal(e->size, 1);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->data;
+    
+    for(int i = 0; i < e->size; i++){
+        printf("[%x]",((uint8_t *)(e->entry))[i]);
+    }
+
+    assert_memory_equal(e->entry, "The Powers That Butf8ÛȾℲⅧ♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏utf8",66);
+    assert_int_equal(e->size, 66);
+
+    listFree(context);
     byteStreamDestroy(stream);
-    id3v2DestroyFrameHeader(&h);
+    id3v2DestroyFrame(&f);
 
 }
 

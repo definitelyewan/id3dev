@@ -17,6 +17,8 @@ extern "C"{
 
 #include "id3v2Types.h"
 
+unsigned long id3v2djb2(char *str);
+
 //mem
 
 Id3v2ContentContext *id3v2CreateContentContext(Id3v2ContextType type, size_t key, size_t max, size_t min);

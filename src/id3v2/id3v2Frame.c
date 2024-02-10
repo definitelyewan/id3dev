@@ -61,6 +61,9 @@ Id3v2ContentEntry *id3v2CreateContentEntry(void *entry, size_t size){
 
     Id3v2ContentEntry *ce = malloc(sizeof(Id3v2ContentEntry));
 
+    // ce->size = size;
+    // ce->entry = entry;
+
     if(!size){
         ce->entry = NULL;
         ce->size = 0;

@@ -12,7 +12,7 @@
 
 static void id3v2CreateAndDestroyFrameHeader_allInOne(void **state){
     
-    Id3v2FrameHeader *h = id3v2CreateFrameHeader((uint8_t *)"TT2", false, false, false, 0, 0xff, 0xff);
+    Id3v2FrameHeader *h = id3v2CreateFrameHeader((uint8_t *)"TT2", false, false, false, false, 0, 0xff, 0xff);
 
     assert_non_null(h);
     assert_string_equal((char *)h->id, "TT2");
@@ -49,7 +49,7 @@ static void id3v2CreateAndDestroyHeader_allInOne(void **state){
     listInsertBack(l, (void *)id3v2CreateContentEntry((void *)"test2", 6));
     listInsertBack(l, (void *)id3v2CreateContentEntry((void *)"test3", 6));
 
-    Id3v2FrameHeader *h = id3v2CreateFrameHeader((uint8_t *)"TT2", false, false, false, 0, 0xff, 0xff);
+    Id3v2FrameHeader *h = id3v2CreateFrameHeader((uint8_t *)"TT2", false, false, false, false, 0, 0xff, 0xff);
     
     Id3v2Frame *f = id3v2CreateFrame(h, id3v2CreateTextFrameContext(),l);
 

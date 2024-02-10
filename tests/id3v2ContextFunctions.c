@@ -9,18 +9,6 @@
 #include <limits.h>
 #include "id3v2.h"
 
-//djb2 algorithm for stings
-static unsigned long djb2(char *str){
-    
-    unsigned long hash = 5381;
-    int c;
-
-    while ((c = *str++))
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
-    return hash;
-}
-
 static void id3v2CreateContentContext_validStruct(void **state){
     (void) state;
 
@@ -59,14 +47,14 @@ static void id3v2CreateTextFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("encoding"));
+    assert_int_equal(c->key, id3v2djb2("encoding"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("text"));
+    assert_int_equal(c->key, id3v2djb2("text"));
 
     listFree(l);
 }
@@ -85,21 +73,21 @@ static void id3v2CreateUserDefinedTextFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("encoding"));
+    assert_int_equal(c->key, id3v2djb2("encoding"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("desc"));
+    assert_int_equal(c->key, id3v2djb2("desc"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("text"));
+    assert_int_equal(c->key, id3v2djb2("text"));
     
     listFree(l);
 }
@@ -117,7 +105,7 @@ static void id3v2CreateURLFrameContext_valid(void **state){
     assert_int_equal(c->type, noEncoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("url"));
+    assert_int_equal(c->key, id3v2djb2("url"));
 
     listFree(l);
 
@@ -136,21 +124,21 @@ static void id3v2CreateUserDefinedURLFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("encoding"));
+    assert_int_equal(c->key, id3v2djb2("encoding"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("desc"));
+    assert_int_equal(c->key, id3v2djb2("desc"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, noEncoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("url"));
+    assert_int_equal(c->key, id3v2djb2("url"));
 
     listFree(l);
 
@@ -169,35 +157,35 @@ static void id3v2CreateAttachedPictureFrameContext_unknownVersion(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("encoding"));
+    assert_int_equal(c->key, id3v2djb2("encoding"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, unknown_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("format"));
+    assert_int_equal(c->key, id3v2djb2("format"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("type"));
+    assert_int_equal(c->key, id3v2djb2("type"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("desc"));
+    assert_int_equal(c->key, id3v2djb2("desc"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->data;
 
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 
@@ -216,35 +204,35 @@ static void id3v2CreateAttachedPictureFrameContext_version2(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("encoding"));
+    assert_int_equal(c->key, id3v2djb2("encoding"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, noEncoding_context);
     assert_int_equal(c->max, 3);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("format"));
+    assert_int_equal(c->key, id3v2djb2("format"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("type"));
+    assert_int_equal(c->key, id3v2djb2("type"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("desc"));
+    assert_int_equal(c->key, id3v2djb2("desc"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->data;
 
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 
@@ -263,35 +251,35 @@ static void id3v2CreateAttachedPictureFrameContext_version3(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("encoding"));
+    assert_int_equal(c->key, id3v2djb2("encoding"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("format"));
+    assert_int_equal(c->key, id3v2djb2("format"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("type"));
+    assert_int_equal(c->key, id3v2djb2("type"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("desc"));
+    assert_int_equal(c->key, id3v2djb2("desc"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->data;
 
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 
@@ -310,28 +298,28 @@ static void id3v2CreateAudioencryptionContext_valid(void **state){
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("identifier"));
+    assert_int_equal(c->key, id3v2djb2("identifier"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 2);
     assert_int_equal(c->min, 2);
-    assert_int_equal(c->key, djb2("start"));
+    assert_int_equal(c->key, id3v2djb2("start"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 2);
     assert_int_equal(c->min, 2);
-    assert_int_equal(c->key, djb2("length"));
+    assert_int_equal(c->key, id3v2djb2("length"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
 
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 }
@@ -349,7 +337,7 @@ static void id3v2CreateAudioSeekPointIndexFrameContext_valid(void **state){
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 }
@@ -367,28 +355,28 @@ static void id3v2CreateCommentFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("encoding"));
+    assert_int_equal(c->key, id3v2djb2("encoding"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, noEncoding_context);
     assert_int_equal(c->max, 3);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("language"));
+    assert_int_equal(c->key, id3v2djb2("language"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("desc"));
+    assert_int_equal(c->key, id3v2djb2("desc"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("text"));
+    assert_int_equal(c->key, id3v2djb2("text"));
 
     listFree(l);
 
@@ -407,63 +395,63 @@ static void id3v2CreateCommercialFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("encoding"));
+    assert_int_equal(c->key, id3v2djb2("encoding"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("price"));
+    assert_int_equal(c->key, id3v2djb2("price"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, 8);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("date"));
+    assert_int_equal(c->key, id3v2djb2("date"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
 
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("url"));
+    assert_int_equal(c->key, id3v2djb2("url"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("type"));
+    assert_int_equal(c->key, id3v2djb2("type"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("name"));
+    assert_int_equal(c->key, id3v2djb2("name"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("desc"));
+    assert_int_equal(c->key, id3v2djb2("desc"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->next->next->next->data;
 
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("format"));
+    assert_int_equal(c->key, id3v2djb2("format"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->next->next->next->next->data;
 
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 }
@@ -481,21 +469,21 @@ static void id3v2CreateEncryptedMetaFrameContext_valid(void **state){
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("identifier"));
+    assert_int_equal(c->key, id3v2djb2("identifier"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("content"));
+    assert_int_equal(c->key, id3v2djb2("content"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 }
@@ -513,7 +501,7 @@ static void id3v2CreateMusicCDIdentifierFrameContext_valid(void **state){
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, 804);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 }
@@ -531,7 +519,7 @@ static void id3v2CreatePlayCounterFrameContext_valid(void **state){
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 }
@@ -549,35 +537,35 @@ static void id3v2CreateEqulizationFrameContext_validVersion2(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("adjustment"));
+    assert_int_equal(c->key, id3v2djb2("adjustment"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, bit_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("unary"));
+    assert_int_equal(c->key, id3v2djb2("unary"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, bit_context);
     assert_int_equal(c->max, 15);
     assert_int_equal(c->min, 15);
-    assert_int_equal(c->key, djb2("frequency"));
+    assert_int_equal(c->key, id3v2djb2("frequency"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
 
     assert_int_equal(c->type, adjustment_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("volume"));
+    assert_int_equal(c->key, id3v2djb2("volume"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->data;
 
     assert_int_equal(c->type, iter_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("iter"));
+    assert_int_equal(c->key, id3v2djb2("iter"));
 
     listFree(l);
 }
@@ -595,7 +583,7 @@ void id3v2CreateEqulizationFrameContext_wrongVersion(void **state){
     assert_int_equal(c->type, unknown_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("unkown"));
+    assert_int_equal(c->key, id3v2djb2("unkown"));
 
     listFree(l);
 
@@ -614,28 +602,28 @@ void id3v2CreateEqulizationFrameContext_validVersion4(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("symbol"));
+    assert_int_equal(c->key, id3v2djb2("symbol"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("identifier"));
+    assert_int_equal(c->key, id3v2djb2("identifier"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 2);
     assert_int_equal(c->min, 2);
-    assert_int_equal(c->key, djb2("volume"));
+    assert_int_equal(c->key, id3v2djb2("volume"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
 
     assert_int_equal(c->type, iter_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 2);
-    assert_int_equal(c->key, djb2("iter"));
+    assert_int_equal(c->key, id3v2djb2("iter"));
 
     listFree(l);
 
@@ -654,28 +642,28 @@ static void id3v2CreateEventTimingCodesFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("symbol"));
+    assert_int_equal(c->key, id3v2djb2("symbol"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("type"));
+    assert_int_equal(c->key, id3v2djb2("type"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 4);
     assert_int_equal(c->min, 4);
-    assert_int_equal(c->key, djb2("stamp"));
+    assert_int_equal(c->key, id3v2djb2("stamp"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
 
     assert_int_equal(c->type, iter_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("iter"));
+    assert_int_equal(c->key, id3v2djb2("iter"));
 
     listFree(l);
 }
@@ -693,35 +681,35 @@ static void id3v2CreateGeneralEncapsulatedObjectFrameContext_valid(void **state)
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("encoding"));
+    assert_int_equal(c->key, id3v2djb2("encoding"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("format"));
+    assert_int_equal(c->key, id3v2djb2("format"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("name"));
+    assert_int_equal(c->key, id3v2djb2("name"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("desc"));
+    assert_int_equal(c->key, id3v2djb2("desc"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->data;
 
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 
@@ -740,28 +728,28 @@ static void id3v2CreateInvolvedPeopleListFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("encoding"));
+    assert_int_equal(c->key, id3v2djb2("encoding"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("name"));
+    assert_int_equal(c->key, id3v2djb2("name"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("text"));
+    assert_int_equal(c->key, id3v2djb2("text"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
 
     assert_int_equal(c->type, iter_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("iter"));
+    assert_int_equal(c->key, id3v2djb2("iter"));
 
     listFree(l);
 }
@@ -779,14 +767,14 @@ static void id3v2CreateLinkedInformationFrameContext_valid(void **state){
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("url"));
+    assert_int_equal(c->key, id3v2djb2("url"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, noEncoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 
@@ -805,7 +793,7 @@ static void id3v2CreateMPEGLocationLookupTableFrameContext_valid(void **state){
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 
@@ -824,28 +812,28 @@ static void id3v2CreateOwnershipFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("encoding"));
+    assert_int_equal(c->key, id3v2djb2("encoding"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("price"));
+    assert_int_equal(c->key, id3v2djb2("price"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, 8);
     assert_int_equal(c->min, 8);
-    assert_int_equal(c->key, djb2("date"));
+    assert_int_equal(c->key, id3v2djb2("date"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("name"));
+    assert_int_equal(c->key, id3v2djb2("name"));
 
     listFree(l);
 
@@ -864,21 +852,21 @@ static void id3v2CreatePopularimeterFrameContext_valid(void **state){
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("identifier"));
+    assert_int_equal(c->key, id3v2djb2("identifier"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("symbol"));
+    assert_int_equal(c->key, id3v2djb2("symbol"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 
@@ -897,14 +885,14 @@ static void id3v2CreatePositionSynchronisationFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("format"));
+    assert_int_equal(c->key, id3v2djb2("format"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 4);
     assert_int_equal(c->min, 4);
-    assert_int_equal(c->key, djb2("stamp"));
+    assert_int_equal(c->key, id3v2djb2("stamp"));
 
     listFree(l);
 
@@ -923,14 +911,14 @@ static void id3v2CreatePrivateFrameContext_valid(void **state){
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("identifier"));
+    assert_int_equal(c->key, id3v2djb2("identifier"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 
@@ -949,21 +937,21 @@ static void id3v2CreateRecommendedBufferSizeFrameContext_valid(){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 3);
     assert_int_equal(c->min, 3);
-    assert_int_equal(c->key, djb2("buffer"));
+    assert_int_equal(c->key, id3v2djb2("buffer"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, bit_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("flag"));
+    assert_int_equal(c->key, id3v2djb2("flag"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 4);
     assert_int_equal(c->min, 0);
-    assert_int_equal(c->key, djb2("offset"));
+    assert_int_equal(c->key, id3v2djb2("offset"));
 
     listFree(l);
 
@@ -982,7 +970,7 @@ static void id3v2CreateRelativeVolumeAdjustmentFrameContext_valid(void **state){
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 
@@ -1001,77 +989,77 @@ static void id3v2CreateReverbFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 2);
     assert_int_equal(c->min, 2);
-    assert_int_equal(c->key, djb2("left"));
+    assert_int_equal(c->key, id3v2djb2("left"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 2);
     assert_int_equal(c->min, 2);
-    assert_int_equal(c->key, djb2("right"));
+    assert_int_equal(c->key, id3v2djb2("right"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 2);
     assert_int_equal(c->min, 2);
-    assert_int_equal(c->key, djb2("right"));
+    assert_int_equal(c->key, id3v2djb2("right"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("bounce left"));
+    assert_int_equal(c->key, id3v2djb2("bounce left"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("bounce right"));
+    assert_int_equal(c->key, id3v2djb2("bounce right"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("feedback ll"));
+    assert_int_equal(c->key, id3v2djb2("feedback ll"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("feedback lr"));
+    assert_int_equal(c->key, id3v2djb2("feedback lr"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("feedback rr"));
+    assert_int_equal(c->key, id3v2djb2("feedback rr"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->next->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("feedback rl"));
+    assert_int_equal(c->key, id3v2djb2("feedback rl"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->next->next->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("p left"));
+    assert_int_equal(c->key, id3v2djb2("p left"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->next->next->next->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("p right"));
+    assert_int_equal(c->key, id3v2djb2("p right"));
 
     listFree(l);
 
@@ -1090,7 +1078,7 @@ static void id3v2CreateSeekPointIndexFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 4);
     assert_int_equal(c->min, 4);
-    assert_int_equal(c->key, djb2("offset"));
+    assert_int_equal(c->key, id3v2djb2("offset"));
 
     listFree(l);
 }
@@ -1108,14 +1096,14 @@ static void id3v2CreateSignatureFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("symbol"));
+    assert_int_equal(c->key, id3v2djb2("symbol"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 
@@ -1134,56 +1122,56 @@ static void id3v2CreateSynchronisedLyricFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("encoding"));
+    assert_int_equal(c->key, id3v2djb2("encoding"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, noEncoding_context);
     assert_int_equal(c->max, 3);
     assert_int_equal(c->min, 3);
-    assert_int_equal(c->key, djb2("language"));
+    assert_int_equal(c->key, id3v2djb2("language"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("format"));
+    assert_int_equal(c->key, id3v2djb2("format"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("symbol"));
+    assert_int_equal(c->key, id3v2djb2("symbol"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("desc"));
+    assert_int_equal(c->key, id3v2djb2("desc"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("text"));
+    assert_int_equal(c->key, id3v2djb2("text"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->next->next->data;
 
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 4);
     assert_int_equal(c->min, 4);
-    assert_int_equal(c->key, djb2("stamp"));
+    assert_int_equal(c->key, id3v2djb2("stamp"));
 
     c = (Id3v2ContentContext *) n->next->next->next->next->next->next->next->data;
 
     assert_int_equal(c->type, iter_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 5);
-    assert_int_equal(c->key, djb2("iter"));
+    assert_int_equal(c->key, id3v2djb2("iter"));
     listFree(l);
 
 }
@@ -1201,14 +1189,14 @@ static void id3v2CreateSynchronisedTempoCodesFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("format"));
+    assert_int_equal(c->key, id3v2djb2("format"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 }
@@ -1226,14 +1214,14 @@ static void id3v2CreateUniqueFileIdentifierFrameContext_valid(void **state){
     assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("url"));
+    assert_int_equal(c->key, id3v2djb2("url"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, binary_context);
     assert_int_equal(c->max, 64);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("data"));
+    assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
 
@@ -1252,21 +1240,21 @@ static void id3v2CreateTermsOfUseFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("encoding"));
+    assert_int_equal(c->key, id3v2djb2("encoding"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, noEncoding_context);
     assert_int_equal(c->max, 3);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("language"));
+    assert_int_equal(c->key, id3v2djb2("language"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("text"));
+    assert_int_equal(c->key, id3v2djb2("text"));
 
     listFree(l);
 
@@ -1285,28 +1273,28 @@ static void id3v2CreateUnsynchronisedLyricFrameContext_valid(void **state){
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("encoding"));
+    assert_int_equal(c->key, id3v2djb2("encoding"));
 
     c = (Id3v2ContentContext *) n->next->data;
 
     assert_int_equal(c->type, noEncoding_context);
     assert_int_equal(c->max, 3);
     assert_int_equal(c->min, 3);
-    assert_int_equal(c->key, djb2("language"));
+    assert_int_equal(c->key, id3v2djb2("language"));
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("desc"));
+    assert_int_equal(c->key, id3v2djb2("desc"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
 
     assert_int_equal(c->type, encodedString_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, djb2("text"));
+    assert_int_equal(c->key, id3v2djb2("text"));
 
     listFree(l);
 
