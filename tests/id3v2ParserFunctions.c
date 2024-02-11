@@ -602,7 +602,7 @@ static void id3v2ParseFrameHeader_v4NoSetFlagsButContent(void **state){
 
 }
 
-static void playground(void **state){
+static void id3v2ParseFrame_parseTALBUTF8(void **state){
 
     uint8_t talb[77] = {0x54, 0x41, 0x4c, 0x42, 0x00, 0x00, 0x00, 0x43, 0x00, 0x00, 
                         0x03, 0x54, 0x68, 0x65, 0x20, 0x50, 0x6f, 0x77, 0x65, 0x72, 
@@ -648,6 +648,155 @@ static void playground(void **state){
     listFree(context);
     byteStreamDestroy(stream);
     id3v2DestroyFrame(&f);
+}
+
+static void id3v2ParseFrame_parseTIT2UTF16(void **state){
+
+    // TIT2
+    uint8_t tit2[37] = {0x54, 0x49, 0x54, 0x32, 0x00, 0x00, 0x00, 0x1b, 0x00, 0x00,
+                        0x01, 0xFF, 0xFE, 's', 0x00, 'o', 0x00, 'r', 0x00, 'r',
+                        0x00, 'y', 0x00, '4', 0x00, 'd', 0x00, 'y', 0x00, 'i',
+                        0x00, 'n', 0x00, 'g', 0x00, 0x00, 0x00
+    };
+
+    
+
+    ByteStream *stream = byteStreamCreate(tit2, 37);
+    Id3v2Frame *f;
+    List *context = id3v2CreateTextFrameContext();
+    uint32_t frameSize = 0;
+
+    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_3, &f);
+
+    assert_non_null(f);
+    assert_non_null(f->header);
+    assert_memory_equal(f->header->id,"TIT2",4);
+    assert_int_equal(frameSize, 37);
+    assert_false(f->header->unsynchronisation);
+    assert_false(f->header->readOnly);
+    assert_false(f->header->tagAlterPreservation);
+    assert_false(f->header->fileAlterPreservation);
+
+    assert_int_equal(f->header->decompressionSize, 0);
+    assert_int_equal(f->header->groupSymbol, 0);
+    assert_int_equal(f->header->encryptionSymbol, 0);
+
+    Id3v2ContentEntry *e = (Id3v2ContentEntry *) f->entries->head->data;
+    
+    assert_int_equal(((uint8_t *)e->entry)[0], 1);
+    assert_int_equal(e->size, 1);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_memory_equal(e->entry, tit2 + 11 ,24);
+    assert_int_equal(e->size, 24);
+
+    listFree(context);
+    byteStreamDestroy(stream);
+    id3v2DestroyFrame(&f);
+
+}
+
+static void id3v2ParseFrame_parseTXXXUTF16(void **state){
+
+    // TXXX 
+    uint8_t txxx[71] = {'T', 'X', 'X', 'X', 0x00, 0x00, 0x00, 0x3d, 0x00, 0x00,
+                    0x01,
+                    0xff, 0xfe, 'u', 0x00, 't', 0x00, 'f', 0x00, '8', 0x00, 0xdb, 0x00, '>', 0x02, '2', '!', 'g', '!', 0x00, 0x00,
+                    0xff, 0xfe, 'H', '&', ' ', 0x00, 'I', '&', ' ', 0x00, 'J', '&', ' ', 0x00, 'K', '&', ' ', 0x00, 'L', '&', ' ', 0x00, 'M', '&', ' ', 0x00, 'N', '&', ' ', 0x00, 'O', '&', 'u', 0x00, 't', 0x00, 'f', 0x00, '8', 0x00
+    };
+
+    
+
+    ByteStream *stream = byteStreamCreate(txxx, 71);
+    Id3v2Frame *f;
+    List *context = id3v2CreateUserDefinedTextFrameContext();
+    uint32_t frameSize = 0;
+
+    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_3, &f);
+
+    assert_non_null(f);
+    assert_non_null(f->header);
+    assert_memory_equal(f->header->id,"TXXX",4);
+    assert_int_equal(frameSize, 71);
+    assert_false(f->header->unsynchronisation);
+    assert_false(f->header->readOnly);
+    assert_false(f->header->tagAlterPreservation);
+    assert_false(f->header->fileAlterPreservation);
+
+    assert_int_equal(f->header->decompressionSize, 0);
+    assert_int_equal(f->header->groupSymbol, 0);
+    assert_int_equal(f->header->encryptionSymbol, 0);
+
+    Id3v2ContentEntry *e = (Id3v2ContentEntry *) f->entries->head->data;
+    
+    assert_int_equal(((uint8_t *)e->entry)[0], 1);
+    assert_int_equal(e->size, 1);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_memory_equal(e->entry, txxx + 11 ,18);
+    assert_int_equal(e->size, 18);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+
+    assert_memory_equal(e->entry, txxx + (11 + 20) ,40);
+    assert_int_equal(e->size, 40);
+
+    listFree(context);
+    byteStreamDestroy(stream);
+    id3v2DestroyFrame(&f);
+
+}
+
+static void playground(void **state){
+    // TXXX 
+    uint8_t txxx[25] = {'T', 'X', 'X', 'X', 0x00, 0x00, 0x00, 0x0f, 0x00, 0x00,
+                    0x00,
+                    'l','a','b','e','l',0x00,
+                    'd','e','a','d',' ','a','i','r'
+    };
+
+    
+
+    ByteStream *stream = byteStreamCreate(txxx, 25);
+    Id3v2Frame *f;
+    List *context = id3v2CreateUserDefinedTextFrameContext();
+    uint32_t frameSize = 0;
+
+    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_4, &f);
+
+    assert_non_null(f);
+    assert_non_null(f->header);
+    assert_memory_equal(f->header->id,"TXXX",4);
+    assert_int_equal(frameSize, 25);
+    assert_false(f->header->unsynchronisation);
+    assert_false(f->header->readOnly);
+    assert_false(f->header->tagAlterPreservation);
+    assert_false(f->header->fileAlterPreservation);
+
+    assert_int_equal(f->header->decompressionSize, 0);
+    assert_int_equal(f->header->groupSymbol, 0);
+    assert_int_equal(f->header->encryptionSymbol, 0);
+
+    Id3v2ContentEntry *e = (Id3v2ContentEntry *) f->entries->head->data;
+    
+    assert_int_equal(((uint8_t *)e->entry)[0], 0);
+    assert_int_equal(e->size, 1);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_memory_equal(e->entry, "label" ,6);
+    assert_int_equal(e->size, 6);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+
+    assert_memory_equal(e->entry,  "dead air",9);
+    assert_int_equal(e->size, 9);
+
+    listFree(context);
+    byteStreamDestroy(stream);
+    id3v2DestroyFrame(&f);
 
 }
 
@@ -689,6 +838,12 @@ int main(){
         cmocka_unit_test(id3v2ParseFrameHeader_v4),
         cmocka_unit_test(id3v2ParseFrameHeader_v4SetFlagButNoContent),
         cmocka_unit_test(id3v2ParseFrameHeader_v4NoSetFlagsButContent),
+
+        // id3v2ParseFrame
+        cmocka_unit_test(id3v2ParseFrame_parseTALBUTF8),
+        cmocka_unit_test(id3v2ParseFrame_parseTIT2UTF16),
+        cmocka_unit_test(id3v2ParseFrame_parseTXXXUTF16),
+
 
         cmocka_unit_test(playground)
 

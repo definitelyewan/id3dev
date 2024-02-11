@@ -451,11 +451,16 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
 
 uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3v2Frame **frame){
 
+
+    printf("[*] attempting to parse provided frame\n");
+
     if(!stream || !context){
         *frame = NULL;
         return 0;
     }
 
+    printf("[*] provided content is valid\n");
+    byteStreamPrintf("%x", stream);
     // values needed
     Id3v2FrameHeader *header = NULL;
     List *entries = NULL;
@@ -469,10 +474,6 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
     ByteStream *innerSream = NULL;
     ListIter iter;
     void *contextData = NULL;
-
-    // Node *n = NULL;
-    // void *data = NULL;
-    // size_t dataSize = 0;
 
     resetIndex = stream->cursor;
 
@@ -489,10 +490,19 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
         return expectedHeaderSize;
     }
     
+    printf("[*] parsed a frame header with a size of %d and a id of %c%c%c%c\n",expectedHeaderSize,header->id[0],header->id[1], header->id[2],header->id[3]);
+
     byteStreamSeek(stream, expectedHeaderSize, SEEK_CUR);
+
+    printf("[*] skipping header bytes\n");
+    byteStreamPrintf("%x", stream);
+
+
     innerSream = byteStreamCreate(byteStreamCursor(stream), expectedContentSize);
-    //byteStreamResize(innerSream, expectedContentSize + 2); // add some padding
     stream->cursor = resetIndex;
+
+    printf("[*] created inner stream container with size %d\n", expectedContentSize);
+    byteStreamPrintf("%x",innerSream);
 
     entries = listCreate(id3v2PrintContentEntry, id3v2DeleteContentEntry, id3v2CompareContentEntry, id3v2CopyContentEntry);
     iter = listCreateIterator(context);
@@ -502,14 +512,19 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
         Id3v2ContentContext *cc = (Id3v2ContentContext *) contextData;
 
         switch(cc->type){
+            // give up on parsing when the context is undefined
             case unknown_context:
+                printf("[*] detected unknown_context");
+                byteStreamSeek(innerSream, 0, SEEK_END);
                 break;
             case noEncoding_context:
                 break;
             case binary_context:
                 break;
+            
+            // encoded strings
             case encodedString_context:{
-
+                printf("[*] detected encodedString_context\n");
                 void *data = NULL;
                 size_t dataSize = 0;
 
@@ -523,10 +538,12 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                 while((tmp = listIteratorNext(&contentContextIter)) != NULL){
 
                     if(((Id3v2ContentContext *)tmp)->type == iter_context){
+                        printf("[*] detected an iter, skipping and reducing position by 1\n");
                         poscc--;
                     }
 
                     if(((Id3v2ContentContext *)tmp)->key == id3v2djb2("encoding")){
+                        printf("[*] encoding found in contexts at position %ld\n",poscc);
                         break;
                     }
 
@@ -537,11 +554,12 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
 
                     if(poscc == posce){
                         encoding = ((uint8_t *)((Id3v2ContentEntry *)tmp)->entry)[0];
+                        printf("[*] detected encoding in content entries at %ld position with the value %d\n", posce, encoding);
                     }
 
                     posce++;
                 }
-
+                byteStreamPrintf("%x", innerSream);
                 switch(encoding){
                     case BYTE_ISO_8859_1:
                     case BYTE_ASCII:
@@ -556,7 +574,13 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                         break;
 
                 }
-
+                printf("[*] string is %ld bytes long and is at address %p\n",dataSize, data);
+                printf("[*] encoded string context = {");
+                for(int i = 0; i < dataSize; i++){
+                    printf("%x,",((uint8_t *)data)[i]);
+                }
+                printf("}\n");
+                byteStreamPrintf("%x", innerSream);
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
                 free(data);
                 expectedContentSize = expectedContentSize - dataSize;
@@ -564,8 +588,11 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                 break;      
             case latin1Encoding_context:
                 break;
+            // numbers
             case numeric_context:{
-                
+                printf("[*] detected a numeric_context\n");
+                byteStreamPrintf("%x",innerSream);
+
                 void * data = NULL;
                 size_t dataSize = 0;
 
@@ -580,12 +607,20 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                 if(dataSize > expectedContentSize){
                     dataSize = expectedContentSize;
                 }
-
+                printf("[*] size of the number is %ld bytes\n", dataSize);
                 data = malloc(dataSize);
 
                 if(!byteStreamRead(innerSream, (uint8_t *)data, dataSize)){
                     memset(data, 0, dataSize);
                 }
+
+                printf("[*] numeric content = {");
+                for(int i = 0; i < dataSize; i++){
+                    printf("%x,",((uint8_t *)data)[i]);
+                }
+                printf("}\n");
+
+                byteStreamPrintf("%x", innerSream);
 
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
                 free(data);
@@ -610,7 +645,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
         }
 
     }
-
+    printf("[*]exiting\n");
     walk += innerSream->cursor;
     *frame = id3v2CreateFrame(header, listDeepCopy(context), entries);
     byteStreamDestroy(innerSream);
