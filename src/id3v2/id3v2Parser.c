@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "id3v2Context.h"
 #include "id3v2Frame.h"
 #include "id3v2Parser.h"
@@ -19,6 +20,29 @@
 #include "byteStream.h"
 #include "byteInt.h"
 #include "byteUnicode.h"
+
+
+static void copyNBits(unsigned char* src, unsigned char* dest, int startBit, int nBits) {
+    int byteIndex = startBit /  CHAR_BIT;
+    int bitIndex = startBit %  CHAR_BIT;
+    int remainingBits = nBits;
+
+    while (remainingBits >  0) {
+        unsigned char mask =  0xFF >> (CHAR_BIT - remainingBits);
+        unsigned char shiftedMask = mask << bitIndex;
+
+        // Clear the destination bits
+        dest[byteIndex] &= ~shiftedMask;
+
+        // Copy the bits from source to destination
+        dest[byteIndex] |= (src[byteIndex] & shiftedMask) >> bitIndex;
+
+        // Update the counters
+        remainingBits -= (CHAR_BIT - bitIndex);
+        byteIndex++;
+        bitIndex =  0; // Reset bit index since we moved to the next byte
+    }
+}
 
 /**
  * @brief Parses an ID3v2.3, ID3v2.4, and unsupported versions. This function will return the number of bytes it read
@@ -469,10 +493,13 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
     // needed for parsing
     size_t resetIndex = 0;
     size_t walk = 0;
+    size_t currIterations = 0;
+    size_t concurrentBitCount = 0;
     uint32_t expectedHeaderSize = 0;
     uint32_t expectedContentSize = 0;
     ByteStream *innerSream = NULL;
     ListIter iter;
+    ListIter iterStorage;
     void *contextData = NULL;
 
     resetIndex = stream->cursor;
@@ -517,14 +544,11 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                 printf("[*] detected unknown_context");
                 byteStreamSeek(innerSream, 0, SEEK_END);
                 break;
-            case noEncoding_context:
-                break;
-            case binary_context:
-                break;
             
             // encoded strings
             case encodedString_context:{
                 printf("[*] detected encodedString_context\n");
+                byteStreamPrintf("%x",innerSream);
                 void *data = NULL;
                 size_t dataSize = 0;
 
@@ -559,7 +583,6 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
 
                     posce++;
                 }
-                byteStreamPrintf("%x", innerSream);
                 switch(encoding){
                     case BYTE_ISO_8859_1:
                     case BYTE_ASCII:
@@ -571,9 +594,21 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                         data = byteStreamReturnUtf16(innerSream, &dataSize);
                         break;
                     default:
+                        printf("[*] encountered an unsupported encoding\n");
                         break;
 
                 }
+
+                if(dataSize > cc->max){
+                    dataSize = cc->max;
+                    data = realloc(data, dataSize);
+
+                }else if(cc->min > dataSize){
+                    data = realloc(data, cc->min);
+                    memset(data + dataSize, 0, cc->min - dataSize);
+                    dataSize = cc->min;
+                }
+
                 printf("[*] string is %ld bytes long and is at address %p\n",dataSize, data);
                 printf("[*] encoded string context = {");
                 for(int i = 0; i < dataSize; i++){
@@ -583,14 +618,50 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                 byteStreamPrintf("%x", innerSream);
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
                 free(data);
-                expectedContentSize = expectedContentSize - dataSize;
+
+                expectedContentSize = ((expectedContentSize < dataSize) ? 0 : expectedContentSize - dataSize);
             }
-                break;      
-            case latin1Encoding_context:
                 break;
-            // numbers
+            // only characters found within the latain1 character set      
+            case latin1Encoding_context:{
+                printf("[*] detected latin1Encoding_context\n");
+                byteStreamPrintf("%x",innerSream);
+                void *data = NULL;
+                size_t dataSize = 0;
+
+                data = byteStreamReturnLatin1(innerSream, &dataSize);
+
+                if(dataSize > cc->max){
+                    dataSize = cc->max;
+                    data = realloc(data, dataSize);
+
+                }else if(cc->min > dataSize){
+                    data = realloc(data, cc->min);
+                    memset(data + dataSize, 0, cc->min - dataSize);
+                    dataSize = cc->min;
+                }
+
+                printf("[*] string is %ld bytes long and is at address %p\n",dataSize, data);
+                printf("[*] latin1 string context = {");
+                for(int i = 0; i < dataSize; i++){
+                    printf("%x,",((uint8_t *)data)[i]);
+                }
+                printf("}\n");
+                byteStreamPrintf("%x", innerSream);
+
+
+                listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
+                free(data);
+
+                expectedContentSize = ((expectedContentSize < dataSize) ? 0 : expectedContentSize - dataSize);
+            }
+                break;
+            // numbers (handled the same way)
+            case binary_context:
+            case noEncoding_context:
+            case precision_context:
             case numeric_context:{
-                printf("[*] detected a numeric_context\n");
+                printf("[*] detected a numeric_context/precision_context/binary_context/noEncoding_context\n");
                 byteStreamPrintf("%x",innerSream);
 
                 void * data = NULL;
@@ -607,6 +678,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                 if(dataSize > expectedContentSize){
                     dataSize = expectedContentSize;
                 }
+
                 printf("[*] size of the number is %ld bytes\n", dataSize);
                 data = malloc(dataSize);
 
@@ -624,30 +696,200 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
 
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
                 free(data);
-                expectedContentSize = expectedContentSize - dataSize;
+
+                expectedContentSize = ((expectedContentSize < dataSize) ? 0 : expectedContentSize - dataSize);
             }
                 break;
-            case precision_context:
+            case bit_context:{
+                printf("[*] detected bit_context\n");
+                byteStreamPrintf("%x",innerSream);
+
+                void *data = NULL;
+                size_t nBits = 0;
+                size_t dataSize = 0;
+                Id3v2ContextType isBitContext = 0;
+
+                if(cc->min == cc->max){
+                    nBits = cc->min;
+                }else if(cc->min > cc->max){// no trust
+                    nBits = cc->min;
+                }else{
+                    nBits = cc->max;
+                }
+
+                dataSize = (nBits + (CHAR_BIT - 1)) / CHAR_BIT;
+                
+                data = malloc(dataSize);
+                memset(data, 0, dataSize);
+
+                copyNBits(byteStreamCursor(innerSream), data, concurrentBitCount, nBits);
+                
+                printf("[*] bit representation as hex = {");
+                for(int i = 0; i < dataSize; i++){
+                    printf("%x,",((uint8_t *)data)[i]);
+                }
+                printf("}\n");
+                byteStreamPrintf("%x", innerSream);
+
+                
+                if(iter.current->data != NULL){
+                    printf("[*] checking if the next context is a bit_context\n");
+                    Id3v2ContentContext *nextContext = (Id3v2ContentContext *) iter.current->data;
+                    isBitContext = nextContext->type;
+                }
+                
+                concurrentBitCount += nBits;
+                
+                // multiple bit_contexts in a row
+                if(isBitContext == bit_context){
+                    printf("[*] next context is a bit_context, setting starting bit for next read to %ld\n", concurrentBitCount);
+
+                // end of bit contexts or no following one
+                }else{
+                    printf("[*] next context is not a bit_context seeking %d bytes and resetting concurrent bits\n", concurrentBitCount / CHAR_BIT);
+                    if(concurrentBitCount / CHAR_BIT){
+                        byteStreamSeek(innerSream, concurrentBitCount / CHAR_BIT, SEEK_CUR);
+                        expectedContentSize = ((expectedContentSize < dataSize) ? 0 : expectedContentSize - dataSize);
+                    }
+
+                    concurrentBitCount = 0;
+                    
+                }
+
+                listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
+                free(data);
+            }
+
+
                 break;
-            case bit_context:
+            case iter_context:{
+                
+                if(!currIterations){
+                    printf("[*] detected an iter_context\n");
+                    
+                    iterStorage = iter;
+
+                    iter = listCreateIterator(context);
+
+                    for(size_t i = 0; i < cc->min; i++){
+                        listIteratorNext(&iter);
+                    }
+                    printf("[*] generated an iter starting at %ld\n",cc->min);
+
+                }
+
+                if(currIterations != cc->max && currIterations != 0){
+                    
+                    printf("[*] reseting iter to min position %ld\n", cc->min);
+                    
+                    iter = listCreateIterator(context);
+
+                    for(size_t i = 0; i < cc->min; i++){
+                        listIteratorNext(&iter);
+                    }
+                }
+
+
+                if(currIterations >= cc->max){
+                    printf("[*] reset iter to stock plus %ld iterations\n",currIterations);
+                    iter = iterStorage;
+
+                    for(size_t i = 0; i < currIterations; i++){
+                        listIteratorNext(&iter);
+                    }
+
+                    currIterations = 0;
+
+                }
+
+                currIterations++;
+            
+            }
                 break;
-            case iter_context:
-                break;
-            case adjustment_context:
+            case adjustment_context:{
+                printf("[*] detected an adjustment_context\n");
+                byteStreamPrintf("%x",innerSream);
+
+                void *data = NULL;
+                size_t dataSize = 0;
+
+                size_t posce = 0;
+                size_t poscc = 0;
+
+                ListIter contentContextIter = listCreateIterator(context); 
+                ListIter contentEntryIter = listCreateIterator(entries);
+                void *tmp = NULL;
+
+                while((tmp = listIteratorNext(&contentContextIter)) != NULL){
+
+                    if(((Id3v2ContentContext *)tmp)->type == iter_context){
+                        printf("[*] detected an iter, skipping and reducing position by 1\n");
+                        poscc--;
+                    }
+
+                    if(((Id3v2ContentContext *)tmp)->key == id3v2djb2("adjustment")){
+                        printf("[*] adjustment found in contexts at position %ld\n",poscc);
+                        break;
+                    }
+
+                    poscc++;
+                }
+
+                while((tmp = listIteratorNext(&contentEntryIter)) != NULL){
+
+                    if(poscc == posce){
+                        dataSize = btoi((unsigned char *)((Id3v2ContentEntry *)tmp)->entry, ((Id3v2ContentEntry *)tmp)->size);
+                        printf("[*] detected adjustment in content entries at %ld position with the a data size of %ld\n", posce, dataSize);
+                    }
+
+                    posce++;
+                }
+
+                if(dataSize > expectedContentSize){
+                    dataSize = expectedContentSize;
+                }
+
+                data = malloc(dataSize);
+                memset(data, 0, dataSize); //ensure data exists
+
+                byteStreamRead(innerSream, data, dataSize); // no need to check error code do to above memset
+
+
+                printf("[*] set max size to %ld and read data at address %p\n",dataSize, data);
+                printf("[*] read data based on adjustment = {");
+                for(int i = 0; i < dataSize; i++){
+                    printf("%x,",((uint8_t *)data)[i]);
+                }
+                printf("}\n");
+                byteStreamPrintf("%x", innerSream);
+
+                listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
+                free(data);
+
+                expectedContentSize = ((expectedContentSize < dataSize) ? 0 : expectedContentSize - dataSize);
+
+
+            }
                 break;
             // no support
             default:
+                printf("[*] NO SUPPORT\n");
+                byteStreamSeek(innerSream, 0, SEEK_END);
                 break;
         }
 
-        if(expectedContentSize == 0){
+        printf("[*] %ld bytes left in the container stream\n", expectedContentSize);
+        if(expectedContentSize == 0 || byteStreamGetCh(innerSream) == EOF){
+            printf("[*] reached maximum size in inner stream container\n");
             break;
         }
 
     }
-    printf("[*]exiting\n");
+    printf("[*] exiting\n");
     walk += innerSream->cursor;
     *frame = id3v2CreateFrame(header, listDeepCopy(context), entries);
     byteStreamDestroy(innerSream);
     return walk;
 }
+
+

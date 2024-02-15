@@ -102,7 +102,7 @@ static void id3v2CreateURLFrameContext_valid(void **state){
 
     Id3v2ContentContext *c = (Id3v2ContentContext *) n->data;
 
-    assert_int_equal(c->type, noEncoding_context);
+    assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
     assert_int_equal(c->key, id3v2djb2("url"));
@@ -135,7 +135,7 @@ static void id3v2CreateUserDefinedURLFrameContext_valid(void **state){
 
     c = (Id3v2ContentContext *) n->next->next->data;
 
-    assert_int_equal(c->type, noEncoding_context);
+    assert_int_equal(c->type, latin1Encoding_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
     assert_int_equal(c->key, id3v2djb2("url"));
@@ -941,7 +941,7 @@ static void id3v2CreateRecommendedBufferSizeFrameContext_valid(){
 
     c = (Id3v2ContentContext *) n->next->data;
 
-    assert_int_equal(c->type, bit_context);
+    assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
     assert_int_equal(c->key, id3v2djb2("flag"));

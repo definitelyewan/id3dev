@@ -197,7 +197,7 @@ List *id3v2CreateURLFrameContext(void){
     List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
 
     // url
-    void *toAdd = (void *) id3v2CreateContentContext(noEncoding_context, id3v2djb2("url"), UINT_MAX, 1);
+    void *toAdd = (void *) id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("url"), UINT_MAX, 1);
     listInsertBack(l, toAdd);
 
     return l;
@@ -221,7 +221,7 @@ List *id3v2CreateUserDefinedURLFrameContext(void){
     listInsertBack(l, toAdd);
 
     // url
-    toAdd = (void *) id3v2CreateContentContext(noEncoding_context, id3v2djb2("url"), UINT_MAX, 1);
+    toAdd = (void *) id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("url"), UINT_MAX, 1);
     listInsertBack(l, toAdd);
 
     return l;
@@ -772,7 +772,7 @@ List *id3v2CreateRecommendedBufferSizeFrameContext(void){
     listInsertBack(l, toAdd);
 
     // bit
-    toAdd = (void *) id3v2CreateContentContext(bit_context, id3v2djb2("flag"), 1, 1);
+    toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("flag"), 1, 1);
     listInsertBack(l, toAdd);
 
     // offset

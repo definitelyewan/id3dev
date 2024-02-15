@@ -146,30 +146,69 @@ typedef struct _Id3v2FrameHeader {
  */
 typedef enum _Id3v2ContextType {
 
-  // error
-  unknown_context = -1, // error context what is there is unreadable
+  /**
+   * @brief Error state for the frame parser/writer. If this is context is encountered
+   * parsing of the current frame will stop.
+   */
+  unknown_context = -1,
 
-  // generic
-  noEncoding_context, // data that is to be read in sequence and has no defining
-                      // end character e.g '\0'
-  binary_context,     // binary data
+  /**
+   * @brief Identifies characters with no end characters within a frame.
+   */
+  noEncoding_context,
 
-  // text
-  encodedString_context,  // an encoded string that is defined by a previous
-                          // context with the enumerated key "encoding"
-  latin1Encoding_context, // forces a latin1 encoded string with the ending of
-                          // '\0'
+  /**
+   * @brief Identifies binary data with no defined ending character. If encountered
+   * this state will cause the parser to read until the defined upper bound of the
+   * context or the end of the frame.
+   */
+  binary_context,
 
-  // numbers
-  numeric_context,   // integers of different sizes such as 8, 16, 32, or 64
-  precision_context, // decimal values such as floats
-  bit_context,       // bits such as 1 or 0
+  /**
+   * @brief Identifies a string encoded in latin1, UTF8, or UTF16. If encountered
+   * a context with the label 'encoding' must exist prior in the context list.
+   */
+  encodedString_context,
 
-  // control
-  iter_context, // allows for the iteration of previous frames with a defiend
-                // start and stop
-  adjustment_context // if a context with the title "adjustment" exists it will
-                     // use its parsed value as a max size
+  /**
+   * @brief Identifies a string using the latin1 character set with the ending '\0'
+   */
+  latin1Encoding_context,
+
+  /**
+   * @brief Identifies integers of different sizes such as 8, 16, 32, or 64.
+   */
+  numeric_context,
+
+  /**
+   * @brief Identifies precision values such as floats or doubles.
+   */
+  precision_context,
+
+  /**
+   * @brief Identifes 1 to n bits. With this context the current byte being read
+   * will not be incremented until 8 sequential bits are read. for example, this 
+   * means if the following context is a binary_context it will read the same byte 
+   * twice. If this context is followed by more then one bit_context it will continue
+   * reading from the position in which the the proceeding cotext left off.
+   */
+  bit_context,
+
+  /**
+   * @brief Iterates context n context to then last context m times. With this context 
+   * min is redefined as a starting node and max is redefined as the number of 
+   * iterations.
+   * 
+   */
+  iter_context,
+
+  /**
+   * @brief Allows for a redefinition of a contexts upper bound if a proir context
+   * is defined with the label 'adjustment'. 
+   * 
+   */
+  adjustment_context
+
 } Id3v2ContextType;
 
 /**

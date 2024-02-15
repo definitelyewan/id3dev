@@ -749,7 +749,7 @@ static void id3v2ParseFrame_parseTXXXUTF16(void **state){
 
 }
 
-static void playground(void **state){
+static void id3v2ParseFrame_parseTXXXLatin1(void **state){
     // TXXX 
     uint8_t txxx[25] = {'T', 'X', 'X', 'X', 0x00, 0x00, 0x00, 0x0f, 0x00, 0x00,
                     0x00,
@@ -800,6 +800,355 @@ static void playground(void **state){
 
 }
 
+static void id3v2ParseFrame_parseWCOM(void **state){
+    // TXXX 
+    uint8_t txxx[31] = {'W', 'C', 'O', 'M', 0x00, 0x00, 0x00, 0x15, 0x00, 0x00,
+                    'h','t','t','p','s',':','/','/','b','a','n','d','c','a','m','p','.','c','o','m','/'
+    };
+
+    
+
+    ByteStream *stream = byteStreamCreate(txxx, 31);
+    Id3v2Frame *f;
+    List *context = id3v2CreateURLFrameContext();
+    uint32_t frameSize = 0;
+
+    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_4, &f);
+
+    assert_non_null(f);
+    assert_non_null(f->header);
+    assert_memory_equal(f->header->id,"WCOM",4);
+    assert_int_equal(frameSize, 31);
+    assert_false(f->header->unsynchronisation);
+    assert_false(f->header->readOnly);
+    assert_false(f->header->tagAlterPreservation);
+    assert_false(f->header->fileAlterPreservation);
+
+    assert_int_equal(f->header->decompressionSize, 0);
+    assert_int_equal(f->header->groupSymbol, 0);
+    assert_int_equal(f->header->encryptionSymbol, 0);
+
+    Id3v2ContentEntry *e = (Id3v2ContentEntry *) f->entries->head->data;
+
+    assert_memory_equal(e->entry, "https://bandcamp.com/", 22);
+    assert_int_equal(e->size, 22);
+
+    listFree(context);
+    byteStreamDestroy(stream);
+    id3v2DestroyFrame(&f);
+
+}
+
+static void id3v2ParseFrame_parseWXXUTF16(void **state){
+
+    // WXX 
+    uint8_t wxx[31] = {'W', 'X', 'X', 0x00, 0x00, 0x19,
+                    0x01,
+                    0xff, 0xfe, 's', 0x00, 't', 0x00, 'o', 0x00, 'r', 0x00, 'e', 0x00, 0x00, 0x00,
+                    'i', 't','u','n','e','s','.','c','o','m'
+    };
+
+    
+
+    ByteStream *stream = byteStreamCreate(wxx, 31);
+    Id3v2Frame *f;
+    List *context = id3v2CreateUserDefinedURLFrameContext();
+    uint32_t frameSize = 0;
+
+    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_2, &f);
+
+    assert_non_null(f);
+    assert_non_null(f->header);
+    assert_memory_equal(f->header->id,"WXX",3);
+    assert_int_equal(frameSize, 31);
+    assert_false(f->header->unsynchronisation);
+    assert_false(f->header->readOnly);
+    assert_false(f->header->tagAlterPreservation);
+    assert_false(f->header->fileAlterPreservation);
+
+    assert_int_equal(f->header->decompressionSize, 0);
+    assert_int_equal(f->header->groupSymbol, 0);
+    assert_int_equal(f->header->encryptionSymbol, 0);
+
+    Id3v2ContentEntry *e = (Id3v2ContentEntry *) f->entries->head->data;
+
+    assert_int_equal(((uint8_t *)e->entry)[0], 1);
+    assert_int_equal(e->size, 1);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_memory_equal(e->entry, wxx + 7, 12);
+    assert_int_equal(e->size, 12);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+
+    assert_memory_equal(e->entry, "itunes.com", 11);
+    assert_int_equal(e->size, 11);
+
+    listFree(context);
+    byteStreamDestroy(stream);
+    id3v2DestroyFrame(&f);
+
+}
+
+static void id3v2ParseFrame_parseCOMLatain1(void **state){
+
+    // COM 
+    uint8_t com[25] = {'C', 'O', 'M', 0x00, 0x00, 0x13,
+                        0x00,
+                        'e','n','g',
+                        'c','o','m','m','e','n','t', 0x00,
+                        't', 'e', 's', 't','i','n','g'
+    };
+
+    
+
+    ByteStream *stream = byteStreamCreate(com, 25);
+    Id3v2Frame *f;
+    List *context = id3v2CreateCommentFrameContext();
+    uint32_t frameSize = 0;
+
+    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_2, &f);
+
+    assert_non_null(f);
+    assert_non_null(f->header);
+    assert_memory_equal(f->header->id,"COM",3);
+    assert_int_equal(frameSize, 25);
+    assert_false(f->header->unsynchronisation);
+    assert_false(f->header->readOnly);
+    assert_false(f->header->tagAlterPreservation);
+    assert_false(f->header->fileAlterPreservation);
+
+    assert_int_equal(f->header->decompressionSize, 0);
+    assert_int_equal(f->header->groupSymbol, 0);
+    assert_int_equal(f->header->encryptionSymbol, 0);
+
+    Id3v2ContentEntry *e = (Id3v2ContentEntry *) f->entries->head->data;
+
+    assert_int_equal(((uint8_t *)e->entry)[0], 0);
+    assert_int_equal(e->size, 1);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_memory_equal(e->entry, "eng", 3);
+    assert_int_equal(e->size, 3);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+
+    assert_memory_equal(e->entry, "comment", 8);
+    assert_int_equal(e->size, 8);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->next->data;
+
+    assert_memory_equal(e->entry, "testing", 8);
+    assert_int_equal(e->size, 8);
+
+    listFree(context);
+    byteStreamDestroy(stream);
+    id3v2DestroyFrame(&f);
+
+}
+
+static void id3v2ParseFrame_parseIPLLatin1(void **state){
+
+    // ipl 
+    uint8_t ipl[51] = {'I', 'P', 'L', 0x00, 0x00, 0x2D,
+                     0x00,
+                     'm','i','x','i','n','g',0x00,
+                     'j','o','h','n', 0x00,
+                     'e','n','g','i','n','e','e','r','i','n','g', 0x00,
+                     'j','a','n','e', 0x00,
+                     'm','a','s','t','e','r','i','n','g', 0x00,
+                     'b','u','d','d','y'
+    };
+
+    
+
+    ByteStream *stream = byteStreamCreate(ipl, 51);
+    Id3v2Frame *f;
+    List *context = id3v2CreateInvolvedPeopleListFrameContext();
+    uint32_t frameSize = 0;
+
+    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_2, &f);
+
+    assert_non_null(f);
+    assert_non_null(f->header);
+    assert_memory_equal(f->header->id,"IPL",3);
+    assert_int_equal(frameSize, 51);
+    assert_false(f->header->unsynchronisation);
+    assert_false(f->header->readOnly);
+    assert_false(f->header->tagAlterPreservation);
+    assert_false(f->header->fileAlterPreservation);
+
+    assert_int_equal(f->header->decompressionSize, 0);
+    assert_int_equal(f->header->groupSymbol, 0);
+    assert_int_equal(f->header->encryptionSymbol, 0);
+
+    Id3v2ContentEntry *e = (Id3v2ContentEntry *) f->entries->head->data;
+
+    assert_int_equal(((uint8_t *)e->entry)[0], 0);
+    assert_int_equal(e->size, 1);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_memory_equal(e->entry, "mixing", 7);
+    assert_int_equal(e->size, 7);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+
+    assert_memory_equal(e->entry, "john", 5);
+    assert_int_equal(e->size, 5);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->next->data;
+
+    assert_memory_equal(e->entry, "engineering", 12);
+    assert_int_equal(e->size, 12);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->data;
+
+    assert_memory_equal(e->entry, "jane", 5);
+    assert_int_equal(e->size, 5);
+
+    listFree(context);
+    byteStreamDestroy(stream);
+    id3v2DestroyFrame(&f);
+
+}
+
+static void id3v2ParseFrame_parseSYLTUTF16(void **state){
+
+    // SYLT 
+    uint8_t sylt[116] = {'S', 'Y', 'L', 'T', 0x00, 0x00, 0x00, 0x6A, 0x00, 0x00,
+                      0x01,
+                      'e','n','g',
+                      0x02,
+                      0x01,
+                      0xff, 0xfe, 'g', 0x00, 'e', 0x00, 'n', 0x00, 'i', 0x00, 'u', 0x00, 's', 0x00, 0x00, 0x00,
+                      0xff, 0xfe, 'S', 0x00, 't', 0x00, 'r', 0x00, 'a', 0x00, 'n', 0x00, 'g', 0x00, 0x00, 0x00,
+                      0x00, 0x00, 0x00, 0x00,
+                      0xff, 0xfe, 'e', 0x00, 'r', 0x00, 's', 0x00, 0x00, 0x00,
+                      0x00, 0x00, 0x00, 0x25,
+                      0xff, 0xfe, ' ', 0x00, 'i', 0x00, 'n', 0x00, 0x00, 0x00,
+                      0x00, 0x00, 0x00, 0x89,
+                      0xff, 0xfe, ' ', 0x00, 't', 0x00, 'h', 0x00, 'e', 0x00, 0x00, 0x00,
+                      0x00, 0x00, 0x00, 0x95,
+                      0xff, 0xfe, ' ', 0x00, 'n', 0x00, 'i', 0x00, 'g', 0x00, 'h', 0x00, 't', 0x00, 0x00, 0x00,
+                      0x00, 0x00, 0x00, 0xA9          
+    };
+
+    
+
+    ByteStream *stream = byteStreamCreate(sylt, 116);
+    Id3v2Frame *f;
+    List *context = id3v2CreateSynchronisedLyricFrameContext();
+    uint32_t frameSize = 0;
+
+    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_3, &f);
+
+    assert_non_null(f);
+    assert_non_null(f->header);
+    assert_memory_equal(f->header->id,"SYLT",4);
+    assert_int_equal(frameSize, 116);
+    assert_false(f->header->unsynchronisation);
+    assert_false(f->header->readOnly);
+    assert_false(f->header->tagAlterPreservation);
+    assert_false(f->header->fileAlterPreservation);
+
+    assert_int_equal(f->header->decompressionSize, 0);
+    assert_int_equal(f->header->groupSymbol, 0);
+    assert_int_equal(f->header->encryptionSymbol, 0);
+
+    Id3v2ContentEntry *e = (Id3v2ContentEntry *) f->entries->head->data;
+
+    assert_int_equal(((uint8_t *)e->entry)[0], 1);
+    assert_int_equal(e->size, 1);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->data;
+    assert_memory_equal(e->entry, "eng", 3);
+    assert_int_equal(e->size, 3);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+    assert_int_equal(((uint8_t *)e->entry)[0], 2);
+    assert_int_equal(e->size, 1);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->next->data;
+    assert_int_equal(((uint8_t *)e->entry)[0], 1);
+    assert_int_equal(e->size, 1);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->data;
+    assert_memory_equal(e->entry, sylt + 16, 16);
+    assert_int_equal(e->size, 14);
+
+    listFree(context);
+    byteStreamDestroy(stream);
+    id3v2DestroyFrame(&f);
+
+}
+
+static void id3v2ParseFrame_parseEQU(void **state){
+
+}
+
+
+static void playground(void **state){
+    // EQU 
+    uint8_t equ[15] = {'E', 'Q', 'U', 0x00, 0x00, 0x09,
+                        2U,
+                        0x03, 0xe9, // 000000111110100 1  inc/dec 
+                        0x40, 0x00,
+                        0x00, 0x28, // 000000000010100 0  inc/dec
+                        0xfc, 0x00
+    };
+
+    
+
+    ByteStream *stream = byteStreamCreate(equ, 15);
+    Id3v2Frame *f;
+    List *context = id3v2CreateEqulizationFrameContext(ID3V2_TAG_VERSION_2);
+    uint32_t frameSize = 0;
+
+    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_2, &f);
+
+    assert_non_null(f);
+    assert_non_null(f->header);
+    assert_memory_equal(f->header->id,"EQU",3);
+    assert_int_equal(frameSize, 15);
+    assert_false(f->header->unsynchronisation);
+    assert_false(f->header->readOnly);
+    assert_false(f->header->tagAlterPreservation);
+    assert_false(f->header->fileAlterPreservation);
+
+    assert_int_equal(f->header->decompressionSize, 0);
+    assert_int_equal(f->header->groupSymbol, 0);
+    assert_int_equal(f->header->encryptionSymbol, 0);
+
+    Id3v2ContentEntry *e = (Id3v2ContentEntry *) f->entries->head->data;
+
+    assert_int_equal(((uint8_t *)e->entry)[0], 2);
+    assert_int_equal(e->size, 1);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->data;
+    assert_int_equal(((uint8_t *)e->entry)[0], 1);
+    assert_int_equal(e->size, 1);
+
+    // e = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+    // assert_int_equal(((uint8_t *)e->entry)[0], 2);
+    // assert_int_equal(e->size, 1);
+
+    // e = (Id3v2ContentEntry *) f->entries->head->next->next->next->data;
+    // assert_int_equal(((uint8_t *)e->entry)[0], 1);
+    // assert_int_equal(e->size, 1);
+
+    // e = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->data;
+    // assert_memory_equal(e->entry, sylt + 16, 16);
+    // assert_int_equal(e->size, 14);
+
+    listFree(context);
+    byteStreamDestroy(stream);
+    id3v2DestroyFrame(&f);
+
+}
+
 int main(){
     const struct CMUnitTest tests[] = {
         
@@ -843,7 +1192,12 @@ int main(){
         cmocka_unit_test(id3v2ParseFrame_parseTALBUTF8),
         cmocka_unit_test(id3v2ParseFrame_parseTIT2UTF16),
         cmocka_unit_test(id3v2ParseFrame_parseTXXXUTF16),
-
+        cmocka_unit_test(id3v2ParseFrame_parseTXXXLatin1),
+        cmocka_unit_test(id3v2ParseFrame_parseWCOM),
+        cmocka_unit_test(id3v2ParseFrame_parseWXXUTF16),
+        cmocka_unit_test(id3v2ParseFrame_parseCOMLatain1),
+        cmocka_unit_test(id3v2ParseFrame_parseIPLLatin1),
+        cmocka_unit_test(id3v2ParseFrame_parseSYLTUTF16),
 
         cmocka_unit_test(playground)
 
