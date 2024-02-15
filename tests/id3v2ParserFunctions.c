@@ -1076,7 +1076,7 @@ static void id3v2ParseFrame_parseSYLTUTF16(void **state){
     assert_int_equal(e->size, 1);
 
     e = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->data;
-    assert_memory_equal(e->entry, sylt + 16, 16);
+    assert_memory_equal(e->entry, sylt + 16, 14);
     assert_int_equal(e->size, 14);
 
     listFree(context);

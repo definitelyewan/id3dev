@@ -516,8 +516,14 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
         stream->cursor = resetIndex;
         return expectedHeaderSize;
     }
+
+    if(version == ID3V2_TAG_VERSION_2){
+        printf("[*] parsed a frame header with a size of %d and a id of %c%c%c%c\n",expectedHeaderSize,header->id[0],header->id[1], header->id[2]);
+    }else{
+        printf("[*] parsed a frame header with a size of %d and a id of %c%c%c%c\n",expectedHeaderSize,header->id[0],header->id[1], header->id[2],header->id[3]);
+    }
+
     
-    printf("[*] parsed a frame header with a size of %d and a id of %c%c%c%c\n",expectedHeaderSize,header->id[0],header->id[1], header->id[2],header->id[3]);
 
     byteStreamSeek(stream, expectedHeaderSize, SEEK_CUR);
 
