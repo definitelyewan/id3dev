@@ -887,7 +887,7 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
             printf("[*] synchronised tag\n");
         }
 
-        if(header->majorVersion == ID3V2_TAG_VERSION_3 || header->majorVersion == ID3V2_TAG_VERSION_4){
+        if((header->majorVersion == ID3V2_TAG_VERSION_3 || header->majorVersion == ID3V2_TAG_VERSION_4) && id3v2ReadExtendedHeaderIndicator(header) == 1){
             read = id3v2ParseExtendedTagHeader(stream, header->majorVersion, &ext);
             header->extendedHeader = ext;
 
@@ -951,7 +951,7 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
                 context = id3v2CreateGenericFrameContext();
             }
 
-
+            printf("HERE\n");
             read = id3v2ParseFrame(stream, context, header->majorVersion, &frame);
             listFree(context);
 
@@ -967,6 +967,7 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
 
             listInsertBack(frames, frame);
             tagSize = ((tagSize < read) ? 0 : tagSize - read);
+            byteStreamSeek(stream, read, SEEK_CUR);
             printf("[*] %u bytes left in the tag\n", tagSize);
         }
         

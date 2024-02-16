@@ -19,6 +19,7 @@ extern "C"{
 
 #include "id3v2Types.h"
 
+
 /*
     Tag Header
 */
@@ -64,6 +65,16 @@ int id3v2ReadImageEncodingRestriction(Id3v2TagHeader *header);
 int id3v2ReadImageSizeRestriction(Id3v2TagHeader *header); 
 
 bool id3v2ClearTagRestrictions(Id3v2TagHeader *header);
+
+/*
+    Tag
+*/
+
+//mem
+
+Id3v2Tag *id3v2CreateTag(Id3v2TagHeader *header, List *frames);
+void id3v2DestroyTag(Id3v2Tag **toDelete);
+
 
 #ifdef __cplusplus
 } //extern c end

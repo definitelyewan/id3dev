@@ -588,3 +588,28 @@ bool id3v2ClearTagRestrictions(Id3v2TagHeader *header){
     
     return 1;
 }
+
+
+Id3v2Tag *id3v2CreateTag(Id3v2TagHeader *header, List *frames){
+
+    Id3v2Tag *tag = malloc(sizeof(Id3v2Tag));
+
+    tag->frames = frames;
+    tag->header = header;
+
+    return tag;
+
+}
+
+
+void id3v2DestroyTag(Id3v2Tag **toDelete){
+
+    if(*toDelete){
+        id3v2DestroyTagHeader(&(*toDelete)->header);
+        listFree((*toDelete)->frames);
+        free(*toDelete);
+        *toDelete = NULL;
+        toDelete = NULL;
+    }
+
+}

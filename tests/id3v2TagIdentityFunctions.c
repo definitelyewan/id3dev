@@ -736,6 +736,21 @@ static void id3v2ClearTagRestrictions_clear(void **state){
     id3v2DestroyTagHeader(&header); 
 }
 
+
+static void id3v2TagCreateAndDestroy_AllInOne(void **state){
+
+    Id3v2Tag *tag = id3v2CreateTag(id3v2CreateTagHeader(1,2,10,id3v2CreateExtendedTagHeader(15,50,1,1,10)), listCreate(id3v2PrintFrame, id3v2DeleteFrame, id3v2CompareFrame, id3v2CopyFrame));
+
+    assert_non_null(tag);
+    assert_non_null(tag->frames);
+    assert_non_null(tag->header);
+
+    id3v2DestroyTag(&tag);
+
+    assert_null(tag);
+
+}
+
 // printf("%d%d%d%d%d%d%d%d\n",readBit(header->extendedHeader->restrictions, 7),
 //                             readBit(header->extendedHeader->restrictions, 6),
 //                             readBit(header->extendedHeader->restrictions, 5),
@@ -866,7 +881,10 @@ int main(){
         cmocka_unit_test(id3v2ReadImageSizeRestriction_readBit2),
 
         //id3v2ClearTagRestrictions test
-        cmocka_unit_test(id3v2ClearTagRestrictions_clear)
+        cmocka_unit_test(id3v2ClearTagRestrictions_clear),
+
+        // tag create/destroy
+        cmocka_unit_test(id3v2TagCreateAndDestroy_AllInOne)
 
     };
 

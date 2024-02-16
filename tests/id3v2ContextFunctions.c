@@ -1427,7 +1427,10 @@ int main(){
         cmocka_unit_test(id3v2CreateTermsOfUseFrameContext_valid),
 
         // id3v2CreateUnsynchronisedLyricFrameContext tests
-        cmocka_unit_test(id3v2CreateUnsynchronisedLyricFrameContext_valid)
+        cmocka_unit_test(id3v2CreateUnsynchronisedLyricFrameContext_valid),
+
+        // id3v2CreateGenericContext tests
+        cmocka_unit_test(id3v2CreateGenericContext_valid)
 
     };
 

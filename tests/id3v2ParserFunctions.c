@@ -1159,6 +1159,14 @@ static void id3v2ParseFrame_parseEQU(void **state){
 
 static void playground(void **state){
 
+    ByteStream *stream = byteStreamFromFile("assets/sorry4dying.mp3");
+
+    // byteStreamPrintf("%x", stream);
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+
+    
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
 }
 
 int main(){
