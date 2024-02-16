@@ -1086,11 +1086,6 @@ static void id3v2ParseFrame_parseSYLTUTF16(void **state){
 }
 
 static void id3v2ParseFrame_parseEQU(void **state){
-
-}
-
-
-static void playground(void **state){
     // EQU 
     uint8_t equ[15] = {'E', 'Q', 'U', 0x00, 0x00, 0x09,
                         2U,
@@ -1131,21 +1126,38 @@ static void playground(void **state){
     assert_int_equal(((uint8_t *)e->entry)[0], 1);
     assert_int_equal(e->size, 1);
 
-    // e = (Id3v2ContentEntry *) f->entries->head->next->next->data;
-    // assert_int_equal(((uint8_t *)e->entry)[0], 2);
-    // assert_int_equal(e->size, 1);
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+    assert_int_equal(((uint8_t *)e->entry)[0], 0);
+    assert_int_equal(((uint8_t *)e->entry)[1], 0xe9);
+    assert_int_equal(e->size, 2);
 
-    // e = (Id3v2ContentEntry *) f->entries->head->next->next->next->data;
-    // assert_int_equal(((uint8_t *)e->entry)[0], 1);
-    // assert_int_equal(e->size, 1);
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->next->data;
+    assert_int_equal(((uint8_t *)e->entry)[0], 0x40);
+    assert_int_equal(((uint8_t *)e->entry)[1], 0x00);
+    assert_int_equal(e->size, 2);
 
-    // e = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->data;
-    // assert_memory_equal(e->entry, sylt + 16, 16);
-    // assert_int_equal(e->size, 14);
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->data;
+    assert_int_equal(((uint8_t *)e->entry)[0], 0x00);
+    assert_int_equal(e->size, 1);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->next->data;
+    assert_int_equal(((uint8_t *)e->entry)[0], 0x00);
+    assert_int_equal(((uint8_t *)e->entry)[1], 0x28);
+    assert_int_equal(e->size, 2);
+
+    e = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->next->next->data;
+    assert_int_equal(((uint8_t *)e->entry)[0], 0xfc);
+    assert_int_equal(((uint8_t *)e->entry)[1], 0x00);
+    assert_int_equal(e->size, 2);
+
 
     listFree(context);
     byteStreamDestroy(stream);
     id3v2DestroyFrame(&f);
+}
+
+
+static void playground(void **state){
 
 }
 
@@ -1198,6 +1210,7 @@ int main(){
         cmocka_unit_test(id3v2ParseFrame_parseCOMLatain1),
         cmocka_unit_test(id3v2ParseFrame_parseIPLLatin1),
         cmocka_unit_test(id3v2ParseFrame_parseSYLTUTF16),
+        cmocka_unit_test(id3v2ParseFrame_parseEQU),
 
         cmocka_unit_test(playground)
 

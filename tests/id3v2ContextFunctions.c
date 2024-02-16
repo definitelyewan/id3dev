@@ -1300,6 +1300,25 @@ static void id3v2CreateUnsynchronisedLyricFrameContext_valid(void **state){
 
 }
 
+static void id3v2CreateGenericContext_valid(void **state){
+
+    List* l = id3v2CreateGenericFrameContext();
+
+    assert_non_null(l);
+
+    Node *n = l->head;
+
+    Id3v2ContentContext *c = (Id3v2ContentContext *) n->data;
+
+    assert_int_equal(c->type, binary_context);
+    assert_int_equal(c->max, UINT_MAX);
+    assert_int_equal(c->min, 1);
+    assert_int_equal(c->key, id3v2djb2("?"));
+
+    listFree(l);
+
+}
+
 int main(){
 
     const struct CMUnitTest tests[] = {

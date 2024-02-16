@@ -272,6 +272,21 @@ typedef struct _Id3v2Frame {
 
 } Id3v2Frame;
 
+/**
+ * @brief A representation of an ID3 tag
+ * @details There is no footer structure as it is a copy of the header with a reversed ID
+ */
+typedef struct _Id3v2Tag {
+  
+  //! A tag header used to identify key information about the tag
+  Id3v2TagHeader *header;
+  
+  //! A list of frames contained with in the tag
+  List *frames;
+
+
+} Id3v2Tag;
+
 #ifdef __cplusplus
 } // extern c end
 #endif

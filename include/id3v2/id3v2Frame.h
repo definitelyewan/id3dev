@@ -19,6 +19,11 @@ int id3v2CompareContentEntry(const void *first, const void *second);
 char *id3v2PrintContentEntry(const void *toBePrinted);
 void *id3v2CopyContentEntry(const void *toBeCopied);
 
+void id3v2DeleteFrame(void *toBeDeleted);
+int id3v2CompareFrame(const void *first, const void *second);
+char *id3v2PrintFrame(const void *toBePrinted);
+void *id3v2CopyFrame(const void *toBeCopied);
+
 Id3v2Frame *id3v2CreateFrame(Id3v2FrameHeader *header, List *context, List *entries);
 void id3v2DestroyFrame(Id3v2Frame **toDelete);
 

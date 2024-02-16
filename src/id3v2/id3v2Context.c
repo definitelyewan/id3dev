@@ -1023,6 +1023,21 @@ List *id3v2CreateUnsynchronisedLyricFrameContext(void){
 
 }
 
+/**
+ * @brief generates the required context for a generic frame with unknown structure
+ * 
+ * @return List* 
+ */
+List *id3v2CreateGenericFrameContext(void){
+
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+
+    // encoding
+    void *toAdd = (void *) id3v2CreateContentContext(binary_context, id3v2djb2("?"), UINT_MAX, 1);
+    listInsertBack(l, toAdd);
+
+    return l;
+}
 
 /**
  * @brief Generates a default map of pairings between frame IDs and the context needed to parse them.
@@ -1033,7 +1048,7 @@ List *id3v2CreateUnsynchronisedLyricFrameContext(void){
  */
 HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version){
 
-    size_t minFrameContexts = 63;
+    size_t minFrameContexts = 64;
     HashTable *table = hashTableCreate(minFrameContexts, id3v2DeleteContentContext, id3v2PrintContentContext, id3v2CopyContentContext);
 
 
@@ -1312,6 +1327,7 @@ HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version){
             break;
     }
 
+    hashTableInsert(table, "?", id3v2CreateGenericFrameContext());
 
     return table;
 }

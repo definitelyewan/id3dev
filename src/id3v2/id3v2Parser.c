@@ -21,7 +21,6 @@
 #include "byteInt.h"
 #include "byteUnicode.h"
 
-
 static void copyNBits(unsigned char* src, unsigned char* dest, int startBit, int nBits) {
     int byteIndex = startBit /  CHAR_BIT;
     int bitIndex = startBit %  CHAR_BIT;
@@ -473,18 +472,26 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
     return walk;
 }
 
+/**
+ * @brief Parses an ID3 version 2, 3, or 4 frame. This function returns a couple of different values back to the caller
+ * including the number of bytes needed to parse the data and a referance to a heap allocated frame structure. This is
+ * the meat of the parser and requires 'hints' in the form of a context list to prase a frame successfully. There is
+ * no error state for this function but a returned size of 0 or an incomplete frame such as a missing entry list may
+ * indicate one.
+ * 
+ * @param stream 
+ * @param context 
+ * @param version 
+ * @param frame 
+ * @return uint32_t 
+ */
 uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3v2Frame **frame){
-
-
-    printf("[*] attempting to parse provided frame\n");
 
     if(!stream || !context){
         *frame = NULL;
         return 0;
     }
 
-    printf("[*] provided content is valid\n");
-    byteStreamPrintf("%x", stream);
     // values needed
     Id3v2FrameHeader *header = NULL;
     List *entries = NULL;
@@ -517,25 +524,10 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
         return expectedHeaderSize;
     }
 
-    if(version == ID3V2_TAG_VERSION_2){
-        printf("[*] parsed a frame header with a size of %d and a id of %c%c%c%c\n",expectedHeaderSize,header->id[0],header->id[1], header->id[2]);
-    }else{
-        printf("[*] parsed a frame header with a size of %d and a id of %c%c%c%c\n",expectedHeaderSize,header->id[0],header->id[1], header->id[2],header->id[3]);
-    }
-
-    
-
     byteStreamSeek(stream, expectedHeaderSize, SEEK_CUR);
-
-    printf("[*] skipping header bytes\n");
-    byteStreamPrintf("%x", stream);
-
 
     innerSream = byteStreamCreate(byteStreamCursor(stream), expectedContentSize);
     stream->cursor = resetIndex;
-
-    printf("[*] created inner stream container with size %d\n", expectedContentSize);
-    byteStreamPrintf("%x",innerSream);
 
     entries = listCreate(id3v2PrintContentEntry, id3v2DeleteContentEntry, id3v2CompareContentEntry, id3v2CopyContentEntry);
     iter = listCreateIterator(context);
@@ -547,14 +539,12 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
         switch(cc->type){
             // give up on parsing when the context is undefined
             case unknown_context:
-                printf("[*] detected unknown_context");
                 byteStreamSeek(innerSream, 0, SEEK_END);
                 break;
             
             // encoded strings
             case encodedString_context:{
-                printf("[*] detected encodedString_context\n");
-                byteStreamPrintf("%x",innerSream);
+
                 void *data = NULL;
                 size_t dataSize = 0;
 
@@ -568,12 +558,10 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                 while((tmp = listIteratorNext(&contentContextIter)) != NULL){
 
                     if(((Id3v2ContentContext *)tmp)->type == iter_context){
-                        printf("[*] detected an iter, skipping and reducing position by 1\n");
                         poscc--;
                     }
 
                     if(((Id3v2ContentContext *)tmp)->key == id3v2djb2("encoding")){
-                        printf("[*] encoding found in contexts at position %ld\n",poscc);
                         break;
                     }
 
@@ -584,11 +572,11 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
 
                     if(poscc == posce){
                         encoding = ((uint8_t *)((Id3v2ContentEntry *)tmp)->entry)[0];
-                        printf("[*] detected encoding in content entries at %ld position with the value %d\n", posce, encoding);
                     }
 
                     posce++;
                 }
+
                 switch(encoding){
                     case BYTE_ISO_8859_1:
                     case BYTE_ASCII:
@@ -600,7 +588,6 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                         data = byteStreamReturnUtf16(innerSream, &dataSize);
                         break;
                     default:
-                        printf("[*] encountered an unsupported encoding\n");
                         break;
 
                 }
@@ -615,13 +602,6 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                     dataSize = cc->min;
                 }
 
-                printf("[*] string is %ld bytes long and is at address %p\n",dataSize, data);
-                printf("[*] encoded string context = {");
-                for(int i = 0; i < dataSize; i++){
-                    printf("%x,",((uint8_t *)data)[i]);
-                }
-                printf("}\n");
-                byteStreamPrintf("%x", innerSream);
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
                 free(data);
 
@@ -630,8 +610,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                 break;
             // only characters found within the latain1 character set      
             case latin1Encoding_context:{
-                printf("[*] detected latin1Encoding_context\n");
-                byteStreamPrintf("%x",innerSream);
+
                 void *data = NULL;
                 size_t dataSize = 0;
 
@@ -647,15 +626,6 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                     dataSize = cc->min;
                 }
 
-                printf("[*] string is %ld bytes long and is at address %p\n",dataSize, data);
-                printf("[*] latin1 string context = {");
-                for(int i = 0; i < dataSize; i++){
-                    printf("%x,",((uint8_t *)data)[i]);
-                }
-                printf("}\n");
-                byteStreamPrintf("%x", innerSream);
-
-
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
                 free(data);
 
@@ -667,8 +637,6 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
             case noEncoding_context:
             case precision_context:
             case numeric_context:{
-                printf("[*] detected a numeric_context/precision_context/binary_context/noEncoding_context\n");
-                byteStreamPrintf("%x",innerSream);
 
                 void * data = NULL;
                 size_t dataSize = 0;
@@ -685,20 +653,11 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                     dataSize = expectedContentSize;
                 }
 
-                printf("[*] size of the number is %ld bytes\n", dataSize);
                 data = malloc(dataSize);
 
                 if(!byteStreamRead(innerSream, (uint8_t *)data, dataSize)){
                     memset(data, 0, dataSize);
                 }
-
-                printf("[*] numeric content = {");
-                for(int i = 0; i < dataSize; i++){
-                    printf("%x,",((uint8_t *)data)[i]);
-                }
-                printf("}\n");
-
-                byteStreamPrintf("%x", innerSream);
 
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
                 free(data);
@@ -707,8 +666,6 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
             }
                 break;
             case bit_context:{
-                printf("[*] detected bit_context\n");
-                byteStreamPrintf("%x",innerSream);
 
                 void *data = NULL;
                 size_t nBits = 0;
@@ -727,32 +684,17 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                 
                 data = malloc(dataSize);
                 memset(data, 0, dataSize);
-
                 copyNBits(byteStreamCursor(innerSream), data, concurrentBitCount, nBits);
                 
-                printf("[*] bit representation as hex = {");
-                for(int i = 0; i < dataSize; i++){
-                    printf("%x,",((uint8_t *)data)[i]);
-                }
-                printf("}\n");
-                byteStreamPrintf("%x", innerSream);
-
-                
                 if(iter.current->data != NULL){
-                    printf("[*] checking if the next context is a bit_context\n");
                     Id3v2ContentContext *nextContext = (Id3v2ContentContext *) iter.current->data;
                     isBitContext = nextContext->type;
                 }
                 
                 concurrentBitCount += nBits;
                 
-                // multiple bit_contexts in a row
-                if(isBitContext == bit_context){
-                    printf("[*] next context is a bit_context, setting starting bit for next read to %ld\n", concurrentBitCount);
+                if(isBitContext != bit_context){
 
-                // end of bit contexts or no following one
-                }else{
-                    printf("[*] next context is not a bit_context seeking %d bytes and resetting concurrent bits\n", concurrentBitCount / CHAR_BIT);
                     if(concurrentBitCount / CHAR_BIT){
                         byteStreamSeek(innerSream, concurrentBitCount / CHAR_BIT, SEEK_CUR);
                         expectedContentSize = ((expectedContentSize < dataSize) ? 0 : expectedContentSize - dataSize);
@@ -765,13 +707,10 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
                 free(data);
             }
-
-
                 break;
             case iter_context:{
                 
                 if(!currIterations){
-                    printf("[*] detected an iter_context\n");
                     
                     iterStorage = iter;
 
@@ -780,13 +719,10 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                     for(size_t i = 0; i < cc->min; i++){
                         listIteratorNext(&iter);
                     }
-                    printf("[*] generated an iter starting at %ld\n",cc->min);
 
                 }
 
                 if(currIterations != cc->max && currIterations != 0){
-                    
-                    printf("[*] reseting iter to min position %ld\n", cc->min);
                     
                     iter = listCreateIterator(context);
 
@@ -797,7 +733,6 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
 
 
                 if(currIterations >= cc->max){
-                    printf("[*] reset iter to stock plus %ld iterations\n",currIterations);
                     iter = iterStorage;
 
                     for(size_t i = 0; i < currIterations; i++){
@@ -813,8 +748,6 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
             }
                 break;
             case adjustment_context:{
-                printf("[*] detected an adjustment_context\n");
-                byteStreamPrintf("%x",innerSream);
 
                 void *data = NULL;
                 size_t dataSize = 0;
@@ -829,12 +762,10 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                 while((tmp = listIteratorNext(&contentContextIter)) != NULL){
 
                     if(((Id3v2ContentContext *)tmp)->type == iter_context){
-                        printf("[*] detected an iter, skipping and reducing position by 1\n");
                         poscc--;
                     }
 
                     if(((Id3v2ContentContext *)tmp)->key == id3v2djb2("adjustment")){
-                        printf("[*] adjustment found in contexts at position %ld\n",poscc);
                         break;
                     }
 
@@ -842,10 +773,8 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                 }
 
                 while((tmp = listIteratorNext(&contentEntryIter)) != NULL){
-
                     if(poscc == posce){
                         dataSize = btoi((unsigned char *)((Id3v2ContentEntry *)tmp)->entry, ((Id3v2ContentEntry *)tmp)->size);
-                        printf("[*] detected adjustment in content entries at %ld position with the a data size of %ld\n", posce, dataSize);
                     }
 
                     posce++;
@@ -857,17 +786,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
 
                 data = malloc(dataSize);
                 memset(data, 0, dataSize); //ensure data exists
-
                 byteStreamRead(innerSream, data, dataSize); // no need to check error code do to above memset
-
-
-                printf("[*] set max size to %ld and read data at address %p\n",dataSize, data);
-                printf("[*] read data based on adjustment = {");
-                for(int i = 0; i < dataSize; i++){
-                    printf("%x,",((uint8_t *)data)[i]);
-                }
-                printf("}\n");
-                byteStreamPrintf("%x", innerSream);
 
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
                 free(data);
@@ -879,23 +798,201 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                 break;
             // no support
             default:
-                printf("[*] NO SUPPORT\n");
                 byteStreamSeek(innerSream, 0, SEEK_END);
                 break;
         }
 
-        printf("[*] %ld bytes left in the container stream\n", expectedContentSize);
         if(expectedContentSize == 0 || byteStreamGetCh(innerSream) == EOF){
-            printf("[*] reached maximum size in inner stream container\n");
             break;
         }
 
     }
-    printf("[*] exiting\n");
+
     walk += innerSream->cursor;
     *frame = id3v2CreateFrame(header, listDeepCopy(context), entries);
     byteStreamDestroy(innerSream);
     return walk;
 }
 
+Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
+
+    if(!stream){
+        return NULL;
+    }
+
+    printf("[*] provided stream is valid\n");
+
+
+    bool exit = false;
+    uint32_t read = 0;
+    uint32_t tagSize = 0;
+    uint8_t id[ID3V2_TAG_ID_SIZE];
+    Id3v2TagHeader *header = NULL;
+    Id3v2ExtendedTagHeader *ext = NULL;
+    Id3v2Tag *tag = NULL;
+    List *frames = NULL;
+    HashTable *pairs = NULL;
+
+    printf("[*] looking for \"ID3\" magic number\n");
+
+    while(true){
+
+        if(!byteStreamRead(stream, id, ID3V2_TAG_ID_SIZE)){
+            printf("[*] failed to find magic number, exitsing...\n");
+            return NULL;
+        }
+
+        if(btoi(id, ID3V2_TAG_ID_SIZE) == ID3V2_TAG_ID_MAGIC_NUMBER_H){
+            printf("[*] found magic number\n");
+            stream->cursor = stream->cursor - ID3V2_TAG_ID_SIZE;
+            break;
+        }
+
+    }
+
+    
+
+    while(true){
+
+        read = id3v2ParseTagHeader(stream, &header, &tagSize);
+
+        printf("[*] parsed tag header at %p in %u with a tag size of %u\n", header, read, tagSize);
+
+        if(read == 0 || header == NULL || tagSize == 0){
+            break;
+        }
+
+        if(!byteStreamSeek(stream, read, SEEK_CUR)){
+            break;
+        }
+
+        printf("[*] seeked %u bytes to move onto other content\n", read);
+
+        if(id3v2ReadUnsynchronisationIndicator(header) == 1){
+            
+            printf("[*] tag is unsynchronised\n");
+
+            size_t cursor = 0;
+            size_t readCount = 0;
+
+            while (cursor < stream->bufferSize && readCount < tagSize) {
+
+                byteStreamDeleteCh(stream);
+                byteStreamSeek(stream, 1, SEEK_CUR);
+
+                cursor += 2;
+                readCount++;
+            }
+
+            printf("[*] synchronised tag\n");
+        }
+
+        if(header->majorVersion == ID3V2_TAG_VERSION_3 || header->majorVersion == ID3V2_TAG_VERSION_4){
+            read = id3v2ParseExtendedTagHeader(stream, header->majorVersion, &ext);
+            header->extendedHeader = ext;
+
+            printf("[*] parsed tag extended header at %p in %u bytes\n", ext, read);
+
+            if(read == 0 || ext == NULL){
+                break;
+            }
+
+            tagSize = ((tagSize < read) ? 0 : tagSize - read);
+            printf("[*] %u bytes left in the tag\n", tagSize);
+        }
+
+        frames = listCreate(id3v2PrintFrame, id3v2DeleteFrame, id3v2CompareFrame, id3v2CopyFrame);
+        pairs = id3v2CreateDefaultIdentiferContextPairings(header->majorVersion);
+
+        printf("[*] created pairs\n");
+
+
+        while(tagSize){
+
+            Id3v2Frame *frame = NULL;
+            List *context = NULL;
+            uint8_t frameId[ID3V2_FRAME_ID_MAX_SIZE];
+
+            memset(frameId, 0, ID3V2_FRAME_ID_MAX_SIZE);
+            
+            if(header->majorVersion == ID3V2_TAG_VERSION_3 || header->majorVersion == ID3V2_TAG_VERSION_4){
+
+                if(!byteStreamRead(stream, frameId, ID3V2_FRAME_ID_MAX_SIZE)){
+                    exit = true;
+                    break;
+                }
+
+                stream->cursor = stream->cursor - ID3V2_FRAME_ID_MAX_SIZE;
+
+                printf("[*] testing with frame ID %c%c%c%c\n",frameId[0],frameId[1],frameId[2],frameId[3]);
+
+            }else if(header->majorVersion == ID3V2_TAG_VERSION_2){
+
+                if(!byteStreamRead(stream, frameId, ID3V2_FRAME_ID_MAX_SIZE - 1)){
+                    exit = true;
+                    break;
+                }
+
+                stream->cursor = stream->cursor - (ID3V2_FRAME_ID_MAX_SIZE - 1);
+
+                printf("[*] testing with frame ID %c%c%c\n",frameId[0],frameId[1],frameId[2]);
+
+            }
+
+            context = hashTableRetrieve(pairs, (char *)frameId);
+
+            if(context == NULL){
+                printf("[*] frame ID was not found checking user suppiled ones\n");
+                context = hashTableRetrieve(userPairs, (char *)frameId);
+            }
+
+            if(context == NULL){
+                printf("[*] frame ID was not valid loading generic\n");
+                context = id3v2CreateGenericFrameContext();
+            }
+
+
+            read = id3v2ParseFrame(stream, context, header->majorVersion, &frame);
+            listFree(context);
+
+            printf("[*] parsed a frame at %p in %u bytes\n", frame, read);
+
+            if(read == 0 || frame == NULL){
+                exit = true;
+                break;
+            }
+
+            printf("[*] successful parse of frame ID %c%c%c%c\n",frame->header->id[0],frame->header->id[1],frame->header->id[2],frame->header->id[3]);
+
+
+            listInsertBack(frames, frame);
+            tagSize = ((tagSize < read) ? 0 : tagSize - read);
+            printf("[*] %u bytes left in the tag\n", tagSize);
+        }
+        
+        if(exit){
+            printf("[*] unexpected? exiting...\n");
+            break;
+        }
+
+        hashTableFree(pairs);
+
+        tag = malloc(sizeof(Id3v2Tag));
+
+        tag->header = header;
+        tag->frames = frames;
+        printf("[*] exiting ...\n");
+        return tag;
+        
+    }
+
+    hashTableFree(pairs);
+
+    tag = malloc(sizeof(Id3v2Tag));
+
+    tag->header = header;
+    tag->frames = frames;
+
+    return tag;
+}
 

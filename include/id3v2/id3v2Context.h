@@ -67,6 +67,7 @@ List *id3v2CreateSynchronisedTempoCodesFrameContext(void);
 List *id3v2CreateUniqueFileIdentifierFrameContext(void);
 List *id3v2CreateTermsOfUseFrameContext(void);
 List *id3v2CreateUnsynchronisedLyricFrameContext(void);
+List *id3v2CreateGenericFrameContext(void);
 
 HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version);
 bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char key[ID3V2_FRAME_ID_MAX_SIZE], List *context);
