@@ -814,6 +814,64 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
     return walk;
 }
 
+
+Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
+
+    if(!stream){
+        return NULL;
+    }
+
+    printf("[*] provided stream is valid\n");
+
+
+    bool exit = false;
+    uint32_t read = 0;
+    uint32_t tagSize = 0;
+    uint8_t id[ID3V2_TAG_ID_SIZE];
+    Id3v2TagHeader *header = NULL;
+    Id3v2ExtendedTagHeader *ext = NULL;
+    List *frames = NULL;
+    HashTable *pairs = NULL;
+
+    // printf("[*] looking for \"ID3\" magic number\n");
+
+    // while(true){
+
+    //     if(!byteStreamRead(stream, id, ID3V2_TAG_ID_SIZE)){
+    //         printf("[*] failed to find magic number, exitsing...\n");
+    //         return NULL;
+    //     }
+
+    //     if(btoi(id, ID3V2_TAG_ID_SIZE) == ID3V2_TAG_ID_MAGIC_NUMBER_H){
+    //         printf("[*] found magic number\n");
+    //         stream->cursor = stream->cursor - ID3V2_TAG_ID_SIZE;
+    //         break;
+    //     }
+    // }
+
+    // while(true){
+
+    //     read = id3v2ParseTagHeader(stream, &header, &tagSize);
+
+    //     printf("[*] parsed tag header at %p in %u with a tag size of %u\n", header, read, tagSize);
+
+    //     if(read == 0 || header == NULL || tagSize == 0){
+    //         break;
+    //     }
+
+    //     if(!byteStreamSeek(stream, read, SEEK_CUR)){
+    //         break;
+    //     }
+
+    //     return id3v2CreateTag(header, frames);
+
+    // }
+
+    return id3v2CreateTag(header, frames);
+
+}
+
+/*
 Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
 
     if(!stream){
@@ -996,4 +1054,5 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
 
     return tag;
 }
+*/
 
