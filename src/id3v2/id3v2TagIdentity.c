@@ -598,13 +598,13 @@ Id3v2Tag *id3v2CreateTag(Id3v2TagHeader *header, List *frames){
     tag->header = header;
 
     return tag;
-
 }
 
 
 void id3v2DestroyTag(Id3v2Tag **toDelete){
 
     if(*toDelete){
+        
         id3v2DestroyTagHeader(&(*toDelete)->header);
         listFree((*toDelete)->frames);
         free(*toDelete);

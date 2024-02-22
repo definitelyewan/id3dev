@@ -32,6 +32,11 @@ int id3v2CompareContentContext(const void *first, const void *second);
 char *id3v2PrintContentContext(const void *toBePrinted);
 void *id3v2CopyContentContext(const void *toBeCopied);
 
+
+void id3v2DeleteContentContextList(void *toBeDeleted);
+char *id3v2PrintContentContextList(const void *toBePrinted);
+void *id3v2CopyContentContextList(const void *toBeCopied);
+
 // context generators
 
 List *id3v2CreateTextFrameContext(void);
@@ -68,6 +73,7 @@ List *id3v2CreateUniqueFileIdentifierFrameContext(void);
 List *id3v2CreateTermsOfUseFrameContext(void);
 List *id3v2CreateUnsynchronisedLyricFrameContext(void);
 List *id3v2CreateGenericFrameContext(void);
+
 
 HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version);
 bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char key[ID3V2_FRAME_ID_MAX_SIZE], List *context);

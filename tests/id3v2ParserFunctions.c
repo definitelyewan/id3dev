@@ -1156,15 +1156,395 @@ static void id3v2ParseFrame_parseEQU(void **state){
     id3v2DestroyFrame(&f);
 }
 
+static void id3v2ParseTagFromStream_v3(void **state){
+
+    ByteStream *stream = byteStreamFromFile("assets/sorry4dying.mp3");
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+
+
+    assert_non_null(tag);
+
+    assert_non_null(tag->header);
+    assert_int_equal(tag->header->flags, 0);
+    assert_int_equal(tag->header->majorVersion, 3);
+    assert_int_equal(tag->header->minorVersion, 0);
+
+    assert_null(tag->header->extendedHeader);
+    
+    // TIT2
+    Id3v2Frame *f = (Id3v2Frame *)tag->frames->head->data;
+    Id3v2ContentEntry *ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data1[26] = {0xff, 0xfe, 's', 0x00, 'o', 0x00, 'r', 0x00, 'r', 0x00, 'y', 0x00, '4', 
+                         0x00, 'd', 0x00, 'y', 0x00, 'i', 0x00, 'n', 0x00, 'g', 0x00, 0x00, 0x00};
+
+    assert_non_null(f);
+    assert_non_null(f->header);
+    assert_memory_equal(f->header->id,"TIT2",4);
+    assert_false(f->header->unsynchronisation);
+    assert_false(f->header->readOnly);
+    assert_false(f->header->tagAlterPreservation);
+    assert_false(f->header->fileAlterPreservation);
+    assert_int_equal(f->header->decompressionSize, 0);
+    assert_int_equal(f->header->groupSymbol, 0);
+    assert_int_equal(f->header->encryptionSymbol, 0);
+
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_int_equal(ce->size, 24);
+    assert_memory_equal(ce->entry, data1, 24);
+
+    // TALB
+    f = (Id3v2Frame *)tag->frames->head->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data2[56] = {0xff, 0xfe, 'I', 0x00, ' ', 0x00, 'D', 0x00, 'i', 0x00, 
+                       'd', 0x00, 'n', 0x00, '\'', 0x00, 't', 0x00, ' ', 0x00,
+                       'M', 0x00, 'e', 0x00, 'a', 0x00, 'n', 0x00, ' ', 0x00,
+                       'T', 0x00, 'o', 0x00, ' ', 0x00, 'H', 0x00, 'a', 0x00,
+                       'u', 0x00, 'n', 0x00, 't', 0x00, ' ', 0x00, 'Y', 0x00,
+                       'o', 0x00, 'u', 0x00, 0x00, 0x00};
+    assert_non_null(f);
+    assert_non_null(f->header);
+    assert_memory_equal(f->header->id,"TALB",4);
+    assert_false(f->header->unsynchronisation);
+    assert_false(f->header->readOnly);
+    assert_false(f->header->tagAlterPreservation);
+    assert_false(f->header->fileAlterPreservation);
+    assert_int_equal(f->header->decompressionSize, 0);
+    assert_int_equal(f->header->groupSymbol, 0);
+    assert_int_equal(f->header->encryptionSymbol, 0);
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_int_equal(ce->size, 54);
+    assert_memory_equal(ce->entry, data2, 54);
+
+
+    // TSRC
+    f = (Id3v2Frame *)tag->frames->head->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data3[28] = {0xff, 0xfe, 'Q', 0x00, 'M', 0x00, 'D', 0x00, 'A', 0x00,
+                       '7', 0x00, '2', 0x00, '2', 0x00, '1', 0x0, '0', 0x00, '2', 
+                       0x00, '3', 0x00, '6', 0x00, 0x00, 0x00};
+    assert_non_null(f);
+    assert_non_null(f->header);
+    assert_memory_equal(f->header->id,"TSRC",4);
+    assert_false(f->header->unsynchronisation);
+    assert_false(f->header->readOnly);
+    assert_false(f->header->tagAlterPreservation);
+    assert_false(f->header->fileAlterPreservation);
+    assert_int_equal(f->header->decompressionSize, 0);
+    assert_int_equal(f->header->groupSymbol, 0);
+    assert_int_equal(f->header->encryptionSymbol, 0);
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_int_equal(ce->size, 26);
+    assert_memory_equal(ce->entry, data3, 26);
+
+    // TCOP
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data4[298] = {0xff, 0xfe, '(', 0x00, 'C', 0x00, ')', 0x00, ' ', 0x00, 
+                       '2', 0x00, '0', 0x00, '2', 0x00, '2', 0x00, ' ', 0x00, 
+                       'd', 0x00, 'e', 0x00, 'a', 0x00, 'd', 0x00, 'A', 0x00,
+                       'i', 0x00, 'r', 0x00, ' ', 0x00, 'u', 0x00, 'n', 0x00,
+                       'd', 0x00, 'e', 0x00, 'r', 0x00, ' ', 0x00, 'e', 0x00,
+                       'x', 0x00, 'c', 0x00, 'l', 0x00, 'u', 0x00, 's', 0x00,
+                       'i', 0x00, 'v', 0x00, 'e', 0x00, ' ', 0x00, 'l', 0x00,
+                       'i', 0x00, 'c', 0x00, 'e', 0x00, 'n', 0x00, 's', 0x00,
+                       'e', 0x00, ' ', 0x00, 't', 0x00, 'o', 0x00, ' ', 0x00,
+                       'A', 0x00, 'W', 0x00, 'A', 0x00, 'L', 0x00, ' ', 0x00,
+                       'R', 0x00, 'e', 0x00, 'c', 0x00, 'o', 0x00, 'r', 0x00,
+                       'd', 0x00, 'i', 0x00, 'n', 0x00, 'g', 0x00, 's', 0x00,
+                       ' ', 0x00, 'A', 0x00, 'm', 0x00, 'e', 0x00, 'r', 0x00,
+                       'i', 0x00, 'c', 0x00, 'a', 0x00, ',', 0x00, ' ', 0x00,
+                       'I', 0x00, 'n', 0x00, 'c', 0x00, '.', 0x00, ' ', 0x00,
+                       '(', 0x00, 'P', 0x00, ')', 0x00, ' ', 0x00, '2', 0x00,
+                       '0', 0x00, '2', 0x00, '2', 0x00, ' ', 0x00, 'd', 0x00,
+                       'e', 0x00, 'a', 0x00, 'd', 0x00, 'A', 0x00, 'i', 0x00,
+                       'r', 0x00, ' ', 0x00, 'u', 0x00, 'n', 0x00, 'd', 0x00,
+                       'e', 0x00, 'r', 0x00, ' ', 0x00, 'e', 0x00, 'x', 0x00,
+                       'c', 0x00, 'l', 0x00, 'u', 0x00, 's', 0x00, 'i', 0x00,
+                       'v', 0x00, 'e', 0x00, ' ', 0x00, 'l', 0x00, 'i', 0x00,
+                       'c', 0x00, 'e', 0x00, 'n', 0x00, 's', 0x00, 'e', 0x00,
+                       ' ', 0x00, 't', 0x00, 'o', 0x00, ' ', 0x00, 'A', 0x00,
+                       'W', 0x00, 'A', 0x00, 'L', 0x00, ' ', 0x00, 'R', 0x00,
+                       'e', 0x00, 'c', 0x00, 'o', 0x00, 'r', 0x00, 'd', 0x00,
+                       'i', 0x00, 'n', 0x00, 'g', 0x00, 's', 0x00, ' ', 0x00,
+                       'A', 0x00, 'm', 0x00, 'e', 0x00, 'r', 0x00, 'i', 0x00,
+                       'c', 0x00, 'a', 0x00, ',', 0x00, ' ', 0x00, 'I', 0x00,
+                       'n', 0x00, 'c', 0x00, '.', 0x00, 0x00, 0x00};
+    assert_non_null(f);
+    assert_non_null(f->header);
+    assert_memory_equal(f->header->id,"TCOP",4);
+    assert_false(f->header->unsynchronisation);
+    assert_false(f->header->readOnly);
+    assert_false(f->header->tagAlterPreservation);
+    assert_false(f->header->fileAlterPreservation);
+    assert_int_equal(f->header->decompressionSize, 0);
+    assert_int_equal(f->header->groupSymbol, 0);
+    assert_int_equal(f->header->encryptionSymbol, 0);
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_int_equal(ce->size, 296);
+    assert_memory_equal(ce->entry, data4, 296);
+
+    // TCON
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data5[250] = {0xff, 0xfe, 'A', 0x00, 'r', 0x00, 't', 0x00, ' ', 0x00, 
+                       'P', 0x00, 'o', 0x00, 'p', 0x00, ',', 0x00, ' ', 0x00,
+                       'F', 0x00, 'o', 0x00, 'l', 0x00, 'k', 0x00, 't', 0x00,
+                       'r', 0x00, 'o', 0x00, 'n', 0x00, 'i', 0x00, 'c', 0x00,
+                       'a', 0x00, ' ', 0x00, 'G', 0x00, 'l', 0x00, 'i', 0x00,
+                       't', 0x00, 'c', 0x00, 'h', 0x00, ' ', 0x00, 'P', 0x00,
+                       'o', 0x00, 'p', 0x00, ',', 0x00, ' ', 0x00, 'A', 0x00,
+                       'm', 0x00, 'b', 0x00, 'i', 0x00, 'e', 0x00, 'n', 0x00,
+                       't', 0x00, ' ', 0x00, 'P', 0x00, 'o', 0x00, 'p', 0x00,
+                       ',', 0x00, ' ', 0x00, 'E', 0x00, 'x', 0x00, 'p', 0x00,
+                       'e', 0x00, 'r', 0x00, 'i', 0x00, 'm', 0x00, 'e', 0x00,
+                       'n', 0x00, 't', 0x00, 'a', 0x00, 'l', 0x00, ' ', 0x00,
+                       'H', 0x00, 'i', 0x00, 'p', 0x00, '-', 0x00, 'H', 0x00,
+                       'o', 0x00, 'p', 0x00, ',', 0x00, ' ', 0x00, 'N', 0x00,
+                       'e', 0x00, 'o', 0x00, '-', 0x00, 'P', 0x00, 's', 0x00,
+                       'y', 0x00, 'c', 0x00, 'h', 0x00, 'e', 0x00, 'd', 0x00,
+                       'e', 0x00, 'l', 0x00, 'i', 0x00, 'a', 0x00, ',', 0x00,
+                       ' ', 0x00, 'A', 0x00, 'l', 0x00, 't', 0x00, 'e', 0x00,
+                       'r', 0x00, 'n', 0x00, 'a', 0x00, 't', 0x00, 'i', 0x00,
+                       'v', 0x00, 'e', 0x00, ' ', 0x00, 'R', 0x00, '&', 0x00,
+                       'B', 0x00, ',', 0x00, ' ', 0x00, 'E', 0x00, 'm', 0x00,
+                       'o', 0x00, ' ', 0x00, 'R', 0x00, 'a', 0x00, 'p', 0x00,
+                       ' ', 0x00, '&', 0x00, ' ', 0x00, 'C', 0x00, 'h', 0x00,
+                       'a', 0x00, 'm', 0x00, 'b', 0x00, 'e', 0x00, 'r', 0x00,
+                       ' ', 0x00, 'P', 0x00, 'o', 0x00, 'p', 0x00, 0x00, 0x00};
+
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_int_equal(ce->size, 248);
+    assert_memory_equal(ce->entry, data5, 248);
+
+    // TYER
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data6[5] = {'2', '0', '2', '2', 0x00};
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 0);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_int_equal(ce->size, 5);
+    assert_memory_equal(ce->entry, data6, 5);
+
+    // TRCK
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data7[6] = {'0', '1', '/', '1', '1', 0};
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 0);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_int_equal(ce->size, 6);
+    assert_memory_equal(ce->entry, data7, 6);
+
+    // TPOS
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data8[4] = {'1','/','1', 0};
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 0);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_int_equal(ce->size, 4);
+    assert_memory_equal(ce->entry, data8, 4);
+
+    // TPE1
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data9[18] = {0xff, 0xfe, 'Q', 0x00, 'u', 0x00, 'a', 0x00, 'd', 0x00, 
+                         'e', 0x00, 'c', 0x00, 'a', 0x00, 0x00, 0x00};
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_int_equal(ce->size, 16);
+    assert_memory_equal(ce->entry, data9, 16);
+
+    // TPE2
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    //same data as TPE2
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_int_equal(ce->size, 16);
+    assert_memory_equal(ce->entry, data9, 16);
+
+
+    // TCON
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data10[22] = {0xff, 0xfe, 'B', 0x00, 'e', 0x00, 'n', 0x00, ' ', 0x00, 
+                         'L', 0x00, 'a', 0x00, 's', 0x00, 'k', 0x00, 'y', 0x00, 
+                         0x00, 0x00};
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_int_equal(ce->size, 20);
+    assert_memory_equal(ce->entry, data10, 20);
+
+    // TXXX 1 label
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data11[14] = {0xff, 0xfe, 'L', 0x00, 'A', 0x00, 'B', 0x00, 'E', 0x00, 'L', 0x00, 0x00, 0x00};
+    uint8_t data12[18] = {0xff, 0xfe, 'd', 0x00, 'e', 0x00, 'a', 0x00, 'd', 0x00, 'A', 0x00, 'i', 0x00, 'r', 0x00, 0x00, 0x00};
+
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_int_equal(ce->size, 12);
+    assert_memory_equal(ce->entry, data11, 12);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+
+    assert_int_equal(ce->size, 16);
+    assert_memory_equal(ce->entry, data12, 16);
+
+    // TXXX 2 performer
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data13[22] = {0xff, 0xfe, 'P', 0x00, 'E', 0x00, 'R', 0x00, 'F', 0x00, 
+                          'O', 0x00, 'R', 0x00, 'M', 0x00, 'E', 0x00, 'R', 0x00, 
+                          0x00, 0x00};
+
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_int_equal(ce->size, 20);
+    assert_memory_equal(ce->entry, data13, 20);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+
+    assert_int_equal(ce->size, 16);
+    assert_memory_equal(ce->entry, data9, 16);
+
+    // TXXX upc
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data14[10] = {0xff, 0xfe, 'U', 0x00, 'P', 0x00, 'C', 0x00, 0x00, 0x00};
+    uint8_t data15[30] = {0xff, 0xfe, '0', 0x00, '1', 0x00, '9', 0x00, '7', 0x00, 
+                         '1', 0x00, '8', 0x00, '7', 0x00, '3', 0x00, '3', 0x00,
+                         '2', 0x00, '4', 0x00, '3', 0x00, '4', 0x00, 0x00, 0x00};
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_int_equal(ce->size, 8);
+    assert_memory_equal(ce->entry, data14, 8);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+
+    assert_int_equal(ce->size, 28);
+    assert_memory_equal(ce->entry, data15, 28);
+
+    // APIC
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 0);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+
+    assert_int_equal(ce->size, 11);
+    assert_memory_equal(ce->entry, "image/jpeg", 11);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 3);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->next->data;
+
+    assert_int_equal(ce->size, 1);
+    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 0);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->data;
+
+    assert_int_equal(ce->size, 3098075);
+    assert_non_null(ce->entry);
+
+
+    // printf("%ld\n[",ce->size);
+    // for(int i = 0; i < ce->size; i++){
+    //     printf("[%c]",((uint8_t *)ce->entry)[i]);
+    // }
+    // printf("]\n");
+
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
+
+}
 
 static void playground(void **state){
 
-    ByteStream *stream = byteStreamFromFile("assets/sorry4dying.mp3");
-
-    // byteStreamPrintf("%x", stream);
+    ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
     Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
 
-    
+
+    // assert_non_null(tag);
+
+    // assert_non_null(tag->header);
+    // assert_int_equal(tag->header->flags, 0);
+    // assert_int_equal(tag->header->majorVersion, 3);
+    // assert_int_equal(tag->header->minorVersion, 0);
+
+    // assert_null(tag->header->extendedHeader);
+
+
+    // printf("%ld\n[",ce->size);
+    // for(int i = 0; i < ce->size; i++){
+    //     printf("[%c]",((uint8_t *)ce->entry)[i]);
+    // }
+    // printf("]\n");
+
     id3v2DestroyTag(&tag);
     byteStreamDestroy(stream);
 }
@@ -1220,7 +1600,14 @@ int main(){
         cmocka_unit_test(id3v2ParseFrame_parseSYLTUTF16),
         cmocka_unit_test(id3v2ParseFrame_parseEQU),
 
+
+        // id3v2ParseTagFromStream
+        cmocka_unit_test(id3v2ParseTagFromStream_v3),
+
+
+
         cmocka_unit_test(playground)
+        //cmocka_unit_test(playground)
 
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
