@@ -11,6 +11,34 @@
 #include "byteStream.h"
 #include "byteInt.h"
 
+static void testFrameHeader(Id3v2Frame *f, char id[ID3V2_FRAME_ID_MAX_SIZE], uint8_t u, 
+                            uint8_t ro, uint8_t tap, uint8_t fap, uint32_t ds, uint8_t gs, 
+                            uint8_t es){
+
+    assert_non_null(f);
+    assert_non_null(f->header);
+    assert_memory_equal(f->header->id,id,4);
+    assert_int_equal(f->header->unsynchronisation, u);
+    assert_int_equal(f->header->readOnly, ro);
+    assert_int_equal(f->header->tagAlterPreservation, tap);
+    assert_int_equal(f->header->fileAlterPreservation, fap);
+    assert_int_equal(f->header->decompressionSize, ds);
+    assert_int_equal(f->header->groupSymbol, gs);
+    assert_int_equal(f->header->encryptionSymbol, es);
+
+}
+
+static void testEntry(Id3v2ContentEntry *ce, size_t size, uint8_t *data){
+
+    assert_non_null(ce);
+    assert_int_equal(ce->size, size);
+    assert_memory_equal(ce->entry, data, size);
+
+}
+
+
+
+
 static void id3v2ParseExtendedTagHeader_nullData(void **state){
     
     Id3v2ExtendedTagHeader *h;
@@ -1160,7 +1188,7 @@ static void id3v2ParseTagFromStream_v3(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/sorry4dying.mp3");
     Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
-
+    uint8_t encodings[2] = {0,1};
 
     assert_non_null(tag);
 
@@ -1168,7 +1196,6 @@ static void id3v2ParseTagFromStream_v3(void **state){
     assert_int_equal(tag->header->flags, 0);
     assert_int_equal(tag->header->majorVersion, 3);
     assert_int_equal(tag->header->minorVersion, 0);
-
     assert_null(tag->header->extendedHeader);
     
     // TIT2
@@ -1177,25 +1204,13 @@ static void id3v2ParseTagFromStream_v3(void **state){
     uint8_t data1[26] = {0xff, 0xfe, 's', 0x00, 'o', 0x00, 'r', 0x00, 'r', 0x00, 'y', 0x00, '4', 
                          0x00, 'd', 0x00, 'y', 0x00, 'i', 0x00, 'n', 0x00, 'g', 0x00, 0x00, 0x00};
 
-    assert_non_null(f);
-    assert_non_null(f->header);
-    assert_memory_equal(f->header->id,"TIT2",4);
-    assert_false(f->header->unsynchronisation);
-    assert_false(f->header->readOnly);
-    assert_false(f->header->tagAlterPreservation);
-    assert_false(f->header->fileAlterPreservation);
-    assert_int_equal(f->header->decompressionSize, 0);
-    assert_int_equal(f->header->groupSymbol, 0);
-    assert_int_equal(f->header->encryptionSymbol, 0);
+    testFrameHeader(f, "TIT2", 0, 0, 0, 0, 0, 0, 0);
 
-
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+    testEntry(ce, 1, &(encodings[1]));
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
 
-    assert_int_equal(ce->size, 24);
-    assert_memory_equal(ce->entry, data1, 24);
+    testEntry(ce, 24, data1);
 
     // TALB
     f = (Id3v2Frame *)tag->frames->head->next->data;
@@ -1206,24 +1221,13 @@ static void id3v2ParseTagFromStream_v3(void **state){
                        'T', 0x00, 'o', 0x00, ' ', 0x00, 'H', 0x00, 'a', 0x00,
                        'u', 0x00, 'n', 0x00, 't', 0x00, ' ', 0x00, 'Y', 0x00,
                        'o', 0x00, 'u', 0x00, 0x00, 0x00};
-    assert_non_null(f);
-    assert_non_null(f->header);
-    assert_memory_equal(f->header->id,"TALB",4);
-    assert_false(f->header->unsynchronisation);
-    assert_false(f->header->readOnly);
-    assert_false(f->header->tagAlterPreservation);
-    assert_false(f->header->fileAlterPreservation);
-    assert_int_equal(f->header->decompressionSize, 0);
-    assert_int_equal(f->header->groupSymbol, 0);
-    assert_int_equal(f->header->encryptionSymbol, 0);
 
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+    testFrameHeader(f, "TALB", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
 
-    assert_int_equal(ce->size, 54);
-    assert_memory_equal(ce->entry, data2, 54);
+    testEntry(ce, 54, data2);
 
 
     // TSRC
@@ -1232,24 +1236,13 @@ static void id3v2ParseTagFromStream_v3(void **state){
     uint8_t data3[28] = {0xff, 0xfe, 'Q', 0x00, 'M', 0x00, 'D', 0x00, 'A', 0x00,
                        '7', 0x00, '2', 0x00, '2', 0x00, '1', 0x0, '0', 0x00, '2', 
                        0x00, '3', 0x00, '6', 0x00, 0x00, 0x00};
-    assert_non_null(f);
-    assert_non_null(f->header);
-    assert_memory_equal(f->header->id,"TSRC",4);
-    assert_false(f->header->unsynchronisation);
-    assert_false(f->header->readOnly);
-    assert_false(f->header->tagAlterPreservation);
-    assert_false(f->header->fileAlterPreservation);
-    assert_int_equal(f->header->decompressionSize, 0);
-    assert_int_equal(f->header->groupSymbol, 0);
-    assert_int_equal(f->header->encryptionSymbol, 0);
-
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+    
+    testFrameHeader(f, "TSRC", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
 
-    assert_int_equal(ce->size, 26);
-    assert_memory_equal(ce->entry, data3, 26);
+    testEntry(ce, 26, data3);
 
     // TCOP
     f = (Id3v2Frame *)tag->frames->head->next->next->next->data;
@@ -1284,24 +1277,13 @@ static void id3v2ParseTagFromStream_v3(void **state){
                        'A', 0x00, 'm', 0x00, 'e', 0x00, 'r', 0x00, 'i', 0x00,
                        'c', 0x00, 'a', 0x00, ',', 0x00, ' ', 0x00, 'I', 0x00,
                        'n', 0x00, 'c', 0x00, '.', 0x00, 0x00, 0x00};
-    assert_non_null(f);
-    assert_non_null(f->header);
-    assert_memory_equal(f->header->id,"TCOP",4);
-    assert_false(f->header->unsynchronisation);
-    assert_false(f->header->readOnly);
-    assert_false(f->header->tagAlterPreservation);
-    assert_false(f->header->fileAlterPreservation);
-    assert_int_equal(f->header->decompressionSize, 0);
-    assert_int_equal(f->header->groupSymbol, 0);
-    assert_int_equal(f->header->encryptionSymbol, 0);
 
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+    testFrameHeader(f, "TCOP", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
 
-    assert_int_equal(ce->size, 296);
-    assert_memory_equal(ce->entry, data4, 296);
+    testEntry(ce, 296, data4);
 
     // TCON
     f = (Id3v2Frame *)tag->frames->head->next->next->next->next->data;
@@ -1331,49 +1313,45 @@ static void id3v2ParseTagFromStream_v3(void **state){
                        ' ', 0x00, '&', 0x00, ' ', 0x00, 'C', 0x00, 'h', 0x00,
                        'a', 0x00, 'm', 0x00, 'b', 0x00, 'e', 0x00, 'r', 0x00,
                        ' ', 0x00, 'P', 0x00, 'o', 0x00, 'p', 0x00, 0x00, 0x00};
-
-
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+    
+    testFrameHeader(f, "TCON", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
 
-    assert_int_equal(ce->size, 248);
-    assert_memory_equal(ce->entry, data5, 248);
+    testEntry(ce, 248, data5);
 
     // TYER
     f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->data;
     ce = (Id3v2ContentEntry *) f->entries->head->data;
     uint8_t data6[5] = {'2', '0', '2', '2', 0x00};
 
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 0);
+    testFrameHeader(f, "TYER", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[0]));
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
 
-    assert_int_equal(ce->size, 5);
-    assert_memory_equal(ce->entry, data6, 5);
+    testEntry(ce, 5, data6);
 
     // TRCK
     f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->data;
     ce = (Id3v2ContentEntry *) f->entries->head->data;
     uint8_t data7[6] = {'0', '1', '/', '1', '1', 0};
 
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 0);
+    testFrameHeader(f, "TRCK", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[0]));
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
 
-    assert_int_equal(ce->size, 6);
-    assert_memory_equal(ce->entry, data7, 6);
+    testEntry(ce, 6, data7);
 
     // TPOS
     f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->data;
     ce = (Id3v2ContentEntry *) f->entries->head->data;
     uint8_t data8[4] = {'1','/','1', 0};
 
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 0);
+    testFrameHeader(f, "TPOS", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[0]));
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
 
@@ -1386,41 +1364,39 @@ static void id3v2ParseTagFromStream_v3(void **state){
     uint8_t data9[18] = {0xff, 0xfe, 'Q', 0x00, 'u', 0x00, 'a', 0x00, 'd', 0x00, 
                          'e', 0x00, 'c', 0x00, 'a', 0x00, 0x00, 0x00};
 
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+    testFrameHeader(f, "TPE1", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
 
-    assert_int_equal(ce->size, 16);
-    assert_memory_equal(ce->entry, data9, 16);
+    testEntry(ce, 16, data9);
 
     // TPE2
     f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->data;
     ce = (Id3v2ContentEntry *) f->entries->head->data;
     //same data as TPE2
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+
+    testFrameHeader(f, "TPE2", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
 
-    assert_int_equal(ce->size, 16);
-    assert_memory_equal(ce->entry, data9, 16);
+    testEntry(ce, 16, data9);
 
 
-    // TCON
+    // TCOM
     f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->next->data;
     ce = (Id3v2ContentEntry *) f->entries->head->data;
     uint8_t data10[22] = {0xff, 0xfe, 'B', 0x00, 'e', 0x00, 'n', 0x00, ' ', 0x00, 
                          'L', 0x00, 'a', 0x00, 's', 0x00, 'k', 0x00, 'y', 0x00, 
                          0x00, 0x00};
 
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+    testFrameHeader(f, "TCOM", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
 
-    assert_int_equal(ce->size, 20);
-    assert_memory_equal(ce->entry, data10, 20);
+    testEntry(ce, 20, data10);
 
     // TXXX 1 label
     f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->next->next->data;
@@ -1428,19 +1404,16 @@ static void id3v2ParseTagFromStream_v3(void **state){
     uint8_t data11[14] = {0xff, 0xfe, 'L', 0x00, 'A', 0x00, 'B', 0x00, 'E', 0x00, 'L', 0x00, 0x00, 0x00};
     uint8_t data12[18] = {0xff, 0xfe, 'd', 0x00, 'e', 0x00, 'a', 0x00, 'd', 0x00, 'A', 0x00, 'i', 0x00, 'r', 0x00, 0x00, 0x00};
 
-
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+    testFrameHeader(f, "TXXX", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
 
-    assert_int_equal(ce->size, 12);
-    assert_memory_equal(ce->entry, data11, 12);
+    testEntry(ce, 12, data11);
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->next->data;
 
-    assert_int_equal(ce->size, 16);
-    assert_memory_equal(ce->entry, data12, 16);
+    testEntry(ce, 16, data12);
 
     // TXXX 2 performer
     f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->next->next->next->data;
@@ -1449,19 +1422,16 @@ static void id3v2ParseTagFromStream_v3(void **state){
                           'O', 0x00, 'R', 0x00, 'M', 0x00, 'E', 0x00, 'R', 0x00, 
                           0x00, 0x00};
 
-
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+    testFrameHeader(f, "TXXX", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
 
-    assert_int_equal(ce->size, 20);
-    assert_memory_equal(ce->entry, data13, 20);
+    testEntry(ce, 20, data13);
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->next->data;
 
-    assert_int_equal(ce->size, 16);
-    assert_memory_equal(ce->entry, data9, 16);
+    testEntry(ce, 16, data9);
 
     // TXXX upc
     f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->next->next->next->next->data;
@@ -1471,40 +1441,39 @@ static void id3v2ParseTagFromStream_v3(void **state){
                          '1', 0x00, '8', 0x00, '7', 0x00, '3', 0x00, '3', 0x00,
                          '2', 0x00, '4', 0x00, '3', 0x00, '4', 0x00, 0x00, 0x00};
 
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 1);
+    testFrameHeader(f, "TXXX", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
 
-    assert_int_equal(ce->size, 8);
-    assert_memory_equal(ce->entry, data14, 8);
+    testEntry(ce, 8, data14);
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->next->data;
 
-    assert_int_equal(ce->size, 28);
-    assert_memory_equal(ce->entry, data15, 28);
+    testEntry(ce, 28, data15);
 
     // APIC
     f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->next->next->next->next->next->data;
     ce = (Id3v2ContentEntry *) f->entries->head->data;
 
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 0);
+    testFrameHeader(f, "APIC", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[0]));
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
 
-    assert_int_equal(ce->size, 11);
-    assert_memory_equal(ce->entry, "image/jpeg", 11);
+    testEntry(ce, 11, (uint8_t *) "image/jpeg");
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->next->data;
 
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 3);
+    uint8_t pic = 3;
+    testEntry(ce, 1, &pic);
+
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->next->next->data;
 
-    assert_int_equal(ce->size, 1);
-    assert_int_equal(btoi((unsigned char *)ce->entry, 1), 0);
+    uint8_t desc = 0;
+    testEntry(ce, 1, &desc);
+
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->data;
 
@@ -1523,27 +1492,321 @@ static void id3v2ParseTagFromStream_v3(void **state){
 
 }
 
-static void playground(void **state){
+static void id3v2ParseTagFromStream_v4(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
     Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    uint8_t encodings[4] = {0,1,2,3};
 
+    assert_non_null(tag);
 
-    // assert_non_null(tag);
+    assert_non_null(tag->header);
+    assert_int_equal(tag->header->flags, 0);
+    assert_int_equal(tag->header->majorVersion, 4);
+    assert_int_equal(tag->header->minorVersion, 0);
 
-    // assert_non_null(tag->header);
-    // assert_int_equal(tag->header->flags, 0);
-    // assert_int_equal(tag->header->majorVersion, 3);
-    // assert_int_equal(tag->header->minorVersion, 0);
+    assert_null(tag->header->extendedHeader);
 
-    // assert_null(tag->header->extendedHeader);
+    // TALB
+    Id3v2Frame *f = (Id3v2Frame *)tag->frames->head->data;
+    Id3v2ContentEntry *ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data[67] = "The Powers That Butf8ÛȾℲⅧ♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏utf8"; 
+
+    testFrameHeader(f, "TALB", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[3]));
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+    testEntry(ce, 67, data);
+
+    // TRCK
+    f = (Id3v2Frame *)tag->frames->head->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data2[12] = {0xff, 0xfe, '0', 0x00, '9', 0x00, '/', 0x00, '1', 0x00, '0', 0x00};
+
+    testFrameHeader(f, "TRCK", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+    testEntry(ce, 12, data2);
+
+    // TPOS
+    f = (Id3v2Frame *)tag->frames->head->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data3[8] = {0xff, 0xfe, '2', 0x00, '/', 0x00, '2', 0x00};
+
+    testFrameHeader(f, "TPOS", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+    testEntry(ce, 8, data3);
+
+    // TPE1
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data4[24] = {0xff, 0xfe, 'D', 0x00, 'e', 0x00, 'a', 0x00, 't', 0x00, 
+                        'h', 0x00, ' ', 0x00, 'G', 0x00, 'r', 0x00, 'i', 0x00, 
+                        'p', 0x00, 's', 0x00};
+
+    testFrameHeader(f, "TPE1", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+    testEntry(ce, 24, data4);
+
+    // TIT2
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data5[12] = {0xff, 0xfe, 'O', 0x00, 'n', 0x00, ' ', 0x00, 'G', 0x00, 
+                         'P', 0x00};
+
+    testFrameHeader(f, "TIT2", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+    testEntry(ce, 12, data5);
+
+    // TPE2
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    // same data as TPE1
+
+    testFrameHeader(f, "TPE2", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+    testEntry(ce, 24, data4);
+
+    // TCOM
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    // same data as TPE1
+
+    testFrameHeader(f, "TCOM", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+    testEntry(ce, 24, data4);
+
+    // APIC
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+
+    testFrameHeader(f, "APIC", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[0]));
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+    testEntry(ce, 11, (uint8_t *)"image/jpeg");
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+    testEntry(ce, 1, &(encodings[0])); //used just because encodings[0] == 0
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->next->data;
+    testEntry(ce, 5, (uint8_t *)"test");
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->data;
+    assert_non_null(ce);
+    assert_int_equal(ce->size, 1845186);
+
+    // APIC
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data6[12] = {0xff, 0xfe, 't', 0x00, 'e', 0x00, 's', 0x00, 't', 0x00, 0x00, 0x00};
+
+    testFrameHeader(f, "APIC", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+    testEntry(ce, 11, (uint8_t *)"image/jpeg");
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+    testEntry(ce, 1, &(encodings[3])); //used just because encodings[3] == 3
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->next->data;
+    testEntry(ce, 10, data6);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->data;
+    assert_non_null(ce->entry);
+    assert_int_equal(ce->size, 34785);
+
+    // TDRC
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+
+    testFrameHeader(f, "TDRC", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[0]));
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+    testEntry(ce, 5, (uint8_t *)"2015");
+
+    // TCON
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+
+    testFrameHeader(f, "TCON", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[0]));
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+    testEntry(ce, 178, (uint8_t *) "Experimental Hip-Hop, Glitch Hop, Abstract Hip-Hop, Industrial Hip-Hop, Footwork, Wonky, Noise Rock, Rap Rock, Synth Punk, Hardcore Hip-Hop, Experimental Rock & Digital Hardcore");
+
+    // TXXX
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t data7[20] = {0xff, 0xfe, 0x75, 0x00, 0x74, 0x00, 0x66, 0x00, 0x38, 0x00, 
+                         0xdb, 0x00, 0x3e, 0x02, 0x32, 0x21, 0x67, 0x21, 0x00, 0x00};
+    uint8_t data8[40] = {0xff, 0xfe, 'H', '&', ' ', 0x00, 'I', '&', ' ', 0x00, 
+                        'J', '&', ' ', 0x00, 'K', '&', ' ', 0x00, 'L', '&', 
+                        ' ', 0x00, 'M', '&', ' ', 0x00, 'N', '&', ' ', 0x00, 
+                        'O', '&', 'u', 0x00, 't', 0x00, 'f', 0x00, '8', 0x00};
+
+    testFrameHeader(f, "TXXX", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &(encodings[1]));
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+    testEntry(ce, 18, data7);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+    testEntry(ce, 40, data8);
+
+    // WCOM
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+
+    testFrameHeader(f, "WCOM", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 45, (uint8_t *)"The Powers That Butf8\xdb>2gH I J K L M N Outf8");
+
+    // ETCO
+    f = (Id3v2Frame *)tag->frames->head->next->next->next->next->next->next->next->next->next->next->next->next->next->data;
+    ce = (Id3v2ContentEntry *) f->entries->head->data;
+    uint8_t v = 0;
+
+    testFrameHeader(f, "ETCO", 0, 0, 0, 0, 0, 0, 0);
+    
+    v = 2U;
+    testEntry(ce, 1, &v);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+    v = 6U;
+    testEntry(ce, 1, &v);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+    testEntry(ce, 4, (uint8_t *) "\x00\x12\x9D\xA0");
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->next->data;
+    v = 2U;
+    testEntry(ce, 1, &v);
+
+    ce = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->data;
+    testEntry(ce, 4, (uint8_t *) "\x00\x09\x4e\xd0");
 
 
     // printf("%ld\n[",ce->size);
     // for(int i = 0; i < ce->size; i++){
-    //     printf("[%c]",((uint8_t *)ce->entry)[i]);
+    //     printf("[%x]",((uint8_t *)ce->entry)[i]);
     // }
     // printf("]\n");
+
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
+}
+
+static void id3v2ParseTagFromStream_v2unsync(void **state){
+
+    uint8_t data[43] = {'I', 'D', '3', 0x02, 0x01, 0x80, 0x00, 0x00, 0x00, 0x21,
+                        'T', 0x00, 'A', 0x00, 'L', 0x00, 0x00, 0x00, 0x00, 0x00, 0x0b, 0x00, 
+                        0x00, 0x00, 
+                        'F', 0x00, 'a', 0x00, 'm', 0x00, 'i', 0x00, 'l', 0x00, 'y', 0x00, ' ', 0x00, 'G', 0x00, 'u', 0x00, 'y'};
+
+    ByteStream *stream = byteStreamCreate(data, 43);
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    uint8_t encoding = 0;
+
+    assert_non_null(tag);
+    assert_non_null(tag->header);
+    assert_null(tag->header->extendedHeader);
+    assert_int_equal(tag->header->flags, 0x80);
+    assert_int_equal(tag->header->majorVersion, 2);
+    assert_int_equal(tag->header->minorVersion, 1);
+
+    Id3v2Frame *f = (Id3v2Frame *) tag->frames->head->data;
+    Id3v2ContentEntry *ce = (Id3v2ContentEntry *)f->entries->head->data;
+
+    testFrameHeader(f, "TAL", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &encoding); 
+
+    ce = (Id3v2ContentEntry *)f->entries->head->next->data;
+    testEntry(ce, 11, (uint8_t *)"Family Guy");
+
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
+
+}
+
+static void id3v2ParseTagFromStream_v3ext(void **state){
+
+    uint8_t data[45] = {'I', 'D', '3', 0x03, 0x01, 0x40, 0x00, 0x00, 0x00, 0x23, // header
+                        0x00, 0x00, 0x00, 0x0a, 0x80, 0x00, 0xfe, 0xfe, 0xfe, 0xfe, 0xff, 0xff, 0xff, 0xff, // ext
+                        'T', 'A', 'L', 'B', 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00,
+                        0x00,
+                        'F', 'a', 'm', 'i', 'l', 'y', ' ', 'G', 'u', 'y'};
+
+    ByteStream *stream = byteStreamCreate(data, 45);
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    uint8_t encoding = 0;
+
+    assert_non_null(tag);
+    assert_non_null(tag->header);
+    assert_non_null(tag->header->extendedHeader);
+    assert_int_equal(tag->header->flags, 0x40);
+    assert_int_equal(tag->header->majorVersion, 3);
+    assert_int_equal(tag->header->minorVersion, 1);
+
+    assert_int_equal(tag->header->extendedHeader->crc, 0xffffffff);
+    assert_int_equal(tag->header->extendedHeader->padding, 0xfefefefe);
+
+    Id3v2Frame *f = (Id3v2Frame *) tag->frames->head->data;
+    Id3v2ContentEntry *ce = (Id3v2ContentEntry *)f->entries->head->data;
+
+    testFrameHeader(f, "TALB", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &encoding); 
+
+    ce = (Id3v2ContentEntry *)f->entries->head->next->data;
+    testEntry(ce, 11, (uint8_t *)"Family Guy");
+
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
+}
+
+
+static void playground(void **state){
+
+    uint8_t data[45] = {'I', 'D', '3', 0x03, 0x01, 0x40, 0x00, 0x00, 0x00, 0x23, // header
+                        0x00, 0x00, 0x00, 0x0a, 0x80, 0x00, 0xfe, 0xfe, 0xfe, 0xfe, 0xff, 0xff, 0xff, 0xff, // ext
+                        'T', 'A', 'L', 'B', 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00,
+                        0x00,
+                        'F', 'a', 'm', 'i', 'l', 'y', ' ', 'G', 'u', 'y'};
+
+    ByteStream *stream = byteStreamCreate(data, 45);
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    uint8_t encoding = 0;
+
+    assert_non_null(tag);
+    assert_non_null(tag->header);
+    assert_non_null(tag->header->extendedHeader);
+    assert_int_equal(tag->header->flags, 0x40);
+    assert_int_equal(tag->header->majorVersion, 3);
+    assert_int_equal(tag->header->minorVersion, 1);
+
+    assert_int_equal(tag->header->extendedHeader->crc, 0xffffffff);
+    assert_int_equal(tag->header->extendedHeader->padding, 0xfefefefe);
+
+    Id3v2Frame *f = (Id3v2Frame *) tag->frames->head->data;
+    Id3v2ContentEntry *ce = (Id3v2ContentEntry *)f->entries->head->data;
+
+    testFrameHeader(f, "TALB", 0, 0, 0, 0, 0, 0, 0);
+    testEntry(ce, 1, &encoding); 
+
+    ce = (Id3v2ContentEntry *)f->entries->head->next->data;
+    testEntry(ce, 11, (uint8_t *)"Family Guy");
 
     id3v2DestroyTag(&tag);
     byteStreamDestroy(stream);
@@ -1603,6 +1866,9 @@ int main(){
 
         // id3v2ParseTagFromStream
         cmocka_unit_test(id3v2ParseTagFromStream_v3),
+        cmocka_unit_test(id3v2ParseTagFromStream_v4),
+        cmocka_unit_test(id3v2ParseTagFromStream_v2unsync),
+        cmocka_unit_test(id3v2ParseTagFromStream_v3ext),
 
 
 

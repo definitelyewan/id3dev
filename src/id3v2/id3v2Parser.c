@@ -26,20 +26,20 @@ static void copyNBits(unsigned char* src, unsigned char* dest, int startBit, int
     int bitIndex = startBit %  CHAR_BIT;
     int remainingBits = nBits;
 
-    while (remainingBits >  0) {
+    while(remainingBits >  0){
         unsigned char mask =  0xFF >> (CHAR_BIT - remainingBits);
         unsigned char shiftedMask = mask << bitIndex;
 
-        // Clear the destination bits
+        // clear the destination bits
         dest[byteIndex] &= ~shiftedMask;
 
-        // Copy the bits from source to destination
+        // copy the bits from source to destination
         dest[byteIndex] |= (src[byteIndex] & shiftedMask) >> bitIndex;
 
-        // Update the counters
+        // update the counters
         remainingBits -= (CHAR_BIT - bitIndex);
         byteIndex++;
-        bitIndex =  0; // Reset bit index since we moved to the next byte
+        bitIndex = 0;
     }
 }
 
@@ -814,15 +814,21 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
     return walk;
 }
 
-
+/**
+ * @brief Parses an ID3 version 2, 3, or 4 tag from a stream. This function will load the default frame
+ * ID, context pairings and any user supplied ones to extract frames within a tag. If this function fails
+ * it will return NULL to the caller otherwise, some form of parsed tag will be returned based on the
+ * completness of the stream.
+ * 
+ * @param stream 
+ * @param userPairs 
+ * @return Id3v2Tag* 
+ */
 Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
 
     if(!stream){
         return NULL;
     }
-
-    printf("[*] provided stream is valid\n");
-
 
     bool exit = false;
     uint32_t read = 0;
@@ -835,17 +841,13 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
 
     frames = listCreate(id3v2PrintFrame, id3v2DeleteFrame, id3v2CompareFrame, id3v2CopyFrame);
 
-    printf("[*] looking for \"ID3\" magic number\n");
-
     while(true){
 
         if(!byteStreamRead(stream, id, ID3V2_TAG_ID_SIZE)){
-            printf("[*] failed to find magic number, exitsing...\n");
             return NULL;
         }
 
         if(btoi(id, ID3V2_TAG_ID_SIZE) == ID3V2_TAG_ID_MAGIC_NUMBER_H){
-            printf("[*] found magic number\n");
             stream->cursor = stream->cursor - ID3V2_TAG_ID_SIZE;
             break;
         }
@@ -855,8 +857,6 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
 
         read = id3v2ParseTagHeader(stream, &header, &tagSize);
 
-        printf("[*] parsed tag header at %p in %u with a tag size of %u\n", header, read, tagSize);
-
         if(read == 0 || header == NULL || tagSize == 0){
             break;
         }
@@ -865,46 +865,36 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
             break;
         }
 
-        printf("[*] seeked %u bytes to move onto other content\n", read);
-
         if(id3v2ReadUnsynchronisationIndicator(header) == 1){
-            
-            printf("[*] tag is unsynchronised\n");
 
-            size_t cursor = 0;
             size_t readCount = 0;
 
-            while (cursor < stream->bufferSize && readCount < tagSize) {
+            while(readCount < tagSize){
 
-                byteStreamDeleteCh(stream);
                 byteStreamSeek(stream, 1, SEEK_CUR);
-
-                cursor += 2;
+                if(!byteStreamDeleteCh(stream)){
+                    break;
+                }
+                
                 readCount++;
             }
 
-            printf("[*] synchronised tag\n");
+            byteStreamSeek(stream, 10, SEEK_SET);
         }
-
-        printf("[*] checking for an extended header\n");
 
         if((header->majorVersion == ID3V2_TAG_VERSION_3 || header->majorVersion == ID3V2_TAG_VERSION_4) && id3v2ReadExtendedHeaderIndicator(header) == 1){
             read = id3v2ParseExtendedTagHeader(stream, header->majorVersion, &ext);
             header->extendedHeader = ext;
-
-            printf("[*] parsed tag extended header at %p in %u bytes\n", ext, read);
 
             if(read == 0 || ext == NULL){
                 break;
             }
 
             tagSize = ((tagSize < read) ? 0 : tagSize - read);
-            printf("[*] %u bytes left in the tag\n", tagSize);
+            byteStreamSeek(stream, read, SEEK_CUR);
         }
 
         pairs = id3v2CreateDefaultIdentiferContextPairings(header->majorVersion);
-
-        printf("[*] created pairs\n");
 
         while(tagSize){
             
@@ -923,8 +913,6 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
 
                 stream->cursor = stream->cursor - ID3V2_FRAME_ID_MAX_SIZE;
 
-                printf("[*] testing with frame ID %c%c%c%c\n",frameId[0],frameId[1],frameId[2],frameId[3]);
-
             }else if(header->majorVersion == ID3V2_TAG_VERSION_2){
 
                 if(!byteStreamRead(stream, frameId, ID3V2_FRAME_ID_MAX_SIZE - 1)){
@@ -933,39 +921,28 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
                 }
 
                 stream->cursor = stream->cursor - (ID3V2_FRAME_ID_MAX_SIZE - 1);
-
-                printf("[*] testing with frame ID %c%c%c\n",frameId[0],frameId[1],frameId[2]);
-
             }
 
             context = hashTableRetrieve(pairs, (char *)frameId);
 
             if(context == NULL){
-                printf("[*] frame ID was not found checking user suppiled ones\n");
                 context = hashTableRetrieve(userPairs, (char *)frameId);
             }
 
             if(context == NULL){
-                printf("[*] frame ID was not valid loading generic\n");
                 context = hashTableRetrieve(userPairs, "?");
             }
 
             read = id3v2ParseFrame(stream, context, header->majorVersion, &frame);
-
-            printf("[*] parsed a frame at %p in %u bytes\n", frame, read);
 
             if(read == 0 || frame == NULL){
                 exit = true;
                 break;
             }
 
-            printf("[*] successful parse of frame ID %c%c%c%c\n",frame->header->id[0],frame->header->id[1],frame->header->id[2],frame->header->id[3]);
-
-
             listInsertBack(frames, frame);
             tagSize = ((tagSize < read) ? 0 : tagSize - read);
             byteStreamSeek(stream, read, SEEK_CUR);
-            printf("[*] %u bytes left in the tag\n", tagSize);
 
         }
 
@@ -973,8 +950,8 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
             hashTableFree(pairs);
         }
 
+        // double loop break
         if(exit){
-            printf("[*] unexpected? exiting...\n");
             break;
         }
 

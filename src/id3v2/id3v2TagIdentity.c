@@ -589,7 +589,13 @@ bool id3v2ClearTagRestrictions(Id3v2TagHeader *header){
     return 1;
 }
 
-
+/**
+ * @brief Creates a tag
+ * 
+ * @param header 
+ * @param frames 
+ * @return Id3v2Tag* 
+ */
 Id3v2Tag *id3v2CreateTag(Id3v2TagHeader *header, List *frames){
 
     Id3v2Tag *tag = malloc(sizeof(Id3v2Tag));
@@ -600,7 +606,11 @@ Id3v2Tag *id3v2CreateTag(Id3v2TagHeader *header, List *frames){
     return tag;
 }
 
-
+/**
+ * @brief Destroys the a tag and its content
+ * 
+ * @param toDelete 
+ */
 void id3v2DestroyTag(Id3v2Tag **toDelete){
 
     if(*toDelete){

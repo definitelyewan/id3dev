@@ -30,6 +30,7 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
 uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3v2Frame **frame);
 
 Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs);
+List *id3v2ParseTagsFromFile(const char *path);
 #ifdef __cplusplus
 } //extern c end
 #endif
