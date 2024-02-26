@@ -18,6 +18,7 @@ extern "C"{
 #include "id3v1Types.h"
 
 //mem
+
 bool id3v1HasTag(uint8_t *buffer);
 Id3v1Tag *id3v1NewTag(uint8_t *title, uint8_t *artist, uint8_t *albumTitle, int year, int track, uint8_t *comment, Genre genre);
 void id3v1ClearTag(Id3v1Tag *tag);

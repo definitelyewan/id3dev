@@ -13,7 +13,7 @@
  * @param extendedHeader 
  * @return Id3v2TagHeader* 
  */
-Id3v2TagHeader *id3v2NewTagHeader(uint8_t majorVersion, uint8_t minorVersion, uint8_t flags, Id3v2ExtendedTagHeader *extendedHeader){
+Id3v2TagHeader *id3v2CreateTagHeader(uint8_t majorVersion, uint8_t minorVersion, uint8_t flags, Id3v2ExtendedTagHeader *extendedHeader){
 
     Id3v2TagHeader *header = malloc(sizeof(Id3v2TagHeader));
 
@@ -265,7 +265,7 @@ int id3v2ReadFooterIndicator(Id3v2TagHeader *header){
  * @param restrictions 
  * @return Id3v2ExtendedTagHeader* 
  */
-Id3v2ExtendedTagHeader *id3v2NewExtendedTagHeader(uint32_t padding, uint32_t crc, bool update, bool tagRestrictions, uint8_t restrictions){
+Id3v2ExtendedTagHeader *id3v2CreateExtendedTagHeader(uint32_t padding, uint32_t crc, bool update, bool tagRestrictions, uint8_t restrictions){
 
     Id3v2ExtendedTagHeader *extendedHeader = malloc(sizeof(Id3v2ExtendedTagHeader));
 
@@ -312,7 +312,7 @@ bool id3v2WriteTagSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
     }
 
     if(!header->extendedHeader){
-        Id3v2ExtendedTagHeader *extendedHeader = id3v2NewExtendedTagHeader(0,0,0,0,0);
+        Id3v2ExtendedTagHeader *extendedHeader = id3v2CreateExtendedTagHeader(0,0,0,0,0);
         header->extendedHeader = extendedHeader;
     }
 
@@ -344,7 +344,7 @@ bool id3v2WriteTextEncodingRestriction(Id3v2TagHeader *header, bool bit){
     }
 
     if(!header->extendedHeader){
-        Id3v2ExtendedTagHeader *extendedHeader = id3v2NewExtendedTagHeader(0,0,0,0,0);
+        Id3v2ExtendedTagHeader *extendedHeader = id3v2CreateExtendedTagHeader(0,0,0,0,0);
         header->extendedHeader = extendedHeader;
     }
 
@@ -375,7 +375,7 @@ bool id3v2WriteTextFieldsSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
     }
 
     if(!header->extendedHeader){
-        Id3v2ExtendedTagHeader *extendedHeader = id3v2NewExtendedTagHeader(0,0,0,0,0);
+        Id3v2ExtendedTagHeader *extendedHeader = id3v2CreateExtendedTagHeader(0,0,0,0,0);
         header->extendedHeader = extendedHeader;
     }
 
@@ -407,7 +407,7 @@ bool id3v2WriteImageEncodingRestriction(Id3v2TagHeader *header, bool bit){
     }
 
     if(!header->extendedHeader){
-        Id3v2ExtendedTagHeader *extendedHeader = id3v2NewExtendedTagHeader(0,0,0,0,0);
+        Id3v2ExtendedTagHeader *extendedHeader = id3v2CreateExtendedTagHeader(0,0,0,0,0);
         header->extendedHeader = extendedHeader;
     }
 
@@ -438,7 +438,7 @@ bool id3v2WriteImageSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
     }
 
     if(!header->extendedHeader){
-        Id3v2ExtendedTagHeader *extendedHeader = id3v2NewExtendedTagHeader(0,0,0,0,0);
+        Id3v2ExtendedTagHeader *extendedHeader = id3v2CreateExtendedTagHeader(0,0,0,0,0);
         header->extendedHeader = extendedHeader;
     }
 
@@ -587,4 +587,39 @@ bool id3v2ClearTagRestrictions(Id3v2TagHeader *header){
     header->extendedHeader->restrictions = 0;
     
     return 1;
+}
+
+/**
+ * @brief Creates a tag
+ * 
+ * @param header 
+ * @param frames 
+ * @return Id3v2Tag* 
+ */
+Id3v2Tag *id3v2CreateTag(Id3v2TagHeader *header, List *frames){
+
+    Id3v2Tag *tag = malloc(sizeof(Id3v2Tag));
+
+    tag->frames = frames;
+    tag->header = header;
+
+    return tag;
+}
+
+/**
+ * @brief Destroys the a tag and its content
+ * 
+ * @param toDelete 
+ */
+void id3v2DestroyTag(Id3v2Tag **toDelete){
+
+    if(*toDelete){
+        
+        id3v2DestroyTagHeader(&(*toDelete)->header);
+        listFree((*toDelete)->frames);
+        free(*toDelete);
+        *toDelete = NULL;
+        toDelete = NULL;
+    }
+
 }

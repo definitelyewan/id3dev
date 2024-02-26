@@ -379,7 +379,7 @@
                         q - Text encoding restrictions
                     </p>
                     <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">0 = No restrictions.</p>
-                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">1 = Strings are only encoded with ISO-8859-1 [ISO-8859-1] or UTF-8 [UTF-8].</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">1 = Strings are only encoded with ISO-8859-1 or UTF-8.</p>
                     
                     <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">
                         r - Text fields size restrictions
@@ -393,7 +393,7 @@
                         s - Image encoding restrictions
                     </p>
                     <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">0 = No restrictions.</p>
-                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">1 = Images are encoded only with PNG [PNG] or JPEG [JFIF].</p>
+                    <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-20 mt-2">1 = Images are encoded only with PNG or JPEG.</p>
                     
                     <p class="text-gray-500 dark:text-gray-400 whitespace-normal ml-16 mt-2">
                         t - Image size restrictions
@@ -555,7 +555,7 @@
                         Compared to other versions of this metadata container ID3v2.2 contains the simplest frame header.
                         A frame header in this version contains a 3-byte frame ID followed by a 3-byte frame size is represented
                         as a 24-bit integer. The frame size notably only represents the number of bytes present in the frames content
-                        and excludes the total header bytes. An example header could look like the following:
+                        and excludes the total header bytes.
                     </p>
                 </div>
 
@@ -656,8 +656,7 @@
                         method byte. These additions to the frame header, while not included
                         in the frame header size but are included in the 'frame size' field,
                         are not subject to encryption or compression. However, by default all
-                        flags should not be set such that the section equates to $00 00. An 
-                        example header can be found below:
+                        flags should not be set such that the section equates to $00 00.
                     </p>
                 </div>
                     
@@ -982,12 +981,12 @@
                                     <span class="flex-1">
                                         <span class="text-blue-500">ID3v2.2 Example:</span><br>
                                         <span> &emsp; Frame ID = TAL            </span><br>
-                                        <span> &emsp; Frame Size = $00 00 0A    </span><br>
+                                        <span> &emsp; Frame Size = $00 00 0B    </span><br>
                                         <span> &emsp; Encoding = $00            </span><br>
                                         <span> &emsp; Information = "Family Guy"</span><br>
                                         <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
                                         <span> &emsp; Frame ID = TALB           </span><br>
-                                        <span> &emsp; Frame Size = $00 00 00 0A </span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 0B </span><br>
                                         <span> &emsp; Frame Flags = $00 00      </span><br>
                                         <span> &emsp; Encoding = $00            </span><br>
                                         <span> &emsp; Information = "Family Guy"</span><br>
@@ -7045,10 +7044,10 @@
                                     <span class="flex-1">
                                         <span class="text-blue-500">ID3v2.3 & ID3v2.4 Example:</span><br>
                                         <span> &emsp; Frame ID = OWNE            </span><br>
-                                        <span> &emsp; Frame Size = $00 00 00 1A  </span><br>
+                                        <span> &emsp; Frame Size = $00 00 00 1B  </span><br>
                                         <span> &emsp; Frame Flags = $00 00       </span><br>
                                         <span> &emsp; Encoding = $01             </span><br>
-                                        <span> &emsp; Price Payed = "CAD0.99"    </span><br>
+                                        <span> &emsp; Price Payed = "CAD0.99" $00</span><br>
                                         <span> &emsp; Date of Purch. = "20010520"</span><br>
                                         <span> &emsp; Seller = "iTunes"          </span><br>
                                     </span>
@@ -7059,7 +7058,7 @@
                                     <span>4</span><br>
                                     <span>2</span><br>
                                     <span>1</span><br>
-                                    <span>7</span><br>
+                                    <span>8</span><br>
                                     <span>4</span><br>
                                     <span>14</span><br>
                                 </span>
@@ -7749,7 +7748,7 @@
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
-                                        <div class="text-gray-500 dark:text-gray-400">WPAY</div>
+                                        <div class="text-gray-500 dark:text-gray-400">POSS</div>
                                         <div>
                                             <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
                                                 ID3v2.3
@@ -7757,7 +7756,7 @@
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
-                                        <div class="text-gray-500 dark:text-gray-400">WPAY</div>
+                                        <div class="text-gray-500 dark:text-gray-400">POSS</div>
                                         <div>
                                             <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
                                                 ID3v2.4
@@ -9964,8 +9963,7 @@
                             Language = $xx xx xx<br>
                             Time stamp format = $xx<br>
                             Content type = $xx<br>
-                            Content descriptor = [n bytes of encoded data]<br>
-                            Language = [n bytes of encoded data] $00 (00)<br>
+                            Content descriptor = [n bytes of encoded data] $00 (00)<br>
                         </p>
                         <p class="text-gray-500 dark:text-gray-400 whitespace-normal mt-2 mb-2">
                             Time stamp format is defined as:
@@ -10423,7 +10421,7 @@
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
-                                        <div class="text-gray-500 dark:text-gray-400">TIT3</div>
+                                        <div class="text-gray-500 dark:text-gray-400">USER</div>
                                         <div>
                                             <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
                                                 ID3v2.3
@@ -10431,7 +10429,7 @@
                                         </div>
                                     </div>
                                     <div class="grid grid-cols-2 px-4 py-5 text-sm text-gray-700 border-b border-gray-200 gap-x-16 dark:border-gray-700">
-                                        <div class="text-gray-500 dark:text-gray-400">TIT3</div>
+                                        <div class="text-gray-500 dark:text-gray-400">USER</div>
                                         <div>
                                             <p class="text-gray-500 dark:text-gray-400 whitespace-normal">
                                                 ID3v2.4

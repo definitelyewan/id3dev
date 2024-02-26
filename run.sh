@@ -2,4 +2,4 @@ cmake -S . -B ./build -DBUILD_ID3_TESTS=ON -DBUILD_SHARED_LIBS=ON -DDEBUG_ID3_SY
 cd build
 make
 cd tests
-leaks --atExit --list -- ./id3v2_tag_identity_test
+leaks --atExit --list -- ./id3v2_context_test

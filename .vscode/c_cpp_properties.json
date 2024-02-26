@@ -4,11 +4,9 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/include",
-                "${workspaceFolder}/include/util",
-                "${workspaceFolder}/include",
-                "${workspaceFolder}/include",
-                "${workspaceFolder}/include/util",
-                "${workspaceFolder}/modules/cmocka/include"
+                "${workspaceFolder}/modules/cmocka/include",
+                "${workspaceFolder}/modules/LinkedListLib/include",
+                "${workspaceFolder}/modules/ByteStream/include"
             ],
             "defines": [
                 "_DEBUG",

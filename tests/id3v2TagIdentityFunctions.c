@@ -12,7 +12,7 @@
 static void id3v2NewTagHeader_validStruct(void **state){
     (void) state;
 
-    Id3v2TagHeader *header = id3v2NewTagHeader(4,0,0,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4,0,0,NULL);
 
     assert_int_equal(header->majorVersion,4);
     assert_int_equal(header->minorVersion,0);
@@ -25,7 +25,7 @@ static void id3v2NewTagHeader_validStruct(void **state){
 static void id3v2DestroyTagHeader_freeStruct(void **state){
     (void) state;
 
-    Id3v2TagHeader *header = id3v2NewTagHeader(4,0,0,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4,0,0,NULL);
     id3v2DestroyTagHeader(&header);
 
     assert_null(header);
@@ -41,7 +41,7 @@ static void id3v2DestroyTagHeader_failToFreeStruct(void **state){
 static void id3v2SetUnsynchronisationIndicator_set0(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(4,0,128,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4,0,128,NULL);
 
     int v = id3v2WriteUnsynchronisationIndicator(header, 0);
     
@@ -53,7 +53,7 @@ static void id3v2SetUnsynchronisationIndicator_set0(void **state){
 static void id3v2SetUnsynchronisationIndicator_set1While1(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(4,0,128,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4,0,128,NULL);
 
     int v = id3v2WriteUnsynchronisationIndicator(header, 1);
     
@@ -75,7 +75,7 @@ static void id3v2SetUnsynchronisationIndicator_NULLHeader(void **state){
 static void id3v2SetCompressionIndicator_set1(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(2,0,0,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(2,0,0,NULL);
 
 
     int v = id3v2WriteCompressionIndicator(header, 1);
@@ -89,7 +89,7 @@ static void id3v2SetCompressionIndicator_set1(void **state){
 static void id3v2SetCompressionIndicator_setNoneVersion2(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(3,0,0,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(3,0,0,NULL);
 
 
     int v = id3v2WriteCompressionIndicator(header, 1);
@@ -113,7 +113,7 @@ static void id3v2SetCompressionIndicator_setWithNullHeader(void **state){
 static void id3v2SetExtendedHeaderIndicator_set0(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(3,0,64,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(3,0,64,NULL);
 
     int v = id3v2WriteExtendedHeaderIndicator(header, 0);
     
@@ -126,7 +126,7 @@ static void id3v2SetExtendedHeaderIndicator_set0(void **state){
 static void id3v2SetExtendedHeaderIndicator_setWhileOtherFlagIsSet(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(3,0,128,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(3,0,128,NULL);
 
     int v = id3v2WriteExtendedHeaderIndicator(header, 1);
     
@@ -139,7 +139,7 @@ static void id3v2SetExtendedHeaderIndicator_setWhileOtherFlagIsSet(void **state)
 static void id3v2SetExtendedHeaderIndicator_setWrongVersion(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(2,0,128,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(2,0,128,NULL);
 
     int v = id3v2WriteExtendedHeaderIndicator(header, 1);
     
@@ -152,7 +152,7 @@ static void id3v2SetExtendedHeaderIndicator_setWrongVersion(void **state){
 static void id3v2SetExperimentalIndicator_set1(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(4,0,0,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4,0,0,NULL);
 
     int v = id3v2WriteExperimentalIndicator(header, 1);
     
@@ -165,7 +165,7 @@ static void id3v2SetExperimentalIndicator_set1(void **state){
 static void id3v2SetExperimentalIndicator_setsetWrongVersion(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(2,0,0,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(2,0,0,NULL);
 
     int v = id3v2WriteExperimentalIndicator(header, 1);
     
@@ -178,7 +178,7 @@ static void id3v2SetExperimentalIndicator_setsetWrongVersion(void **state){
 static void id3v2SetFooterIndicator_set0(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(4,0,0,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4,0,0,NULL);
 
     int v = id3v2WriteExperimentalIndicator(header, 1);
     
@@ -191,7 +191,7 @@ static void id3v2SetFooterIndicator_set0(void **state){
 static void id3v2SetFooterIndicator_setWrongVersion(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(2,0,16,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(2,0,16,NULL);
 
     int v = id3v2WriteFooterIndicator(header,1);
     
@@ -204,7 +204,7 @@ static void id3v2SetFooterIndicator_setWrongVersion(void **state){
 static void id3v2ReadUnsynchronisationIndicator_validStruct(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(4,0,128,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4,0,128,NULL);
 
     assert_int_equal(id3v2ReadUnsynchronisationIndicator(header), 1);
     id3v2DestroyTagHeader(&header);
@@ -221,7 +221,7 @@ static void id3v2ReadUnsynchronisationIndicator_NULLStruct(void **state){
 static void id3v2ReadCompressionIndicator_validStruct(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(2,0,64,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(2,0,64,NULL);
 
     assert_int_equal(id3v2ReadCompressionIndicator(header), 1);
     header->flags = 0;
@@ -241,7 +241,7 @@ static void id3v2ReadCompressionIndicator_NULLStruct(void **state){
 static void id3v2ReadCompressionIndicator_WrongVersion(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(4,0,64,NULL);;
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4,0,64,NULL);;
 
     assert_int_equal(id3v2ReadCompressionIndicator(header), -1);
     id3v2DestroyTagHeader(&header);
@@ -250,7 +250,7 @@ static void id3v2ReadCompressionIndicator_WrongVersion(void **state){
 static void id3v2ReadExtendedHeaderIndicator_validStruct(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(3,0,64,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(3,0,64,NULL);
 
     assert_int_equal(id3v2ReadExtendedHeaderIndicator(header), 1);
     header->flags = 0;
@@ -270,7 +270,7 @@ static void id3v2ReadExtendedHeaderIndicator_NULLStruct(void **state){
 static void id3v2ReadExtendedHeaderIndicator_WrongVersion(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(2,0,0,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(2,0,0,NULL);
 
     assert_int_equal(id3v2ReadExtendedHeaderIndicator(header), -1);
     id3v2DestroyTagHeader(&header);
@@ -279,7 +279,7 @@ static void id3v2ReadExtendedHeaderIndicator_WrongVersion(void **state){
 static void id3v2ReadExperimentalIndicator_validStruct(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(3,0,32,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(3,0,32,NULL);
 
     assert_int_equal(id3v2ReadExperimentalIndicator(header), 1);
     header->flags = 0;
@@ -299,7 +299,7 @@ static void id3v2ReadExperimentalIndicator_NULLStruct(void **state){
 static void id3v2ReadExperimentalIndicator_WrongVersion(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(2,0,0,NULL);;
+    Id3v2TagHeader *header = id3v2CreateTagHeader(2,0,0,NULL);;
 
     assert_int_equal(id3v2ReadExperimentalIndicator(header), -1);
     id3v2DestroyTagHeader(&header);
@@ -308,7 +308,7 @@ static void id3v2ReadExperimentalIndicator_WrongVersion(void **state){
 static void id3v2ReadFooterIndicator_validStruct(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(4,0,16,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4,0,16,NULL);
 
     assert_int_equal(id3v2ReadFooterIndicator(header), 1);
     header->flags = 0;
@@ -328,7 +328,7 @@ static void id3v2ReadFooterIndicator_NULLStruct(void **state){
 static void id3v2ReadFooterIndicator_WrongVersion(void **state){
     (void) state;
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(2,0,0,NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(2,0,0,NULL);
 
     assert_int_equal(id3v2ReadFooterIndicator(header), -1);
     id3v2DestroyTagHeader(&header);
@@ -336,7 +336,7 @@ static void id3v2ReadFooterIndicator_WrongVersion(void **state){
 
 static void id3v2NewExtendedTagHeader_validStruct(void **state){
     
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(150,909,1,1,255);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(150,909,1,1,255);
 
     assert_int_equal(ext->padding,150);
     assert_int_equal(ext->crc,909);
@@ -349,7 +349,7 @@ static void id3v2NewExtendedTagHeader_validStruct(void **state){
 
 static void id3v2DestroyExtendedTagHeader_DestroyStruct(void **state){
     
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(150,909,1,1,255);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(150,909,1,1,255);
     id3v2DestroyExtendedTagHeader(&ext);
     assert_null(ext);
 }
@@ -362,7 +362,7 @@ static void id3v2DestroyExtendedTagHeader_tryFreeNULL(void **state){
 
 static void id3v2WriteTagSizeRestriction_noExtAlready(void **state){
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, NULL);
 
     assert_true(id3v2WriteTagSizeRestriction(header, 3));
 
@@ -377,8 +377,8 @@ static void id3v2WriteTagSizeRestriction_noExtAlready(void **state){
 static void id3v2WriteTagSizeRestriction_changeCurrentValue(void **state){
     
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,192);
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,192);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_true(id3v2WriteTagSizeRestriction(header, 1));
 
@@ -393,8 +393,8 @@ static void id3v2WriteTagSizeRestriction_changeCurrentValue(void **state){
 static void id3v2WriteTagSizeRestriction_wrongVersion(void **state){
     
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,192);
-    Id3v2TagHeader *header = id3v2NewTagHeader(2, 0, 64, ext);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,192);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(2, 0, 64, ext);
 
     assert_false(id3v2WriteTagSizeRestriction(header, 1));
 
@@ -405,8 +405,8 @@ static void id3v2WriteTagSizeRestriction_wrongVersion(void **state){
 static void id3v2WriteTagSizeRestriction_notAOption(void **state){
     
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,192);
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,192);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_false(id3v2WriteTagSizeRestriction(header, 9));
     assert_int_equal(header->extendedHeader->restrictions, 192);
@@ -416,7 +416,7 @@ static void id3v2WriteTagSizeRestriction_notAOption(void **state){
 
 static void id3v2WriteTextEncodingRestriction_noExtAlready(void **state){
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, NULL);
 
     assert_true(id3v2WriteTextEncodingRestriction(header, 1));
 
@@ -430,8 +430,8 @@ static void id3v2WriteTextEncodingRestriction_noExtAlready(void **state){
 static void id3v2WriteTextEncodingRestriction_changeCurrentValue(void **state){
     
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,32);
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,32);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_true(id3v2WriteTextEncodingRestriction(header, 0));
 
@@ -445,8 +445,8 @@ static void id3v2WriteTextEncodingRestriction_changeCurrentValue(void **state){
 static void id3v2WriteTextEncodingRestriction_wrongVersion(void **state){
     
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,32);
-    Id3v2TagHeader *header = id3v2NewTagHeader(2, 0, 64, ext);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,32);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(2, 0, 64, ext);
 
     assert_false(id3v2WriteTagSizeRestriction(header, 0));
 
@@ -456,8 +456,8 @@ static void id3v2WriteTextEncodingRestriction_wrongVersion(void **state){
 static void id3v2WriteTextEncodingRestriction_notAOption(void **state){
     
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,32);
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,32);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_false(id3v2WriteTagSizeRestriction(header, 100));
     assert_int_equal(header->extendedHeader->restrictions, 32);
@@ -467,7 +467,7 @@ static void id3v2WriteTextEncodingRestriction_notAOption(void **state){
 
 static void id3v2WriteTextFieldsSizeRestriction_noExtAlready(void **state){
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, NULL);
 
     assert_true(id3v2WriteTextFieldsSizeRestriction(header, 2));
 
@@ -481,8 +481,8 @@ static void id3v2WriteTextFieldsSizeRestriction_noExtAlready(void **state){
 static void id3v2WriteTextFieldsSizeRestriction_changeCurrentValue(void **state){
     
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,16);
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,16);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_true(id3v2WriteTextFieldsSizeRestriction(header, 3));
 
@@ -496,8 +496,8 @@ static void id3v2WriteTextFieldsSizeRestriction_changeCurrentValue(void **state)
 static void id3v2WriteTextFieldsSizeRestriction_wrongVersion(void **state){
     
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,16);
-    Id3v2TagHeader *header = id3v2NewTagHeader(2, 0, 64, ext);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,16);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(2, 0, 64, ext);
 
     assert_false(id3v2WriteTextFieldsSizeRestriction(header, 0));
 
@@ -507,8 +507,8 @@ static void id3v2WriteTextFieldsSizeRestriction_wrongVersion(void **state){
 static void id3v2WriteTextFieldsSizeRestriction_notAOption(void **state){
     
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,24);
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,24);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_false(id3v2WriteTagSizeRestriction(header, 100));
     assert_int_equal(header->extendedHeader->restrictions, 24);
@@ -518,7 +518,7 @@ static void id3v2WriteTextFieldsSizeRestriction_notAOption(void **state){
 
 static void id3v2WriteImageEncodingRestriction_noExtAlready(void **state){
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, NULL);
 
     assert_true(id3v2WriteImageEncodingRestriction(header, 1));
 
@@ -532,8 +532,8 @@ static void id3v2WriteImageEncodingRestriction_noExtAlready(void **state){
 static void id3v2WriteImageEncodingRestriction_changeCurrentValue(void **state){
     
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,4);
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,4);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_true(id3v2WriteImageEncodingRestriction(header, 0));
 
@@ -547,8 +547,8 @@ static void id3v2WriteImageEncodingRestriction_changeCurrentValue(void **state){
 static void id3v2WriteImageEncodingRestriction_wrongVersion(void **state){
     
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,4);
-    Id3v2TagHeader *header = id3v2NewTagHeader(2, 0, 64, ext);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,4);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(2, 0, 64, ext);
     bool v = id3v2WriteImageEncodingRestriction(header, 0);
     assert_false(v);
 
@@ -557,7 +557,7 @@ static void id3v2WriteImageEncodingRestriction_wrongVersion(void **state){
 
 static void id3v2WriteImageSizeRestriction_noExtAlready(void **state){
     
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, NULL);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, NULL);
 
     assert_true(id3v2WriteImageSizeRestriction(header, 2));
 
@@ -571,8 +571,8 @@ static void id3v2WriteImageSizeRestriction_noExtAlready(void **state){
 static void id3v2WriteImageSizeRestriction_changeCurrentValue(void **state){
     
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,2);
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,2);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_true(id3v2WriteImageSizeRestriction(header, 3));
 
@@ -586,8 +586,8 @@ static void id3v2WriteImageSizeRestriction_changeCurrentValue(void **state){
 static void id3v2WriteImageSizeRestriction_wrongVersion(void **state){
     
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,3);
-    Id3v2TagHeader *header = id3v2NewTagHeader(2, 0, 64, ext);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,3);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(2, 0, 64, ext);
 
     assert_false(id3v2WriteImageSizeRestriction(header, 0));
 
@@ -597,8 +597,8 @@ static void id3v2WriteImageSizeRestriction_wrongVersion(void **state){
 static void id3v2WriteImageSizeRestriction_notAOption(void **state){
     
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0,0,1,3);
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,3);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_false(id3v2WriteImageSizeRestriction(header, 100));
     assert_int_equal(header->extendedHeader->restrictions, 3);
@@ -607,10 +607,10 @@ static void id3v2WriteImageSizeRestriction_notAOption(void **state){
 
 static void id3v2ReadTagSizeRestriction_readBits(void **state){
     
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 192);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 192);
     //11000000
 
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_int_equal(3, id3v2ReadTagSizeRestriction(header));
 
@@ -619,10 +619,10 @@ static void id3v2ReadTagSizeRestriction_readBits(void **state){
 
 static void id3v2ReadTagSizeRestriction_readBits2(void **state){
     
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 128);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 128);
     //11000000
 
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_int_equal(2, id3v2ReadTagSizeRestriction(header));
 
@@ -631,10 +631,10 @@ static void id3v2ReadTagSizeRestriction_readBits2(void **state){
 
 static void id3v2ReadTextEncodingRestriction_readBit(void **state){
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 32);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 32);
     //00100000
 
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_int_equal(1, id3v2ReadTextEncodingRestriction(header));
 
@@ -643,10 +643,10 @@ static void id3v2ReadTextEncodingRestriction_readBit(void **state){
 
 static void id3v2ReadTextEncodingRestriction_readBit2(void **state){
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 0);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 0);
     //00000000
 
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_int_equal(0, id3v2ReadTextEncodingRestriction(header));
 
@@ -655,10 +655,10 @@ static void id3v2ReadTextEncodingRestriction_readBit2(void **state){
 
 static void id3v2ReadTextFieldsSizeRestriction_readBit(void **state){
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 24);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 24);
     //00011000
 
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_int_equal(3, id3v2ReadTextFieldsSizeRestriction(header));
 
@@ -667,10 +667,10 @@ static void id3v2ReadTextFieldsSizeRestriction_readBit(void **state){
 
 static void id3v2ReadTextFieldsSizeRestriction_readBit2(void **state){
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 8);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 8);
     //00001000
 
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_int_equal(1, id3v2ReadTextFieldsSizeRestriction(header));
 
@@ -679,10 +679,10 @@ static void id3v2ReadTextFieldsSizeRestriction_readBit2(void **state){
 
 static void id3v2ReadImageEncodingRestriction_readBit(void **state){
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 4);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 4);
     //00000100
 
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_int_equal(1, id3v2ReadImageEncodingRestriction(header));
 
@@ -691,10 +691,10 @@ static void id3v2ReadImageEncodingRestriction_readBit(void **state){
 
 static void id3v2ReadImageEncodingRestriction_readBit2(void **state){
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 0);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 0);
     //00000000
 
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_int_equal(0, id3v2ReadImageEncodingRestriction(header));
 
@@ -703,10 +703,10 @@ static void id3v2ReadImageEncodingRestriction_readBit2(void **state){
 
 static void id3v2ReadImageSizeRestriction_readBit(void **state){
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 3);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 3);
     //00000011
 
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_int_equal(3, id3v2ReadImageSizeRestriction(header));
 
@@ -715,10 +715,10 @@ static void id3v2ReadImageSizeRestriction_readBit(void **state){
 
 static void id3v2ReadImageSizeRestriction_readBit2(void **state){
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 1);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 1);
     //00000001
 
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
 
     assert_int_equal(1, id3v2ReadImageSizeRestriction(header));
 
@@ -727,13 +727,28 @@ static void id3v2ReadImageSizeRestriction_readBit2(void **state){
 
 static void id3v2ClearTagRestrictions_clear(void **state){
 
-    Id3v2ExtendedTagHeader *ext = id3v2NewExtendedTagHeader(0, 0, false, true, 1);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 1);
     //00000001
 
-    Id3v2TagHeader *header = id3v2NewTagHeader(4, 0, 64, ext);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
     assert_true(id3v2ClearTagRestrictions(header));
     assert_false(header->extendedHeader->tagRestrictions);
     id3v2DestroyTagHeader(&header); 
+}
+
+
+static void id3v2TagCreateAndDestroy_AllInOne(void **state){
+
+    Id3v2Tag *tag = id3v2CreateTag(id3v2CreateTagHeader(1,2,10,id3v2CreateExtendedTagHeader(15,50,1,1,10)), listCreate(id3v2PrintFrame, id3v2DeleteFrame, id3v2CompareFrame, id3v2CopyFrame));
+
+    assert_non_null(tag);
+    assert_non_null(tag->frames);
+    assert_non_null(tag->header);
+
+    id3v2DestroyTag(&tag);
+
+    assert_null(tag);
+
 }
 
 // printf("%d%d%d%d%d%d%d%d\n",readBit(header->extendedHeader->restrictions, 7),
@@ -750,7 +765,7 @@ int main(){
 
     const struct CMUnitTest tests[] = {
         
-        //id3v2NewTagHeader tests
+        //id3v2CreateTagHeader tests
         cmocka_unit_test(id3v2NewTagHeader_validStruct),
 
         //id3v2DestroyTagHeader tests
@@ -809,7 +824,7 @@ int main(){
         cmocka_unit_test(id3v2ReadFooterIndicator_NULLStruct),
         cmocka_unit_test(id3v2ReadFooterIndicator_WrongVersion),
 
-        //id3v2NewExtendedTagHeader tests
+        //id3v2CreateExtendedTagHeader tests
         cmocka_unit_test(id3v2NewExtendedTagHeader_validStruct),
 
         //d3v2DestroyExtendedTagHeader tests
@@ -866,7 +881,10 @@ int main(){
         cmocka_unit_test(id3v2ReadImageSizeRestriction_readBit2),
 
         //id3v2ClearTagRestrictions test
-        cmocka_unit_test(id3v2ClearTagRestrictions_clear)
+        cmocka_unit_test(id3v2ClearTagRestrictions_clear),
+
+        // tag create/destroy
+        cmocka_unit_test(id3v2TagCreateAndDestroy_AllInOne)
 
     };
 

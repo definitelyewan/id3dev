@@ -9,8 +9,8 @@
  * 
  */
 
-#ifndef ID3V2_TAGIDENTITY
-#define ID3V2_TAGIDENTITY
+#ifndef ID3V2_TAG_IDENTITY
+#define ID3V2_TAG_IDENTITY
 
 #ifdef __cplusplus
 extern "C"{
@@ -19,12 +19,13 @@ extern "C"{
 
 #include "id3v2Types.h"
 
+
 /*
     Tag Header
 */
 
 //mem functions
-Id3v2TagHeader *id3v2NewTagHeader(uint8_t majorVersion, uint8_t minorVersion, uint8_t flags, Id3v2ExtendedTagHeader *extendedHeader);
+Id3v2TagHeader *id3v2CreateTagHeader(uint8_t majorVersion, uint8_t minorVersion, uint8_t flags, Id3v2ExtendedTagHeader *extendedHeader);
 void id3v2DestroyTagHeader(Id3v2TagHeader **toDelete);
 
 //flag functions
@@ -46,7 +47,7 @@ int id3v2ReadFooterIndicator(Id3v2TagHeader *header);
 
 //mem functions
 
-Id3v2ExtendedTagHeader *id3v2NewExtendedTagHeader(uint32_t padding, uint32_t crc, bool update, bool tagRestrictions, uint8_t restrictions);
+Id3v2ExtendedTagHeader *id3v2CreateExtendedTagHeader(uint32_t padding, uint32_t crc, bool update, bool tagRestrictions, uint8_t restrictions);
 void id3v2DestroyExtendedTagHeader(Id3v2ExtendedTagHeader **toDelete);
 
 //tag restriction functions
@@ -64,6 +65,16 @@ int id3v2ReadImageEncodingRestriction(Id3v2TagHeader *header);
 int id3v2ReadImageSizeRestriction(Id3v2TagHeader *header); 
 
 bool id3v2ClearTagRestrictions(Id3v2TagHeader *header);
+
+/*
+    Tag
+*/
+
+//mem
+
+Id3v2Tag *id3v2CreateTag(Id3v2TagHeader *header, List *frames);
+void id3v2DestroyTag(Id3v2Tag **toDelete);
+
 
 #ifdef __cplusplus
 } //extern c end
