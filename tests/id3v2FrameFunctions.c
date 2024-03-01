@@ -8,6 +8,7 @@
 #include <string.h>
 #include <limits.h>
 #include "id3v2.h"
+#include "byteStream.h"
 
 
 static void id3v2CreateAndDestroyFrameHeader_allInOne(void **state){
@@ -63,13 +64,117 @@ static void id3v2CreateAndDestroyHeader_allInOne(void **state){
     assert_null(f);
 }
 
+static void id3v2Traverse_allInOne(void **state){
+
+    ByteStream *stream = byteStreamFromFile("assets/boniver.mp3");
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+
+    int i = 0;
+
+    while((f = id3v2FrameTraverse(&frames)) != NULL){
+        i++;
+    }
+    
+    assert_int_equal(i, 93);
+
+
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
+}
+
+static void id3v2ReadFrameEntry_allEntries(void **state){
+
+    ByteStream *stream = byteStreamFromFile("assets/boniver.mp3");
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+
+    while((f = id3v2FrameTraverse(&frames)) != NULL){
+        
+        ListIter entries = id3v2CreateFrameEntryTraverser(f);
+        void *tmp = NULL;
+        size_t s = 0;
+        int i = 0;
+        while((tmp = id3v2ReadFrameEntry(&entries, &s)) != NULL){
+            assert_non_null(tmp);
+            
+            if(i == 0){
+                assert_memory_equal(tmp, "http://musicbrainz.org", 23);
+                assert_int_equal(s, 23);
+            }else if(i == 1){
+                assert_memory_equal(tmp, "test", 4);
+                assert_int_equal(s, 4);
+            }
+
+            free(tmp);
+            i++;
+        }
+
+        break;
+
+    }
+
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
+}
+
+static void id3v2ReadFrameEntry_allEntriesAsChar(void **state){
+
+    ByteStream *stream = byteStreamFromFile("assets/sorry4dying.mp3");
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+
+    while((f = id3v2FrameTraverse(&frames)) != NULL){
+        
+        ListIter entries = id3v2CreateFrameEntryTraverser(f);
+        char *tmp = NULL;
+        size_t s = 0;
+        int i = 0;
+        while((tmp = id3v2ReadFrameEntryAsChar(&entries, &s)) != NULL){
+            assert_non_null(tmp);
+            
+            if(i == 0){
+                // assert_string_equal((char *)tmp, "http://musicbrainz.org");
+                // assert_int_equal(s, 22);
+            }else if(i == 1){
+                // assert_string_equal((char *)tmp, "test");
+                // assert_int_equal(s, 4);
+            }
+            //printf("%s\n", tmp);
+
+            if(tmp){
+                free(tmp);
+            }
+            
+            i++;
+        }
+        //printf("NEW FRAME\n");
+        //break;
+
+    }
+
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
+}
+
 
 int main(){
 
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(id3v2CreateAndDestroyFrameHeader_allInOne),
         cmocka_unit_test(id3v2CreateAndDestroyContentEntry_allInOne),
-        cmocka_unit_test(id3v2CreateAndDestroyHeader_allInOne)
+        cmocka_unit_test(id3v2CreateAndDestroyHeader_allInOne),
+        cmocka_unit_test(id3v2Traverse_allInOne),
+
+        cmocka_unit_test(id3v2ReadFrameEntry_allEntries),
+        cmocka_unit_test(id3v2ReadFrameEntry_allEntriesAsChar),
+
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

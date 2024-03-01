@@ -4,6 +4,7 @@
 #include "id3v2Frame.h"
 #include "id3v2Context.h"
 #include "byteInt.h"
+#include "byteUnicode.h"
 
 /**
  * @brief Creates an ID3v2 frame header structure
@@ -161,11 +162,23 @@ void id3v2DeleteContentEntry(void *toBeDeleted){
     free(e);
 }
 
+/**
+ * @brief Frees a frame in a linked list
+ * 
+ * @param toBeDeleted 
+ */
 void id3v2DeleteFrame(void *toBeDeleted){
     Id3v2Frame *f = (Id3v2Frame *) toBeDeleted;
     id3v2DestroyFrame(&f);
 }
 
+/**
+ * @brief Compares a frame in a linked list
+ * 
+ * @param first 
+ * @param second 
+ * @return int 
+ */
 int id3v2CompareFrame(const void *first, const void *second){
 
     Id3v2Frame *f = (Id3v2Frame *)first;
@@ -247,7 +260,12 @@ int id3v2CompareFrame(const void *first, const void *second){
     return diff;
 }
 
-
+/**
+ * @brief Builds a string representation of a frame
+ * 
+ * @param toBePrinted 
+ * @return char* 
+ */
 char *id3v2PrintFrame(const void *toBePrinted){
 
     Id3v2Frame *f = (Id3v2Frame *)toBePrinted;    
@@ -259,6 +277,12 @@ char *id3v2PrintFrame(const void *toBePrinted){
     return s;
 }
 
+/**
+ * @brief Deep copys a frame
+ * 
+ * @param toBeCopied 
+ * @return void* 
+ */
 void *id3v2CopyFrame(const void *toBeCopied){
     
     Id3v2Frame *f = (Id3v2Frame *)toBeCopied;
@@ -274,8 +298,6 @@ void *id3v2CopyFrame(const void *toBeCopied){
     
     return id3v2CreateFrame(h, listDeepCopy(f->contexts), listDeepCopy(f->entries));
 }
-
-
 
 
 
@@ -313,4 +335,188 @@ void id3v2DestroyFrame(Id3v2Frame **toDelete){
         *toDelete = NULL;
         toDelete = NULL;
     }
+}
+
+/**
+ * @brief Creates a list iter specific to frame content
+ * 
+ * @param tag 
+ * @return ListIter 
+ */
+ListIter id3v2CreateFrameTraverser(Id3v2Tag *tag){
+
+    ListIter e;
+    e.current = NULL;
+
+    if(tag == NULL){
+        return e;
+    }
+
+    if(tag->frames == NULL){
+        return e;
+    }
+
+    return listCreateIterator(tag->frames);
+}
+
+/**
+ * @brief treverses through a list of frames with the use of a list iter
+ * and returns frame content while doing so. If null is returned the end
+ * of the list has been reached.
+ * 
+ * @param traverser 
+ * @return Id3v2Frame* 
+ */
+Id3v2Frame *id3v2FrameTraverse(ListIter *traverser){
+    return (Id3v2Frame *) listIteratorNext(traverser);
+}
+
+/**
+ * @brief Creates a list iterator specific to frame entries
+ * 
+ * @param frame 
+ * @return ListIter 
+ */
+ListIter id3v2CreateFrameEntryTraverser(Id3v2Frame *frame){
+
+    ListIter e;
+    e.current = NULL;
+
+    if(frame == NULL){
+        return e;
+    }
+
+    if(frame->entries == NULL){
+        return e;
+    }
+
+    return listCreateIterator(frame->entries);
+}
+
+
+/**
+ * @brief Returns the data at the traversers current position and 
+ * moves onto the next entry
+ * 
+ * @param traverser 
+ * @param dataSize 
+ * @return void* 
+ */
+void *id3v2ReadFrameEntry(ListIter *traverser, size_t *dataSize){
+
+    if(traverser == NULL){
+        *dataSize = 0;
+        return NULL;
+    }
+
+    Id3v2ContentEntry *data = (Id3v2ContentEntry *) listIteratorNext(traverser);
+    void *ret = NULL;
+
+
+    if(data == NULL){
+        *dataSize = 0;
+        return NULL;
+    }
+
+    if(!data->size){
+        *dataSize = 0;
+        return NULL;
+    }
+
+    ret = malloc(data->size);
+    memset(ret, 0, data->size);
+    memcpy(ret, data->entry, data->size);
+
+    *dataSize = data->size;
+    return ret;
+}
+
+
+/**
+ * @brief Returns a UTF8 representation of the data held at the traversers current
+ * position. the size of the returned data is returned though dataSize and a UTF8
+ * string is returned to the caller if successful. If this function fails it will
+ * return NULL and a dataSize of 0.
+ * 
+ * @param traverser 
+ * @param dataSize 
+ * @return char* 
+ */
+char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
+    
+    unsigned char *tmp = NULL;
+    unsigned char *outString = NULL;
+    unsigned char encoding = 0;
+    char *escapedStr = NULL;
+    bool convi = false;
+    size_t outLen = 0;
+    size_t j = 0;
+
+    tmp = (unsigned char *) id3v2ReadFrameEntry(traverser, dataSize);
+
+    // Failed
+    if(!tmp){
+        return NULL;
+    }
+
+    // detect utf16
+    if(*dataSize > BYTE_BOM_SIZE){
+        if(byteHasBOM(tmp)){
+            if(tmp[0] == 0xff && tmp[1] == 0xfe){
+                encoding = BYTE_UTF16LE;
+            }else{
+                encoding = BYTE_UTF16BE;
+            }
+        }
+    }
+
+    // add some padding to tmp
+    tmp = realloc(tmp, *dataSize + (BYTE_PADDING * 2));
+    memset(tmp + *dataSize, 0, (BYTE_PADDING * 2));
+    outLen = *dataSize + (BYTE_PADDING * 2);
+
+    // detect utf8/ascii
+    if(byteIsUtf8(tmp)){
+        encoding = BYTE_UTF8;
+    }
+
+    // detect latin1
+    if(byteIsUtf8(tmp) && encoding == 0){
+        encoding = BYTE_ISO_8859_1;
+    }
+
+    // convert to UTF8
+    convi = byteConvertTextFormat(tmp, encoding, *dataSize + (BYTE_PADDING * 2), &outString, BYTE_UTF8, &outLen);
+
+    if(!convi && outLen == 0){
+        free(tmp);
+        *dataSize = 0;
+        return NULL;
+    }
+
+    // data is already in utf8
+    if(convi && outLen == 0){
+        outString = tmp;
+    }else{
+        *dataSize = outLen;
+        free(tmp);
+    }
+
+    // escape quotes and backslashes
+    escapedStr = malloc(2 * (*dataSize) + 1);
+    j = 0;
+
+    for(size_t i = 0; i < *dataSize; ++i){
+        if(outString[i] == '"' || outString[i] == '\\'){
+            escapedStr[j++] = '\\';
+            escapedStr[j++] = outString[i];
+        }else{
+            escapedStr[j++] = outString[i];
+        }
+    }
+    
+    escapedStr[j] = '\0';
+    free(outString);
+
+    return escapedStr;
 }

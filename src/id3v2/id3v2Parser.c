@@ -486,8 +486,8 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
  * @return uint32_t 
  */
 uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3v2Frame **frame){
-
     if(!stream || !context){
+        printf("[*] Invalid data passed (likely context)\n");
         *frame = NULL;
         return 0;
     }
@@ -923,16 +923,32 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
                 stream->cursor = stream->cursor - (ID3V2_FRAME_ID_MAX_SIZE - 1);
             }
 
+            // check default pairings (pass 1/4)
             context = hashTableRetrieve(pairs, (char *)frameId);
 
+            // check user supplied ones (pass 2/4)
             if(context == NULL){
                 context = hashTableRetrieve(userPairs, (char *)frameId);
             }
 
+            // special considerations (pass 3/4)
             if(context == NULL){
-                context = hashTableRetrieve(userPairs, "?");
+                if(frameId[0] == 'T'){
+                    context = hashTableRetrieve(pairs, "T");
+                }
+                
+                if(frameId[0] == 'W'){
+                    context = hashTableRetrieve(pairs, "W");
+                }
             }
 
+            // use generic (pass 4/4)
+            if(context == NULL){
+                context = hashTableRetrieve(pairs, "?");
+            }
+            
+            
+            
             read = id3v2ParseFrame(stream, context, header->majorVersion, &frame);
 
             if(read == 0 || frame == NULL){

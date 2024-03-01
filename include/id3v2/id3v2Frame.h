@@ -1,3 +1,14 @@
+/**
+ * @file id3v2Frame.h
+ * @author Ewan Jones
+ * @brief function declerations for frame operations
+ * @version 0.1
+ * @date 2024-02-26
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+
 #ifndef ID3V2_FRAME
 #define ID3V2_FRAME
 
@@ -6,6 +17,10 @@ extern "C"{
 #endif
 
 #include "id3v2Types.h"
+
+/*
+    Frame header
+*/
 
 Id3v2FrameHeader *id3v2CreateFrameHeader(uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], bool tagAlter, bool fileAlter, bool readOnly, bool unsync, uint32_t decompressionSize, uint8_t encryptionSymbol, uint8_t groupSymbol);
 void id3v2DestroyFrameHeader(Id3v2FrameHeader **toDelete);
@@ -24,8 +39,43 @@ int id3v2CompareFrame(const void *first, const void *second);
 char *id3v2PrintFrame(const void *toBePrinted);
 void *id3v2CopyFrame(const void *toBeCopied);
 
+/*
+    Frame
+*/
+
 Id3v2Frame *id3v2CreateFrame(Id3v2FrameHeader *header, List *context, List *entries);
 void id3v2DestroyFrame(Id3v2Frame **toDelete);
+
+
+/*
+    Frame access
+*/
+
+// 1. treverse
+// 2. attach a new frame
+// 3. remove a frame
+// 4. read an entry
+// 5. update an entry
+
+
+ListIter id3v2CreateFrameTraverser(Id3v2Tag *tag);
+Id3v2Frame *id3v2FrameTraverse(ListIter *traverser);
+
+
+ListIter id3v2CreateFrameEntryTraverser(Id3v2Frame *frame);
+void *id3v2ReadFrameEntry(ListIter *traverser, size_t *dataSize);
+char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize);
+// uint8_t *id3v2ReadFrameEntryAsUtf16(ListIter *traverser, size_t dataSize);
+// size_t id3v2ReadFrameEntryAsU8(ListIter *traverser, uint8_t *entry);
+// size_t id3v2ReadFrameEntryAsU16(ListIter *traverser, uint16_t *entry);
+// size_t id3v2ReadFrameEntryAsU32(ListIter *traverser, uint32_t *entry);
+
+// bool id3v2WriteFrameEntry(ListIter *entries, size_t entrySize, void *entry);
+
+// bool id3v2AttachFrameToTag(Id3v2Tag *tag);
+// Id3v2Frame *id3v2DetatchFrameFromTag(ListIter *frames);
+
+
 
 #ifdef __cplusplus
 } //extern c end

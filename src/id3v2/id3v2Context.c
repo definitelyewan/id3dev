@@ -1078,7 +1078,7 @@ List *id3v2CreateGenericFrameContext(void){
  */
 HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version){
 
-    size_t minFrameContexts = 64;
+    size_t minFrameContexts = 66;
     HashTable *table = hashTableCreate(minFrameContexts, id3v2DeleteContentContextList, id3v2PrintContentContextList, id3v2CopyContentContextList);
     List *l = NULL;
 
@@ -1579,6 +1579,10 @@ HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version){
     }
 
     hashTableInsert(table, "?", (l = id3v2CreateGenericFrameContext()));
+    listFree(l);
+    hashTableInsert(table, "T", (l = id3v2CreateTextFrameContext()));
+    listFree(l);
+    hashTableInsert(table, "W", (l = id3v2CreateURLFrameContext()));
     listFree(l);
 
     return table;
