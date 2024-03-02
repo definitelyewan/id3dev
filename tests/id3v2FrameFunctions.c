@@ -122,7 +122,7 @@ static void id3v2ReadFrameEntry_allEntries(void **state){
     byteStreamDestroy(stream);
 }
 
-static void id3v2ReadFrameEntry_allEntriesAsChar(void **state){
+static void id3v2ReadFrameEntry_TextFrameAsChar(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/sorry4dying.mp3");
     Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
@@ -140,13 +140,12 @@ static void id3v2ReadFrameEntry_allEntriesAsChar(void **state){
             assert_non_null(tmp);
             
             if(i == 0){
-                // assert_string_equal((char *)tmp, "http://musicbrainz.org");
-                // assert_int_equal(s, 22);
+                assert_memory_equal(tmp, "\x01", 1);
+                assert_int_equal(s, 1);
             }else if(i == 1){
-                // assert_string_equal((char *)tmp, "test");
-                // assert_int_equal(s, 4);
+                assert_string_equal(tmp, "sorry4dying");
+                assert_int_equal(s, 11);
             }
-            //printf("%s\n", tmp);
 
             if(tmp){
                 free(tmp);
@@ -154,8 +153,7 @@ static void id3v2ReadFrameEntry_allEntriesAsChar(void **state){
             
             i++;
         }
-        //printf("NEW FRAME\n");
-        //break;
+        break;
 
     }
 
@@ -163,6 +161,46 @@ static void id3v2ReadFrameEntry_allEntriesAsChar(void **state){
     byteStreamDestroy(stream);
 }
 
+
+static void id3v2ReadFrameEntry_TextFrameEncodings(void **state){
+
+    ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+    int i = 0;
+    while((f = id3v2FrameTraverse(&frames)) != NULL){
+        
+        if(f->header->id[0] == 'T'){
+
+            ListIter entries = id3v2CreateFrameEntryTraverser(f);
+            uint8_t encoding = id3v2ReadFrameEntryAsU8(&entries);
+
+            switch(i){
+                
+                case 0:
+                    assert_int_equal(encoding, 3);
+                    break;
+                case 7:
+                    assert_int_equal(encoding, 0);
+                    break;
+                case 8:
+                    assert_int_equal(encoding, 0);
+                    break;
+                default:
+                    assert_int_equal(encoding, 1);
+            }
+
+            i++;
+
+        }
+
+    }
+
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
+}
 
 int main(){
 
@@ -173,7 +211,8 @@ int main(){
         cmocka_unit_test(id3v2Traverse_allInOne),
 
         cmocka_unit_test(id3v2ReadFrameEntry_allEntries),
-        cmocka_unit_test(id3v2ReadFrameEntry_allEntriesAsChar),
+        cmocka_unit_test(id3v2ReadFrameEntry_TextFrameAsChar),
+        cmocka_unit_test(id3v2ReadFrameEntry_TextFrameEncodings)
 
     };
 

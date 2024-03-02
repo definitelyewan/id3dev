@@ -300,7 +300,6 @@ void *id3v2CopyFrame(const void *toBeCopied){
 }
 
 
-
 /**
  * @brief Creates a frame 
  * 
@@ -396,7 +395,7 @@ ListIter id3v2CreateFrameEntryTraverser(Id3v2Frame *frame){
 
 /**
  * @brief Returns the data at the traversers current position and 
- * moves onto the next entry
+ * moves onto the next entry.
  * 
  * @param traverser 
  * @param dataSize 
@@ -449,6 +448,7 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
     unsigned char encoding = 0;
     char *escapedStr = NULL;
     bool convi = false;
+    int utf8BomOffset = 0;
     size_t outLen = 0;
     size_t j = 0;
 
@@ -502,21 +502,222 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
         free(tmp);
     }
 
+    // check for UTF8 BOM
+    if(*dataSize >= 3 && outString[0] == 0xEF && outString[1] == 0xBB && outString[2] == 0xBF) {
+        utf8BomOffset = 3;
+    }
+
+
     // escape quotes and backslashes
-    escapedStr = malloc(2 * (*dataSize) + 1);
+    escapedStr = malloc(2 * (*dataSize - utf8BomOffset) + 1);
     j = 0;
 
-    for(size_t i = 0; i < *dataSize; ++i){
-        if(outString[i] == '"' || outString[i] == '\\'){
+    for(size_t i = 0; i < *dataSize - utf8BomOffset; i++){
+        
+        if(outString[i + utf8BomOffset] == '"' || outString[i + utf8BomOffset] == '\\'){
             escapedStr[j++] = '\\';
-            escapedStr[j++] = outString[i];
+            escapedStr[j++] = outString[i + utf8BomOffset];
         }else{
-            escapedStr[j++] = outString[i];
+            escapedStr[j++] = outString[i + utf8BomOffset];
         }
     }
-    
+
     escapedStr[j] = '\0';
+
+    // truncate
+    size_t nullPos = 0;
+    while (escapedStr[nullPos] != '\0') {
+        nullPos++;
+    }
+    *dataSize = nullPos;
+    escapedStr[nullPos] = '\0';
+
+
     free(outString);
 
     return escapedStr;
+}
+
+/**
+ * @brief Returns a 8 bit integer representation of the data held at the traversers 
+ * current position. If this function fails it will return 0.
+ * 
+ * @param traverser 
+ * @return uint8_t 
+ */
+uint8_t id3v2ReadFrameEntryAsU8(ListIter *traverser){
+
+    uint8_t *tmp = NULL;
+    uint8_t ret = 0;
+    size_t dataSize = 0;
+
+    tmp = (uint8_t *) id3v2ReadFrameEntry(traverser, &dataSize);
+
+    // Failed
+    if(!tmp){
+        return 0;
+    }
+
+    ret = tmp[0];
+    free(tmp);
+
+    return ret;
+}
+
+uint16_t id3v2ReadFrameEntryAsU16(ListIter *traverser){
+
+    unsigned char *tmp = NULL;
+    uint16_t ret = 0;
+    
+    size_t dataSize = 0;
+
+    tmp = (unsigned char *) id3v2ReadFrameEntry(traverser, &dataSize);
+
+    // Failed
+    if(!tmp){
+        return 0;
+    }
+
+    if(dataSize >= sizeof(uint16_t)){
+        ret = (uint16_t)tmp[0] << 8 | (uint16_t)tmp[1];
+    }else if(dataSize == sizeof(uint8_t)){
+        ret = (uint16_t)tmp[0];
+    }
+    
+    free(tmp);
+    return ret;
+}
+
+uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser){
+
+
+    unsigned char *tmp = NULL;
+    uint32_t ret = 0;
+    size_t dataSize = 0;
+
+    tmp = (unsigned char *) id3v2ReadFrameEntry(traverser, &dataSize);
+
+    if(!tmp){
+        return 0;
+    }
+
+    // clamp to max size
+    if(dataSize > sizeof(uint32_t)){
+        dataSize = sizeof(uint32_t);
+    }
+
+    switch(dataSize) {
+        case 1:
+            ret = tmp[0];
+            break;
+        case 2:
+            ret = tmp[0] | (tmp[1] << 8);
+            break;
+        case 3:
+            ret = tmp[0] | (tmp[1] << 8) | (tmp[2] << 16);
+            break;
+        case 4:
+            ret = tmp[0] | (tmp[1] << 8) | (tmp[2] << 16) | (tmp[3] << 24);
+            break;
+        default:
+            break;
+    }
+
+
+
+    free(tmp);
+    return ret;
+}
+
+bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize, void *entry){
+
+    if(frame == NULL || entries == NULL || entrySize == 0 || entry == NULL){
+        return false;
+    }
+
+    if(frame->contexts == NULL || frame->entries == NULL){
+        return false;
+    }
+
+
+    ListIter contextIter = listCreateIterator(frame->contexts);
+    ListIter entriesIter = listCreateIterator(frame->entries);
+    Id3v2ContentEntry *ce = NULL;
+    Id3v2ContentContext *cc = NULL;
+    size_t posce = 0;
+    size_t poscc = 0;
+    size_t newSize = 0;
+    void *newData = 0;
+
+    // locate the entries position in the frame
+    while((ce = (Id3v2ContentEntry *) listIteratorNext(&entriesIter)) != NULL){
+
+        int comp = frame->entries->compareData((void *) ce, (void *) entries->current);
+
+        if(!comp){
+            break;
+        }
+
+        posce++;
+    }
+
+    // loacte the context for the entry
+    while((cc = (Id3v2ContentContext *) listIteratorNext(&contextIter)) != NULL){
+
+        if(cc->type == iter_context){
+            // in case an iter is the first context
+            poscc = (poscc == 0) ? 0 : poscc--;
+        }
+
+        if(poscc == posce){
+            break;
+        }
+
+        poscc++;
+    }
+
+
+    newSize = entrySize;
+
+    if(entrySize > cc->max){
+        newSize = cc->max;
+    }
+    
+    if(entrySize < cc->min){
+        newSize = cc->min;
+    }
+
+
+    newData = malloc(newSize);
+    memset(newData, 0, newSize);
+    memcpy(newData, entry, newSize);
+
+    free(((Id3v2ContentEntry *)entries->current->data)->entry);
+    ((Id3v2ContentEntry *)entries->current->data)->entry = newData;
+    ((Id3v2ContentEntry *)entries->current->data)->entry = newSize;
+
+    return true;
+}
+
+bool id3v2AttachFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame){
+
+    if(tag == NULL || frame == NULL){
+        return false;
+    }
+
+    if(tag->frames == NULL || frame->contexts == NULL || frame->entries == NULL || frame->header == NULL){
+        return false;
+    }
+
+    return listInsertBack(tag->frames, (void *) frame) ? true : false;
+
+}
+
+Id3v2Frame *id3v2DetatchFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame){
+
+    if(tag == NULL || frame == NULL){
+        return NULL;
+    }
+
+    return listDeleteData(tag->frames, (void *) frame);
 }

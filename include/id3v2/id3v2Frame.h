@@ -51,13 +51,6 @@ void id3v2DestroyFrame(Id3v2Frame **toDelete);
     Frame access
 */
 
-// 1. treverse
-// 2. attach a new frame
-// 3. remove a frame
-// 4. read an entry
-// 5. update an entry
-
-
 ListIter id3v2CreateFrameTraverser(Id3v2Tag *tag);
 Id3v2Frame *id3v2FrameTraverse(ListIter *traverser);
 
@@ -65,15 +58,14 @@ Id3v2Frame *id3v2FrameTraverse(ListIter *traverser);
 ListIter id3v2CreateFrameEntryTraverser(Id3v2Frame *frame);
 void *id3v2ReadFrameEntry(ListIter *traverser, size_t *dataSize);
 char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize);
-// uint8_t *id3v2ReadFrameEntryAsUtf16(ListIter *traverser, size_t dataSize);
-// size_t id3v2ReadFrameEntryAsU8(ListIter *traverser, uint8_t *entry);
-// size_t id3v2ReadFrameEntryAsU16(ListIter *traverser, uint16_t *entry);
-// size_t id3v2ReadFrameEntryAsU32(ListIter *traverser, uint32_t *entry);
+uint8_t id3v2ReadFrameEntryAsU8(ListIter *traverser);
+uint16_t id3v2ReadFrameEntryAsU16(ListIter *traverser);
+uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser);
 
-// bool id3v2WriteFrameEntry(ListIter *entries, size_t entrySize, void *entry);
+bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize, void *entry);
 
-// bool id3v2AttachFrameToTag(Id3v2Tag *tag);
-// Id3v2Frame *id3v2DetatchFrameFromTag(ListIter *frames);
+bool id3v2AttachFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame);
+Id3v2Frame *id3v2DetatchFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame);
 
 
 
