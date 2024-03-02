@@ -202,6 +202,34 @@ static void id3v2ReadFrameEntry_TextFrameEncodings(void **state){
     byteStreamDestroy(stream);
 }
 
+static void id3v2ReadFrameEntry_checkETCO(void **state){
+
+    ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+
+    while((f = id3v2FrameTraverse(&frames)) != NULL){
+        
+        if(!memcmp(f->header->id, "ETCO", 4)){
+
+            ListIter entries = id3v2CreateFrameEntryTraverser(f);
+            
+            assert_int_equal(2, id3v2ReadFrameEntryAsU8(&entries));
+            assert_int_equal(6, id3v2ReadFrameEntryAsU8(&entries));
+            assert_int_equal(1220000U, id3v2ReadFrameEntryAsU32(&entries));
+            assert_int_equal(2, id3v2ReadFrameEntryAsU8(&entries));
+            assert_int_equal(610000U, id3v2ReadFrameEntryAsU32(&entries));
+            
+        }
+
+    }
+
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
+}
+
 int main(){
 
     const struct CMUnitTest tests[] = {
@@ -212,7 +240,8 @@ int main(){
 
         cmocka_unit_test(id3v2ReadFrameEntry_allEntries),
         cmocka_unit_test(id3v2ReadFrameEntry_TextFrameAsChar),
-        cmocka_unit_test(id3v2ReadFrameEntry_TextFrameEncodings)
+        cmocka_unit_test(id3v2ReadFrameEntry_TextFrameEncodings),
+        cmocka_unit_test(id3v2ReadFrameEntry_checkETCO)
 
     };
 

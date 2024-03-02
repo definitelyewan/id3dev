@@ -539,7 +539,7 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
 }
 
 /**
- * @brief Returns a 8 bit integer representation of the data held at the traversers 
+ * @brief Returns a 8-bit integer representation of the data held at the traversers 
  * current position. If this function fails it will return 0.
  * 
  * @param traverser 
@@ -564,6 +564,13 @@ uint8_t id3v2ReadFrameEntryAsU8(ListIter *traverser){
     return ret;
 }
 
+/**
+ * @brief Returns a 16-bit integer representation of the data held at the traversers 
+ * current position. If this function fails it will return 0.
+ * 
+ * @param traverser 
+ * @return uint16_t 
+ */
 uint16_t id3v2ReadFrameEntryAsU16(ListIter *traverser){
 
     unsigned char *tmp = NULL;
@@ -579,7 +586,7 @@ uint16_t id3v2ReadFrameEntryAsU16(ListIter *traverser){
     }
 
     if(dataSize >= sizeof(uint16_t)){
-        ret = (uint16_t)tmp[0] << 8 | (uint16_t)tmp[1];
+        ret = (uint16_t)tmp[1] << 8 | (uint16_t)tmp[0];
     }else if(dataSize == sizeof(uint8_t)){
         ret = (uint16_t)tmp[0];
     }
@@ -588,6 +595,13 @@ uint16_t id3v2ReadFrameEntryAsU16(ListIter *traverser){
     return ret;
 }
 
+/**
+ * @brief Returns a 32-bit integer representation of the data held at the traversers 
+ * current position. If this function fails it will return 0.
+ * 
+ * @param traverser 
+ * @return uint32_t 
+ */
 uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser){
 
 
@@ -611,13 +625,13 @@ uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser){
             ret = tmp[0];
             break;
         case 2:
-            ret = tmp[0] | (tmp[1] << 8);
+            ret = tmp[1] | (tmp[0] << 8);
             break;
         case 3:
-            ret = tmp[0] | (tmp[1] << 8) | (tmp[2] << 16);
+            ret = tmp[2] | (tmp[1] << 8) | (tmp[0] << 16);
             break;
         case 4:
-            ret = tmp[0] | (tmp[1] << 8) | (tmp[2] << 16) | (tmp[3] << 24);
+            ret = tmp[3] | (tmp[2] << 8) | (tmp[1] << 16) | (tmp[0] << 24);
             break;
         default:
             break;
@@ -666,7 +680,7 @@ bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize
 
         if(cc->type == iter_context){
             // in case an iter is the first context
-            poscc = (poscc == 0) ? 0 : poscc--;
+            poscc = (poscc == 0) ? 0 : poscc - 1;
         }
 
         if(poscc == posce){
@@ -694,7 +708,7 @@ bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize
 
     free(((Id3v2ContentEntry *)entries->current->data)->entry);
     ((Id3v2ContentEntry *)entries->current->data)->entry = newData;
-    ((Id3v2ContentEntry *)entries->current->data)->entry = newSize;
+    ((Id3v2ContentEntry *)entries->current->data)->size = newSize;
 
     return true;
 }
