@@ -101,6 +101,14 @@ int id3v2CompareContentEntry(const void *first, const void *second){
     Id3v2ContentEntry *one = (Id3v2ContentEntry *)first;
     Id3v2ContentEntry *two = (Id3v2ContentEntry *)second;
 
+    if(one == NULL){
+        return -1;
+    }
+
+    if(two == NULL){
+        return 1;
+    }
+
     int diff = 0;
     
     diff = one->size - two->size;
@@ -188,6 +196,14 @@ int id3v2CompareFrame(const void *first, const void *second){
     void *tmp2 = NULL;
     int diff = 0;
 
+    if(f == NULL){
+        return -1;
+    }
+
+    if(s == NULL){
+        return 1;
+    }
+
     diff = f->header->decompressionSize - s->header->decompressionSize;
     if(diff != 0){
         return diff;
@@ -232,15 +248,19 @@ int id3v2CompareFrame(const void *first, const void *second){
     i1 = listCreateIterator(f->entries);
     i2 = listCreateIterator(s->entries);
 
-    while((tmp1 = listIteratorNext(&i1)) != NULL || (tmp2 = listIteratorNext(&i2)) != NULL){
+    while((tmp1 = listIteratorNext(&i1)) != NULL){
+        
+        tmp2 = listIteratorNext(&i2);
+        
         diff = id3v2CompareContentEntry(tmp1, tmp2);
+
         if(diff != 0){
             return diff;
         }
         
     }
 
-    diff = f->entries->length - s->entries->length;
+    diff = f->contexts->length - s->contexts->length;
     if(diff != 0){
         return diff;
     }
@@ -248,14 +268,16 @@ int id3v2CompareFrame(const void *first, const void *second){
     i1 = listCreateIterator(f->contexts);
     i2 = listCreateIterator(s->contexts);
 
-    while((tmp1 = listIteratorNext(&i1)) != NULL || (tmp2 = listIteratorNext(&i2)) != NULL){
+    while((tmp1 = listIteratorNext(&i1)) != NULL){
+        
+        tmp2 = listIteratorNext(&i2);
+        
         diff = id3v2CompareContentContext(tmp1, tmp2);
         if(diff != 0){
             return diff;
         }
         
     }
-
 
     return diff;
 }
@@ -523,6 +545,7 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
     }
 
     escapedStr[j] = '\0';
+    free(outString);
 
     // truncate
     size_t nullPos = 0;
@@ -532,8 +555,9 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
     *dataSize = nullPos;
     escapedStr[nullPos] = '\0';
 
-
-    free(outString);
+    if(escapedStr != NULL && *dataSize == 0){
+        *dataSize = 1;
+    }
 
     return escapedStr;
 }
@@ -643,13 +667,28 @@ uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser){
     return ret;
 }
 
+/**
+ * @brief Writes entrySize bytes of entry at the current position of the traverser.
+ * However, the data provided will be truncated as to not violate the entries context.
+ * Its recommneded to not change the context to make your data fit but instread create a
+ * new pairing with a new frame ID. This is to best ensure compatability with other 
+ * ID3v2 readers. You wouldnt want to break your cars metadata reader because it can no
+ * longer read a songs title. If this function fails it will return false otherwise, true.
+ * 
+ * @param frame 
+ * @param entries 
+ * @param entrySize 
+ * @param entry 
+ * @return true 
+ * @return false 
+ */
 bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize, void *entry){
 
     if(frame == NULL || entries == NULL || entrySize == 0 || entry == NULL){
         return false;
     }
 
-    if(frame->contexts == NULL || frame->entries == NULL){
+    if(frame->contexts == NULL || frame->entries == NULL || entries->current == NULL){
         return false;
     }
 
@@ -666,13 +705,17 @@ bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize
     // locate the entries position in the frame
     while((ce = (Id3v2ContentEntry *) listIteratorNext(&entriesIter)) != NULL){
 
-        int comp = frame->entries->compareData((void *) ce, (void *) entries->current);
+        int comp = frame->entries->compareData((void *) ce, (void *) entries->current->data);
 
-        if(!comp){
+        if(comp == 0){
             break;
         }
 
         posce++;
+    }
+
+    if(ce == NULL){
+        return false;
     }
 
     // loacte the context for the entry
@@ -690,6 +733,9 @@ bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize
         poscc++;
     }
 
+    if(cc == NULL){
+        return false;
+    }
 
     newSize = entrySize;
 
@@ -713,6 +759,16 @@ bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize
     return true;
 }
 
+
+/**
+ * @brief Inserts a frame into the tag. This function returns true on success and false
+ * otherwise.
+ * 
+ * @param tag 
+ * @param frame 
+ * @return true 
+ * @return false 
+ */
 bool id3v2AttachFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame){
 
     if(tag == NULL || frame == NULL){

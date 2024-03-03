@@ -230,6 +230,151 @@ static void id3v2ReadFrameEntry_checkETCO(void **state){
     byteStreamDestroy(stream);
 }
 
+static void id3v2WriteFrameEntry_greatestHits(void **state){
+
+    ByteStream *stream = byteStreamFromFile("assets/boniver.mp3");
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+    bool exit = false;
+    while((f = id3v2FrameTraverse(&frames)) != NULL){
+        
+        if(memcmp(f->header->id, "TXX", 3) == 0){
+
+            ListIter entries = id3v2CreateFrameEntryTraverser(f);
+            size_t s = 0;
+            char *tmp = NULL;
+
+            while((tmp = id3v2ReadFrameEntryAsChar(&entries, &s)) != NULL){
+
+                if(memcmp("IS_GREATEST_HITS", tmp, s) == 0){
+
+                    uint8_t zero = 0;
+                    id3v2WriteFrameEntry(f, &entries, 1, (void *)&zero);
+
+                    uint8_t ret = id3v2ReadFrameEntryAsU8(&entries);
+                    assert_int_equal(ret, 0);
+                    exit = true;
+                    free(tmp);
+                    break;
+
+                }
+
+                free(tmp);
+            }
+        }
+        
+        if(exit){
+            break;
+        }
+
+    }
+
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
+}
+
+
+static void id3v2WriteFrameEntry_updateTitle(void **state){
+
+    ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+
+    while((f = id3v2FrameTraverse(&frames)) != NULL){
+        
+        if(memcmp(f->header->id, "TIT2", 4) == 0){
+
+            ListIter entries = id3v2CreateFrameEntryTraverser(f);
+            size_t s = 0;
+
+            id3v2ReadFrameEntryAsU8(&entries);
+            
+            assert_true(id3v2WriteFrameEntry(f, &entries, 15, (void *) "A better title"));
+
+            char *newTitle = id3v2ReadFrameEntryAsChar(&entries, &s);
+
+            assert_int_equal(s, 14);
+            assert_string_equal(newTitle, "A better title");
+
+            free(newTitle);
+
+        }
+
+    }
+
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
+}
+
+static void id3v2AtatchFrameFromTag_TSOA(void **state){
+
+    ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    
+    
+    List *entries = listCreate(id3v2PrintContentEntry, id3v2DeleteContentEntry, id3v2CompareContentEntry, id3v2CopyContentEntry);
+    listInsertBack(entries, id3v2CreateContentEntry((void *)"\x0", 1));
+    listInsertBack(entries, id3v2CreateContentEntry((void *)"SORT", 5));
+    
+    Id3v2FrameHeader *h = id3v2CreateFrameHeader((uint8_t *)"TSOA", false, false, false, false, 0, 0, 0);
+    Id3v2Frame *f = id3v2CreateFrame(h, id3v2CreateTextFrameContext(), entries);
+
+
+    assert_true(id3v2AttachFrameToTag(tag, f));
+
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
+
+    // if the memory assigned to f is freed it was added successfully
+
+}
+
+static void id3v2DetatchFrameFromTag_TIT2(void **state){
+
+    ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+
+    while((f = id3v2FrameTraverse(&frames)) != NULL){
+        
+        if(memcmp(f->header->id, "TIT2", 4) == 0){
+
+            Id3v2Frame *detach = id3v2DetatchFrameFromTag(tag, f);
+
+            assert_non_null(detach);
+
+            id3v2DestroyFrame(&detach);
+
+            assert_null(detach);
+        }
+
+    }
+
+
+    frames = id3v2CreateFrameTraverser(tag);
+    bool exit = false;
+    while((f = id3v2FrameTraverse(&frames)) != NULL){
+        
+        if(memcmp(f->header->id, "TIT2", 4) == 0){
+            exit = true;
+        }
+
+    }
+
+
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
+
+    assert_false(exit);
+}
+
+
 int main(){
 
     const struct CMUnitTest tests[] = {
@@ -241,7 +386,12 @@ int main(){
         cmocka_unit_test(id3v2ReadFrameEntry_allEntries),
         cmocka_unit_test(id3v2ReadFrameEntry_TextFrameAsChar),
         cmocka_unit_test(id3v2ReadFrameEntry_TextFrameEncodings),
-        cmocka_unit_test(id3v2ReadFrameEntry_checkETCO)
+        cmocka_unit_test(id3v2ReadFrameEntry_checkETCO),
+
+        cmocka_unit_test(id3v2WriteFrameEntry_greatestHits),
+        cmocka_unit_test(id3v2WriteFrameEntry_updateTitle),
+        cmocka_unit_test(id3v2AtatchFrameFromTag_TSOA),
+        cmocka_unit_test(id3v2DetatchFrameFromTag_TIT2)
 
     };
 
