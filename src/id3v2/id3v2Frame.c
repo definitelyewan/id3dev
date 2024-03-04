@@ -783,6 +783,14 @@ bool id3v2AttachFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame){
 
 }
 
+
+/**
+ * @brief Removes a frame from a tag and returns it to the caller otherwise, NULL.
+ * 
+ * @param tag 
+ * @param frame 
+ * @return Id3v2Frame* 
+ */
 Id3v2Frame *id3v2DetatchFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame){
 
     if(tag == NULL || frame == NULL){

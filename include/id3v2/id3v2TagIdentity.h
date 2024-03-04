@@ -25,10 +25,12 @@ extern "C"{
 */
 
 //mem functions
+
 Id3v2TagHeader *id3v2CreateTagHeader(uint8_t majorVersion, uint8_t minorVersion, uint8_t flags, Id3v2ExtendedTagHeader *extendedHeader);
 void id3v2DestroyTagHeader(Id3v2TagHeader **toDelete);
 
 //flag functions
+
 bool id3v2WriteUnsynchronisationIndicator(Id3v2TagHeader *header, bool bit);
 bool id3v2WriteCompressionIndicator(Id3v2TagHeader *header, bool bit);
 bool id3v2WriteExtendedHeaderIndicator(Id3v2TagHeader *header, bool bit);

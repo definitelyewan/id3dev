@@ -31,11 +31,13 @@ target_link_libraries(id3v1_test PRIVATE cmocka)
 add_executable(id3v2_tag_identity_test ${TEST_ID3V2_TAG_IDENTITY_ID3V2})
 set_target_properties(id3v2_tag_identity_test PROPERTIES C_STANDARD 99)
 target_link_libraries(id3v2_tag_identity_test PRIVATE Id3dev)
+target_link_libraries(id3v1_test PRIVATE ByteStream)
 target_link_libraries(id3v2_tag_identity_test PRIVATE cmocka)
 
 add_executable(id3v2_context_test ${TEST_ID3V2_CONTEXT})
 set_target_properties(id3v2_context_test PROPERTIES C_STANDARD 99)
 target_link_libraries(id3v2_context_test PRIVATE Id3dev)
+target_link_libraries(id3v1_test PRIVATE ByteStream)
 target_link_libraries(id3v2_context_test PRIVATE cmocka)
 
 add_executable(id3v2_parser_test ${TEST_ID3V2_PARSER})

@@ -35,11 +35,11 @@ update.message("Compiling id3v1_test program")
 update.message("Compiling id3v2_tag_identity_test program")
 #compile_code("id3v2_tag_identity_test")
 update.message("Compiling id3v2_context_test program")
-#compile_code("id3v2_context_test")
+compile_code("id3v2_context_test")
 update.message("Compiling id3v2_parser_test program")
 #compile_code("id3v2_parser_test")
 update.message("Compiling id3v2_frame_test program")
-compile_code("id3v2_frame_test")
+#compile_code("id3v2_frame_test")
 
 # call test execs
 try:
@@ -72,9 +72,9 @@ try:
 
             #subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v1_test"])
             #subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_tag_identity_test"])
-            #subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_context_test"])
+            subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_context_test"])
             #subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_parser_test"])
-            subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_frame_test"])
+            #subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_frame_test"])
 
             if(malloc_stack_logging == False):
                 os.environ["MallocStackLogging"] = "0"

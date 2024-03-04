@@ -8,6 +8,8 @@
 #include <string.h>
 #include <limits.h>
 #include "id3v2.h"
+#include "byteStream.h"
+#include "byteInt.h"
 
 static void id3v2CreateContentContext_validStruct(void **state){
     (void) state;
@@ -1319,6 +1321,38 @@ static void id3v2CreateGenericContext_valid(void **state){
 
 }
 
+static void id3v2ContextToStream_valid(void **state){
+
+
+    Id3v2ContentContext *cc = id3v2CreateContentContext(iter_context, id3v2djb2("test"), INT16_MAX, 1);
+
+    ByteStream *stream = id3v2ContextToStream(cc);
+    char test[sizeof(size_t)] = {0};
+
+
+    assert_non_null(stream);
+
+    assert_memory_equal(byteStreamCursor(stream), "\x07", 1);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+    byteStreamPrintf("%x", stream);
+
+
+    byteStreamRead(stream, test, sizeof(size_t));
+
+    for(int i = 0; i < sizeof(size_t); i++){
+        printf("[%x]", test[i]);
+    }
+    printf("\n");
+    // assert_memory_equal(byteStreamCursor(stream), "\x7C\x9E\x68\x65", 4);
+    // byteStreamSeek(stream, 4, SEEK_CUR);
+    // byteStreamPrintf("%x", stream);
+
+    id3v2DestroyContentContext(&cc);
+    byteStreamDestroy(stream);
+}
+
+
+
 int main(){
 
     const struct CMUnitTest tests[] = {
@@ -1430,7 +1464,10 @@ int main(){
         cmocka_unit_test(id3v2CreateUnsynchronisedLyricFrameContext_valid),
 
         // id3v2CreateGenericContext tests
-        cmocka_unit_test(id3v2CreateGenericContext_valid)
+        cmocka_unit_test(id3v2CreateGenericContext_valid),
+
+        // id3v2ContextToStream tests
+        cmocka_unit_test(id3v2ContextToStream_valid)
 
     };
 

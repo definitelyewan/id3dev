@@ -4,6 +4,7 @@
 #include <limits.h>
 #include "LinkedList.h"
 #include "id3v2Context.h"
+#include "byteStream.h"
 
 //djb2 algorithm for stings
 unsigned long id3v2djb2(char *str){
@@ -1608,3 +1609,52 @@ bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char ke
     return true;
 }
 
+/**
+ * @brief Creates a stream that represents the passed context
+ * 
+ * @param cc 
+ * @return ByteStream* 
+ */
+ByteStream *id3v2ContextToStream(Id3v2ContentContext *cc){
+    
+    ByteStream *stream = NULL;
+    size_t s = 0;
+    uint8_t convi[8] = {0,0,0,0,0,0,0,0};
+
+    if(cc == NULL){
+        return stream;
+    }
+
+    s += (sizeof(size_t) * 3) + sizeof(Id3v2ContextType) + 1;
+    
+    stream = byteStreamCreate(NULL, s);
+
+    byteStreamWrite(stream, (uint8_t *) &cc->type, 1);
+
+    for(size_t i = 0; i < sizeof(size_t); i++){
+        convi[i] = (cc->key >> (i * 8)) & 0xFF;
+    }
+
+    byteStreamWrite(stream, convi, 4);
+
+    convi[0] = (uint8_t)(cc->min >> 24);
+    convi[1] = (uint8_t)(cc->min >> 16);
+    convi[2] = (uint8_t)(cc->min >> 8);
+    convi[3] = (uint8_t)cc->min;
+
+    byteStreamWrite(stream, convi, 4);
+
+    convi[0] = (uint8_t)(cc->max >> 24);
+    convi[1] = (uint8_t)(cc->max >> 16);
+    convi[2] = (uint8_t)(cc->max >> 8);
+    convi[3] = (uint8_t)cc->max;
+
+    byteStreamWrite(stream, convi, 4);
+
+    byteStreamRewind(stream);
+    return stream;
+}
+
+char *id3v2ContextToJSON(Id3v2ContentContext *cc){
+    return NULL;
+}

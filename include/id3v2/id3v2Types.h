@@ -17,6 +17,7 @@ extern "C" {
 #endif
 
 #include "id3v1Types.h"
+#include "byteTypes.h"
 #include <stdbool.h>
 #include <stdint.h>
 
