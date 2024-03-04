@@ -5,6 +5,7 @@
 #include "LinkedList.h"
 #include "id3v2Context.h"
 #include "byteStream.h"
+#include "byteInt.h"
 
 //djb2 algorithm for stings
 unsigned long id3v2djb2(char *str){
@@ -1619,42 +1620,50 @@ ByteStream *id3v2ContextToStream(Id3v2ContentContext *cc){
     
     ByteStream *stream = NULL;
     size_t s = 0;
-    uint8_t convi[8] = {0,0,0,0,0,0,0,0};
+    unsigned char *convi = NULL;
 
     if(cc == NULL){
         return stream;
     }
 
-    s += (sizeof(size_t) * 3) + sizeof(Id3v2ContextType) + 1;
+    s += (sizeof(size_t) * 3) + 1;
     
     stream = byteStreamCreate(NULL, s);
 
     byteStreamWrite(stream, (uint8_t *) &cc->type, 1);
 
-    for(size_t i = 0; i < sizeof(size_t); i++){
-        convi[i] = (cc->key >> (i * 8)) & 0xFF;
-    }
+    convi = sttob(cc->key);
+    byteStreamWrite(stream, convi, sizeof(size_t));
+    free(convi);
 
-    byteStreamWrite(stream, convi, 4);
+    convi = sttob(cc->max);
+    byteStreamWrite(stream, convi, sizeof(size_t));
+    free(convi);
 
-    convi[0] = (uint8_t)(cc->min >> 24);
-    convi[1] = (uint8_t)(cc->min >> 16);
-    convi[2] = (uint8_t)(cc->min >> 8);
-    convi[3] = (uint8_t)cc->min;
-
-    byteStreamWrite(stream, convi, 4);
-
-    convi[0] = (uint8_t)(cc->max >> 24);
-    convi[1] = (uint8_t)(cc->max >> 16);
-    convi[2] = (uint8_t)(cc->max >> 8);
-    convi[3] = (uint8_t)cc->max;
-
-    byteStreamWrite(stream, convi, 4);
+    convi = sttob(cc->min);
+    byteStreamWrite(stream, convi, sizeof(size_t));
+    free(convi);
 
     byteStreamRewind(stream);
     return stream;
 }
 
 char *id3v2ContextToJSON(Id3v2ContentContext *cc){
-    return NULL;
+    
+    char *json = NULL;
+    size_t memCount = 3;
+    if(cc == NULL){
+        json = malloc(sizeof(char) * memCount);
+        memcpy(json, "{}\0", memCount);
+        return json;
+    }
+
+    memCount += (sizeof(size_t) * 3) + 1 + 28;
+
+    json = malloc(sizeof(char) * memCount);
+    memset(json, 0, memCount);
+
+    sprintf(json, "{\"type\":%d,\"key\":%ld,\"max\":%ld,\"min\":%ld}", cc->type, cc->key, cc->max, cc->min);
+
+    return json;
 }

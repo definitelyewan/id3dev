@@ -1323,32 +1323,91 @@ static void id3v2CreateGenericContext_valid(void **state){
 
 static void id3v2ContextToStream_valid(void **state){
 
-
     Id3v2ContentContext *cc = id3v2CreateContentContext(iter_context, id3v2djb2("test"), INT16_MAX, 1);
 
     ByteStream *stream = id3v2ContextToStream(cc);
-    char test[sizeof(size_t)] = {0};
+    unsigned char test[sizeof(size_t)] = {0};
 
 
     assert_non_null(stream);
-
     assert_memory_equal(byteStreamCursor(stream), "\x07", 1);
     byteStreamSeek(stream, 1, SEEK_CUR);
-    byteStreamPrintf("%x", stream);
-
 
     byteStreamRead(stream, test, sizeof(size_t));
+    assert_int_equal(id3v2djb2("test"), btost(test, sizeof(size_t)));
+    
+    byteStreamRead(stream, test, sizeof(size_t));
+    assert_int_equal(INT16_MAX, btost(test, sizeof(size_t)));
 
-    for(int i = 0; i < sizeof(size_t); i++){
-        printf("[%x]", test[i]);
-    }
-    printf("\n");
-    // assert_memory_equal(byteStreamCursor(stream), "\x7C\x9E\x68\x65", 4);
-    // byteStreamSeek(stream, 4, SEEK_CUR);
-    // byteStreamPrintf("%x", stream);
+    byteStreamRead(stream, test, sizeof(size_t));
+    assert_int_equal(1, btost(test, sizeof(size_t)));
 
     id3v2DestroyContentContext(&cc);
     byteStreamDestroy(stream);
+}
+
+
+static void id3v2ContextToStream_minned(void **state){
+
+
+    Id3v2ContentContext *cc = id3v2CreateContentContext(0, 0, 0, 0);
+
+    ByteStream *stream = id3v2ContextToStream(cc);
+    unsigned char test[sizeof(size_t)] = {0};
+
+
+    assert_non_null(stream);
+    assert_memory_equal(byteStreamCursor(stream), "\x00", 1);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    byteStreamRead(stream, test, sizeof(size_t));
+    assert_int_equal(0, btost(test, sizeof(size_t)));
+    
+    byteStreamRead(stream, test, sizeof(size_t));
+    assert_int_equal(0, btost(test, sizeof(size_t)));
+
+    byteStreamRead(stream, test, sizeof(size_t));
+    assert_int_equal(0, btost(test, sizeof(size_t)));
+
+    id3v2DestroyContentContext(&cc);
+    byteStreamDestroy(stream);
+}
+
+static void id3v2ContextToJSON_valid(void **state){
+    (void) state;
+
+    Id3v2ContentContext *cc = id3v2CreateContentContext(iter_context, id3v2djb2("test"), INT16_MAX, 1);
+    char *json = id3v2ContextToJSON(cc);
+
+    assert_non_null(json);
+    assert_string_equal(json,"{\"type\":7,\"key\":6385723493,\"max\":32767,\"min\":1}");
+
+    id3v2DestroyContentContext(&cc);
+    free(json);
+}
+
+
+static void id3v2ContextToJSON_minned(void **state){
+    (void) state;
+
+    Id3v2ContentContext *cc = id3v2CreateContentContext(0, 0, 0, 0);
+    char *json = id3v2ContextToJSON(cc);
+
+    assert_non_null(json);
+    assert_string_equal(json,"{\"type\":0,\"key\":0,\"max\":0,\"min\":0}");
+
+    id3v2DestroyContentContext(&cc);
+    free(json);
+}
+
+static void id3v2ContextToJSON_NULL(void **state){
+    (void) state;
+
+    char *json = id3v2ContextToJSON(NULL);
+
+    assert_non_null(json);
+    assert_string_equal(json,"{}");
+    free(json);
 }
 
 
@@ -1467,7 +1526,13 @@ int main(){
         cmocka_unit_test(id3v2CreateGenericContext_valid),
 
         // id3v2ContextToStream tests
-        cmocka_unit_test(id3v2ContextToStream_valid)
+        cmocka_unit_test(id3v2ContextToStream_valid),
+        cmocka_unit_test(id3v2ContextToStream_minned),
+
+        // id3v2ContextToJSON tests
+        cmocka_unit_test(id3v2ContextToJSON_valid),
+        cmocka_unit_test(id3v2ContextToJSON_minned),
+        cmocka_unit_test(id3v2ContextToJSON_NULL)
 
     };
 
