@@ -78,6 +78,19 @@ Id3v2Tag *id3v2CreateTag(Id3v2TagHeader *header, List *frames);
 void id3v2DestroyTag(Id3v2Tag **toDelete);
 
 
+/*
+    output
+*/
+
+ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t version);
+char *id3v2ExtendedTagHeaderToJSON(Id3v2ExtendedTagHeader *stream);
+
+ByteStream *id3v2TagHeaderToStream(Id3v2TagHeader *header, uint32_t uintSize);
+char *id3v2TagHeaderToJSON(Id3v2TagHeader *header, uint32_t uintSize);
+
+
+
+
 #ifdef __cplusplus
 } //extern c end
 #endif

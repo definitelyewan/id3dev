@@ -8,6 +8,8 @@
 #include <string.h>
 #include <limits.h>
 #include "id3v2.h"
+#include "byteStream.h"
+#include "byteInt.h"
 
 static void id3v2NewTagHeader_validStruct(void **state){
     (void) state;
@@ -751,6 +753,29 @@ static void id3v2TagCreateAndDestroy_AllInOne(void **state){
 
 }
 
+static void id3v2ExtendedTagHeaderToStream_v3noCRC(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(100, UINT32_MAX, 0,0,0);
+    ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_3);
+
+    byteStreamPrintf("%x", stream);
+    assert_int_equal(byteStreamReturnInt(stream), 10);
+
+    byteStreamPrintf("%x", stream);
+    assert_int_equal(byteStreamGetCh(stream), 0x80);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+    assert_int_equal(byteStreamGetCh(stream), 0);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    byteStreamPrintf("%x", stream);
+    assert_int_equal(byteStreamReturnInt(stream), 100);
+    
+
+    byteStreamPrintf("%x", stream);
+    byteStreamDestroy(stream);
+    id3v2DestroyExtendedTagHeader(&ext);
+}
+
 // printf("%d%d%d%d%d%d%d%d\n",readBit(header->extendedHeader->restrictions, 7),
 //                             readBit(header->extendedHeader->restrictions, 6),
 //                             readBit(header->extendedHeader->restrictions, 5),
@@ -884,7 +909,10 @@ int main(){
         cmocka_unit_test(id3v2ClearTagRestrictions_clear),
 
         // tag create/destroy
-        cmocka_unit_test(id3v2TagCreateAndDestroy_AllInOne)
+        cmocka_unit_test(id3v2TagCreateAndDestroy_AllInOne),
+
+        // id3v2ExtendedTagHeader tests
+        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v3noCRC)
 
     };
 

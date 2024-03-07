@@ -33,9 +33,9 @@ else:
 update.message("Compiling id3v1_test program")
 #compile_code("id3v1_test")
 update.message("Compiling id3v2_tag_identity_test program")
-#compile_code("id3v2_tag_identity_test")
+compile_code("id3v2_tag_identity_test")
 update.message("Compiling id3v2_context_test program")
-compile_code("id3v2_context_test")
+#compile_code("id3v2_context_test")
 update.message("Compiling id3v2_parser_test program")
 #compile_code("id3v2_parser_test")
 update.message("Compiling id3v2_frame_test program")
@@ -71,8 +71,8 @@ try:
             os.environ["MallocStackLogging"] = "1"
 
             #subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v1_test"])
-            #subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_tag_identity_test"])
-            subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_context_test"])
+            subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_tag_identity_test"])
+            #subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_context_test"])
             #subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_parser_test"])
             #subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_frame_test"])
 

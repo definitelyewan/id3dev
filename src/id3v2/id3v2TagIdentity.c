@@ -3,6 +3,7 @@
 #include <string.h>
 #include "byteInt.h"
 #include "id3v2TagIdentity.h"
+#include "byteStream.h"
 
 /**
  * @brief Creates an inits a tag header structure.
@@ -622,4 +623,74 @@ void id3v2DestroyTag(Id3v2Tag **toDelete){
         toDelete = NULL;
     }
 
+}
+
+
+ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t version){
+    
+    ByteStream *stream = NULL;
+    int buildSize = 0;
+    unsigned char *tmp = NULL;
+
+    if(ext == NULL){
+        return stream;
+    }
+    
+    switch(version){
+        
+        case ID3V2_TAG_VERSION_3:
+
+            buildSize = 10;
+
+            if(ext->crc == 0){
+                buildSize += 4;
+            }
+
+            stream = byteStreamCreate(NULL, buildSize);
+
+            tmp = (unsigned char *) itob(buildSize);
+            byteStreamWrite(stream, tmp, 4);
+            free(tmp);
+
+            byteStreamWriteBit(stream, (ext->crc > 0) ? 1 : 0, 7);
+            byteStreamSeek(stream, 1, SEEK_CUR);
+
+            tmp = sttob(ext->padding);
+            byteStreamWrite(stream, tmp, 4);
+            free(tmp);
+
+            if(ext->crc == 0){
+                tmp = sttob(ext->crc);
+                byteStreamWrite(stream, tmp, 4);
+                free(tmp);
+            }
+            
+            break;
+
+        case ID3V2_TAG_VERSION_4:
+
+
+            break;
+
+        // no support or it does not exist
+        case ID3V2_TAG_VERSION_2:
+        default:
+            break;
+    }
+
+    byteStreamRewind(stream);
+    return stream;
+}
+
+char *id3v2ExtendedTagHeaderToJSON(Id3v2ExtendedTagHeader *stream){
+    return NULL;
+}
+
+ByteStream *id3v2TagHeaderToStream(Id3v2TagHeader *header, uint32_t uintSize){    
+    
+    return NULL;
+}
+
+char *id3v2TagHeaderToJSON(Id3v2TagHeader *header, uint32_t uintSize){
+    return NULL;
 }
