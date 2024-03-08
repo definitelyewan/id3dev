@@ -4,6 +4,7 @@
 #include "byteInt.h"
 #include "id3v2TagIdentity.h"
 #include "byteStream.h"
+#include "byteInt.h"
 
 /**
  * @brief Creates an inits a tag header structure.
@@ -625,12 +626,21 @@ void id3v2DestroyTag(Id3v2Tag **toDelete){
 
 }
 
-
+/**
+ * @brief Converts an extended tag header into a stream. if this function fails it will
+ * return NULL otherwise, a stream.
+ * 
+ * @param ext 
+ * @param version 
+ * @return ByteStream* 
+ */
 ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t version){
     
     ByteStream *stream = NULL;
     int buildSize = 0;
     unsigned char *tmp = NULL;
+    uint8_t flags = 0;
+    int offset = 0;
 
     if(ext == NULL){
         return stream;
@@ -642,7 +652,7 @@ ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t 
 
             buildSize = 10;
 
-            if(ext->crc == 0){
+            if(ext->crc != 0){
                 buildSize += 4;
             }
 
@@ -653,14 +663,14 @@ ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t 
             free(tmp);
 
             byteStreamWriteBit(stream, (ext->crc > 0) ? 1 : 0, 7);
-            byteStreamSeek(stream, 1, SEEK_CUR);
+            byteStreamSeek(stream, 2, SEEK_CUR);
 
-            tmp = sttob(ext->padding);
+            tmp = u32tob(ext->padding);
             byteStreamWrite(stream, tmp, 4);
             free(tmp);
 
-            if(ext->crc == 0){
-                tmp = sttob(ext->crc);
+            if(ext->crc != 0){
+                tmp = u32tob(ext->crc);
                 byteStreamWrite(stream, tmp, 4);
                 free(tmp);
             }
@@ -669,6 +679,72 @@ ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t 
 
         case ID3V2_TAG_VERSION_4:
 
+            buildSize = 6;
+
+            stream = byteStreamCreate(NULL, buildSize);
+
+            byteStreamSeek(stream, 5, SEEK_SET);
+
+            byteStreamWriteBit(stream, ext->update, 6);
+
+            if(ext->crc){
+                byteStreamWriteBit(stream, 1, 5);
+                flags += 5;
+                buildSize += 5;
+            }
+            
+            if(ext->tagRestrictions){
+                byteStreamWriteBit(stream, ext->tagRestrictions, 4);
+                flags++;
+                buildSize++;
+            }
+            
+            
+
+            // flags are set more space is needed
+            if(buildSize > 6){
+                
+                byteStreamSeek(stream, 4, SEEK_SET);
+                byteStreamResize(stream, buildSize);
+
+                tmp = (unsigned char *) itob(flags);
+                byteStreamWrite(stream, &tmp[3], 1);
+                free(tmp);
+            }
+
+            // write size
+            byteStreamSeek(stream, 0, SEEK_SET);
+            tmp = (unsigned char *) itob(buildSize);
+            byteStreamWrite(stream, tmp, 4);
+            free(tmp);
+
+
+            if(buildSize <= 6){
+                break;
+            }
+
+            // write crc *******NEEDS FIXING*****
+            tmp = u32tob(byteSyncintEncode(ext->crc));
+
+            for(int i = 0; i < sizeof(uint32_t); i++){
+                printf("[%x]",tmp[i]);
+            }
+            printf("<-----\n");
+
+            // for(offset = 0; offset < sizeof(size_t); offset++){
+            //     if(tmp[offset] != 0){
+            //         break;
+            //     }
+            // }
+            // offset--;
+
+            // byteStreamSeek(stream, 6, SEEK_SET);
+            // byteStreamWrite(stream, tmp + offset, 5);
+            free(tmp);
+
+
+            // write tag restrictions
+            byteStreamWrite(stream, &ext->restrictions, 1);
 
             break;
 

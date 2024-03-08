@@ -486,8 +486,8 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
  * @return uint32_t 
  */
 uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3v2Frame **frame){
+    
     if(!stream || !context){
-        printf("[*] Invalid data passed (likely context)\n");
         *frame = NULL;
         return 0;
     }

@@ -755,23 +755,88 @@ static void id3v2TagCreateAndDestroy_AllInOne(void **state){
 
 static void id3v2ExtendedTagHeaderToStream_v3noCRC(void **state){
 
-    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(100, UINT32_MAX, 0,0,0);
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(100, 0, 0, 0, 0);
     ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_3);
 
-    byteStreamPrintf("%x", stream);
     assert_int_equal(byteStreamReturnInt(stream), 10);
 
-    byteStreamPrintf("%x", stream);
-    assert_int_equal(byteStreamGetCh(stream), 0x80);
+    assert_int_equal(byteStreamGetCh(stream), 0);
     byteStreamSeek(stream, 1, SEEK_CUR);
     assert_int_equal(byteStreamGetCh(stream), 0);
     byteStreamSeek(stream, 1, SEEK_CUR);
 
-    byteStreamPrintf("%x", stream);
     assert_int_equal(byteStreamReturnInt(stream), 100);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyExtendedTagHeader(&ext);
+}
+
+static void id3v2ExtendedTagHeaderToStream_v3CRC(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(UINT32_MAX, UINT32_MAX, 1,1,1);
+    ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_3);
+
+    assert_int_equal(byteStreamReturnInt(stream), 14);
+
+    assert_int_equal(byteStreamGetCh(stream), 0x80);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamGetCh(stream), 0);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamReturnU32(stream), UINT32_MAX);
+    assert_int_equal(byteStreamReturnU32(stream), UINT32_MAX);
     
+    byteStreamDestroy(stream);
+    id3v2DestroyExtendedTagHeader(&ext);
+}
+
+static void id3v2ExtendedTagHeaderToStream_null(void **state){
+
+    ByteStream *stream = id3v2ExtendedTagHeaderToStream(NULL, ID3V2_TAG_VERSION_3);
+
+    assert_null(stream);
+
+}
+
+
+static void id3v2ExtendedTagHeaderToStream_v4WithEverything(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(UINT32_MAX, UINT32_MAX, 1,1,0xfe);
+    ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_4);
 
     byteStreamPrintf("%x", stream);
+    
+    assert_int_equal(byteStreamReturnInt(stream), 12);
+
+    byteStreamPrintf("%x", stream);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 6);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    byteStreamPrintf("%x", stream);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0x70);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    byteStreamPrintf("%x", stream);
+
+
+    unsigned char tmp[5] = {0,0,0,0,0};
+    byteStreamRead(stream, tmp, 5);
+    printf("[%x][%x][%x][%x][%x]<---\n",tmp[0],tmp[1],tmp[2],tmp[3],tmp[4]);
+
+    byteStreamPrintf("%x", stream);
+    assert_int_equal(btost(tmp, 5), byteSyncintEncode(UINT32_MAX));
+    byteStreamSeek(stream, 5, SEEK_CUR);
+
+    
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0xfe);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    byteStreamPrintf("%x", stream);
+
     byteStreamDestroy(stream);
     id3v2DestroyExtendedTagHeader(&ext);
 }
@@ -912,7 +977,10 @@ int main(){
         cmocka_unit_test(id3v2TagCreateAndDestroy_AllInOne),
 
         // id3v2ExtendedTagHeader tests
-        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v3noCRC)
+        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v3noCRC),
+        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v3CRC),
+        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_null),
+        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v4WithEverything)
 
     };
 
