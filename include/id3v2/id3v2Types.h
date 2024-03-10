@@ -20,6 +20,7 @@ extern "C" {
 #include "byteTypes.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include <inttypes.h>
 
 // data structures
 

@@ -1648,22 +1648,37 @@ ByteStream *id3v2ContextToStream(Id3v2ContentContext *cc){
     return stream;
 }
 
+/**
+ * @brief Converts a context structure into its representation in JSON.
+ * 
+ * @param cc 
+ * @return char* 
+ */
 char *id3v2ContextToJSON(Id3v2ContentContext *cc){
     
     char *json = NULL;
     size_t memCount = 3;
     if(cc == NULL){
-        json = malloc(sizeof(char) * memCount);
+        json = calloc(memCount, sizeof(char));
         memcpy(json, "{}\0", memCount);
         return json;
     }
 
-    memCount += (sizeof(size_t) * 3) + 1 + 28;
+    memCount += snprintf(NULL, 0, 
+                        "{\"type\":%d,\"key\":%ld,\"max\":%ld,\"min\":%ld}", 
+                        cc->type, 
+                        cc->key, 
+                        cc->max, 
+                        cc->min);
 
-    json = malloc(sizeof(char) * memCount);
-    memset(json, 0, memCount);
+    json = calloc(memCount + 1, sizeof(char));
 
-    sprintf(json, "{\"type\":%d,\"key\":%ld,\"max\":%ld,\"min\":%ld}", cc->type, cc->key, cc->max, cc->min);
+    snprintf(json, memCount, 
+            "{\"type\":%d,\"key\":%ld,\"max\":%ld,\"min\":%ld}", 
+            cc->type, 
+            cc->key, 
+            cc->max, 
+            cc->min);
 
     return json;
 }

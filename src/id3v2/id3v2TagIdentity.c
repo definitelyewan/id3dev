@@ -637,11 +637,12 @@ void id3v2DestroyTag(Id3v2Tag **toDelete){
 ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t version){
     
     ByteStream *stream = NULL;
+    int offset = 0;
+    int toWrite = 0;
     int buildSize = 0;
     unsigned char *tmp = NULL;
-    uint8_t flags = 0;
-    int offset = 0;
-
+    unsigned char crcb[5] = {0,0,0,0,0};
+    
     if(ext == NULL){
         return stream;
     }
@@ -650,11 +651,8 @@ ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t 
         
         case ID3V2_TAG_VERSION_3:
 
-            buildSize = 10;
-
-            if(ext->crc != 0){
-                buildSize += 4;
-            }
+            // size
+            buildSize = 10 + ((ext->crc) ? 4 : 0);
 
             stream = byteStreamCreate(NULL, buildSize);
 
@@ -662,14 +660,16 @@ ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t 
             byteStreamWrite(stream, tmp, 4);
             free(tmp);
 
+            // flag
             byteStreamWriteBit(stream, (ext->crc > 0) ? 1 : 0, 7);
             byteStreamSeek(stream, 2, SEEK_CUR);
-
+            
+            // crc
             tmp = u32tob(ext->padding);
             byteStreamWrite(stream, tmp, 4);
             free(tmp);
 
-            if(ext->crc != 0){
+            if(ext->crc){
                 tmp = u32tob(ext->crc);
                 byteStreamWrite(stream, tmp, 4);
                 free(tmp);
@@ -679,72 +679,51 @@ ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t 
 
         case ID3V2_TAG_VERSION_4:
 
-            buildSize = 6;
+            buildSize = 6 + ((ext->crc) ? 5 : 0)  + ((ext->tagRestrictions) ? 1 : 0);
 
             stream = byteStreamCreate(NULL, buildSize);
 
-            byteStreamSeek(stream, 5, SEEK_SET);
 
-            byteStreamWriteBit(stream, ext->update, 6);
-
-            if(ext->crc){
-                byteStreamWriteBit(stream, 1, 5);
-                flags += 5;
-                buildSize += 5;
-            }
-            
-            if(ext->tagRestrictions){
-                byteStreamWriteBit(stream, ext->tagRestrictions, 4);
-                flags++;
-                buildSize++;
-            }
-            
-            
-
-            // flags are set more space is needed
-            if(buildSize > 6){
-                
-                byteStreamSeek(stream, 4, SEEK_SET);
-                byteStreamResize(stream, buildSize);
-
-                tmp = (unsigned char *) itob(flags);
-                byteStreamWrite(stream, &tmp[3], 1);
-                free(tmp);
-            }
-
-            // write size
-            byteStreamSeek(stream, 0, SEEK_SET);
-            tmp = (unsigned char *) itob(buildSize);
+            // ext size
+            tmp = u32tob(buildSize);
             byteStreamWrite(stream, tmp, 4);
             free(tmp);
 
-
-            if(buildSize <= 6){
-                break;
-            }
-
-            // write crc *******NEEDS FIXING*****
-            tmp = u32tob(byteSyncintEncode(ext->crc));
-
-            for(int i = 0; i < sizeof(uint32_t); i++){
-                printf("[%x]",tmp[i]);
-            }
-            printf("<-----\n");
-
-            // for(offset = 0; offset < sizeof(size_t); offset++){
-            //     if(tmp[offset] != 0){
-            //         break;
-            //     }
-            // }
-            // offset--;
-
-            // byteStreamSeek(stream, 6, SEEK_SET);
-            // byteStreamWrite(stream, tmp + offset, 5);
+            // flag bytes
+            tmp = (unsigned char *) itob(buildSize - 6);
+            byteStreamWrite(stream, &tmp[3], 1);
             free(tmp);
 
+            // flags
+            byteStreamWriteBit(stream, ext->update, 6);
+            byteStreamWriteBit(stream, (ext->crc > 0) ? 1 : 0, 5);
+            byteStreamWriteBit(stream, ext->tagRestrictions, 4);
+            byteStreamSeek(stream, 1, SEEK_CUR);
 
-            // write tag restrictions
-            byteStreamWrite(stream, &ext->restrictions, 1);
+            // crc
+            if(ext->crc){
+                tmp = sttob(byteSyncintEncode(ext->crc));
+
+                while(offset < sizeof(size_t) && tmp[offset] == 0){
+                    offset++;
+                }
+
+                // c4c is 5 bytes if the 0s are there they must be kept
+                if(offset > 3){
+                    offset = 3;
+                }
+
+                toWrite = sizeof(size_t) - offset > 5 ? 5 : sizeof(size_t) - offset;
+                memcpy(crcb, tmp + offset, toWrite);
+
+                byteStreamSeek(stream, 6, SEEK_SET);
+                byteStreamWrite(stream, crcb, 5);
+                free(tmp);
+            }
+
+            if(ext->tagRestrictions){
+                byteStreamWrite(stream, &ext->restrictions, 1);
+            }
 
             break;
 
@@ -758,8 +737,72 @@ ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t 
     return stream;
 }
 
-char *id3v2ExtendedTagHeaderToJSON(Id3v2ExtendedTagHeader *stream){
-    return NULL;
+/**
+ * @brief Converts an extended tag header into its structures representation as JSON.
+ * 
+ * @param ext 
+ * @param version 
+ * @return char* 
+ */
+char *id3v2ExtendedTagHeaderToJSON(Id3v2ExtendedTagHeader *ext, uint8_t version){
+    
+    char *json = NULL;
+    size_t memCount = 3;
+
+    if(ext == NULL){
+        json = calloc(memCount, sizeof(char));
+        memcpy(json, "{}\0", memCount);
+        return json;
+    }
+
+    switch(version){
+        case ID3V2_TAG_VERSION_3:
+
+            memCount += snprintf(NULL, 0,
+                                "{\"padding\":%"PRIu32",\"crc\":%"PRIu32"}",
+                                ext->padding,
+                                ext->crc);
+
+            json = calloc(memCount + 1, sizeof(char));
+
+            snprintf(json, memCount,
+                     "{\"padding\":%"PRIu32",\"crc\":%"PRIu32"}",
+                     ext->padding,
+                     ext->crc);
+
+            break;
+        case ID3V2_TAG_VERSION_4:
+            
+            memCount += snprintf(NULL, 0,
+                                "{\"padding\":%"PRIu32",\"crc\":%"PRIu32",\"update\":%s,\"tagRestrictions\":%s,\"restrictions\":%d}",
+                                ext->padding,
+                                ext->crc, 
+                                ext->update ? "true" : "false", 
+                                ext->tagRestrictions ? "true" : "false",
+                                ext->restrictions);
+
+            json = calloc(memCount + 1, sizeof(char));
+
+            snprintf(json, memCount,
+                     "{\"padding\":%"PRIu32",\"crc\":%"PRIu32",\"update\":%s,\"tagRestrictions\":%s,\"restrictions\":%d}",
+                     ext->padding,
+                     ext->crc, 
+                     ext->update ? "true" : "false", 
+                     ext->tagRestrictions ? "true" : "false",
+                     ext->restrictions);
+
+            break;
+
+        // no support
+        case ID3V2_TAG_VERSION_2:
+        default:
+            json = malloc(sizeof(char) * memCount);
+            memcpy(json, "{}\0", memCount);
+            break;
+    }
+    
+    
+    return json;
 }
 
 ByteStream *id3v2TagHeaderToStream(Id3v2TagHeader *header, uint32_t uintSize){    
