@@ -86,7 +86,7 @@ ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t 
 char *id3v2ExtendedTagHeaderToJSON(Id3v2ExtendedTagHeader *ext, uint8_t version);
 
 ByteStream *id3v2TagHeaderToStream(Id3v2TagHeader *header, uint32_t uintSize);
-char *id3v2TagHeaderToJSON(Id3v2TagHeader *header, uint32_t uintSize);
+char *id3v2TagHeaderToJSON(Id3v2TagHeader *header);
 
 
 
