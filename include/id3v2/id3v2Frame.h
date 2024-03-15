@@ -68,6 +68,13 @@ bool id3v2AttachFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame);
 Id3v2Frame *id3v2DetatchFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame);
 
 
+/*
+    output
+*/
+
+ByteStream *id3v2FrameHeaderToStream(Id3v2FrameHeader *header, uint8_t version, uint32_t frameSize);
+char *id3v2FrameHeaderToJSON(Id3v2FrameHeader *header, uint8_t version);
+
 
 #ifdef __cplusplus
 } //extern c end

@@ -9,6 +9,7 @@
 #include <limits.h>
 #include "id3v2.h"
 #include "byteStream.h"
+#include "byteInt.h"
 
 
 static void id3v2CreateAndDestroyFrameHeader_allInOne(void **state){
@@ -374,6 +375,223 @@ static void id3v2DetatchFrameFromTag_TIT2(void **state){
     assert_false(exit);
 }
 
+static void id3v2FrameHeaderToStream_null(void **state){
+
+    ByteStream *stream = id3v2FrameHeaderToStream(NULL, 0, 0);
+    
+    assert_null(stream);
+}
+
+static void id3v2FrameHeaderToStream_v2(void **state){
+
+    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *)"TT2", false, false, false, false, 0, 0, 0);
+    ByteStream *stream = id3v2FrameHeaderToStream(frameHeader, ID3V2_TAG_VERSION_2, 100);
+
+    assert_memory_equal("TT2", byteStreamCursor(stream), 3);
+    byteStreamSeek(stream, 3, SEEK_CUR);
+
+    assert_memory_equal("\x00\x00\x64", byteStreamCursor(stream), 3);
+    byteStreamSeek(stream, 3, SEEK_CUR);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&frameHeader);
+}
+
+static void id3v2FrameHeaderToStream_v3(void **state){
+
+    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *)"TIT2", false, false, false, false, 0, 0, 0);
+    ByteStream *stream = id3v2FrameHeaderToStream(frameHeader, ID3V2_TAG_VERSION_3, 300);
+
+    assert_memory_equal("TIT2", byteStreamCursor(stream), 4);
+    byteStreamSeek(stream, 4, SEEK_CUR);
+
+    assert_int_equal(300, byteStreamReturnU32(stream));
+
+    assert_memory_equal("\x00\x00", byteStreamCursor(stream), 2);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&frameHeader);
+}
+
+static void id3v2FrameHeaderToStream_v3AllFlags(void **state){
+
+    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *)"TALB", true, true, true, false, 500, 0x0F, 0xFF);
+    ByteStream *stream = id3v2FrameHeaderToStream(frameHeader, ID3V2_TAG_VERSION_3, 600);
+
+    
+
+    assert_memory_equal("TALB", byteStreamCursor(stream), 4);
+    byteStreamSeek(stream, 4, SEEK_CUR);
+
+    assert_int_equal(600, byteStreamReturnU32(stream));
+
+    assert_int_equal(0xE0, byteStreamCursor(stream)[0]);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(0xE0, byteStreamCursor(stream)[0]);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(500, byteStreamReturnU32(stream));
+
+    assert_int_equal(0x0F, byteStreamCursor(stream)[0]);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(0xFF, byteStreamCursor(stream)[0]);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&frameHeader);
+}
+
+static void id3v2FrameHeaderToStream_v3OnlySymbols(void **state){
+
+    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *)"TALB", false, false, false, false, 0, 0xAF, 0x56);
+    ByteStream *stream = id3v2FrameHeaderToStream(frameHeader, ID3V2_TAG_VERSION_3, 100);
+
+    assert_memory_equal("TALB", byteStreamCursor(stream), 4);
+    byteStreamSeek(stream, 4, SEEK_CUR);
+
+    assert_int_equal(100, byteStreamReturnU32(stream));
+
+    assert_int_equal(0x00, byteStreamCursor(stream)[0]);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(0x60, byteStreamCursor(stream)[0]);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(0xAF, byteStreamCursor(stream)[0]);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(0x56, byteStreamCursor(stream)[0]);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&frameHeader);
+}
+
+static void id3v2FrameHeaderToStream_v4(void **state){
+
+    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *)"TSOA", false, false, false, false, 0, 0, 0);
+    ByteStream *stream = id3v2FrameHeaderToStream(frameHeader, ID3V2_TAG_VERSION_3, 100);
+
+    assert_memory_equal("TSOA", byteStreamCursor(stream), 4);
+    byteStreamSeek(stream, 4, SEEK_CUR);
+
+    assert_int_equal(100, byteStreamReturnSyncInt(stream));
+
+    assert_memory_equal("\x00\x00", byteStreamCursor(stream), 2);
+    byteStreamSeek(stream, 2, SEEK_CUR);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&frameHeader);
+}
+
+static void id3v2FrameHeaderToStream_v4AllFlags(void **state){
+
+    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *)"TSOA", true, true, true, true, 12345, 0x11, 0x22);
+    ByteStream *stream = id3v2FrameHeaderToStream(frameHeader, ID3V2_TAG_VERSION_4, 500);
+
+    assert_memory_equal("TSOA", byteStreamCursor(stream), 4);
+    byteStreamSeek(stream, 4, SEEK_CUR);
+
+    assert_int_equal(500, byteStreamReturnSyncInt(stream));
+
+    assert_memory_equal("\x70\x4F", byteStreamCursor(stream), 2);
+    byteStreamSeek(stream, 2, SEEK_CUR);
+
+    assert_int_equal(0x22, byteStreamCursor(stream)[0]);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(0x11, byteStreamCursor(stream)[0]);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(12345, byteStreamReturnU32(stream));
+
+    byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&frameHeader);
+}
+
+static void id3v2FrameHeaderToStream_v4NoUnsync(void **state){
+
+    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *)"TSOA", true, true, true, false, 12345, 0x11, 0x22);
+    ByteStream *stream = id3v2FrameHeaderToStream(frameHeader, ID3V2_TAG_VERSION_4, 500);
+
+    assert_memory_equal("TSOA", byteStreamCursor(stream), 4);
+    byteStreamSeek(stream, 4, SEEK_CUR);
+
+    assert_int_equal(500, byteStreamReturnSyncInt(stream));
+
+    assert_memory_equal("\x70\x4D", byteStreamCursor(stream), 2);
+    byteStreamSeek(stream, 2, SEEK_CUR);
+
+    assert_int_equal(0x22, byteStreamCursor(stream)[0]);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(0x11, byteStreamCursor(stream)[0]);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(12345, byteStreamReturnU32(stream));
+
+    byteStreamDestroy(stream);
+    id3v2DestroyFrameHeader(&frameHeader);
+}
+
+static void id3v2FrameHeaderToJSON_null(void **state){
+
+    char *json = id3v2FrameHeaderToJSON(NULL, 10);
+
+    assert_string_equal("{}", json);
+
+    free(json);
+}
+
+static void id3v2FrameHeaderToJSON_v2(void **state){
+
+    Id3v2FrameHeader *frame = id3v2CreateFrameHeader((uint8_t *)"TT1", false, false, false, false, 0, 0, 0);
+    char *json = id3v2FrameHeaderToJSON(frame, ID3V2_TAG_VERSION_2);
+
+    assert_string_equal("{\"id\":\"TT1\"}", 
+                        json);
+
+    free(json);
+    id3v2DestroyFrameHeader(&frame);
+}
+
+static void id3v2FrameHeaderToJSON_v3(void **state){
+
+    Id3v2FrameHeader *frame = id3v2CreateFrameHeader((uint8_t *)"TIT1", false, false, false, false, 0, 0, 0);
+    char *json = id3v2FrameHeaderToJSON(frame, ID3V2_TAG_VERSION_3);
+
+    assert_string_equal("{\"id\":\"TIT1\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0}", 
+                        json);
+
+    free(json);
+    id3v2DestroyFrameHeader(&frame);
+}
+
+static void id3v2FrameHeaderToJSON_v3Symbol(void **state){
+
+    Id3v2FrameHeader *frame = id3v2CreateFrameHeader((uint8_t *)"TIT1", false, false, false, false, 0, 20, 0);
+    char *json = id3v2FrameHeaderToJSON(frame, ID3V2_TAG_VERSION_3);
+
+    assert_string_equal("{\"id\":\"TIT1\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"decompressionSize\":0,\"encryptionSymbol\":20,\"groupSymbol\":0}", 
+                        json);
+
+    free(json);
+    id3v2DestroyFrameHeader(&frame);
+}
+
+static void id3v2FrameHeaderToJSON_v4WithUnsync(void **state){
+
+    Id3v2FrameHeader *frame = id3v2CreateFrameHeader((uint8_t *)"TIT1", false, false, false, true, 0, 0, 0);
+    char *json = id3v2FrameHeaderToJSON(frame, ID3V2_TAG_VERSION_4);
+
+    assert_string_equal("{\"id\":\"TIT1\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"unsynchronisation\":true,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0}", 
+                        json);
+
+    free(json);
+    id3v2DestroyFrameHeader(&frame);
+}
 
 int main(){
 
@@ -391,7 +609,25 @@ int main(){
         cmocka_unit_test(id3v2WriteFrameEntry_greatestHits),
         cmocka_unit_test(id3v2WriteFrameEntry_updateTitle),
         cmocka_unit_test(id3v2AtatchFrameFromTag_TSOA),
-        cmocka_unit_test(id3v2DetatchFrameFromTag_TIT2)
+        cmocka_unit_test(id3v2DetatchFrameFromTag_TIT2),
+
+        // id3v2FrameHeaderToStream
+        cmocka_unit_test(id3v2FrameHeaderToStream_null),
+        cmocka_unit_test(id3v2FrameHeaderToStream_v2),
+        cmocka_unit_test(id3v2FrameHeaderToStream_v3),
+        cmocka_unit_test(id3v2FrameHeaderToStream_v3AllFlags),
+        cmocka_unit_test(id3v2FrameHeaderToStream_v3OnlySymbols),
+        cmocka_unit_test(id3v2FrameHeaderToStream_v4),
+        cmocka_unit_test(id3v2FrameHeaderToStream_v4AllFlags),
+        cmocka_unit_test(id3v2FrameHeaderToStream_v4NoUnsync),
+
+        // id3v2FrameHeaderToJSON
+        cmocka_unit_test(id3v2FrameHeaderToJSON_null),
+        cmocka_unit_test(id3v2FrameHeaderToJSON_v2),
+        cmocka_unit_test(id3v2FrameHeaderToJSON_v3),
+        cmocka_unit_test(id3v2FrameHeaderToJSON_v3Symbol),
+        cmocka_unit_test(id3v2FrameHeaderToJSON_v4WithUnsync)
+
 
     };
 

@@ -5,6 +5,7 @@
 #include "id3v2Context.h"
 #include "byteInt.h"
 #include "byteUnicode.h"
+#include "byteStream.h"
 
 /**
  * @brief Creates an ID3v2 frame header structure
@@ -25,7 +26,6 @@ Id3v2FrameHeader *id3v2CreateFrameHeader(uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], bo
     for(int i = 0; i < ID3V2_FRAME_ID_MAX_SIZE; i++){
         h->id[i] = id[i];
     }
-
 
     h->tagAlterPreservation = tagAlter;
     h->fileAlterPreservation = fileAlter;
@@ -798,4 +798,229 @@ Id3v2Frame *id3v2DetatchFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame){
     }
 
     return listDeleteData(tag->frames, (void *) frame);
+}
+
+
+/**
+ * @brief Converts a frame header into its binary representation. If this 
+ * function fails it will return NULL otherwise, a ByteStream structure.
+ * 
+ * @param header 
+ * @param version 
+ * @param frameSize 
+ * @return ByteStream* 
+ */
+ByteStream *id3v2FrameHeaderToStream(Id3v2FrameHeader *header, uint8_t version, uint32_t frameSize){
+
+    unsigned char *tmp = NULL;
+    ByteStream *stream = NULL;
+
+    if(header == NULL || version > ID3V2_TAG_VERSION_4){
+        return stream;
+    }
+
+    switch(version){
+        case ID3V2_TAG_VERSION_2:
+
+            // size of header for this version is always 6 bytes.
+            stream = byteStreamCreate(NULL, 6);
+
+            byteStreamWrite(stream, header->id, ID3V2_FRAME_ID_MAX_SIZE - 1);
+            
+            tmp = u32tob(frameSize);
+            byteStreamWrite(stream, tmp + 1, 3);
+            free(tmp);
+
+            break;
+        case ID3V2_TAG_VERSION_3:
+            
+            // base header is always 10 bytes.
+            stream = byteStreamCreate(NULL, 10);
+
+            byteStreamWrite(stream, header->id, ID3V2_FRAME_ID_MAX_SIZE);
+
+            tmp = u32tob(frameSize);
+            byteStreamWrite(stream, tmp, 4);
+            free(tmp);
+
+            byteStreamWriteBit(stream, header->tagAlterPreservation, 7);
+            byteStreamWriteBit(stream, header->fileAlterPreservation, 6);
+            byteStreamWriteBit(stream, header->readOnly, 5);
+            byteStreamSeek(stream, 1, SEEK_CUR);
+
+            byteStreamWriteBit(stream, (header->decompressionSize > 0) ? true : false, 7);
+            byteStreamWriteBit(stream, (header->encryptionSymbol > 0) ? true : false, 6);
+            byteStreamWriteBit(stream, (header->groupSymbol > 0) ? true : false, 5);
+            byteStreamSeek(stream, 1, SEEK_CUR);
+
+            if(header->decompressionSize > 0){
+                byteStreamResize(stream, stream->bufferSize + 4);
+                tmp = u32tob(header->decompressionSize);
+                byteStreamWrite(stream, tmp, 4);
+                free(tmp);
+            }
+
+            if(header->encryptionSymbol > 0){
+                byteStreamResize(stream, stream->bufferSize + 1);
+                byteStreamWrite(stream, &header->encryptionSymbol, 1);
+            }
+
+            if(header->groupSymbol > 0){
+                byteStreamResize(stream, stream->bufferSize + 1);
+                byteStreamWrite(stream, &header->groupSymbol, 1);
+            }
+
+            break;
+        case ID3V2_TAG_VERSION_4:
+
+            // base header is always 10 bytes.
+            stream = byteStreamCreate(NULL, 10);
+
+            byteStreamWrite(stream, header->id, ID3V2_FRAME_ID_MAX_SIZE);
+
+            tmp = u32tob(byteSyncintEncode(frameSize));
+            byteStreamWrite(stream, tmp, 4);
+            free(tmp);
+
+            byteStreamWriteBit(stream, header->tagAlterPreservation, 6);
+            byteStreamWriteBit(stream, header->fileAlterPreservation, 5);
+            byteStreamWriteBit(stream, header->readOnly, 4);
+            byteStreamSeek(stream, 1, SEEK_CUR);
+
+            byteStreamWriteBit(stream, (header->groupSymbol > 0) ? true : false, 6);
+            byteStreamWriteBit(stream, (header->decompressionSize > 0) ? true : false, 3);
+            byteStreamWriteBit(stream, (header->encryptionSymbol > 0) ? true : false, 2);
+            byteStreamWriteBit(stream, (header->unsynchronisation > 0) ? true : false, 1);
+            byteStreamWriteBit(stream, (header->decompressionSize > 0) ? true : false, 0);
+            byteStreamSeek(stream, 1, SEEK_CUR);
+
+            if(header->groupSymbol > 0){
+                byteStreamResize(stream, stream->bufferSize + 1);
+                byteStreamWrite(stream, &header->groupSymbol, 1);
+            }
+
+            if(header->encryptionSymbol > 0){
+                byteStreamResize(stream, stream->bufferSize + 1);
+                byteStreamWrite(stream, &header->encryptionSymbol, 1);
+            }
+
+            if(header->decompressionSize > 0){
+                byteStreamResize(stream, stream->bufferSize + 4);
+                tmp = u32tob(header->decompressionSize);
+                byteStreamWrite(stream, tmp, 4);
+                free(tmp);
+            }
+
+            break;
+        default:
+            return stream;
+    }
+
+
+    byteStreamRewind(stream);
+    return stream;
+}
+
+char *id3v2FrameHeaderToJSON(Id3v2FrameHeader *header, uint8_t version){
+
+    char *json = NULL;
+    size_t memCount = 3;
+
+    if(header == NULL){
+        json = calloc(memCount, sizeof(char));
+        memcpy(json, "{}\0", memCount);
+        return json;
+    }
+
+    switch(version){
+        case ID3V2_TAG_VERSION_2:
+
+            memCount += snprintf(NULL, 0,
+                                "{\"id\":\"%c%c%c\"}",
+                                header->id[0],
+                                header->id[1],
+                                header->id[2]);
+
+            json = calloc(memCount + 1, sizeof(char)); 
+
+            snprintf(json, memCount,
+                    "{\"id\":\"%c%c%c\"}",
+                    header->id[0],
+                    header->id[1],
+                    header->id[2]);
+
+            break;
+        case ID3V2_TAG_VERSION_3:
+
+            memCount += snprintf(NULL, 0,
+                                "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"decompressionSize\":%"PRId32",\"encryptionSymbol\":%d,\"groupSymbol\":%d}",
+                                header->id[0],
+                                header->id[1],
+                                header->id[2],
+                                header->id[3],
+                                ((header->tagAlterPreservation == true) ? "true" : "false"),
+                                ((header->fileAlterPreservation == true) ? "true" : "false"),
+                                ((header->readOnly == true) ? "true" : "false"),
+                                header->decompressionSize,
+                                header->encryptionSymbol,
+                                header->groupSymbol);
+            
+            json = calloc(memCount + 1, sizeof(char));
+
+            snprintf(json, memCount,
+                    "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"decompressionSize\":%"PRId32",\"encryptionSymbol\":%d,\"groupSymbol\":%d}",
+                    header->id[0],
+                    header->id[1],
+                    header->id[2],
+                    header->id[3],
+                    ((header->tagAlterPreservation == true) ? "true" : "false"),
+                    ((header->fileAlterPreservation == true) ? "true" : "false"),
+                    ((header->readOnly == true) ? "true" : "false"),
+                    header->decompressionSize,
+                    header->encryptionSymbol,
+                    header->groupSymbol);
+
+            break;
+        case ID3V2_TAG_VERSION_4:
+
+            memCount += snprintf(NULL, 0,
+                                "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"unsynchronisation\":%s,\"decompressionSize\":%"PRId32",\"encryptionSymbol\":%d,\"groupSymbol\":%d}",
+                                header->id[0],
+                                header->id[1],
+                                header->id[2],
+                                header->id[3],
+                                ((header->tagAlterPreservation == true) ? "true" : "false"),
+                                ((header->fileAlterPreservation == true) ? "true" : "false"),
+                                ((header->readOnly == true) ? "true" : "false"),
+                                ((header->unsynchronisation == true) ? "true" : "false"),
+                                header->decompressionSize,
+                                header->encryptionSymbol,
+                                header->groupSymbol);
+
+            json = calloc(memCount + 1, sizeof(char));
+
+            snprintf(json, memCount,
+                    "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"unsynchronisation\":%s,\"decompressionSize\":%"PRId32",\"encryptionSymbol\":%d,\"groupSymbol\":%d}",
+                    header->id[0],
+                    header->id[1],
+                    header->id[2],
+                    header->id[3],
+                    ((header->tagAlterPreservation == true) ? "true" : "false"),
+                    ((header->fileAlterPreservation == true) ? "true" : "false"),
+                    ((header->readOnly == true) ? "true" : "false"),
+                    ((header->unsynchronisation == true) ? "true" : "false"),
+                    header->decompressionSize,
+                    header->encryptionSymbol,
+                    header->groupSymbol);
+
+            break;
+        
+        // no support
+        default:
+            json = calloc(memCount, sizeof(char));
+            memcpy(json, "{}\0", memCount);
+            break;
+    }
+
+    return json;
 }

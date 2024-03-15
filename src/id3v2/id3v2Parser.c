@@ -281,6 +281,7 @@ uint32_t id3v2ParseTagHeader(ByteStream *stream, Id3v2TagHeader **tagHeader, uin
     *tagHeader = id3v2CreateTagHeader(major, minor, flags, NULL);
     return walk;
 }
+
 /**
  * @brief Parses an ID3 version 2, 3 or 4 frame header. This function returns a couple values back to the caller, first
  * it returns the number of bytes it read to to create a frame header structure. The structure itself is returned as a
@@ -946,8 +947,6 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
             if(context == NULL){
                 context = hashTableRetrieve(pairs, "?");
             }
-            
-            
             
             read = id3v2ParseFrame(stream, context, header->majorVersion, &frame);
 
