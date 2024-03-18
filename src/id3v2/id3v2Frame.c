@@ -382,8 +382,8 @@ ListIter id3v2CreateFrameTraverser(Id3v2Tag *tag){
 
 /**
  * @brief treverses through a list of frames with the use of a list iter
- * and returns frame content while doing so. If null is returned the end
- * of the list has been reached.
+ * and returns a referance to frame content while doing so. If null is 
+ * returned, the end of the list has been reached.
  * 
  * @param traverser 
  * @return Id3v2Frame* 
@@ -921,6 +921,13 @@ ByteStream *id3v2FrameHeaderToStream(Id3v2FrameHeader *header, uint8_t version, 
     return stream;
 }
 
+/**
+ * @brief Converts a frame header structure into its representation as JSON.
+ * 
+ * @param header 
+ * @param version 
+ * @return char* 
+ */
 char *id3v2FrameHeaderToJSON(Id3v2FrameHeader *header, uint8_t version){
 
     char *json = NULL;
@@ -1023,4 +1030,320 @@ char *id3v2FrameHeaderToJSON(Id3v2FrameHeader *header, uint8_t version){
     }
 
     return json;
+}
+
+ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
+    printf("[*] In id3v2FrameToStream\n");
+    
+    ByteStream *stream = NULL;
+    Id3v2ContentContext *cc = NULL;
+
+    if(frame == NULL || version > ID3V2_TAG_VERSION_4){
+        return stream;        
+    }
+
+    printf("[*] Arguments are valid\n");
+
+    ListIter context = listCreateIterator(frame->contexts);
+    ListIter trav = id3v2CreateFrameEntryTraverser(frame);
+    ListIter iterStorage;
+    size_t readSize = 0;
+    size_t contentSize = 0;
+    size_t currIterations = 0;
+    unsigned char *tmp = NULL;
+    bool exit = false;
+
+    // the frame size will be updated later as it cannot be calculated 
+    // before processing frame entries
+    stream = id3v2FrameHeaderToStream(frame->header, version, 0);    
+    byteStreamSeek(stream, 0, SEEK_END);
+    printf("[*] Returned a frame header\n");
+
+    while((cc = listIteratorNext(&context)) != NULL){
+
+        switch(cc->type){
+
+            // encoding will always be enforced
+            case encodedString_context:{
+                
+                ListIter contentContextIter = listCreateIterator(frame->contexts);
+                ListIter contentEntryIter = listCreateIterator(frame->entries);
+                size_t poscc = 0;
+                size_t posce = 0;
+                size_t utf8Len = 0;
+                uint8_t encoding = 0;
+                void *iterNext = NULL;
+                bool convi = false; 
+                
+
+                // hunt down "encoding" key
+                while((iterNext = listIteratorNext(&contentContextIter)) != NULL){
+
+                    if(((Id3v2ContentContext *)iterNext)->type == iter_context){
+                        poscc--;
+                    }
+
+                    if(((Id3v2ContentContext *)iterNext)->key == id3v2djb2("encoding")){
+                        break;
+                    }
+
+                    poscc++;
+                }
+                
+                // hunt down encoding value
+                while((iterNext = listIteratorNext(&contentEntryIter)) != NULL){
+
+                    if(poscc == posce){
+                        encoding = ((uint8_t *)((Id3v2ContentEntry *)iterNext)->entry)[0];
+                        break;
+                    }
+
+                    posce++;
+                }
+
+                printf("[*] Encoding found to be %d\n", encoding);
+
+                // enforce encoding as utf8
+                tmp = (unsigned char *)id3v2ReadFrameEntryAsChar(&trav, &utf8Len);
+
+                if(tmp == NULL || utf8Len == 0){
+                    exit = true;
+                    break;
+                }
+
+
+                printf("[*] Input encoding string of %ld in utf8 : [%s]\n", utf8Len, tmp);
+                unsigned char *outStr = NULL;
+                size_t outLen = 0;
+                convi = byteConvertTextFormat(tmp, BYTE_UTF8, utf8Len, &outStr, encoding, &outLen);
+
+                if(convi == false && outLen == 0){
+                    free(tmp);
+                    exit = true;
+                    break;
+                }
+
+
+                // data is already in utf8
+                if(convi && outLen == 0){
+                    outStr = tmp;
+                    outLen = utf8Len;
+                }else{
+                    free(tmp);
+                }
+
+                // prepend BOM
+                if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
+                    bytePrependBOM(encoding, &outStr, &outLen);
+                    printf("[*] Prepended utf16 BOM\n");
+                }
+
+                // append null spacer if there are more entries in the list
+                if(listIteratorHasNext(trav)){
+                    printf("[*] Appending spacer\n");
+                    switch(encoding){
+                        case BYTE_ISO_8859_1:
+                        case BYTE_ASCII:
+                        case BYTE_UTF8:
+                            outStr = realloc(outStr, outLen + 1);
+                            memset(outStr + outLen, 0, 1);
+                            outLen++;
+                            break;
+                        case BYTE_UTF16BE:
+                        case BYTE_UTF16LE:
+                            outStr = realloc(outStr, outLen + 2);
+                            memset(outStr + outLen, 0, 2);
+                            outLen += 2;
+                            break;
+                        default:
+                            break;
+
+                    }
+                }
+                printf("[*] Writing value to stream\n");
+                byteStreamResize(stream, stream->bufferSize + outLen);
+                byteStreamWrite(stream, outStr, outLen);
+                contentSize += outLen;
+                free(outStr);
+                
+                break;
+            }
+
+            // written the same way with no spacer *coms cut out* i repeat no spacer over
+            case numeric_context:
+            case noEncoding_context:
+            case binary_context:
+            case precision_context:
+
+                printf("[*] Detected numeric/noEncoding/binary/precision context\n");
+
+                tmp = id3v2ReadFrameEntry(&trav, &readSize);
+                
+                if(tmp == NULL){
+                    exit = true;
+                    break;
+                }
+
+                printf("[*] Read an entry of %ld bytes with context[", readSize);
+
+                for(int i = 0; i < readSize; i++){
+                    printf("[%x]",tmp[i]);
+                }
+                printf("]\n");
+
+
+                byteStreamResize(stream, stream->bufferSize + readSize);
+                byteStreamWrite(stream, tmp, readSize);
+                free(tmp);
+                contentSize += readSize;
+                break;
+
+            // latin1 will be enforced
+            case latin1Encoding_context:{
+                
+                bool convi = false;
+                unsigned char *outStr = NULL;
+                size_t outLen = 0;
+                size_t utf8len = 0;
+
+                tmp = (unsigned char *)id3v2ReadFrameEntryAsChar(&trav, &utf8len);
+
+                if(tmp == NULL){
+                    exit = true;
+                    break;
+                }
+
+                printf("[*] Input encoding string of %ld in utf8 : [%s]\n", utf8len, tmp);
+
+                convi = byteConvertTextFormat(tmp, BYTE_UTF8, utf8len, &outStr, BYTE_ISO_8859_1, &outLen);
+
+                if(convi == false && outLen == 0){
+                    free(tmp);
+                    break;
+                }
+
+                // add spacer
+                if(listIteratorHasNext(trav)){
+                    printf("[*] Adding spacer\n");
+                    outStr = realloc(outStr, outLen + 1);
+                    memset(outStr + outLen, 0, 1);
+                    outLen++;
+                }
+
+                printf("[*] Writing value to stream\n");
+                byteStreamResize(stream, stream->bufferSize + outLen);
+                byteStreamWrite(stream, outStr, outLen);
+
+                free(tmp);
+                free(outStr);
+                contentSize += outLen;
+                break;
+            }
+
+            case iter_context:{
+
+                printf("[*] Detected an iter context with cc->max = %ld\n",cc->max);
+
+                // create a new iter
+                if(currIterations == 0){
+                    
+                    printf("[*] First iter\n");
+
+                    iterStorage = context;
+
+                    context = listCreateIterator(frame->contexts);
+                    
+                    for(size_t i = 0; i < cc->min; i++){
+                        listIteratorNext(&context);
+                    }
+
+                    printf("[*] Repositioned iter to %ld\n", cc->min);
+
+                }
+
+                //iter 
+                if(currIterations != cc->max && currIterations != 0){
+                    printf("[*] iterating for the %ld time\n",currIterations);
+                    context = listCreateIterator(frame->contexts);
+
+                    for(size_t i = 0; i < cc->min; i++){
+                        listIteratorNext(&context);
+                    }
+                }
+
+                // reset
+                if(currIterations >= cc->max){
+                    printf("[*] resetting iter\n");
+                    context = iterStorage;
+
+                    for(size_t i = 0; i < currIterations; i++){
+                        listIteratorNext(&context);
+                    }
+
+                    currIterations = 0;
+
+                }
+
+                currIterations++;
+
+                /**
+                 * This will go on forever until a failure condition is met by a previous context
+                 * i.e latin1_context detects null
+                 */
+                
+            }
+                break;
+            // case bit_context:
+            // case adjustment_context:
+            
+            case unknown_context:
+            default:
+                exit = true;
+                break;
+        }
+
+        if(exit == true){
+            break;
+        }
+
+    }
+
+
+    // write in the frame size
+    printf("[*] Writing frame size\n");
+    switch(version){
+
+        case ID3V2_TAG_VERSION_2:
+            tmp = u32tob(contentSize);
+            byteStreamSeek(stream, ID3V2_FRAME_ID_MAX_SIZE - 1, SEEK_SET);
+            byteStreamWrite(stream, tmp + 1, ID3V2_FRAME_ID_MAX_SIZE - 1);
+            free(tmp);
+
+            break;
+        case ID3V2_TAG_VERSION_3:
+            tmp = u32tob(contentSize);
+            byteStreamSeek(stream, ID3V2_FRAME_ID_MAX_SIZE, SEEK_SET);
+            byteStreamWrite(stream, tmp, ID3V2_FRAME_ID_MAX_SIZE);
+            free(tmp);
+
+            break;
+        case ID3V2_TAG_VERSION_4:
+            tmp = u32tob(byteSyncintEncode(contentSize));
+            byteStreamSeek(stream, ID3V2_FRAME_ID_MAX_SIZE, SEEK_SET);
+            byteStreamWrite(stream, tmp, ID3V2_FRAME_ID_MAX_SIZE);
+            free(tmp);
+            
+            break;
+        default:
+            break;
+    }
+
+
+
+    byteStreamRewind(stream);
+    return stream;
+}
+
+char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
+    return NULL;
 }

@@ -302,7 +302,7 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
     }
 
     // values needed
-    uint8_t id[ID3V2_FRAME_ID_MAX_SIZE];
+    uint8_t id[ID3V2_FRAME_ID_MAX_SIZE] = {0,0,0,0};
     uint32_t tSize = 0;
     bool tagAlter = false;
     bool fileAlter = false;
@@ -516,11 +516,18 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
     walk += expectedHeaderSize;
 
     if(!expectedHeaderSize){
+        if(header != NULL){
+            id3v2DestroyFrameHeader(&header);
+        }
         stream->cursor = resetIndex;
         return 0;
     }
 
-    if(!header || !expectedContentSize){
+    if(header == NULL || !expectedContentSize){
+        // just in case both args are not true
+        if(header != NULL){
+            id3v2DestroyFrameHeader(&header);
+        }
         stream->cursor = resetIndex;
         return expectedHeaderSize;
     }
@@ -534,18 +541,14 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
     iter = listCreateIterator(context);
 
     while((contextData = listIteratorNext(&iter)) != NULL){
-
+        
         Id3v2ContentContext *cc = (Id3v2ContentContext *) contextData;
 
         switch(cc->type){
-            // give up on parsing when the context is undefined
-            case unknown_context:
-                byteStreamSeek(innerSream, 0, SEEK_END);
-                break;
             
             // encoded strings
             case encodedString_context:{
-
+                
                 void *data = NULL;
                 size_t dataSize = 0;
 
@@ -583,10 +586,24 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                     case BYTE_ASCII:
                     case BYTE_UTF8:
                         data = byteStreamReturnUtf8(innerSream, &dataSize);
+
+                        if(data == NULL && dataSize == 0){
+                            byteStreamSeek(innerSream, 1, SEEK_CUR);
+                            data = calloc(sizeof(unsigned char), 1);
+                            memset(data, 0, 1);
+                            dataSize = 1;
+                        }
                         break;
                     case BYTE_UTF16BE:
                     case BYTE_UTF16LE:
                         data = byteStreamReturnUtf16(innerSream, &dataSize);
+
+                        if(data == NULL && dataSize == 0){
+                            byteStreamSeek(innerSream, 2, SEEK_CUR);
+                            data = calloc(sizeof(unsigned char), 2);
+                            memset(data, 0, 2);
+                            dataSize = 2;
+                        }
                         break;
                     default:
                         break;
@@ -616,7 +633,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                 size_t dataSize = 0;
 
                 data = byteStreamReturnLatin1(innerSream, &dataSize);
-
+                
                 if(dataSize > cc->max){
                     dataSize = cc->max;
                     data = realloc(data, dataSize);
@@ -638,7 +655,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
             case noEncoding_context:
             case precision_context:
             case numeric_context:{
-
+                
                 void * data = NULL;
                 size_t dataSize = 0;
 
@@ -710,7 +727,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
             }
                 break;
             case iter_context:{
-                
+
                 if(!currIterations){
                     
                     iterStorage = iter;
@@ -798,6 +815,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
             }
                 break;
             // no support
+            case unknown_context:
             default:
                 byteStreamSeek(innerSream, 0, SEEK_END);
                 break;

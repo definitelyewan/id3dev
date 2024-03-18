@@ -593,6 +593,171 @@ static void id3v2FrameHeaderToJSON_v4WithUnsync(void **state){
     id3v2DestroyFrameHeader(&frame);
 }
 
+static void id3v2FrameToStream_v4TALB(void **state){
+
+    ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+
+    ByteStream *rep = id3v2FrameToStream((Id3v2Frame *)tag->frames->head->data, ID3V2_TAG_VERSION_4);
+    
+
+    assert_memory_equal(byteStreamCursor(rep), "TALB", 4);
+    byteStreamSeek(rep, 4, SEEK_CUR);
+
+    assert_memory_equal(byteStreamCursor(rep), "\x00\x00\x00\x43", 4);
+    byteStreamSeek(rep, 4, SEEK_CUR);
+
+    assert_memory_equal(byteStreamCursor(rep), "\x00\x00", 2);
+    byteStreamSeek(rep, 2, SEEK_CUR);
+
+    assert_memory_equal(byteStreamCursor(rep), "\x03", 1);
+    byteStreamSeek(rep, 1, SEEK_CUR);
+
+    assert_memory_equal(byteStreamCursor(rep), "The Powers That Butf8ÛȾℲⅧ♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏utf8", 67);
+    byteStreamSeek(rep, 67, SEEK_CUR);
+
+    byteStreamDestroy(rep);
+    byteStreamDestroy(stream);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2FrameToStream_v4WCOM(void **state){
+
+    ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+
+    ListIter iter = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+
+    ByteStream *rep = NULL;
+
+    while((f = id3v2FrameTraverse(&iter)) != NULL){
+        if(memcmp(f->header->id, "WCOM", ID3V2_FRAME_ID_MAX_SIZE) == 0){
+            
+            rep = id3v2FrameToStream(f, ID3V2_TAG_VERSION_4);
+
+            break;
+        }
+    }
+
+    assert_memory_equal(byteStreamCursor(rep), "WCOM", 4);
+    byteStreamSeek(rep, 4, SEEK_CUR);
+
+    assert_memory_equal(byteStreamCursor(rep), "\x00\x00\x00\x2c", 4);
+    byteStreamSeek(rep, 4, SEEK_CUR);
+
+    assert_memory_equal(byteStreamCursor(rep), "\x00\x00", 2);
+    byteStreamSeek(rep, 2, SEEK_CUR);
+
+    assert_memory_equal(byteStreamCursor(rep), "The Powers That Butf8\xdb>2gH I J K L M N Outf8", 44);
+    byteStreamSeek(rep, 44, SEEK_CUR);
+
+    byteStreamDestroy(rep);
+    byteStreamDestroy(stream);
+    id3v2DestroyTag(&tag);
+
+}
+
+static void id3v2FrameToStream_v4ETCO(void **state){
+
+    ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+
+    ListIter iter = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+
+    ByteStream *rep = NULL;
+
+    while((f = id3v2FrameTraverse(&iter)) != NULL){
+        
+        if(memcmp(f->header->id, "ETCO", ID3V2_FRAME_ID_MAX_SIZE) == 0){
+            printf("%c%c%c%c\n",f->header->id[0],f->header->id[1],f->header->id[2],f->header->id[3]);
+            rep = id3v2FrameToStream(f, ID3V2_TAG_VERSION_4);
+
+            break;
+        }
+    }
+
+    assert_memory_equal("ETCO", byteStreamCursor(rep), 4);
+    byteStreamSeek(rep, 4, SEEK_CUR);
+
+    assert_memory_equal("\x00\x00\x00\x0b", byteStreamCursor(rep), 4);
+    byteStreamSeek(rep, 4, SEEK_CUR);
+
+    assert_memory_equal("\x00\x00", byteStreamCursor(rep), 2);
+    byteStreamSeek(rep, 2, SEEK_CUR);
+
+    assert_memory_equal("\x02", byteStreamCursor(rep), 1);
+    byteStreamSeek(rep, 1, SEEK_CUR);
+
+    assert_memory_equal("\x06", byteStreamCursor(rep), 1);
+    byteStreamSeek(rep, 1, SEEK_CUR);
+
+    assert_memory_equal("\x00\x12\x9d\xa0", byteStreamCursor(rep), 4);
+    byteStreamSeek(rep, 4, SEEK_CUR);
+
+    assert_memory_equal("\x02", byteStreamCursor(rep), 1);
+    byteStreamSeek(rep, 1, SEEK_CUR);
+
+    assert_memory_equal("\x00\x09\x4e\xd0", byteStreamCursor(rep), 4);
+    byteStreamSeek(rep, 4, SEEK_CUR);
+
+    byteStreamDestroy(rep);
+    byteStreamDestroy(stream);
+    id3v2DestroyTag(&tag);
+
+}
+
+static void playground(void **state){
+
+    ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+
+    ListIter iter = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+
+    ByteStream *rep = NULL;
+
+    while((f = id3v2FrameTraverse(&iter)) != NULL){
+        
+        if(memcmp(f->header->id, "ETCO", ID3V2_FRAME_ID_MAX_SIZE) == 0){
+            printf("%c%c%c%c\n",f->header->id[0],f->header->id[1],f->header->id[2],f->header->id[3]);
+            rep = id3v2FrameToStream(f, ID3V2_TAG_VERSION_4);
+
+            break;
+        }
+    }
+
+    assert_memory_equal("ETCO", byteStreamCursor(rep), 4);
+    byteStreamSeek(rep, 4, SEEK_CUR);
+
+    assert_memory_equal("\x00\x00\x00\x0b", byteStreamCursor(rep), 4);
+    byteStreamSeek(rep, 4, SEEK_CUR);
+
+    assert_memory_equal("\x00\x00", byteStreamCursor(rep), 2);
+    byteStreamSeek(rep, 2, SEEK_CUR);
+
+    assert_memory_equal("\x02", byteStreamCursor(rep), 1);
+    byteStreamSeek(rep, 1, SEEK_CUR);
+
+    assert_memory_equal("\x06", byteStreamCursor(rep), 1);
+    byteStreamSeek(rep, 1, SEEK_CUR);
+
+    assert_memory_equal("\x00\x12\x9d\xa0", byteStreamCursor(rep), 4);
+    byteStreamSeek(rep, 4, SEEK_CUR);
+
+    assert_memory_equal("\x02", byteStreamCursor(rep), 1);
+    byteStreamSeek(rep, 1, SEEK_CUR);
+
+    assert_memory_equal("\x00\x09\x4e\xd0", byteStreamCursor(rep), 4);
+    byteStreamSeek(rep, 4, SEEK_CUR);
+
+    byteStreamDestroy(rep);
+    byteStreamDestroy(stream);
+    id3v2DestroyTag(&tag);
+}
+
+
 int main(){
 
     const struct CMUnitTest tests[] = {
@@ -626,9 +791,15 @@ int main(){
         cmocka_unit_test(id3v2FrameHeaderToJSON_v2),
         cmocka_unit_test(id3v2FrameHeaderToJSON_v3),
         cmocka_unit_test(id3v2FrameHeaderToJSON_v3Symbol),
-        cmocka_unit_test(id3v2FrameHeaderToJSON_v4WithUnsync)
+        cmocka_unit_test(id3v2FrameHeaderToJSON_v4WithUnsync),
+
+        // id3v2FrameToStream
+        cmocka_unit_test(id3v2FrameToStream_v4TALB),
+        cmocka_unit_test(id3v2FrameToStream_v4WCOM),
+        cmocka_unit_test(id3v2FrameToStream_v4ETCO),
 
 
+        cmocka_unit_test(playground)
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

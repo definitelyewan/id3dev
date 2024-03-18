@@ -75,6 +75,9 @@ Id3v2Frame *id3v2DetatchFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame);
 ByteStream *id3v2FrameHeaderToStream(Id3v2FrameHeader *header, uint8_t version, uint32_t frameSize);
 char *id3v2FrameHeaderToJSON(Id3v2FrameHeader *header, uint8_t version);
 
+ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version);
+char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version);
+
 
 #ifdef __cplusplus
 } //extern c end

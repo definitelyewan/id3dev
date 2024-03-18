@@ -1730,7 +1730,7 @@ static void id3v2ParseTagFromStream_v2unsync(void **state){
     Id3v2Frame *f = (Id3v2Frame *) tag->frames->head->data;
     Id3v2ContentEntry *ce = (Id3v2ContentEntry *)f->entries->head->data;
 
-    testFrameHeader(f, "TAL", 0, 0, 0, 0, 0, 0, 0);
+    testFrameHeader(f, "TAL\0", 0, 0, 0, 0, 0, 0, 0);
     testEntry(ce, 1, &encoding); 
 
     ce = (Id3v2ContentEntry *)f->entries->head->next->data;
@@ -1777,39 +1777,41 @@ static void id3v2ParseTagFromStream_v3ext(void **state){
 }
 
 
-static void playground(void **state){
+static void id3v2ParseTagFromStream_v2ULTWithMissingDesc(void **state){
 
-    uint8_t data[45] = {'I', 'D', '3', 0x03, 0x01, 0x40, 0x00, 0x00, 0x00, 0x23, // header
-                        0x00, 0x00, 0x00, 0x0a, 0x80, 0x00, 0xfe, 0xfe, 0xfe, 0xfe, 0xff, 0xff, 0xff, 0xff, // ext
-                        'T', 'A', 'L', 'B', 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00,
-                        0x00,
-                        'F', 'a', 'm', 'i', 'l', 'y', ' ', 'G', 'u', 'y'};
-
-    ByteStream *stream = byteStreamCreate(data, 45);
+    ByteStream *stream = byteStreamFromFile("assets/danybrown2.mp3");
     Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
-    uint8_t encoding = 0;
+    ListIter iter = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+    Id3v2ContentEntry *ce = NULL;
 
-    assert_non_null(tag);
-    assert_non_null(tag->header);
-    assert_non_null(tag->header->extendedHeader);
-    assert_int_equal(tag->header->flags, 0x40);
-    assert_int_equal(tag->header->majorVersion, 3);
-    assert_int_equal(tag->header->minorVersion, 1);
+    while((f = id3v2FrameTraverse(&iter)) != NULL){
+        
+        if(memcmp(f->header->id, "ULT", ID3V2_FRAME_ID_MAX_SIZE) == 0){
+            testFrameHeader(f, "ULT", 0, 0, 0, 0, 0, 0, 0);
 
-    assert_int_equal(tag->header->extendedHeader->crc, 0xffffffff);
-    assert_int_equal(tag->header->extendedHeader->padding, 0xfefefefe);
+            ce = (Id3v2ContentEntry *) f->entries->head->data;
+            testEntry(ce, 1, (uint8_t *)"\x00");
 
-    Id3v2Frame *f = (Id3v2Frame *) tag->frames->head->data;
-    Id3v2ContentEntry *ce = (Id3v2ContentEntry *)f->entries->head->data;
+            ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+            testEntry(ce, 3, (uint8_t *)"eng");
 
-    testFrameHeader(f, "TALB", 0, 0, 0, 0, 0, 0, 0);
-    testEntry(ce, 1, &encoding); 
+            ce = (Id3v2ContentEntry *) f->entries->head->next->data;
+            testEntry(ce, 3, (uint8_t *)"eng");
 
-    ce = (Id3v2ContentEntry *)f->entries->head->next->data;
-    testEntry(ce, 11, (uint8_t *)"Family Guy");
+            ce = (Id3v2ContentEntry *) f->entries->head->next->next->data;
+            testEntry(ce, 1, (uint8_t *)"\x00");
 
+            ce = (Id3v2ContentEntry *) f->entries->head->next->next->next->data;
+            testEntry(ce, 279, (uint8_t *)"haBDJHAsbdjkHASBDJahbsdkAHBSDHAbsdHBDUAHSBDUBAUIBFOASIUBDFOIAUBFOIAUWBFOAWBFAOUWEBFUOYBOUBUOBUOboubouboubouboubouboigndoignoisnjgsdfjnglksjdfngslkjfngskdjfnglskdnfgiserugisugnvfkdxjnvxlkjnijxdngixjdhfgoiserhgiusdng spoerijgsoergjnposeirhgposergn reigjosperijgsodfkgkldfmvxc.,vbm");
+
+            break;
+        }
+    }
+    
     id3v2DestroyTag(&tag);
     byteStreamDestroy(stream);
+
 }
 
 int main(){
@@ -1869,11 +1871,7 @@ int main(){
         cmocka_unit_test(id3v2ParseTagFromStream_v4),
         cmocka_unit_test(id3v2ParseTagFromStream_v2unsync),
         cmocka_unit_test(id3v2ParseTagFromStream_v3ext),
-
-
-
-        cmocka_unit_test(playground)
-        //cmocka_unit_test(playground)
+        cmocka_unit_test(id3v2ParseTagFromStream_v2ULTWithMissingDesc)
 
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
