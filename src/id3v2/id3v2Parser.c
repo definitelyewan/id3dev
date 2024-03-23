@@ -524,7 +524,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
     }
 
     if(header == NULL || !expectedContentSize){
-        // just in case both args are not true
+        // just in case both args are not null
         if(header != NULL){
             id3v2DestroyFrameHeader(&header);
         }

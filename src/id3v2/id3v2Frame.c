@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "id3v2Frame.h"
 #include "id3v2Context.h"
 #include "byteInt.h"
@@ -1032,8 +1033,15 @@ char *id3v2FrameHeaderToJSON(Id3v2FrameHeader *header, uint8_t version){
     return json;
 }
 
+/**
+ * @brief Converts a frame structure into its binary representation. If this
+ * function fails it will return NULL otherwise, a ByteStream structure.
+ * 
+ * @param frame 
+ * @param version 
+ * @return ByteStream* 
+ */
 ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
-    printf("[*] In id3v2FrameToStream\n");
     
     ByteStream *stream = NULL;
     Id3v2ContentContext *cc = NULL;
@@ -1041,8 +1049,6 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
     if(frame == NULL || version > ID3V2_TAG_VERSION_4){
         return stream;        
     }
-
-    printf("[*] Arguments are valid\n");
 
     ListIter context = listCreateIterator(frame->contexts);
     ListIter trav = id3v2CreateFrameEntryTraverser(frame);
@@ -1052,12 +1058,12 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
     size_t currIterations = 0;
     unsigned char *tmp = NULL;
     bool exit = false;
+    bool bitFlag = false;
 
     // the frame size will be updated later as it cannot be calculated 
     // before processing frame entries
     stream = id3v2FrameHeaderToStream(frame->header, version, 0);    
     byteStreamSeek(stream, 0, SEEK_END);
-    printf("[*] Returned a frame header\n");
 
     while((cc = listIteratorNext(&context)) != NULL){
 
@@ -1101,8 +1107,6 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
                     posce++;
                 }
 
-                printf("[*] Encoding found to be %d\n", encoding);
-
                 // enforce encoding as utf8
                 tmp = (unsigned char *)id3v2ReadFrameEntryAsChar(&trav, &utf8Len);
 
@@ -1111,8 +1115,6 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
                     break;
                 }
 
-
-                printf("[*] Input encoding string of %ld in utf8 : [%s]\n", utf8Len, tmp);
                 unsigned char *outStr = NULL;
                 size_t outLen = 0;
                 convi = byteConvertTextFormat(tmp, BYTE_UTF8, utf8Len, &outStr, encoding, &outLen);
@@ -1135,12 +1137,10 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
                 // prepend BOM
                 if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
                     bytePrependBOM(encoding, &outStr, &outLen);
-                    printf("[*] Prepended utf16 BOM\n");
                 }
 
                 // append null spacer if there are more entries in the list
-                if(listIteratorHasNext(trav)){
-                    printf("[*] Appending spacer\n");
+                if(trav.current != NULL){
                     switch(encoding){
                         case BYTE_ISO_8859_1:
                         case BYTE_ASCII:
@@ -1160,7 +1160,7 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
 
                     }
                 }
-                printf("[*] Writing value to stream\n");
+
                 byteStreamResize(stream, stream->bufferSize + outLen);
                 byteStreamWrite(stream, outStr, outLen);
                 contentSize += outLen;
@@ -1174,23 +1174,12 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
             case noEncoding_context:
             case binary_context:
             case precision_context:
-
-                printf("[*] Detected numeric/noEncoding/binary/precision context\n");
-
                 tmp = id3v2ReadFrameEntry(&trav, &readSize);
                 
                 if(tmp == NULL){
                     exit = true;
                     break;
                 }
-
-                printf("[*] Read an entry of %ld bytes with context[", readSize);
-
-                for(int i = 0; i < readSize; i++){
-                    printf("[%x]",tmp[i]);
-                }
-                printf("]\n");
-
 
                 byteStreamResize(stream, stream->bufferSize + readSize);
                 byteStreamWrite(stream, tmp, readSize);
@@ -1213,8 +1202,7 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
                     break;
                 }
 
-                printf("[*] Input encoding string of %ld in utf8 : [%s]\n", utf8len, tmp);
-
+                // ensure latin1
                 convi = byteConvertTextFormat(tmp, BYTE_UTF8, utf8len, &outStr, BYTE_ISO_8859_1, &outLen);
 
                 if(convi == false && outLen == 0){
@@ -1223,14 +1211,12 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
                 }
 
                 // add spacer
-                if(listIteratorHasNext(trav)){
-                    printf("[*] Adding spacer\n");
+                if(trav.current != NULL){
                     outStr = realloc(outStr, outLen + 1);
                     memset(outStr + outLen, 0, 1);
                     outLen++;
                 }
 
-                printf("[*] Writing value to stream\n");
                 byteStreamResize(stream, stream->bufferSize + outLen);
                 byteStreamWrite(stream, outStr, outLen);
 
@@ -1242,13 +1228,9 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
 
             case iter_context:{
 
-                printf("[*] Detected an iter context with cc->max = %ld\n",cc->max);
-
                 // create a new iter
                 if(currIterations == 0){
                     
-                    printf("[*] First iter\n");
-
                     iterStorage = context;
 
                     context = listCreateIterator(frame->contexts);
@@ -1256,14 +1238,10 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
                     for(size_t i = 0; i < cc->min; i++){
                         listIteratorNext(&context);
                     }
-
-                    printf("[*] Repositioned iter to %ld\n", cc->min);
-
                 }
 
-                //iter 
+                // iter 
                 if(currIterations != cc->max && currIterations != 0){
-                    printf("[*] iterating for the %ld time\n",currIterations);
                     context = listCreateIterator(frame->contexts);
 
                     for(size_t i = 0; i < cc->min; i++){
@@ -1273,7 +1251,7 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
 
                 // reset
                 if(currIterations >= cc->max){
-                    printf("[*] resetting iter\n");
+
                     context = iterStorage;
 
                     for(size_t i = 0; i < currIterations; i++){
@@ -1293,9 +1271,263 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
                 
             }
                 break;
-            // case bit_context:
-            // case adjustment_context:
-            
+            // wildly long and probably inefficient but it works for now and is the best i can do with my current knowledge
+            case bit_context:{
+
+                // there is another bit context next
+                if(listIteratorHasNext(context)){
+                    if(((Id3v2ContentContext *)context.current->data)->type != bit_context){
+                        bitFlag = false;
+                    }else{
+                        bitFlag = true;
+                    }
+                }
+
+
+                // at least 1 or more bit contexts in a row
+                if(bitFlag == true){
+                    
+                    unsigned char *bitBuff = NULL;
+                    unsigned char **byteDataArr = NULL;
+                    size_t *byteDataSizeArr = NULL;
+                    size_t *nbits = NULL;
+                    
+                    size_t arrSize = 0;
+                    size_t totalBits = 0;
+                    size_t totalBytes = 0;
+                    size_t bitBuffSize = 0;
+                    
+                    // copy values
+                    while(true){
+                        
+                        tmp = id3v2ReadFrameEntry(&trav, &readSize);
+
+                        if(tmp == NULL){
+                            exit = true;
+                            break;
+
+                        }
+
+                        if(byteDataSizeArr == NULL){
+                            
+                            byteDataSizeArr = malloc(sizeof(size_t));
+                            byteDataSizeArr[0] = readSize;
+
+                            nbits = malloc(sizeof(size_t));
+                            nbits[0] = cc->max;
+
+                            byteDataArr = malloc(sizeof(unsigned char *));
+                            byteDataArr[0] = malloc(readSize);
+
+                            for(size_t i = 0; i < readSize; i++){
+                                byteDataArr[0][i] = tmp[i];
+                            }
+
+                            arrSize++;
+
+                        }else{
+                            arrSize++;
+                            byteDataSizeArr = realloc(byteDataSizeArr, arrSize * sizeof(size_t));
+                            byteDataSizeArr[arrSize - 1] = readSize;
+
+                            nbits = realloc(nbits, arrSize * sizeof(size_t));
+                            nbits[arrSize - 1] = cc->max;
+
+                            byteDataArr = realloc(byteDataArr, arrSize * sizeof(unsigned char *));
+                            byteDataArr[arrSize - 1] = malloc(readSize);
+
+                            for(size_t i = 0; i < readSize; i++){
+                                byteDataArr[arrSize - 1][i] = tmp[i];
+                            }
+
+                        }
+
+                        totalBits += cc->max;
+
+                        free(tmp);
+
+
+                        if(listIteratorHasNext(context)){
+                            
+                            if(((Id3v2ContentContext *)context.current->data)->type != bit_context){
+                                break;
+                            
+                            // seek to the next context 
+                            }else{
+                                cc = listIteratorNext(&context);
+                            }
+                        }else{
+                            break;
+                        }
+                    }
+
+                    totalBytes = ((totalBits / CHAR_BIT) % 2) ? (totalBits / CHAR_BIT) + 1: totalBits / CHAR_BIT; // ? odd : even
+
+                    bitBuff = malloc(totalBytes);
+                    memset(bitBuff, 0, totalBytes);
+                    bitBuffSize = totalBytes;
+
+                    // reverse the byte data
+                    for(size_t i = 0; i < arrSize; i++){
+                        size_t dataSize = byteDataSizeArr[i];
+                        size_t halfSize = dataSize / 2;
+                        for(size_t j = 0; j < halfSize; j++){
+                            unsigned char temp = byteDataArr[i][j];
+                            byteDataArr[i][j] = byteDataArr[i][dataSize - j - 1];
+                            byteDataArr[i][dataSize - j - 1] = temp;
+                        }
+                    }
+
+                    int step = 0;
+                    int offset = 0;
+                    int bitIndex = 0;
+                    for(size_t i = totalBytes; i > 0; i--){
+                        
+                        if(step >= arrSize || totalBytes == 0){
+                            break;
+                        }
+                        
+                        size_t nBit = nbits[step];
+                        size_t nBytes = byteDataSizeArr[step];
+                        unsigned char *data = byteDataArr[step];
+                        int counter = 0;
+
+                        while(nBit > 0){
+                            
+                            if(counter == nBytes){
+                                break;
+                            }
+
+                            int j = 0;
+                            for(j = 0; j < CHAR_BIT; j++){
+                                if(nBit == 0){
+                                    break;
+                                }
+                                
+                                // switch to the next byte
+                                if(j + offset >= CHAR_BIT){
+                                    offset = 0;
+                                    totalBytes--;
+                                    bitIndex = 0;
+                                }
+
+                                bitBuff[totalBytes - 1] = setBit(bitBuff[totalBytes - 1], bitIndex, readBit(data[counter], j) > 0 ? true : false);
+                                bitIndex++;
+
+                                nBit--;
+                            }
+
+                            if(j < CHAR_BIT){
+                                offset = j;
+                            }else{
+                                offset = 0;
+                            }
+                            counter++;
+                            
+                        }
+
+                        step++;
+                    }
+
+                    byteStreamResize(stream, stream->bufferSize + bitBuffSize);
+                    byteStreamWrite(stream, bitBuff, bitBuffSize);
+                    contentSize += bitBuffSize;
+
+                    for(size_t i = 0; i < arrSize; i++){
+                        free(byteDataArr[i]);
+                    }
+
+                    free(bitBuff);
+                    free(nbits);
+                    free(byteDataArr);
+                    free(byteDataSizeArr);
+
+                    bitFlag = false;
+
+                // read a single and only bit context
+                }else{
+                    
+                    int totalBytesNeeded = (cc->max / CHAR_BIT) + 1;
+                    int nBit = CHAR_BIT - 1;
+
+                    tmp = id3v2ReadFrameEntry(&trav, &readSize);
+
+                    if(tmp == NULL){
+                        exit = true;
+                        break;
+                    }
+
+                    while(totalBytesNeeded > 0){
+                        
+                        byteStreamResize(stream, stream->bufferSize + 1);
+
+                        while(nBit >= 0){
+                            byteStreamWriteBit(stream, (readBit(tmp[readSize - 1], nBit) > 0) ? true : false, nBit);
+                            nBit--;
+                        }
+
+                        byteStreamSeek(stream, 1, SEEK_CUR);
+                        totalBytesNeeded--;
+                    }
+
+                    contentSize += readSize;
+                    free(tmp);
+                }
+
+                break;
+            }
+
+            case adjustment_context:{
+
+                ListIter contentContextIter = listCreateIterator(frame->contexts);
+                ListIter contentEntryIter = listCreateIterator(frame->entries);
+                size_t poscc = 0;
+                size_t posce = 0;
+                uint32_t rSize = 0;
+                void *iterNext = NULL;
+                
+
+                // hunt down "encoding" key
+                while((iterNext = listIteratorNext(&contentContextIter)) != NULL){
+
+                    if(((Id3v2ContentContext *)iterNext)->type == iter_context){
+                        poscc--;
+                    }
+
+                    if(((Id3v2ContentContext *)iterNext)->key == id3v2djb2("adjustment")){
+                        break;
+                    }
+
+                    poscc++;
+                }
+                
+                // hunt down adjustment value
+                while((iterNext = listIteratorNext(&contentEntryIter)) != NULL){
+
+                    if(poscc == posce){
+                        rSize = btou32((uint8_t *)((Id3v2ContentEntry *)iterNext)->entry, (size_t)((Id3v2ContentEntry *)iterNext)->size);
+                        break;
+                    }
+
+                    posce++;
+                }
+
+                tmp = id3v2ReadFrameEntry(&trav, &readSize);
+
+                if(tmp == NULL){
+                    exit = true;
+                    break;
+
+                }
+
+                byteStreamResize(stream, stream->bufferSize + rSize);
+                byteStreamWrite(stream, tmp, rSize);
+
+                contentSize += rSize;
+                free(tmp);
+                break;
+            }
+                break;
             case unknown_context:
             default:
                 exit = true;
@@ -1310,7 +1542,6 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
 
 
     // write in the frame size
-    printf("[*] Writing frame size\n");
     switch(version){
 
         case ID3V2_TAG_VERSION_2:
@@ -1337,8 +1568,6 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
         default:
             break;
     }
-
-
 
     byteStreamRewind(stream);
     return stream;

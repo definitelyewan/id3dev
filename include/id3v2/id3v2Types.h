@@ -192,7 +192,9 @@ typedef enum _Id3v2ContextType {
    * will not be incremented until 8 sequential bits are read. for example, this 
    * means if the following context is a binary_context it will read the same byte 
    * twice. If this context is followed by more then one bit_context it will continue
-   * reading from the position in which the the proceeding cotext left off.
+   * reading from the position in which the the proceeding context left off. Do note
+   * that max and min within the context structure now represent max and min bits 
+   * instead of bytes.
    */
   bit_context,
 
