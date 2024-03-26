@@ -33,6 +33,7 @@ set(ID3V2_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v2/id3v2Context.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v2/id3v2Parser.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v2/id3v2Frame.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/id3v2/id3v2.c"
 )
 
 

@@ -8,6 +8,32 @@
 #include "byteUnicode.h"
 #include "byteStream.h"
 
+static char *base64Encode(const unsigned char *input, size_t inputLength){
+    const char *base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    size_t outputLength = 4 * ((inputLength + 2) / 3);
+    char *output = malloc(outputLength + 1);
+    if(output == NULL){
+        return NULL;
+    }
+
+    size_t i = 0;
+    size_t j = 0;
+    for(i = 0, j = 0; i < inputLength; i += 3, j += 4){
+        unsigned char byte1 = input[i];
+        unsigned char byte2 = (i + 1 < inputLength) ? input[i + 1] : 0;
+        unsigned char byte3 = (i + 2 < inputLength) ? input[i + 2] : 0;
+
+        output[j] = base64Chars[byte1 >> 2];
+        output[j + 1] = base64Chars[((byte1 & 0x03) << 4) | (byte2 >> 4)];
+        output[j + 2] = (i + 1 < inputLength) ? base64Chars[((byte2 & 0x0F) << 2) | (byte3 >> 6)] : '=';
+        output[j + 3] = (i + 2 < inputLength) ? base64Chars[byte3 & 0x3F] : '=';
+    }
+
+    output[outputLength] = '\0';
+    return output;
+}
+
+
 /**
  * @brief Creates an ID3v2 frame header structure
  * 
@@ -189,7 +215,7 @@ void id3v2DeleteFrame(void *toBeDeleted){
  * @return int 
  */
 int id3v2CompareFrame(const void *first, const void *second){
-
+    printf("\t\t[+] Entered id3v2CompareFrame\n");
     Id3v2Frame *f = (Id3v2Frame *)first;
     Id3v2Frame *s = (Id3v2Frame *)second;
     ListIter i1, i2;
@@ -205,47 +231,51 @@ int id3v2CompareFrame(const void *first, const void *second){
         return 1;
     }
 
-    diff = f->header->decompressionSize - s->header->decompressionSize;
-    if(diff != 0){
-        return diff;
-    }
-
-    diff = f->header->encryptionSymbol - s->header->encryptionSymbol;
-    if(diff != 0){
-        return diff;
-    }
-
-    if(f->header->fileAlterPreservation != s->header->fileAlterPreservation){
-        return 1;
-    }
-
-    diff = f->header->groupSymbol - s->header->groupSymbol;
-    if(diff != 0){
-        return diff;
-    }
-
     diff = memcmp(f->header->id, s->header->id, ID3V2_FRAME_ID_MAX_SIZE);
     if(diff != 0){
         return diff;
     }
+printf("\t\t[+] Tested id [%s]\n",f->header->id);
+
+    printf("\t\t[+] First and second are not NULL\n");
+    diff = f->header->decompressionSize - s->header->decompressionSize;
+    if(diff != 0){
+        return diff;
+    }
+printf("\t\t[+] Tested decompressionSize\n");
+    diff = f->header->encryptionSymbol - s->header->encryptionSymbol;
+    if(diff != 0){
+        return diff;
+    }
+printf("\t\t[+] Tested encryptionSymbol\n");
+    if(f->header->fileAlterPreservation != s->header->fileAlterPreservation){
+        return 1;
+    }
+printf("\t\t[+] Tested fileAlterPreservation\n");
+    diff = f->header->groupSymbol - s->header->groupSymbol;
+    if(diff != 0){
+        return diff;
+    }
+printf("\t\t[+] Tested groupSymbol\n");
 
     if(f->header->readOnly != s->header->readOnly){
         return 1;
     }
-
+printf("\t\t[+] Tested read only\n");
     if(f->header->tagAlterPreservation != s->header->tagAlterPreservation){
         return 1;
     }
-
+printf("\t\t[+] Tested tagAlterPreservation\n");
     if(f->header->unsynchronisation != s->header->unsynchronisation){
         return 1;
     }
-
+printf("\t\t[+] Tested unsync\n");
     diff = f->entries->length - s->entries->length;
+    printf("\t\t[+] Diff = %ld,%ld\n",f->entries->length, s->entries->length);
     if(diff != 0){
         return diff;
     }
-
+printf("\t\t[+] Tested length\n");
     i1 = listCreateIterator(f->entries);
     i2 = listCreateIterator(s->entries);
 
@@ -260,12 +290,12 @@ int id3v2CompareFrame(const void *first, const void *second){
         }
         
     }
-
+printf("\t\t[+] Tested entries\n");
     diff = f->contexts->length - s->contexts->length;
     if(diff != 0){
         return diff;
     }
-
+printf("\t\t[+] Tested length\n");
     i1 = listCreateIterator(f->contexts);
     i2 = listCreateIterator(s->contexts);
 
@@ -279,7 +309,7 @@ int id3v2CompareFrame(const void *first, const void *second){
         }
         
     }
-
+printf("\t\t[+] Tested context\n");
     return diff;
 }
 
@@ -793,11 +823,11 @@ bool id3v2AttachFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame){
  * @return Id3v2Frame* 
  */
 Id3v2Frame *id3v2DetatchFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame){
-
+    printf("\t[-] Entered id3v2DetatchFrameFromTag\n");
     if(tag == NULL || frame == NULL){
         return NULL;
     }
-
+    printf("\t[-] Arguments are valid\n");
     return listDeleteData(tag->frames, (void *) frame);
 }
 
@@ -1487,7 +1517,7 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
                 void *iterNext = NULL;
                 
 
-                // hunt down "encoding" key
+                // hunt down "adjustment" key
                 while((iterNext = listIteratorNext(&contentContextIter)) != NULL){
 
                     if(((Id3v2ContentContext *)iterNext)->type == iter_context){
@@ -1573,6 +1603,397 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
     return stream;
 }
 
+/**
+ * @brief Converts a frame structure into its JSON representation.
+ * 
+ * @param frame 
+ * @param version 
+ * @return char* 
+ */
 char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
-    return NULL;
+
+    char *json = NULL;
+    char *headerJson = NULL;
+    char **contentJson = NULL;
+    char *concatenatedString = NULL;
+    size_t contentJsonSize = 0;
+    size_t memCount = 3;
+    size_t concatenatedStringLength = 0;
+    size_t currIterations = 0;
+
+    ListIter trav = id3v2CreateFrameEntryTraverser(frame);
+    ListIter context = listCreateIterator(frame->contexts);
+    ListIter iterStorage;
+    
+
+    Id3v2ContentContext *cc = NULL;
+    bool exit = false;
+
+    unsigned char *tmp = NULL;
+
+    if(frame == NULL || version > ID3V2_TAG_VERSION_4){
+        json = calloc(memCount, sizeof(char));
+        memcpy(json, "{}\0", memCount);
+        return json;
+    }
+
+    while((cc = (Id3v2ContentContext *)listIteratorNext(&context)) != NULL){
+
+        switch(cc->type){
+
+            // treated as base64
+            case noEncoding_context:
+            case bit_context:
+            case binary_context:{
+                size_t readSize = 0;
+                size_t contentMemCount = 3;
+                char *b64 = NULL;
+
+                tmp = id3v2ReadFrameEntry(&trav, &readSize);
+
+                if(tmp == NULL || readSize == 0){
+                    exit = true;
+                    break;
+                }
+
+
+                b64 = base64Encode(tmp, readSize);
+
+                contentMemCount += snprintf(NULL, 0,
+                                           "{\"value\":\"%s\",\"size\":%ld}",
+                                           b64,
+                                           strlen(b64));
+                
+                contentJsonSize++;
+                if(contentJson == NULL){
+                    contentJson = calloc(contentJsonSize, sizeof(char *));
+                    contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
+
+                    snprintf(contentJson[contentJsonSize - 1], contentMemCount,
+                             "{\"value\":\"%s\",\"size\":%ld}",
+                             b64,
+                             readSize);                    
+
+                }else{
+                    contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
+                    contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
+                    snprintf(contentJson[contentJsonSize - 1], contentMemCount,
+                             "{\"value\":\"%s\",\"size\":%ld}",
+                             b64,
+                             readSize);   
+                }
+
+                free(tmp);
+                free(b64);
+            }
+                break; 
+
+
+            // will always be treated as utf8 when in json
+            case encodedString_context:
+            case latin1Encoding_context:{
+                size_t readSize = 0;
+                size_t contentMemCount = 3;
+
+                tmp = (unsigned char *) id3v2ReadFrameEntryAsChar(&trav, &readSize);
+
+                if(tmp == NULL || readSize == 0){
+                    exit = true;
+                    break;
+                }
+
+
+                contentMemCount += snprintf(NULL, 0,
+                                           "{\"value\":\"%s\",\"size\":%ld}",
+                                           tmp,
+                                           readSize);
+
+                contentJsonSize++;
+                if(contentJson == NULL){
+                    contentJson = calloc(contentJsonSize, sizeof(char *));
+                    contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
+
+                    snprintf(contentJson[contentJsonSize - 1], contentMemCount,
+                             "{\"value\":\"%s\",\"size\":%ld}",
+                             tmp,
+                             readSize);                    
+
+                }else{
+                    contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
+                    contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
+                    snprintf(contentJson[contentJsonSize - 1], contentMemCount,
+                             "{\"value\":\"%s\",\"size\":%ld}",
+                             tmp,
+                             readSize);   
+                }
+
+                free(tmp);
+
+            }
+                break;
+
+            case numeric_context:{
+                size_t readSize = 0;
+                size_t contentMemCount = 3;
+                size_t num = 0;
+
+                tmp = id3v2ReadFrameEntry(&trav, &readSize);
+
+                if(tmp == NULL || readSize == 0){
+                    exit = true;
+                    break;
+                }
+
+                num = btost(tmp, readSize);
+                free(tmp);
+
+                contentMemCount += snprintf(NULL, 0,
+                                           "{\"value\":\"%ld\",\"size\":%ld}",
+                                           num,
+                                           readSize);
+
+                contentJsonSize++;
+                if(contentJson == NULL){
+                    contentJson = calloc(contentJsonSize, sizeof(char *));
+                    contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
+
+                    snprintf(contentJson[contentJsonSize - 1], contentMemCount,
+                             "{\"value\":\"%ld\",\"size\":%ld}",
+                             num,
+                             readSize);                    
+
+                }else{
+                    contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
+                    contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
+                    snprintf(contentJson[contentJsonSize - 1], contentMemCount,
+                             "{\"value\":\"%ld\",\"size\":%ld}",
+                             num,
+                             readSize);   
+                }
+            }
+                break;
+            
+            case precision_context:{
+                size_t readSize = 0;
+                size_t contentMemCount = 0;
+                float value = 0;
+
+                tmp = id3v2ReadFrameEntry(&trav, &readSize);
+
+                if(tmp == NULL || readSize == 0){
+                    exit = true;
+                    break;
+                }
+
+
+                memcpy(&value, tmp, sizeof(value));
+                free(tmp);
+
+                contentMemCount = snprintf(NULL, 0,
+                                           "{\"value\":\"%f\",\"size\":%ld}",
+                                           value,
+                                           readSize);
+
+                contentJsonSize++;
+                if(contentJson == NULL){
+                    contentJson = calloc(contentJsonSize, sizeof(char *));
+                    contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
+
+                    snprintf(contentJson[contentJsonSize - 1], contentMemCount,
+                             "{\"value\":\"%f\",\"size\":%ld}",
+                             value,
+                             readSize);                    
+
+                }else{
+                    contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
+                    contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
+                    snprintf(contentJson[contentJsonSize - 1], contentMemCount,
+                             "{\"value\":\"%f\",\"size\":%ld}",
+                             value,
+                             readSize);   
+                }
+
+            }
+                break;
+            
+            // produces no json
+            case iter_context:{
+                // create a new iter
+                if(currIterations == 0){
+                    
+                    iterStorage = context;
+
+                    context = listCreateIterator(frame->contexts);
+                    
+                    for(size_t i = 0; i < cc->min; i++){
+                        listIteratorNext(&context);
+                    }
+                }
+
+                // iter 
+                if(currIterations != cc->max && currIterations != 0){
+                    context = listCreateIterator(frame->contexts);
+
+                    for(size_t i = 0; i < cc->min; i++){
+                        listIteratorNext(&context);
+                    }
+                }
+
+                // reset
+                if(currIterations >= cc->max){
+
+                    context = iterStorage;
+
+                    for(size_t i = 0; i < currIterations; i++){
+                        listIteratorNext(&context);
+                    }
+
+                    currIterations = 0;
+
+                }
+
+                currIterations++;
+
+                
+                // This will go on forever until a failure condition is met by a previous context
+                // i.e latin1_context detects null
+                 
+            }
+                break;
+
+            // base 64 again but concatenated
+            case adjustment_context:{
+                ListIter contentContextIter = listCreateIterator(frame->contexts);
+                ListIter contentEntryIter = listCreateIterator(frame->entries);
+                size_t poscc = 0;
+                size_t posce = 0;
+                size_t readSize = 0;
+                size_t contentMemCount = 0;
+                void *iterNext = NULL;
+                char *b64 = NULL;
+                
+
+                // hunt down "adjustment" key
+                while((iterNext = listIteratorNext(&contentContextIter)) != NULL){
+
+                    if(((Id3v2ContentContext *)iterNext)->type == iter_context){
+                        poscc--;
+                    }
+
+                    if(((Id3v2ContentContext *)iterNext)->key == id3v2djb2("adjustment")){
+                        break;
+                    }
+
+                    poscc++;
+                }
+                
+                // hunt down adjustment value
+                while((iterNext = listIteratorNext(&contentEntryIter)) != NULL){
+
+                    if(poscc == posce){
+                        readSize = btou32((uint8_t *)((Id3v2ContentEntry *)iterNext)->entry, (size_t)((Id3v2ContentEntry *)iterNext)->size);
+                        break;
+                    }
+
+                    posce++;
+                }
+
+
+                tmp = id3v2ReadFrameEntry(&trav, &readSize);
+
+                if(tmp == NULL || readSize == 0){
+                    exit = true;
+                    break;
+                }
+
+
+                b64 = base64Encode(tmp, readSize);
+                free(tmp);
+
+
+
+                contentMemCount = snprintf(NULL, 0,
+                                           "{\"value\":\"%s\",\"size\":%ld}",
+                                           b64,
+                                           strlen(b64));
+
+                contentJsonSize++;
+                if(contentJson == NULL){
+                    contentJson = calloc(contentJsonSize, sizeof(char *));
+                    contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
+
+                    snprintf(contentJson[contentJsonSize - 1], contentMemCount,
+                             "{\"value\":\"%s\",\"size\":%ld}",
+                             b64,
+                             readSize);                    
+
+                }else{
+                    contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
+                    contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
+                    snprintf(contentJson[contentJsonSize - 1], contentMemCount,
+                             "{\"value\":\"%s\",\"size\":%ld}",
+                             b64,
+                             readSize);   
+                }
+
+            }
+                break;
+
+            case unknown_context:
+            default:
+                exit = true;
+                break;
+        }
+
+        if(exit == true){
+            break;
+            
+        }
+    }
+
+    headerJson = id3v2FrameHeaderToJSON(frame->header, version);
+
+    // concatenate all JSON data stored in contentJson into a single string split by ","
+    for(size_t i = 0; i < contentJsonSize; i++){
+        concatenatedStringLength += strlen(contentJson[i]) + 1;
+    }
+    
+
+    concatenatedString = calloc(concatenatedStringLength + 1, sizeof(char));
+    for(size_t i = 0; i < contentJsonSize; i++){
+        strcat(concatenatedString, contentJson[i]);
+        if(i < contentJsonSize - 1){
+            strcat(concatenatedString, ",");
+        }
+    }
+
+    memCount += snprintf(NULL, 0,
+                        "{\"header\":%s,\"content\":[%s]}",
+                        headerJson,
+                        concatenatedString);
+
+
+    json = malloc((memCount + 1) * sizeof(char));
+    strcpy(json, "{\"header\":");
+    strcat(json, headerJson);
+    strcat(json, ",\"content\":[");
+    strcat(json, concatenatedString);
+    strcat(json, "]}");
+
+
+    free(headerJson);
+
+    if(concatenatedString != NULL){
+        free(concatenatedString);
+    }
+
+    if(contentJson != NULL){
+        for(size_t i = 0; i < contentJsonSize; i++){
+            free(contentJson[i]);
+
+        }
+        free(contentJson);
+    }
+
+    return json;
 }

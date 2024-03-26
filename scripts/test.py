@@ -31,16 +31,17 @@ else:
 
 # compile code
 update.message("Compiling id3v1_test program")
-#compile_code("id3v1_test")
+compile_code("id3v1_test")
 update.message("Compiling id3v2_tag_identity_test program")
-#compile_code("id3v2_tag_identity_test")
+compile_code("id3v2_tag_identity_test")
 update.message("Compiling id3v2_context_test program")
-#compile_code("id3v2_context_test")
+compile_code("id3v2_context_test")
 update.message("Compiling id3v2_parser_test program")
-#compile_code("id3v2_parser_test")
+compile_code("id3v2_parser_test")
 update.message("Compiling id3v2_frame_test program")
 compile_code("id3v2_frame_test")
-
+update.message("Compiling id3v2_test program")
+compile_code("id3v2_test")
 # call test execs
 try:
     if platform == "linux" or platform == "linux2":
@@ -51,12 +52,14 @@ try:
             subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v2_context_test"])
             subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v2_parser_test"])
             subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v2_frame_test"])
+            subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v2_test"])
         else:
             subprocess.call(["./id3v1_test"])
             subprocess.call(["./id3v2_tag_identity_test"])
             subprocess.call(["./id3v2_context_test"])
             subprocess.call(["./id3v2_parser_test"])
             subprocess.call(["./id3v2_frame_test"])
+            subprocess.call(["./id3v2_test"])
         
     elif platform == "darwin":
 
@@ -70,11 +73,12 @@ try:
             # will get changed back but just in case it needs to be set
             os.environ["MallocStackLogging"] = "1"
 
-            #subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v1_test"])
-            #subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_tag_identity_test"])
-            #subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_context_test"])
-            #subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_parser_test"])
+            subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v1_test"])
+            subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_tag_identity_test"])
+            subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_context_test"])
+            subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_parser_test"])
             subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_frame_test"])
+            subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_test"])
 
             if(malloc_stack_logging == False):
                 os.environ["MallocStackLogging"] = "0"
@@ -84,6 +88,7 @@ try:
             subprocess.call(["./id3v2_context_test"])
             subprocess.call(["./id3v2_parser_test"])
             subprocess.call(["./id3v2_frame_test"])
+            subprocess.call(["./id3v2_test"])
 
 
     elif platform == "win32":
@@ -92,6 +97,7 @@ try:
         subprocess.call(["id3v2_context_test.exe"])
         subprocess.call(["id3v2_parser_test.exe"])
         subprocess.call(["id3v2_frame_test.exe"])
+        subprocess.call(["id3v2_test.exe"])
         
 except OSError as e:
     if e.errno == errno.ENOENT:

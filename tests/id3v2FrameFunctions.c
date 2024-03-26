@@ -1,3 +1,13 @@
+/**
+ * @file id3v2FrameFunctions.c
+ * @author Ewan Jones
+ * @brief unit tests for id3v2Frame.c
+ * @version 0.1
+ * @date 2024-03-25
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
 #include <stdio.h>
 #include <stdarg.h>
 #include <stddef.h>
@@ -7,7 +17,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include "id3v2.h"
+#include "id3v2Frame.h"
+#include "id3v2Parser.h"
+#include "id3v2Context.h"
+#include "id3v2TagIdentity.h"
 #include "byteStream.h"
 #include "byteInt.h"
 #include "byteUnicode.h"
@@ -812,10 +825,10 @@ static void id3v2FrameToStream_v3TXXX(void **state){
     byteStreamDestroy(stream);
 }
 
-static void playground(void **state){
+static void id3v2FrameToJSON_v3TXXX(void **state){
     
     ByteStream *stream = byteStreamFromFile("assets/sorry4dying.mp3");
-    ByteStream *rep = NULL;
+    char *json = NULL;
 
     Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
     ListIter iter = id3v2CreateFrameTraverser(tag);
@@ -828,7 +841,7 @@ static void playground(void **state){
         if(memcmp(f->header->id, "TXXX", ID3V2_FRAME_ID_MAX_SIZE) == 0){
             
             if(c == 1){
-                rep = id3v2FrameToStream(f, ID3V2_TAG_VERSION_3);
+                json = id3v2FrameToJSON(f, ID3V2_TAG_VERSION_3);
                 break;
             }
             c++;
@@ -836,28 +849,70 @@ static void playground(void **state){
         }
     }
 
-    assert_memory_equal("TXXX", byteStreamCursor(rep), 4);
-    byteStreamSeek(rep, 4, SEEK_CUR);
+    assert_string_equal(json,
+                        "{\"header\":{\"id\":\"TXXX\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0},\"content\":[{\"value\":\"1\",\"size\":1},{\"value\":\"PERFORMER\",\"size\":9},{\"value\":\"Quadeca\",\"size\":7}]}");
 
-    assert_memory_equal("\x00\x00\x00\x27", byteStreamCursor(rep), 4);
-    byteStreamSeek(rep, 4, SEEK_CUR);
+    free(json);
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
+}   
 
-    assert_memory_equal("\x00\x00", byteStreamCursor(rep), 2);
-    byteStreamSeek(rep, 2, SEEK_CUR);
+static void id3v2FrameToJSON_v3APIC(void **state){
+    
+    ByteStream *stream = byteStreamFromFile("assets/sorry4dying.mp3");
+    char *json = NULL;
 
-    assert_memory_equal("\x01", byteStreamCursor(rep), 1);
-    byteStreamSeek(rep, 1, SEEK_CUR);
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    ListIter iter = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+    
+    while((f = id3v2FrameTraverse(&iter)) != NULL){
 
-    assert_memory_equal("\xff\xfe\x50\x00\x45\x00\x52\x00\x46\x00\x4f\x00\x52\x00\x4d\x00\x45\x00\x52\x00", byteStreamCursor(rep), 20);
-    byteStreamSeek(rep, 20, SEEK_CUR);
+        if(memcmp(f->header->id, "APIC", ID3V2_FRAME_ID_MAX_SIZE) == 0){
+            
+            json = id3v2FrameToJSON(f, ID3V2_TAG_VERSION_3);
+            break;
+            
+            
+        }
+    }
 
-    assert_memory_equal("\x00\x00", byteStreamCursor(rep), 2);
-    byteStreamSeek(rep, 2, SEEK_CUR);
+    assert_non_null(json);
+    assert_memory_equal(json, "{\"header\":{\"id\":\"APIC\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0},\"content\":[{\"value\":\"image/jpeg\",\"size\":10},{\"value\":\"\",", 144);
 
-    assert_memory_equal("\xff\xfe\x51\x00\x75\x00\x61\x00\x64\x00\x65\x00\x63\x00\x61\x00", byteStreamCursor(rep), 16);
-    byteStreamSeek(rep, 16, SEEK_CUR);
+    /**
+     * vscode actually crashes when i try and compare the json string so i cant do it?
+     */
 
-    byteStreamDestroy(rep);
+    free(json);
+    id3v2DestroyTag(&tag);
+    byteStreamDestroy(stream);
+}   
+
+static void id3v2FrameToJSON_v4ETCO(void **state){
+    
+    ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
+    char *json = NULL;
+
+    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    ListIter iter = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+    
+    while((f = id3v2FrameTraverse(&iter)) != NULL){
+
+        if(memcmp(f->header->id, "ETCO", ID3V2_FRAME_ID_MAX_SIZE) == 0){
+            
+            json = id3v2FrameToJSON(f, ID3V2_TAG_VERSION_4);
+            break;
+            
+        }
+    }
+
+
+    assert_non_null(json);
+    assert_string_equal(json, "{\"header\":{\"id\":\"ETCO\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"unsynchronisation\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0},\"content\":[{\"value\":\"2\",\"size\":1},{\"value\":\"6\",\"size\":1},{\"value\":\"1220000\",\"size\":4},{\"value\":\"2\",\"size\":1},{\"value\":\"610000\",\"size\":4}]}");
+
+    free(json);
     id3v2DestroyTag(&tag);
     byteStreamDestroy(stream);
 }
@@ -905,8 +960,10 @@ int main(){
         cmocka_unit_test(id3v2FrameToStream_v2EQU),
         cmocka_unit_test(id3v2FrameToStream_v3TXXX),
 
-
-        cmocka_unit_test(playground)
+        // id3v2FrameToJSON
+        cmocka_unit_test(id3v2FrameToJSON_v3TXXX),
+        cmocka_unit_test(id3v2FrameToJSON_v3APIC),
+        cmocka_unit_test(id3v2FrameToJSON_v4ETCO),
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
