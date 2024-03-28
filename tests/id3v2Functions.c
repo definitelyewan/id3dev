@@ -191,14 +191,562 @@ static void id3v2RemoveFrameByID_v3EveryFrame(void **state){
 
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
-    //int total = tag->frames->length;
-    id3v2RemoveFrameByID("APIC", tag);
-    //assert_true(id3v2RemoveFrameByID("APIC", tag));
-    //assert_int_equal(total--, tag->frames->length);
+    int total = tag->frames->length;
+
+    assert_true(id3v2RemoveFrameByID("APIC", tag));
+    total--;
+    assert_int_equal(total, tag->frames->length);
+    assert_false(id3v2RemoveFrameByID("APIC", tag));
+
+    for(int i = 0; i < 3; i++){
+        assert_true(id3v2RemoveFrameByID("TXXX", tag));
+        total--;
+        assert_int_equal(total, tag->frames->length);
+        
+    }
+    assert_false(id3v2RemoveFrameByID("TXXX", tag));
+
+    assert_true(id3v2RemoveFrameByID("TCOM", tag));
+    total--;
+    assert_int_equal(total, tag->frames->length);
+    assert_false(id3v2RemoveFrameByID("TCOM", tag));
+
+    assert_true(id3v2RemoveFrameByID("TPE2", tag));
+    total--;
+    assert_int_equal(total, tag->frames->length);
+    assert_false(id3v2RemoveFrameByID("TPE2", tag));
+
+    assert_true(id3v2RemoveFrameByID("TPE1", tag));
+    total--;
+    assert_int_equal(total, tag->frames->length);
+    assert_false(id3v2RemoveFrameByID("TPE1", tag));
+
+    assert_true(id3v2RemoveFrameByID("TPOS", tag));
+    total--;
+    assert_int_equal(total, tag->frames->length);
+    assert_false(id3v2RemoveFrameByID("TPOS", tag));
+
+    assert_true(id3v2RemoveFrameByID("TRCK", tag));
+    total--;
+    assert_int_equal(total, tag->frames->length);
+    assert_false(id3v2RemoveFrameByID("TRCK", tag));
+
+    assert_true(id3v2RemoveFrameByID("TYER", tag));
+    total--;
+    assert_int_equal(total, tag->frames->length);
+    assert_false(id3v2RemoveFrameByID("TYER", tag));
+
+    assert_true(id3v2RemoveFrameByID("TCON", tag));
+    total--;
+    assert_int_equal(total, tag->frames->length);
+    assert_false(id3v2RemoveFrameByID("TCON", tag));
+
+    assert_true(id3v2RemoveFrameByID("TCOP", tag));
+    total--;
+    assert_int_equal(total, tag->frames->length);
+    assert_false(id3v2RemoveFrameByID("TCOP", tag));
+
+    assert_true(id3v2RemoveFrameByID("TSRC", tag));
+    total--;
+    assert_int_equal(total, tag->frames->length);
+    assert_false(id3v2RemoveFrameByID("TSRC", tag));
+
+    assert_true(id3v2RemoveFrameByID("TALB", tag));
+    total--;
+    assert_int_equal(total, tag->frames->length);
+    assert_false(id3v2RemoveFrameByID("TALB", tag));
+
+    assert_true(id3v2RemoveFrameByID("TIT2", tag));
+    total--;
+    assert_int_equal(total, tag->frames->length);
+    assert_false(id3v2RemoveFrameByID("TIT2", tag));
+
+    assert_int_equal(0, tag->frames->length);
 
     id3v2DestroyTag(&tag);
 
 }
+
+static void id3v2RemoveFrameByID_Null(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    assert_false(id3v2RemoveFrameByID("ASWA", tag));
+
+    id3v2DestroyTag(&tag);
+
+
+}
+
+
+static void id3v2ReadTextFrameContent_TRK(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    char *str = id3v2ReadTextFrameContent("TRK", tag);
+
+    assert_non_null(str);
+    assert_string_equal(str, "06/15");
+
+    free(str);
+
+    id3v2DestroyTag(&tag);
+
+}
+
+static void id3v2ReadTextFrameContent_TXX(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    char *str = id3v2ReadTextFrameContent("TXX", tag);
+
+    assert_null(str);
+
+    id3v2DestroyTag(&tag);
+
+}
+
+static void id3v2ReadTextFrameContent_PIC(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    char *str = id3v2ReadTextFrameContent("PIC", tag);
+
+    assert_null(str);
+
+    id3v2DestroyTag(&tag);
+
+}
+
+static void id3v2ReadTitle_TT2(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    char *str = id3v2ReadTitle(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "Ain't It Funny");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadTitle_TIT2(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    char *str = id3v2ReadTitle(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "sorry4dying");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadArtist_TP1(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    char *str = id3v2ReadArtist(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "Danny Brown");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadArtist_TPE1(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    char *str = id3v2ReadArtist(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "Quadeca");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadArtist_TP2(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    char *str = id3v2ReadAlbumArtist(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "Danny Brown");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadArtist_TPE2(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    char *str = id3v2ReadAlbumArtist(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "Quadeca");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadArtist_TAL(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    char *str = id3v2ReadAlbum(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "Atrocity Exhibition");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadArtist_TALB(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    char *str = id3v2ReadAlbum(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "I Didn't Mean To Haunt You");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadYear_TYE(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    char *str = id3v2ReadYear(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "2016");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadYear_TYER(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    char *str = id3v2ReadYear(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "2022");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadGenre_TCO(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    char *str = id3v2ReadGenre(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "Experimental Hip-Hop, Hardcore Hip-Hop, Abstract Hip-Hop, Industrial Hip-Hop & Post-Punk");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadGenre_TCON(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    char *str = id3v2ReadGenre(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "Art Pop, Folktronica Glitch Pop, Ambient Pop, Experimental Hip-Hop, Neo-Psychedelia, Alternative R&B, Emo Rap & Chamber Pop");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadTrack_TRK(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    char *str = id3v2ReadTrack(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "06/15");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadTrack_TRCK(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    char *str = id3v2ReadTrack(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "01/11");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadComposer_TCM(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    char *str = id3v2ReadComposer(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "Danny Brown");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadComposer_TCOM(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    char *str = id3v2ReadComposer(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "Ben Lasky");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadDisc_TPA(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    char *str = id3v2ReadDisc(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "01/01");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadDisc_TPOS(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    char *str = id3v2ReadDisc(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "1/1");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadLyrics_ULT(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    char *str = id3v2ReadLyrics(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "haBDJHAsbdjkHASBDJahbsdkAHBSDHAbsdHBDUAHSBDUBAUIBFOASIUBDFOIAUBFOIAUWBFOAWBFAOUWEBFUOYBOUBUOBUOboubouboubouboubouboigndoignoisnjgsdfjnglksjdfngslkjfngskdjfnglskdnfgiserugisugnvfkdxjnvxlkjnijxdngixjdhfgoiserhgiusdng spoerijgsoergjnposeirhgposergn reigjosperijgsodfkgkldfmvxc.,vbm");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+
+static void id3v2ReadLyrics_Null(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    char *str = id3v2ReadLyrics(tag);
+
+    assert_null(str);
+
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadComment_COM(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    char *str = id3v2ReadComment(tag);
+
+    assert_non_null(str);
+
+    assert_string_equal(str, "test");
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadComment_Null(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    char *str = id3v2ReadComment(tag);
+
+    assert_null(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadPicture_PIC(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    size_t dataSize = 0;
+    uint8_t *data = id3v2ReadPicture(0, tag, &dataSize);
+
+    assert_non_null(data);
+    assert_int_equal(dataSize, 107904);
+    free(data);
+
+    data = id3v2ReadPicture(78, tag, &dataSize);
+
+    assert_non_null(data);
+    assert_int_equal(dataSize, 107904);
+    free(data);
+
+
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2ReadPictre_APIC(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+
+    size_t dataSize = 0;
+    uint8_t *data = NULL;
+
+    data = id3v2ReadPicture(0, tag, &dataSize);
+    assert_non_null(data);
+    free(data);
+
+    data = id3v2ReadPicture(3, tag, &dataSize);
+    assert_non_null(data);
+    free(data);
+
+    id3v2DestroyTag(&tag);
+}
+
+
+static void id3v2WriteTextFrameContent_TIT2(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+
+    assert_true(id3v2WriteTextFrameContent("TIT2", "test", tag));
+
+    char *str = id3v2ReadTitle(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "test");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteTextFrameContent_WCOM(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+
+    assert_false(id3v2WriteTextFrameContent("WCOM", "test", tag));
+
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteTitle_TT2(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
+
+    assert_true(id3v2WriteTitle("death breast", tag));
+
+    char *str = id3v2ReadTitle(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "death breast");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteTitle_TIT2(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    assert_true(id3v2WriteTitle("title", tag));
+
+    char *str = id3v2ReadTitle(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "title");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteArtist_TP1(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
+
+    assert_true(id3v2WriteArtist("good winter", tag));
+
+    char *str = id3v2ReadArtist(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "good winter");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteArtist_TEP1(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    assert_true(id3v2WriteArtist("t", tag));
+
+    char *str = id3v2ReadArtist(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "t");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteAlbumArtist_TP2(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
+
+    assert_true(id3v2WriteAlbumArtist("justin", tag));
+
+    char *str = id3v2ReadAlbumArtist(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "justin");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteAlbumArtist_TEP2(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    assert_true(id3v2WriteAlbumArtist("ben", tag));
+
+    char *str = id3v2ReadAlbumArtist(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "ben");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
 
 int main(){
     const struct CMUnitTest tests[] = {
@@ -221,6 +769,76 @@ int main(){
 
         // id3v2RemoveFrameByID
         cmocka_unit_test(id3v2RemoveFrameByID_v3EveryFrame),
+        cmocka_unit_test(id3v2RemoveFrameByID_Null),
+
+        // id3v2ReadTextFrameContent
+        cmocka_unit_test(id3v2ReadTextFrameContent_TRK),
+        cmocka_unit_test(id3v2ReadTextFrameContent_TXX),
+        cmocka_unit_test(id3v2ReadTextFrameContent_PIC),
+
+        // id3v2ReadTitle
+        cmocka_unit_test(id3v2ReadTitle_TT2),
+        cmocka_unit_test(id3v2ReadTitle_TIT2),
+
+        // id3v2ReadArtist
+        cmocka_unit_test(id3v2ReadArtist_TP1),
+        cmocka_unit_test(id3v2ReadArtist_TPE1),
+
+        // id3v2ReadAlbumArtist
+        cmocka_unit_test(id3v2ReadArtist_TP2),
+        cmocka_unit_test(id3v2ReadArtist_TPE2),
+
+        // id3v2ReadAlbum
+        cmocka_unit_test(id3v2ReadArtist_TAL),
+        cmocka_unit_test(id3v2ReadArtist_TALB),
+
+        // id3v2ReadYear
+        cmocka_unit_test(id3v2ReadYear_TYE),
+        cmocka_unit_test(id3v2ReadYear_TYER),
+
+        // id3v2ReadGenre
+        cmocka_unit_test(id3v2ReadGenre_TCO),
+        cmocka_unit_test(id3v2ReadGenre_TCON),
+
+        // id3v2ReadTrack
+        cmocka_unit_test(id3v2ReadTrack_TRK),
+        cmocka_unit_test(id3v2ReadTrack_TRCK),
+
+        // id3v2ReadComposer
+        cmocka_unit_test(id3v2ReadComposer_TCM),
+        cmocka_unit_test(id3v2ReadComposer_TCOM),
+
+        // id3v2ReadDisc
+        cmocka_unit_test(id3v2ReadDisc_TPA),
+        cmocka_unit_test(id3v2ReadDisc_TPOS),
+
+        // id3v2ReadLyrics
+        cmocka_unit_test(id3v2ReadLyrics_ULT),
+        cmocka_unit_test(id3v2ReadLyrics_Null),
+
+        // id3v2ReadComment
+        cmocka_unit_test(id3v2ReadComment_COM),
+        cmocka_unit_test(id3v2ReadComment_Null),
+
+        // id3v2ReadPicture
+        cmocka_unit_test(id3v2ReadPicture_PIC),
+        cmocka_unit_test(id3v2ReadPictre_APIC),
+
+        // id3v2WriteTextFrameContent
+        cmocka_unit_test(id3v2WriteTextFrameContent_TIT2),
+        cmocka_unit_test(id3v2WriteTextFrameContent_WCOM),
+
+        // id3v2WriteTitle
+        cmocka_unit_test(id3v2WriteTitle_TT2),
+        cmocka_unit_test(id3v2WriteTitle_TIT2),
+
+        // id3v2WriteArtist
+        cmocka_unit_test(id3v2WriteArtist_TP1),
+        cmocka_unit_test(id3v2WriteArtist_TEP1),
+
+        // id3v2WriteArtist
+        cmocka_unit_test(id3v2WriteAlbumArtist_TP2),
+        cmocka_unit_test(id3v2WriteAlbumArtist_TEP2)
 
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

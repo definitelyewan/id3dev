@@ -215,7 +215,7 @@ void id3v2DeleteFrame(void *toBeDeleted){
  * @return int 
  */
 int id3v2CompareFrame(const void *first, const void *second){
-    printf("\t\t[+] Entered id3v2CompareFrame\n");
+
     Id3v2Frame *f = (Id3v2Frame *)first;
     Id3v2Frame *s = (Id3v2Frame *)second;
     ListIter i1, i2;
@@ -235,47 +235,43 @@ int id3v2CompareFrame(const void *first, const void *second){
     if(diff != 0){
         return diff;
     }
-printf("\t\t[+] Tested id [%s]\n",f->header->id);
 
-    printf("\t\t[+] First and second are not NULL\n");
     diff = f->header->decompressionSize - s->header->decompressionSize;
     if(diff != 0){
         return diff;
     }
-printf("\t\t[+] Tested decompressionSize\n");
+
     diff = f->header->encryptionSymbol - s->header->encryptionSymbol;
     if(diff != 0){
         return diff;
     }
-printf("\t\t[+] Tested encryptionSymbol\n");
+
     if(f->header->fileAlterPreservation != s->header->fileAlterPreservation){
         return 1;
     }
-printf("\t\t[+] Tested fileAlterPreservation\n");
+
     diff = f->header->groupSymbol - s->header->groupSymbol;
     if(diff != 0){
         return diff;
     }
-printf("\t\t[+] Tested groupSymbol\n");
 
     if(f->header->readOnly != s->header->readOnly){
         return 1;
     }
-printf("\t\t[+] Tested read only\n");
+
     if(f->header->tagAlterPreservation != s->header->tagAlterPreservation){
         return 1;
     }
-printf("\t\t[+] Tested tagAlterPreservation\n");
+
     if(f->header->unsynchronisation != s->header->unsynchronisation){
         return 1;
     }
-printf("\t\t[+] Tested unsync\n");
+
     diff = f->entries->length - s->entries->length;
-    printf("\t\t[+] Diff = %ld,%ld\n",f->entries->length, s->entries->length);
     if(diff != 0){
         return diff;
     }
-printf("\t\t[+] Tested length\n");
+
     i1 = listCreateIterator(f->entries);
     i2 = listCreateIterator(s->entries);
 
@@ -290,12 +286,12 @@ printf("\t\t[+] Tested length\n");
         }
         
     }
-printf("\t\t[+] Tested entries\n");
+
     diff = f->contexts->length - s->contexts->length;
     if(diff != 0){
         return diff;
     }
-printf("\t\t[+] Tested length\n");
+
     i1 = listCreateIterator(f->contexts);
     i2 = listCreateIterator(s->contexts);
 
@@ -309,7 +305,7 @@ printf("\t\t[+] Tested length\n");
         }
         
     }
-printf("\t\t[+] Tested context\n");
+
     return diff;
 }
 
@@ -823,11 +819,11 @@ bool id3v2AttachFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame){
  * @return Id3v2Frame* 
  */
 Id3v2Frame *id3v2DetatchFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame){
-    printf("\t[-] Entered id3v2DetatchFrameFromTag\n");
+
     if(tag == NULL || frame == NULL){
         return NULL;
     }
-    printf("\t[-] Arguments are valid\n");
+
     return listDeleteData(tag->frames, (void *) frame);
 }
 
