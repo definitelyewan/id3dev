@@ -491,7 +491,6 @@ void *id3v2ReadFrameEntry(ListIter *traverser, size_t *dataSize){
  * @return char* 
  */
 char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
-    
     unsigned char *tmp = NULL;
     unsigned char *outString = NULL;
     unsigned char encoding = 0;
@@ -555,7 +554,6 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
     if(*dataSize >= 3 && outString[0] == 0xEF && outString[1] == 0xBB && outString[2] == 0xBF) {
         utf8BomOffset = 3;
     }
-
 
     // escape quotes and backslashes
     escapedStr = malloc(2 * (*dataSize - utf8BomOffset) + 1);

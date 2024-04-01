@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "byteStream.h"
+#include "byteUnicode.h"
 #include "id3v2.h"
 #include "id3v2Frame.h"
 #include "id3v2Parser.h"
@@ -723,7 +724,8 @@ uint8_t *id3v2ReadPicture(uint8_t type, Id3v2Tag *tag, size_t *dataSize){
 }
 
 /**
- * @brief Writes a null-terminated string to a text frame with a given id.
+ * @brief Writes a null-terminated UTF8 string to a text frame with a given id.
+ * The provided string will be converted to the appropriate encoding for the frame.
  * If the frame does not exist, this function fails. Any failure will result
  * in this function returning false otherwise, true.
  * 
@@ -738,12 +740,23 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
 
     }
 
+    // null is an invalid string
+    if(strlen(string) == 0){
+        return false;
+
+    }
+
     Id3v2Frame *f = NULL;
     ListIter frames = id3v2CreateFrameTraverser(tag);
     ListIter context = {0};
     ListIter entries = {0};
     Id3v2ContentContext *cc = NULL;
+    uint8_t encoding = 0;
+    uint8_t *usableString = NULL;
+    size_t outLen = 0;
     int i = 0;
+    bool convi = false;
+
 
 
     // sanitize id
@@ -758,6 +771,10 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
         if(memcmp(id, f->header->id, i) == 0){
             break;
         }
+    }
+
+    if(f == NULL){
+        return false;
     }
 
     // verify text frame via context
@@ -778,9 +795,37 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
 
     entries = id3v2CreateFrameEntryTraverser(f);
 
-    id3v2ReadFrameEntryAsU8(&entries); // encoding
+    encoding = id3v2ReadFrameEntryAsU8(&entries); // encoding
+
+    convi = byteConvertTextFormat((unsigned char *)string, BYTE_UTF8, strlen(string), &usableString, encoding, &outLen);
+
+    if(!convi && outLen == 0 && usableString == NULL){
+        return false;
+    }
+
+    // data is already in utf8
+    if(convi && outLen == 0){
+        usableString = (uint8_t *) string;
+    }
+
+    bytePrependBOM(encoding, &usableString, &outLen);
+
+    // reenable utf16 len support
+    if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
+        usableString = realloc(usableString, outLen + BYTE_PADDING);
+        memset(usableString + outLen, 0, BYTE_PADDING);
+    }
+
+    if(id3v2WriteFrameEntry(f, &entries, byteStrlen(encoding, usableString), (void *) usableString)){
+        free(usableString);
+        return true;
+    }
     
-    return id3v2WriteFrameEntry(f, &entries, strlen(string), (void *) string);
+    if(usableString != NULL){
+        free(usableString);
+    }
+    
+    return false;
 }
 
 /**
@@ -864,4 +909,591 @@ int id3v2WriteAlbumArtist(const char *albumArtist, Id3v2Tag *tag){
 
     // dummy
     return false;
+}
+
+/**
+ * @brief Writes a new album to the first Album/Movie/Show title (TAL or TALB) frame of a tag.
+ * If no album is found, false is returned otherwise, true.
+ * 
+ * @param album 
+ * @param tag 
+ * @return int 
+ */
+int id3v2WriteAlbum(const char *album, Id3v2Tag *tag){
+    
+    if(album == NULL || tag == NULL){
+        return false;
+    }
+
+    switch(tag->header->majorVersion){
+        case ID3V2_TAG_VERSION_2:
+            return id3v2WriteTextFrameContent("TAL", album, tag);
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteTextFrameContent("TALB", album, tag);
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes a new year to the first Year (TYE or TYER) frame of a tag. If no year is found,
+ * false is returned otherwise, true.
+ * 
+ * @param year 
+ * @param tag 
+ * @return int 
+ */
+int id3v2WriteYear(const char *year, Id3v2Tag *tag){
+        
+    if(year == NULL || tag == NULL){
+        return false;
+    }
+
+    switch(tag->header->majorVersion){
+        case ID3V2_TAG_VERSION_2:
+            return id3v2WriteTextFrameContent("TYE", year, tag);
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteTextFrameContent("TYER", year, tag);
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes a new genre to the first Genre (TCO or TCON) frame of a tag. If no genre is found,
+ * false is returned otherwise, true.
+ * 
+ * @param genre 
+ * @param tag 
+ * @return int 
+ */
+int id3v2WriteGenre(const char *genre, Id3v2Tag *tag){
+
+    if(genre == NULL || tag == NULL){
+        return false;
+    }
+
+    switch(tag->header->majorVersion){
+        case ID3V2_TAG_VERSION_2:
+            return id3v2WriteTextFrameContent("TCO", genre, tag);
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteTextFrameContent("TCON", genre, tag);
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes a new track to the first Track number/Position in set (TRK or TRCK) frame of a tag.
+ * if no track is found, false is returned otherwise, true.
+ * 
+ * @param track 
+ * @param tag 
+ * @return int 
+ */
+int id3v2WriteTrack(const char *track, Id3v2Tag *tag){
+
+    if(track == NULL || tag == NULL){
+        return false;
+    }
+
+    switch(tag->header->majorVersion){
+        case ID3V2_TAG_VERSION_2:
+            return id3v2WriteTextFrameContent("TRK", track, tag);
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteTextFrameContent("TRCK", track, tag);
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes a new disc to the first Disc number (TPA or TPOS) frame of a tag. If no disc is found,
+ * false is returned otherwise, true.
+ * 
+ * @param disc 
+ * @param tag 
+ * @return int 
+ */
+int id3v2WriteDisc(const char *disc, Id3v2Tag *tag){
+
+    if(disc == NULL || tag == NULL){
+        return false;
+    }
+
+    switch(tag->header->majorVersion){
+        case ID3V2_TAG_VERSION_2:
+            return id3v2WriteTextFrameContent("TPA", disc, tag);
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteTextFrameContent("TPOS", disc, tag);
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes a new composer to the first Composer (TCM or TCOM) frame of a tag.
+ * if ni composer is found, false is returned otherwise, true.
+ * 
+ * @param composer 
+ * @param tag 
+ * @return int 
+ */
+int id3v2WriteComposer(const char *composer, Id3v2Tag *tag){
+
+    if(composer == NULL || tag == NULL){
+        return false;
+    }
+
+    switch(tag->header->majorVersion){
+        case ID3V2_TAG_VERSION_2:
+            return id3v2WriteTextFrameContent("TCM", composer, tag);
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteTextFrameContent("TCOM", composer, tag);
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes new lyrics to the first Unsynchronised Lyric/Text Transcription (ULT or USLT) 
+ * frame of a tag. If no lyrics are found, false is returned otherwise, true.
+ * 
+ * @param composer 
+ * @param tag 
+ * @return int 
+ */
+int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
+
+    if(lyrics == NULL || tag == NULL){
+        return false;
+    }
+
+    // null is an invalid string
+    if(strlen(lyrics) == 0){
+        return false;
+    }
+
+    Id3v2Frame *f = NULL;
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    ListIter context = {0};
+    ListIter entries = {0};
+    Id3v2ContentContext *cc = NULL;
+    uint8_t encoding = 0;
+    uint8_t *usableString = NULL;
+    size_t outLen = 0;
+    char id[ID3V2_FRAME_ID_MAX_SIZE] = {0,0,0,0};
+    int i = 0;
+    bool convi = false;
+
+    switch(tag->header->majorVersion){
+        case ID3V2_TAG_VERSION_2:
+            i = ID3V2_FRAME_ID_MAX_SIZE - 1;
+            memcpy(id, "ULT", i);
+            break;
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            i = ID3V2_FRAME_ID_MAX_SIZE;
+            memcpy(id, "USLT", i);
+            break;
+        default:
+            return false;
+
+    }
+
+    while((f = id3v2FrameTraverse(&frames)) != NULL){
+
+        if(memcmp(id, f->header->id, i) == 0){
+            break;
+        }
+    }
+
+    if(f == NULL){
+        return false;
+    }
+
+    // verify frame via context
+    if(f->contexts->length != 4 && f->entries->length != 4){
+        return false;
+    }
+
+    context = listCreateIterator(f->contexts);
+
+    for(int i = 0; i < 4; i++){
+        cc = listIteratorNext(&context);
+
+        if(cc == NULL || (i == 0 && cc->type != numeric_context) ||
+            (i == 1 && cc->type != noEncoding_context) ||
+            (i == 2 && cc->type != encodedString_context) ||
+            (i == 3 && cc->type != encodedString_context)){
+            return false;
+        }
+    }
+
+    entries = id3v2CreateFrameEntryTraverser(f);
+
+    encoding = id3v2ReadFrameEntryAsU8(&entries); // encoding
+
+    convi = byteConvertTextFormat((unsigned char *)lyrics, BYTE_UTF8, strlen(lyrics), &usableString, encoding, &outLen);
+
+    if(!convi && outLen == 0 && usableString == NULL){
+        return false;
+    }
+
+    // data is already in utf8
+    if(convi && outLen == 0){
+        usableString = (uint8_t *) lyrics;
+    }
+
+    bytePrependBOM(encoding, &usableString, &outLen);
+
+    // reenable utf16 len support
+    if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
+        usableString = realloc(usableString, outLen + BYTE_PADDING);
+        memset(usableString + outLen, 0, BYTE_PADDING);
+    }
+
+    id3v2ReadFrameEntryAsU8(&entries); // language
+    id3v2ReadFrameEntryAsU8(&entries); // description
+
+    if(id3v2WriteFrameEntry(f, &entries, byteStrlen(encoding, usableString), (void *) usableString)){
+        free(usableString);
+        return true;
+    }
+    
+    if(usableString != NULL){
+        free(usableString);
+    }
+    
+    return false;
+}
+
+
+/**
+ * @brief Writes a new comment to the first Comment (COM or COMM) frame of a tag. If no comment is found,
+ * false is returned otherwise, true.
+ * 
+ * @param comment 
+ * @param tag 
+ * @return int 
+ */
+int id3v2WriteComment(const char *comment, Id3v2Tag *tag){
+
+    if(comment == NULL || tag == NULL){
+        return false;
+    }
+
+    // null is an invalid string
+    if(strlen(comment) == 0){
+        return false;
+    }
+
+    Id3v2Frame *f = NULL;
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    ListIter context = {0};
+    ListIter entries = {0};
+    Id3v2ContentContext *cc = NULL;
+    uint8_t encoding = 0;
+    uint8_t *usableString = NULL;
+    size_t outLen = 0;
+    char id[ID3V2_FRAME_ID_MAX_SIZE] = {0,0,0,0};
+    int i = 0;
+    bool convi = false;
+
+
+    switch(tag->header->majorVersion){
+        case ID3V2_TAG_VERSION_2:
+            i = ID3V2_FRAME_ID_MAX_SIZE - 1;
+            memcpy(id, "COM", i);
+            break;
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            i = ID3V2_FRAME_ID_MAX_SIZE;
+            memcpy(id, "COMM", i);
+            break;
+        default:
+            return false;
+    }
+
+    while((f = id3v2FrameTraverse(&frames)) != NULL){
+        if(memcmp(id, f->header->id, i) == 0){
+            break;
+        }
+    }
+
+    if(f == NULL){
+        return false;
+    }
+
+    // verify frame via context
+    if(f->contexts->length != 4 && f->entries->length != 4){
+        return false;
+    }
+
+    context = listCreateIterator(f->contexts);
+
+    for(int i = 0; i < 4; i++){
+        cc = listIteratorNext(&context);
+
+        if(cc == NULL || (i == 0 && cc->type != numeric_context) ||
+            (i == 1 && cc->type != noEncoding_context) ||
+            (i == 2 && cc->type != encodedString_context) ||
+            (i == 3 && cc->type != encodedString_context)){
+            return false;
+        }
+    }
+
+    entries = id3v2CreateFrameEntryTraverser(f);
+
+    encoding = id3v2ReadFrameEntryAsU8(&entries); // encoding
+
+    convi = byteConvertTextFormat((unsigned char *)comment, BYTE_UTF8, strlen(comment), &usableString, encoding, &outLen);
+
+    if(!convi && outLen == 0 && usableString == NULL){
+        return false;
+    }
+
+    // data is already in utf8
+    if(convi && outLen == 0){
+        usableString = (uint8_t *) comment;
+    }
+
+    bytePrependBOM(encoding, &usableString, &outLen);
+
+    // reenable utf16 len support
+    if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
+        usableString = realloc(usableString, outLen + BYTE_PADDING);
+        memset(usableString + outLen, 0, BYTE_PADDING);
+    }
+
+    id3v2ReadFrameEntryAsU8(&entries); // language
+    id3v2ReadFrameEntryAsU8(&entries); // description
+
+    if(id3v2WriteFrameEntry(f, &entries, byteStrlen(encoding, usableString), (void *) usableString)){
+        free(usableString);
+        return true;
+    }
+    
+    if(usableString != NULL){
+        free(usableString);
+    }
+    
+    return false;
+}
+
+/**
+ * @brief Writes a new picture to the first Attached picture (PIC or APIC) frame of a tag that matches the
+ * given type. It will additionally write the mime type via the null terminated string kind. If no picture
+ * frame is detected or any argument is null, false is returned otherwise, true.
+ * 
+ * @param image 
+ * @param imageSize 
+ * @param kind 
+ * @param type 
+ * @param tag 
+ * @return int 
+ */
+int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_t type, Id3v2Tag *tag){
+
+    if(image == NULL || imageSize == 0 || kind == NULL || tag == NULL){
+        return false;
+    }
+
+    if(strlen(kind) == 0){
+        return false;
+    }
+
+    Id3v2Frame *f = NULL;
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    ListIter context = {0};
+    ListIter entries = {0};
+    Id3v2ContentContext *cc = NULL;
+    uint8_t usableType = ((type > 0x14) ? 0x00 : type); // clamp type
+    char id[ID3V2_FRAME_ID_MAX_SIZE] = {0,0,0,0};
+    int i = 0;
+    int kindLen = 0;
+
+    // what id will be used
+    switch(tag->header->majorVersion){
+        case ID3V2_TAG_VERSION_2:
+            i = ID3V2_FRAME_ID_MAX_SIZE - 1;
+            memcpy(id, "PIC", i);
+            break;
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            i = ID3V2_FRAME_ID_MAX_SIZE;
+            memcpy(id, "APIC", i);
+            break;
+        default:
+            return false;
+    }
+
+    // find frame
+    while(true){
+        while((f = id3v2FrameTraverse(&frames)) != NULL){
+            if(memcmp(id, f->header->id, i) == 0){
+                break;
+            }
+        }
+
+        if(f == NULL){
+            return false;
+        }
+
+        // verify frame via context
+        if(f->contexts->length != 5 && f->entries->length != 5){
+            return false;
+        }
+
+        context = listCreateIterator(f->contexts);
+
+        for(int i = 0; i < 4; i++){
+            cc = listIteratorNext(&context);
+
+            if(cc == NULL){
+                return false;
+            }
+
+            if((i == 0 && cc->type != numeric_context) || 
+            (i == 1 && (cc->type != noEncoding_context && cc->type != latin1Encoding_context)) ||
+            (i == 2 && cc->type != numeric_context) ||
+            (i == 3 && cc->type != encodedString_context) || 
+            (i == 4 && cc->type != binary_context)){
+                return false;
+
+            }
+        }
+
+        entries = id3v2CreateFrameEntryTraverser(f);
+
+        id3v2ReadFrameEntryAsU8(&entries); // encoding
+        id3v2ReadFrameEntryAsU8(&entries); // mime type
+        if(id3v2ReadFrameEntryAsU8(&entries) == usableType){
+            break;
+        }
+
+    }
+
+    entries = id3v2CreateFrameEntryTraverser(f);
+
+    id3v2ReadFrameEntryAsU8(&entries); // encoding
+    
+    switch(tag->header->majorVersion){
+        case ID3V2_TAG_VERSION_2:
+            kindLen = strlen(kind);
+
+            if(kindLen > 3){
+                kindLen = 3;
+            }
+
+            if(!id3v2WriteFrameEntry(f, &entries, kindLen, (void *) kind)){
+                return false;
+            }
+
+            break;
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:{
+
+            char *mime = NULL;
+
+            mime = calloc(sizeof(char), strlen("image/") + strlen(kind) + 1);
+
+            memcpy(mime, "image/", strlen("image/"));
+            memcpy(mime + strlen("image/"), kind, strlen(kind));
+
+            if(!id3v2WriteFrameEntry(f, &entries, strlen(mime), (void *) mime)){
+                free(mime);
+                return false;
+            }
+
+            free(mime);
+        }
+            break;
+        default:
+            return false;
+
+    }
+
+    id3v2ReadFrameEntryAsU8(&entries); // mime type skip
+    id3v2ReadFrameEntryAsU8(&entries); // picture type
+    id3v2ReadFrameEntryAsU8(&entries); // description
+
+    return id3v2WriteFrameEntry(f, &entries, imageSize, (void *) image);
+}
+
+/**
+ * @brief Writes a new picture from a file to the first Attached picture (PIC or APIC) frame of a tag that 
+ * matches the given type. It will additionally write the mime type via the null terminated string kind. 
+ * If no picture frame is detected or any argument is null, false is returned otherwise, true.
+ * 
+ * @param filename 
+ * @param kind 
+ * @param type 
+ * @param tag 
+ * @return int 
+ */
+int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t type, Id3v2Tag *tag){
+    
+    if(filename == NULL || kind == NULL || tag == NULL){
+        return false;
+    }
+
+    if(strlen(filename) == 0 || strlen(kind) == 0){
+        return false;
+    }
+
+    FILE *f = NULL;
+    uint8_t *data = NULL;
+    size_t size = 0;
+    int ret = 0;
+
+    f = fopen(filename, "rb");
+
+    if(f == NULL){
+        return false;
+    }
+
+    fseek(f, 0, SEEK_END);
+    size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    data = calloc(sizeof(uint8_t), size);
+
+    if(fread(data, sizeof(uint8_t), size, f) != size){
+        fclose(f);
+        free(data);
+        return false;
+    }
+
+    fclose(f);
+
+    ret = id3v2WritePicture(data, size, kind, type, tag);
+
+    free(data);
+
+    return ret;
 }

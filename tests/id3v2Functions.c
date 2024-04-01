@@ -709,11 +709,11 @@ static void id3v2WriteArtist_TEP1(void **state){
 
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
-    assert_true(id3v2WriteArtist("t", tag));
+    assert_true(id3v2WriteArtist("ab", tag));
 
     char *str = id3v2ReadArtist(tag);
     assert_non_null(str);
-    assert_string_equal(str, "t");
+    assert_string_equal(str, "ab");
 
     free(str);
     id3v2DestroyTag(&tag);
@@ -747,6 +747,308 @@ static void id3v2WriteAlbumArtist_TEP2(void **state){
     id3v2DestroyTag(&tag);
 }
 
+static void id3v2WriteAlbum_TAL(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
+
+    assert_false(id3v2WriteAlbum("", tag));
+
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteAlbum_TALB(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    assert_true(id3v2WriteAlbum("SCRAPYARD", tag));
+
+    char *str = id3v2ReadAlbum(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "SCRAPYARD");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteYear_TYE(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
+
+    assert_true(id3v2WriteYear("1910", tag));
+
+    char *str = id3v2ReadYear(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "1910");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteYear_TYER(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    assert_true(id3v2WriteYear("0", tag));
+
+    char *str = id3v2ReadYear(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "0");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteGenre_TCO(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
+
+    assert_true(id3v2WriteGenre("Bossa Nova", tag));
+
+    char *str = id3v2ReadGenre(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "Bossa Nova");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteGenre_TCON(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    assert_true(id3v2WriteGenre("Death Metal", tag));
+
+    char *str = id3v2ReadGenre(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "Death Metal");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteTrack_TRK(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
+
+    assert_true(id3v2WriteTrack("99/99", tag));
+
+    char *str = id3v2ReadTrack(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "99/99");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteTrack_TRCK(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    assert_true(id3v2WriteTrack("1/40", tag));
+
+    char *str = id3v2ReadTrack(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "1/40");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteDisc_TPA(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
+
+    assert_true(id3v2WriteDisc("1/1", tag));
+
+    char *str = id3v2ReadDisc(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "1/1");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteDisc_TPOS(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    assert_true(id3v2WriteDisc("10/100", tag));
+
+    char *str = id3v2ReadDisc(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "10/100");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteComposer_TCM(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
+
+    assert_true(id3v2WriteComposer("justion vernon", tag));
+
+    char *str = id3v2ReadComposer(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "justion vernon");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteComposer_TCOM(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    assert_true(id3v2WriteComposer("Lasky", tag));
+
+    char *str = id3v2ReadComposer(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "Lasky");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteLyrics_ULT(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
+
+    assert_false(id3v2WriteLyrics("there is no lyrics frame", tag));
+
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteLyrics_ULT2(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    assert_true(id3v2WriteLyrics("Verbal couture, parkour with the metaphors The flow house of horror, dead bolted with metal doors Grinch bitch, six sense with a nose drip Mind skydive, sniffing bumps in the cockpit Locksmith of hip-hop, appraisal the wrist watch The rocks 'bout the size as the teeth in Chris Rock's mouth Sock out the mic, prototype for Adderall Your work's killing fiends 'cause you cut it with Fentanyl So much coke just to sniff, need a ski lift Flip your table over if you cut it with the bullshit Nosebleed on red carpets, but it just blend in Snapping pictures feeling my chest being sunk in Live a fast life, seen many die slowly Unhappy when they left so I try to seize the moment Funny how it happens who ever would imagine That joke's on you but Satan the one laughing Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? I can sell honey to a bee In the fall time, make trees, take back they leaves Octopus in a straight jacket, savage with bad habits Broke, serving fiends, got rich, became a addict Ain't it funny how it happens, who would ever would imagine? Nose running right now, could ya pass me a napkin? Managed to somehow to have the upper advantage Panic when the drugs are gone and nobody is answering Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? No way to mask it, a lot became has-beens Rolling up that hundred dollar bill 'til they cash in Think it's gon' last, going too fast Man, it's fucked up, ain't it funny how it happens? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Upcoming heavy traffic Say you need to slow down 'cause you feel yourself crashing Staring in the devil face but you can't stop laughing Staring in the devil face but you can't stop laughing It's a living nightmare, that most of us might share Inherited in our blood, it's why we stuck in the mud Can't quit the drug use or the alcohol abuse Even if I wanted to, tell you what I'm gonna do I'ma wash away my problems with a bottle of Henny Anxiety got the best of me so I'm popping them Xannies Might need rehab but to me that shit pussy Pray for me y'all, 'cause I don't know what coming to me Bought a 8-ball of coke and my nigga on the way Got three hoes with him and they all tryna play Ain't it funny how it happens, ever would imagine Joke's on you but Satan the one laughing Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it?", tag));
+
+    char *str = id3v2ReadLyrics(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "Verbal couture, parkour with the metaphors The flow house of horror, dead bolted with metal doors Grinch bitch, six sense with a nose drip Mind skydive, sniffing bumps in the cockpit Locksmith of hip-hop, appraisal the wrist watch The rocks 'bout the size as the teeth in Chris Rock's mouth Sock out the mic, prototype for Adderall Your work's killing fiends 'cause you cut it with Fentanyl So much coke just to sniff, need a ski lift Flip your table over if you cut it with the bullshit Nosebleed on red carpets, but it just blend in Snapping pictures feeling my chest being sunk in Live a fast life, seen many die slowly Unhappy when they left so I try to seize the moment Funny how it happens who ever would imagine That joke's on you but Satan the one laughing Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? I can sell honey to a bee In the fall time, make trees, take back they leaves Octopus in a straight jacket, savage with bad habits Broke, serving fiends, got rich, became a addict Ain't it funny how it happens, who would ever would imagine? Nose running right now, could ya pass me a napkin? Managed to somehow to have the upper advantage Panic when the drugs are gone and nobody is answering Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? No way to mask it, a lot became has-beens Rolling up that hundred dollar bill 'til they cash in Think it's gon' last, going too fast Man, it's fucked up, ain't it funny how it happens? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Upcoming heavy traffic Say you need to slow down 'cause you feel yourself crashing Staring in the devil face but you can't stop laughing Staring in the devil face but you can't stop laughing It's a living nightmare, that most of us might share Inherited in our blood, it's why we stuck in the mud Can't quit the drug use or the alcohol abuse Even if I wanted to, tell you what I'm gonna do I'ma wash away my problems with a bottle of Henny Anxiety got the best of me so I'm popping them Xannies Might need rehab but to me that shit pussy Pray for me y'all, 'cause I don't know what coming to me Bought a 8-ball of coke and my nigga on the way Got three hoes with him and they all tryna play Ain't it funny how it happens, ever would imagine Joke's on you but Satan the one laughing Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it?");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteComment_COM(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+
+    assert_true(id3v2WriteComment("not a test", tag));
+
+    char *str = id3v2ReadComment(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "not a test");
+
+    free(str);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WriteComment_COMM(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+
+    assert_false(id3v2WriteComment("not a test", tag));
+
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WritePicture_PIC(void **state){
+
+    FILE *fp = NULL;
+    size_t sz = 0;
+    size_t charsz = 0;
+    uint8_t *data = NULL;
+
+    fp = fopen("assets/cat.png", "rb");
+    
+    fseek(fp, 0L, SEEK_END);
+    sz = ftell(fp);
+    fseek(fp, 0L, SEEK_SET);
+    data = malloc(sz);
+    fread(data, 1, sz, fp);
+    fclose(fp);
+    
+    assert_non_null(data);
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
+    assert_true(id3v2WritePicture(data, sz, "PNG", 0x00, tag));
+
+    Id3v2Frame *f = id3v2ReadFrameByID("PIC", tag);
+    assert_non_null(f);
+
+    ListIter i = id3v2CreateFrameEntryTraverser(f);
+
+    id3v2ReadFrameEntryAsU8(&i); //encoding
+
+    char *str = id3v2ReadFrameEntryAsChar(&i, &charsz); // mime type
+    assert_non_null(str);
+    assert_string_equal(str, "PNG");
+
+    id3v2ReadFrameEntryAsU8(&i); // picture type
+    id3v2ReadFrameEntryAsU8(&i);
+
+    uint8_t *test = (uint8_t *) id3v2ReadFrameEntry(&i, &charsz);
+
+    assert_memory_equal(test, data, sz);
+    free(test);
+
+    free(str);
+    free(data);
+    id3v2DestroyFrame(&f);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2WritePicture_APIC(void **state){
+
+    FILE *fp = NULL;
+    size_t sz = 0;
+    size_t charsz = 0;
+    uint8_t *data = NULL;
+
+    fp = fopen("assets/cat.png", "rb");
+    
+    fseek(fp, 0L, SEEK_END);
+    sz = ftell(fp);
+    fseek(fp, 0L, SEEK_SET);
+    data = malloc(sz);
+    fread(data, 1, sz, fp);
+    fclose(fp);
+    
+    assert_non_null(data);
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+    assert_true(id3v2WritePicture(data, sz, "png", 0x03, tag));
+
+    id3v2RemoveFrameByID("APIC", tag); // first tag has 00 as type so remove it after write
+    Id3v2Frame *f = id3v2ReadFrameByID("APIC", tag);
+    assert_non_null(f);
+    
+
+    ListIter i = id3v2CreateFrameEntryTraverser(f);
+
+    id3v2ReadFrameEntryAsU8(&i); //encoding
+
+    char *str = id3v2ReadFrameEntryAsChar(&i, &charsz); // mime type
+    assert_non_null(str);
+    assert_string_equal(str, "image/png");
+
+    id3v2ReadFrameEntryAsU8(&i); // picture type
+    id3v2ReadFrameEntryAsU8(&i);
+
+    uint8_t *test = (uint8_t *) id3v2ReadFrameEntry(&i, &charsz);
+
+    assert_memory_equal(test, data, sz);
+    free(test);
+
+    free(str);
+    free(data);
+    id3v2DestroyFrame(&f);
+    id3v2DestroyTag(&tag);
+}
 
 int main(){
     const struct CMUnitTest tests[] = {
@@ -836,9 +1138,45 @@ int main(){
         cmocka_unit_test(id3v2WriteArtist_TP1),
         cmocka_unit_test(id3v2WriteArtist_TEP1),
 
-        // id3v2WriteArtist
+        // id3v2WriteAlbumArtist
         cmocka_unit_test(id3v2WriteAlbumArtist_TP2),
-        cmocka_unit_test(id3v2WriteAlbumArtist_TEP2)
+        cmocka_unit_test(id3v2WriteAlbumArtist_TEP2),
+
+        // id3v2WriteAlbum
+        cmocka_unit_test(id3v2WriteAlbum_TAL),
+        cmocka_unit_test(id3v2WriteAlbum_TALB),
+
+        // id3v2WriteYear
+        cmocka_unit_test(id3v2WriteYear_TYE),
+        cmocka_unit_test(id3v2WriteYear_TYER),
+
+        // id3v2WriteGenre
+        cmocka_unit_test(id3v2WriteGenre_TCO),
+        cmocka_unit_test(id3v2WriteGenre_TCON),
+
+        // id3v2WriteTrack
+        cmocka_unit_test(id3v2WriteTrack_TRK),
+        cmocka_unit_test(id3v2WriteTrack_TRCK),
+
+        // id3v2WriteDisc
+        cmocka_unit_test(id3v2WriteDisc_TPA),
+        cmocka_unit_test(id3v2WriteDisc_TPOS),
+
+        // id3v2WriteComposer
+        cmocka_unit_test(id3v2WriteComposer_TCM),
+        cmocka_unit_test(id3v2WriteComposer_TCOM),
+
+        // id3v2WriteLyrics
+        cmocka_unit_test(id3v2WriteLyrics_ULT),
+        cmocka_unit_test(id3v2WriteLyrics_ULT2),
+
+        // id3v2WriteComment
+        cmocka_unit_test(id3v2WriteComment_COM),
+        cmocka_unit_test(id3v2WriteComment_COMM),
+
+        // id3v2WritePicture
+        cmocka_unit_test(id3v2WritePicture_PIC),
+        cmocka_unit_test(id3v2WritePicture_APIC)
 
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

@@ -43,6 +43,7 @@ char *id3v2ReadGenre(Id3v2Tag *tag);
 char *id3v2ReadTrack(Id3v2Tag *tag);
 char *id3v2ReadComposer(Id3v2Tag *tag);
 char *id3v2ReadDisc(Id3v2Tag *tag);
+
 char *id3v2ReadLyrics(Id3v2Tag *tag);
 char *id3v2ReadComment(Id3v2Tag *tag);
 uint8_t *id3v2ReadPicture(uint8_t type, Id3v2Tag *tag, size_t *dataSize);
@@ -59,10 +60,11 @@ int id3v2WriteGenre(const char *genre, Id3v2Tag *tag);
 int id3v2WriteTrack(const char *track, Id3v2Tag *tag);
 int id3v2WriteDisc(const char *disc, Id3v2Tag *tag);
 int id3v2WriteComposer(const char *composer, Id3v2Tag *tag);
+
 int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag);
 int id3v2WriteComment(const char *comment, Id3v2Tag *tag);
-int id3v2WritePicture(uint8_t *image, uint8_t type, Id3v2Tag *tag);
-int id3v2WritePictureFromFile(const char *filename, uint8_t type, Id3v2Tag *tag);
+int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_t type, Id3v2Tag *tag);
+int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t type, Id3v2Tag *tag);
 
 // writes
 

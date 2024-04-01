@@ -18,6 +18,7 @@ set(TEST_ASSETS
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/OnGP.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/sorry4dying.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/null.mp3"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../assets/cat.png"
 )
 
 
