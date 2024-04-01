@@ -262,7 +262,6 @@ List *id3v2CreateUserDefinedURLFrameContext(void){
 
 /**
  * @brief Generates the required contexts for an attached picture frame depending on the version on ID3v2
- * @details will be underfined until i can find a better way or more contexts
  * @param version 
  * @return List* 
  */
