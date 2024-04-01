@@ -1,4 +1,5 @@
 # id3dev status
+```bash
                                                 |2.4 |2.3 |2.2|SUPPORT?
 Audio encryption                                |AENC|AENC|CRA|X|
 Attached picture                                |APIC|APIC|PIC|X|
@@ -90,7 +91,7 @@ Recording dates                                 |    |TRDA|TRD|X|
 Size                                            |    |TSIZ|TSI|X|
 Year                                            |    |TYER|TYE|X|
 Encrypted meta frame                            |    |    |CRM|X|
-
+```
 X = full support, - = partial support, = no support
 
 TODO:
