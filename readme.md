@@ -96,5 +96,4 @@ X = full support, - = partial support, = no support
 
 TODO:
 1. update frames to use a generic context if encrypted or compressed
-2. create a frame when one is not found in id3v2.c
-3. fix bit_context in parser to reflect the ToByteStream version
+2. fix bit_context in parser to reflect the ToByteStream version

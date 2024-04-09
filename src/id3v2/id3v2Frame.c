@@ -90,9 +90,6 @@ Id3v2ContentEntry *id3v2CreateContentEntry(void *entry, size_t size){
 
     Id3v2ContentEntry *ce = malloc(sizeof(Id3v2ContentEntry));
 
-    // ce->size = size;
-    // ce->entry = entry;
-
     if(!size){
         ce->entry = NULL;
         ce->size = 0;
@@ -117,8 +114,12 @@ Id3v2ContentEntry *id3v2CreateContentEntry(void *entry, size_t size){
 
 
 /**
- * @brief Comparse two entries and returns the difference
- * 
+ * @brief Comparse two entries and returns the difference. Note, only the
+ * data itself is compared and not its size. The lower of the two sizes
+ * will be used to compare the held data.
+ * @details This is not ideal but it needs to be done as ive found different
+ * writers Jaikoz, itunes, Mp3tag, Mp3diag, and kid3 all write strings 
+ * differently. This is a compatability decision when id3v2 is parsed.  
  * @param first 
  * @param second 
  * @return int 
@@ -128,24 +129,18 @@ int id3v2CompareContentEntry(const void *first, const void *second){
     Id3v2ContentEntry *one = (Id3v2ContentEntry *)first;
     Id3v2ContentEntry *two = (Id3v2ContentEntry *)second;
 
-    if(one == NULL){
-        return -1;
-    }
-
-    if(two == NULL){
+    if(one == NULL || two == NULL){
         return 1;
     }
-
-    int diff = 0;
     
-    diff = one->size - two->size;
-    if(diff != 0){
-        return diff;
-    }
-
-    diff = memcmp(one->entry,two->entry,one->size);
-    if(diff != 0){
-        return diff;
+    int diff = 0;
+    size_t usableSize = (one->size <= two->size) ? one->size : two->size;
+    
+    for(size_t i = 0; i < usableSize; i++){
+        if(((unsigned char *)one->entry)[i] != ((unsigned char *)two->entry)[i]){
+            diff = ((unsigned char*)one->entry)[i] - ((unsigned char*)two->entry)[i];
+            return diff;
+        }
     }
 
     return 0;
@@ -383,6 +378,72 @@ void id3v2DestroyFrame(Id3v2Frame **toDelete){
         *toDelete = NULL;
         toDelete = NULL;
     }
+}
+
+
+/**
+ * @brief Creates a frame with each entry set to 0 with the correct context. default pairings will be
+ * scanned first and then userPairs will be scanned. If no pairings are found this function will use a
+ * generic pairing. If this function fails it will return NULL.
+ * 
+ * @param id 
+ * @return Id3v2Frame* 
+ */
+Id3v2Frame *id3v2CreateEmptyFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], uint8_t version, HashTable *userPairs){
+
+    if(id == NULL){
+        return NULL;
+    }
+
+    HashTable *pairs = NULL;
+    List *context = NULL;
+    List *entries = NULL;
+    Id3v2ContentContext *cc = NULL;
+    Id3v2FrameHeader *header = NULL;
+    Id3v2Frame *f = NULL;
+
+    pairs = id3v2CreateDefaultIdentiferContextPairings(version);
+
+    // first pass
+    context = hashTableRetrieve(pairs, id);
+
+    // second pass
+    if(context == NULL && id[0] == 'T'){
+        context = hashTableRetrieve(pairs, "T");
+    }
+
+    // third pass
+    if(context == NULL && id[0] == 'W'){
+        context = hashTableRetrieve(pairs, "W");
+    }
+
+    // forth pass
+    if(context == NULL){
+        context = hashTableRetrieve(userPairs, id);
+
+    }
+
+    // fifth pass generic
+    if(context == NULL){
+        context = hashTableRetrieve(pairs, "?");
+    }
+
+
+    ListIter i = listCreateIterator(context);
+    
+    entries = listCreate(id3v2PrintContentEntry, id3v2DeleteContentEntry, id3v2CompareContentEntry, id3v2CopyContentEntry);
+    while((cc = listIteratorNext(&i)) != NULL){
+        if(cc->type != iter_context){
+            Id3v2ContentEntry *ce = id3v2CreateContentEntry("\0", 1);
+            listInsertBack(entries, (void *) ce);
+        }
+    }
+
+    header = id3v2CreateFrameHeader((uint8_t *) id, false, false, false, false, 0, 0, 0);
+    f = id3v2CreateFrame(header, listDeepCopy(context), entries);
+    
+    hashTableFree(pairs);
+    return f;
 }
 
 /**
@@ -1141,26 +1202,32 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
 
                 unsigned char *outStr = NULL;
                 size_t outLen = 0;
-                convi = byteConvertTextFormat(tmp, BYTE_UTF8, utf8Len, &outStr, encoding, &outLen);
 
-                if(convi == false && outLen == 0){
-                    free(tmp);
-                    exit = true;
-                    break;
-                }
+                // non-empty strings
+                if(utf8Len >= 1 && tmp[0] != 0){
+                    convi = byteConvertTextFormat(tmp, BYTE_UTF8, utf8Len, &outStr, encoding, &outLen);
+
+                    if(convi == false && outLen == 0){
+                        free(tmp);
+                        exit = true;
+                        break;
+                    }
 
 
-                // data is already in utf8
-                if(convi && outLen == 0){
-                    outStr = tmp;
-                    outLen = utf8Len;
+                    // data is already in utf8
+                    if(convi && outLen == 0){
+                        outStr = tmp;
+                        outLen = utf8Len;
+                    }else{
+                        free(tmp);
+                    }
+
+                    // prepend BOM
+                    if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
+                        bytePrependBOM(encoding, &outStr, &outLen);
+                    }
                 }else{
                     free(tmp);
-                }
-
-                // prepend BOM
-                if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
-                    bytePrependBOM(encoding, &outStr, &outLen);
                 }
 
                 // append null spacer if there are more entries in the list

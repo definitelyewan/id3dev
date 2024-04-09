@@ -19,6 +19,8 @@
 #include <limits.h>
 #include "id3v2.h"
 #include "id3v2Frame.h"
+#include "byteStream.h"
+#include "id3v2Parser.h"
 
 static void id3v2TagFromFile_v3(void **state){
 
@@ -654,11 +656,11 @@ static void id3v2WriteTextFrameContent_TIT2(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteTextFrameContent_WCOM(void **state){
+static void id3v2WriteTextFrameContent_TCOM(void **state){
 
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
 
-    assert_false(id3v2WriteTextFrameContent("WCOM", "test", tag));
+    assert_true(id3v2WriteTextFrameContent("TCOM", "test", tag));
 
     id3v2DestroyTag(&tag);
 }
@@ -914,8 +916,13 @@ static void id3v2WriteLyrics_ULT(void **state){
 
     Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
 
-    assert_false(id3v2WriteLyrics("there is no lyrics frame", tag));
+    assert_true(id3v2WriteLyrics("there is no lyrics frame", tag));
+    
+    char *str = id3v2ReadLyrics(tag);
+    assert_non_null(str);
+    assert_string_equal(str, "there is no lyrics frame");
 
+    free(str);
     id3v2DestroyTag(&tag);
 }
 
@@ -951,8 +958,13 @@ static void id3v2WriteComment_COMM(void **state){
 
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
-    assert_false(id3v2WriteComment("not a test", tag));
+    assert_true(id3v2WriteComment("not a test", tag));
 
+    char *str = id3v2ReadComment(tag);
+    assert_non_null(str);
+    assert_string_equal("not a test", str);
+
+    free(str);
     id3v2DestroyTag(&tag);
 }
 
@@ -1002,52 +1014,228 @@ static void id3v2WritePicture_PIC(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WritePicture_APIC(void **state){
+static void id3v2WritePictureFromFile_PIC(void **state){
 
-    FILE *fp = NULL;
-    size_t sz = 0;
-    size_t charsz = 0;
-    uint8_t *data = NULL;
+    Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
+    assert_true(id3v2WritePictureFromFile("assets/cat.png", "PNG", 0x00, tag));
 
-    fp = fopen("assets/cat.png", "rb");
-    
-    fseek(fp, 0L, SEEK_END);
-    sz = ftell(fp);
-    fseek(fp, 0L, SEEK_SET);
-    data = malloc(sz);
-    fread(data, 1, sz, fp);
-    fclose(fp);
-    
-    assert_non_null(data);
-
-    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
-    assert_true(id3v2WritePicture(data, sz, "png", 0x03, tag));
-
-    id3v2RemoveFrameByID("APIC", tag); // first tag has 00 as type so remove it after write
-    Id3v2Frame *f = id3v2ReadFrameByID("APIC", tag);
+    Id3v2Frame *f = id3v2ReadFrameByID("PIC", tag);
     assert_non_null(f);
-    
 
     ListIter i = id3v2CreateFrameEntryTraverser(f);
 
     id3v2ReadFrameEntryAsU8(&i); //encoding
-
+    size_t charsz = 0;
     char *str = id3v2ReadFrameEntryAsChar(&i, &charsz); // mime type
-    assert_non_null(str);
-    assert_string_equal(str, "image/png");
+    assert_string_equal(str, "PNG");
+    free(str);
 
     id3v2ReadFrameEntryAsU8(&i); // picture type
-    id3v2ReadFrameEntryAsU8(&i);
+    id3v2ReadFrameEntryAsU8(&i); // desc
 
-    uint8_t *test = (uint8_t *) id3v2ReadFrameEntry(&i, &charsz);
+    uint8_t *data = (uint8_t *) id3v2ReadFrameEntry(&i, &charsz);
 
-    assert_memory_equal(test, data, sz);
-    free(test);
+    FILE *fp = NULL;
+    fp = fopen("assets/cat.png", "rb");
+    fseek(fp, 0L, SEEK_END);
+    size_t sz = ftell(fp);
+    fseek(fp, 0L, SEEK_SET);
+    uint8_t *test = malloc(sz);
+    fread(test, 1, sz, fp);
+    fclose(fp);
 
-    free(str);
+
+    assert_memory_equal(data, test, sz);
+
     free(data);
+    free(test);
     id3v2DestroyFrame(&f);
     id3v2DestroyTag(&tag);
+}
+
+static void id3v2InsertTextFrame_TSOA(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+
+    assert_true(id3v2InsertTextFrame("TSOA", BYTE_UTF16LE, "test", tag));
+
+    Id3v2Frame *f = id3v2ReadFrameByID("TSOA", tag);
+
+    assert_non_null(f);
+
+    ListIter i = id3v2CreateFrameEntryTraverser(f);
+
+    assert_int_equal(id3v2ReadFrameEntryAsU8(&i), BYTE_UTF16LE);
+
+    size_t charsz = 0;
+    char *str = id3v2ReadFrameEntryAsChar(&i, &charsz);
+
+    assert_string_equal(str, "test");
+    
+    free(str);
+    id3v2DestroyFrame(&f);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2InsertTextFrame_TSOAnoString(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+
+    assert_false(id3v2InsertTextFrame("TSOA", BYTE_UTF16LE, NULL, tag));
+
+    Id3v2Frame *f = id3v2ReadFrameByID("TSOA", tag);
+
+    assert_null(f);
+
+    id3v2DestroyFrame(&f);
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2InsertTextFrame_NoID(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+
+    assert_false(id3v2InsertTextFrame(NULL, BYTE_UTF16LE, "test", tag));
+
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2TagToStream_v3(void **state){
+    
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+    ByteStream *stream = id3v2TagToStream(tag);
+    
+    assert_non_null(stream);
+
+    Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
+    bool v = id3v2CompareTag(tag, tag2);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyTag(&tag);
+    id3v2DestroyTag(&tag2);
+
+    assert_true(v);
+}
+
+static void id3v2TagToStream_v2(void **state){
+    
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+    ByteStream *stream = id3v2TagToStream(tag);
+    
+    assert_non_null(stream);
+
+    Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
+    bool v = id3v2CompareTag(tag, tag2);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyTag(&tag);
+    id3v2DestroyTag(&tag2);
+
+    assert_true(v);
+}
+
+static void id3v2TagToStream_v4(void **state){
+    
+    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+    ByteStream *stream = id3v2TagToStream(tag);
+    
+    assert_non_null(stream);
+
+    Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
+    bool v = id3v2CompareTag(tag, tag2);
+    
+
+    byteStreamDestroy(stream);
+    id3v2DestroyTag(&tag);
+    id3v2DestroyTag(&tag2);
+
+    assert_true(v);
+}
+
+static void id3v2TagToStream_v3ext(void **state){
+    
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+    tag->header->extendedHeader = id3v2CreateExtendedTagHeader(0, 0x74657374, 0, 0, 0); // crc is equal to test in hex
+    id3v2WriteExtendedHeaderIndicator(tag->header, true);
+
+    ByteStream *stream = id3v2TagToStream(tag);
+    assert_non_null(stream);
+
+    Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
+
+    bool v = id3v2CompareTag(tag, tag2);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyTag(&tag);
+    id3v2DestroyTag(&tag2);
+
+    assert_true(v);
+}
+
+static void id3v2TagToStream_v4ext(void **state){
+    
+    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+    tag->header->extendedHeader = id3v2CreateExtendedTagHeader(0, 0, 0, 1, 0);
+    id3v2WriteExtendedHeaderIndicator(tag->header, true);
+
+    ByteStream *stream = id3v2TagToStream(tag);
+    assert_non_null(stream);
+
+    Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
+
+    bool v = id3v2CompareTag(tag, tag2);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyTag(&tag);
+    id3v2DestroyTag(&tag2);
+
+    assert_true(v);
+}
+
+static void id3v2TagToStream_v4footer(void **state){
+    
+    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+    id3v2WriteFooterIndicator(tag->header, true);
+
+    ByteStream *stream = id3v2TagToStream(tag);
+    assert_non_null(stream);
+
+    byteStreamSeek(stream, 10, SEEK_END);
+    byteStreamPrintf("%c", stream);
+    byteStreamRewind(stream);
+
+    printf("[*] Parsing tag from stream\n");
+    Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
+
+    printf("[*] Comparing tags\n");
+    bool v = id3v2CompareTag(tag, tag2);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyTag(&tag);
+    id3v2DestroyTag(&tag2);
+
+    assert_true(v);
+}
+
+static void id3v2TagToStream_v4unsync(void **state){
+    
+    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+    id3v2WriteUnsynchronisationIndicator(tag->header, true);
+
+    ByteStream *stream = id3v2TagToStream(tag);
+    assert_non_null(stream);
+
+    printf("[*] Parsing tag from stream\n");
+    Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
+
+    printf("[*] Comparing tags\n");
+    bool v = id3v2CompareTag(tag, tag2);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyTag(&tag);
+    id3v2DestroyTag(&tag2);
+
+    assert_true(v);
 }
 
 int main(){
@@ -1128,7 +1316,7 @@ int main(){
 
         // id3v2WriteTextFrameContent
         cmocka_unit_test(id3v2WriteTextFrameContent_TIT2),
-        cmocka_unit_test(id3v2WriteTextFrameContent_WCOM),
+        cmocka_unit_test(id3v2WriteTextFrameContent_TCOM),
 
         // id3v2WriteTitle
         cmocka_unit_test(id3v2WriteTitle_TT2),
@@ -1176,7 +1364,23 @@ int main(){
 
         // id3v2WritePicture
         cmocka_unit_test(id3v2WritePicture_PIC),
-        cmocka_unit_test(id3v2WritePicture_APIC)
+
+        // id3v2WritePictureFromFile
+        cmocka_unit_test(id3v2WritePictureFromFile_PIC),
+
+        // id3v2InsertTextFrame
+        cmocka_unit_test(id3v2InsertTextFrame_TSOA),
+        cmocka_unit_test(id3v2InsertTextFrame_TSOAnoString),
+        cmocka_unit_test(id3v2InsertTextFrame_NoID),
+
+        // id3v2TagToStream
+        cmocka_unit_test(id3v2TagToStream_v3),
+        cmocka_unit_test(id3v2TagToStream_v2),
+        cmocka_unit_test(id3v2TagToStream_v4),
+        cmocka_unit_test(id3v2TagToStream_v3ext),
+        cmocka_unit_test(id3v2TagToStream_v4ext),
+        cmocka_unit_test(id3v2TagToStream_v4footer),
+        cmocka_unit_test(id3v2TagToStream_v4unsync),
 
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

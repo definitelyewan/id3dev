@@ -917,6 +917,46 @@ static void id3v2FrameToJSON_v4ETCO(void **state){
     byteStreamDestroy(stream);
 }
 
+static void id3v2CreateEmptyFrame_noID(void **state){
+
+    Id3v2Frame *f = id3v2CreateEmptyFrame(NULL, ID3V2_TAG_VERSION_4, NULL);
+    assert_null(f);
+
+}
+
+static void id3v2CreateEmptyFrame_TT2(void **state){
+
+    Id3v2Frame *f = id3v2CreateEmptyFrame("TT2", ID3V2_TAG_VERSION_2, NULL);
+    assert_non_null(f);
+
+    assert_memory_equal(f->header->id, "TT2", 3);
+    assert_int_equal(f->contexts->length, 2);
+    assert_int_equal(f->entries->length, 2);
+
+    Id3v2ContentContext *cc = NULL;
+    ListIter i = {0};
+    int c = 0;
+
+    while((cc = listIteratorNext(&i)) != NULL){
+
+        if(c == 0){
+            assert_int_equal(cc->type, numeric_context);
+        }else if(c == 1){
+            assert_int_equal(cc->type, encodedString_context);
+        }
+
+        c++;
+    }
+
+    c = 0;
+
+    i = id3v2CreateFrameEntryTraverser(f);
+
+    assert_int_equal(id3v2ReadFrameEntryAsU8(&i), 0);
+    assert_int_equal(id3v2ReadFrameEntryAsU8(&i), 0);
+
+    id3v2DestroyFrame(&f);
+}
 
 int main(){
 
@@ -964,6 +1004,10 @@ int main(){
         cmocka_unit_test(id3v2FrameToJSON_v3TXXX),
         cmocka_unit_test(id3v2FrameToJSON_v3APIC),
         cmocka_unit_test(id3v2FrameToJSON_v4ETCO),
+
+        // id3v2CreateEmptyFrame
+        cmocka_unit_test(id3v2CreateEmptyFrame_noID),
+        cmocka_unit_test(id3v2CreateEmptyFrame_TT2)
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

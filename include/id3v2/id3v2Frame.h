@@ -45,7 +45,7 @@ void *id3v2CopyFrame(const void *toBeCopied);
 
 Id3v2Frame *id3v2CreateFrame(Id3v2FrameHeader *header, List *context, List *entries);
 void id3v2DestroyFrame(Id3v2Frame **toDelete);
-
+Id3v2Frame *id3v2CreateEmptyFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], uint8_t version, HashTable *userPairs);
 
 /*
     Frame access

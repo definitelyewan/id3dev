@@ -98,7 +98,7 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
         innerStream = byteStreamCreate(byteStreamCursor(stream), hSize - offset);
         stream->cursor = resetIndex;
     }
-
+    byteStreamPrintf("%x",innerStream);
     switch(version){
         case ID3V2_TAG_VERSION_3:
 
@@ -114,7 +114,9 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
 
             // read padding
             if(!(padding = byteStreamReturnInt(innerStream))){
-                break;
+                if(flags == 0){
+                    break;
+                }   
             }
 
             // check to see if a crc is there
@@ -149,7 +151,7 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
             if(!(byteStreamSeek(innerStream, 1, SEEK_CUR))){
                 break;
             }
-
+byteStreamPrintf("%x",innerStream);
             // read crc
             if(hasCrc){
                 if(!(byteStreamRead(innerStream, (uint8_t *)crcBytes, 5))){
@@ -159,7 +161,7 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
                 crc = byteSyncintDecode(btoi(crcBytes, 5));
 
             }
-
+byteStreamPrintf("%x",innerStream);
             // read restrictions
             if(hasRestrictions){
     
@@ -174,15 +176,13 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
                     restrictions = setBit(restrictions, k - 1, (bool) bit);
                 }
 
-                if(restrictions > 0){
-                    tagRestrictions = true;
-                }
+                tagRestrictions = true;
                 
                 if(!(byteStreamSeek(innerStream, 1, SEEK_CUR))){
                     break;
                 }            
             }
-
+byteStreamPrintf("%x",innerStream);
             break;
 
         // no support
@@ -198,7 +198,7 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
     if(innerStream != NULL){
         byteStreamDestroy(innerStream);
     }
-
+    printf("\t[*] walk = %d\n", walk);
     return walk; 
 }
 
@@ -206,7 +206,7 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
  * @brief Parses an ID3 header but, not its extended header. This function will return the number
  * of bytes it read in order to correctly parse a tag header. the size of tag itself and header 
  * are returned by referance. There are no error states but a tagSize of 0 and a NULL header 
- * it likely faild to retrive anything useful.
+ * means it likely failed to retrive anything useful.
  * 
  * @param stream 
  * @param tagHeader 
@@ -350,7 +350,7 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
                 return 0;
             }
 
-            if(!(tSize = byteStreamReturnInt(stream))){
+            if(!(tSize = byteStreamReturnU32(stream))){
                 *frameHeader = NULL;
                 *frameSize = 0;
                 return ID3V2_FRAME_ID_MAX_SIZE;
@@ -514,7 +514,6 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
 
     expectedHeaderSize = id3v2ParseFrameHeader(stream, version, &header, &expectedContentSize);
     walk += expectedHeaderSize;
-
     if(!expectedHeaderSize){
         if(header != NULL){
             id3v2DestroyFrameHeader(&header);
@@ -838,7 +837,10 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
  * ID, context pairings and any user supplied ones to extract frames within a tag. If this function fails
  * it will return NULL to the caller otherwise, some form of parsed tag will be returned based on the
  * completness of the stream.
- * 
+ * @details Unlike other parsing functions this one consumes the stream it uses so sending in a copy is
+ * recommended. Additionally, unsynchronisation will take a long time to parse as 0s are stripped before
+ * frame parsing begins, which is increadibly expensive to do. A fast system is recommended for this 
+ * feature.
  * @param stream 
  * @param userPairs 
  * @return Id3v2Tag* 
@@ -860,9 +862,11 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
 
     frames = listCreate(id3v2PrintFrame, id3v2DeleteFrame, id3v2CompareFrame, id3v2CopyFrame);
 
+    // locate the start of the tag
     while(true){
 
         if(!byteStreamRead(stream, id, ID3V2_TAG_ID_SIZE)){
+            listFree(frames);
             return NULL;
         }
 
@@ -884,17 +888,23 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
             break;
         }
 
+        // shorten to exclude none tag data
+        byteStreamResize(stream, tagSize + read);
+
+        printf("tagSize = %d\n", tagSize);
         if(id3v2ReadUnsynchronisationIndicator(header) == 1){
-
+            printf("[*] Unsynchronisation indicator found\n");
             size_t readCount = 0;
-
+            tagSize = tagSize / 2; // format is $xx $00 ...
             while(readCount < tagSize){
+                
+                printf("is %ld < %ld\n", readCount, tagSize);
 
                 byteStreamSeek(stream, 1, SEEK_CUR);
                 if(!byteStreamDeleteCh(stream)){
                     break;
                 }
-                
+
                 readCount++;
             }
 

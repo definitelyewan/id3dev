@@ -228,7 +228,7 @@ static void id3v2ParseExtendedTagHeader_v4NoRestrictions(void **state){
     assert_int_equal(v, 11);
     assert_int_equal(h->crc, 8008);
     assert_true(h->update);
-    assert_false(h->tagRestrictions);
+    assert_true(h->tagRestrictions);
     assert_int_equal(h->restrictions, 0);
 
     byteStreamDestroy(stream);
