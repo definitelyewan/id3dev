@@ -1,9 +1,22 @@
+/**
+ * @file id3v2Context.c
+ * @author Ewan Jones
+ * @brief Functions for configuring the parser and any output of a tag
+ * @version 0.1
+ * @date 2024-04-11
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
 #include "LinkedList.h"
 #include "id3v2Context.h"
+#include "byteStream.h"
+#include "byteInt.h"
 
 //djb2 algorithm for stings
 unsigned long id3v2djb2(char *str){
@@ -260,7 +273,6 @@ List *id3v2CreateUserDefinedURLFrameContext(void){
 
 /**
  * @brief Generates the required contexts for an attached picture frame depending on the version on ID3v2
- * @details will be underfined until i can find a better way or more contexts
  * @param version 
  * @return List* 
  */
@@ -1078,7 +1090,7 @@ List *id3v2CreateGenericFrameContext(void){
  */
 HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version){
 
-    size_t minFrameContexts = 64;
+    size_t minFrameContexts = 66;
     HashTable *table = hashTableCreate(minFrameContexts, id3v2DeleteContentContextList, id3v2PrintContentContextList, id3v2CopyContentContextList);
     List *l = NULL;
 
@@ -1580,6 +1592,10 @@ HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version){
 
     hashTableInsert(table, "?", (l = id3v2CreateGenericFrameContext()));
     listFree(l);
+    hashTableInsert(table, "T", (l = id3v2CreateTextFrameContext()));
+    listFree(l);
+    hashTableInsert(table, "W", (l = id3v2CreateURLFrameContext()));
+    listFree(l);
 
     return table;
 }
@@ -1604,3 +1620,75 @@ bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char ke
     return true;
 }
 
+/**
+ * @brief Creates a stream that represents the passed context
+ * 
+ * @param cc 
+ * @return ByteStream* 
+ */
+ByteStream *id3v2ContextToStream(Id3v2ContentContext *cc){
+    
+    ByteStream *stream = NULL;
+    size_t s = 0;
+    unsigned char *convi = NULL;
+
+    if(cc == NULL){
+        return stream;
+    }
+
+    s += (sizeof(size_t) * 3) + 1;
+    
+    stream = byteStreamCreate(NULL, s);
+
+    byteStreamWrite(stream, (uint8_t *) &cc->type, 1);
+
+    convi = sttob(cc->key);
+    byteStreamWrite(stream, convi, sizeof(size_t));
+    free(convi);
+
+    convi = sttob(cc->max);
+    byteStreamWrite(stream, convi, sizeof(size_t));
+    free(convi);
+
+    convi = sttob(cc->min);
+    byteStreamWrite(stream, convi, sizeof(size_t));
+    free(convi);
+
+    byteStreamRewind(stream);
+    return stream;
+}
+
+/**
+ * @brief Converts a context structure into its representation in JSON.
+ * 
+ * @param cc 
+ * @return char* 
+ */
+char *id3v2ContextToJSON(Id3v2ContentContext *cc){
+    
+    char *json = NULL;
+    size_t memCount = 3;
+    if(cc == NULL){
+        json = calloc(memCount, sizeof(char));
+        memcpy(json, "{}\0", memCount);
+        return json;
+    }
+
+    memCount += snprintf(NULL, 0, 
+                        "{\"type\":%d,\"key\":%ld,\"max\":%ld,\"min\":%ld}", 
+                        cc->type, 
+                        cc->key, 
+                        cc->max, 
+                        cc->min);
+
+    json = calloc(memCount + 1, sizeof(char));
+
+    snprintf(json, memCount, 
+            "{\"type\":%d,\"key\":%ld,\"max\":%ld,\"min\":%ld}", 
+            cc->type, 
+            cc->key, 
+            cc->max, 
+            cc->min);
+
+    return json;
+}

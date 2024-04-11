@@ -114,7 +114,9 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
 
             // read padding
             if(!(padding = byteStreamReturnInt(innerStream))){
-                break;
+                if(flags == 0){
+                    break;
+                }   
             }
 
             // check to see if a crc is there
@@ -174,9 +176,7 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
                     restrictions = setBit(restrictions, k - 1, (bool) bit);
                 }
 
-                if(restrictions > 0){
-                    tagRestrictions = true;
-                }
+                tagRestrictions = true;
                 
                 if(!(byteStreamSeek(innerStream, 1, SEEK_CUR))){
                     break;
@@ -206,7 +206,7 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
  * @brief Parses an ID3 header but, not its extended header. This function will return the number
  * of bytes it read in order to correctly parse a tag header. the size of tag itself and header 
  * are returned by referance. There are no error states but a tagSize of 0 and a NULL header 
- * it likely faild to retrive anything useful.
+ * means it likely failed to retrive anything useful.
  * 
  * @param stream 
  * @param tagHeader 
@@ -281,6 +281,7 @@ uint32_t id3v2ParseTagHeader(ByteStream *stream, Id3v2TagHeader **tagHeader, uin
     *tagHeader = id3v2CreateTagHeader(major, minor, flags, NULL);
     return walk;
 }
+
 /**
  * @brief Parses an ID3 version 2, 3 or 4 frame header. This function returns a couple values back to the caller, first
  * it returns the number of bytes it read to to create a frame header structure. The structure itself is returned as a
@@ -301,7 +302,7 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
     }
 
     // values needed
-    uint8_t id[ID3V2_FRAME_ID_MAX_SIZE];
+    uint8_t id[ID3V2_FRAME_ID_MAX_SIZE] = {0,0,0,0};
     uint32_t tSize = 0;
     bool tagAlter = false;
     bool fileAlter = false;
@@ -349,7 +350,7 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
                 return 0;
             }
 
-            if(!(tSize = byteStreamReturnInt(stream))){
+            if(!(tSize = byteStreamReturnU32(stream))){
                 *frameHeader = NULL;
                 *frameSize = 0;
                 return ID3V2_FRAME_ID_MAX_SIZE;
@@ -486,7 +487,7 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
  * @return uint32_t 
  */
 uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3v2Frame **frame){
-
+    
     if(!stream || !context){
         *frame = NULL;
         return 0;
@@ -513,13 +514,19 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
 
     expectedHeaderSize = id3v2ParseFrameHeader(stream, version, &header, &expectedContentSize);
     walk += expectedHeaderSize;
-
     if(!expectedHeaderSize){
+        if(header != NULL){
+            id3v2DestroyFrameHeader(&header);
+        }
         stream->cursor = resetIndex;
         return 0;
     }
 
-    if(!header || !expectedContentSize){
+    if(header == NULL || !expectedContentSize){
+        // just in case both args are not null
+        if(header != NULL){
+            id3v2DestroyFrameHeader(&header);
+        }
         stream->cursor = resetIndex;
         return expectedHeaderSize;
     }
@@ -533,18 +540,14 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
     iter = listCreateIterator(context);
 
     while((contextData = listIteratorNext(&iter)) != NULL){
-
+        
         Id3v2ContentContext *cc = (Id3v2ContentContext *) contextData;
 
         switch(cc->type){
-            // give up on parsing when the context is undefined
-            case unknown_context:
-                byteStreamSeek(innerSream, 0, SEEK_END);
-                break;
             
             // encoded strings
             case encodedString_context:{
-
+                
                 void *data = NULL;
                 size_t dataSize = 0;
 
@@ -582,10 +585,24 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                     case BYTE_ASCII:
                     case BYTE_UTF8:
                         data = byteStreamReturnUtf8(innerSream, &dataSize);
+
+                        if(data == NULL && dataSize == 0){
+                            byteStreamSeek(innerSream, 1, SEEK_CUR);
+                            data = calloc(sizeof(unsigned char), 1);
+                            memset(data, 0, 1);
+                            dataSize = 1;
+                        }
                         break;
                     case BYTE_UTF16BE:
                     case BYTE_UTF16LE:
                         data = byteStreamReturnUtf16(innerSream, &dataSize);
+
+                        if(data == NULL && dataSize == 0){
+                            byteStreamSeek(innerSream, 2, SEEK_CUR);
+                            data = calloc(sizeof(unsigned char), 2);
+                            memset(data, 0, 2);
+                            dataSize = 2;
+                        }
                         break;
                     default:
                         break;
@@ -615,7 +632,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
                 size_t dataSize = 0;
 
                 data = byteStreamReturnLatin1(innerSream, &dataSize);
-
+                
                 if(dataSize > cc->max){
                     dataSize = cc->max;
                     data = realloc(data, dataSize);
@@ -637,7 +654,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
             case noEncoding_context:
             case precision_context:
             case numeric_context:{
-
+                
                 void * data = NULL;
                 size_t dataSize = 0;
 
@@ -709,7 +726,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
             }
                 break;
             case iter_context:{
-                
+
                 if(!currIterations){
                     
                     iterStorage = iter;
@@ -797,6 +814,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
             }
                 break;
             // no support
+            case unknown_context:
             default:
                 byteStreamSeek(innerSream, 0, SEEK_END);
                 break;
@@ -819,7 +837,10 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
  * ID, context pairings and any user supplied ones to extract frames within a tag. If this function fails
  * it will return NULL to the caller otherwise, some form of parsed tag will be returned based on the
  * completness of the stream.
- * 
+ * @details Unlike other parsing functions this one consumes the stream it uses so sending in a copy is
+ * recommended. Additionally, unsynchronisation will take a long time to parse as 0s are stripped before
+ * frame parsing begins, which is increadibly expensive to do. A fast system is recommended for this 
+ * feature.
  * @param stream 
  * @param userPairs 
  * @return Id3v2Tag* 
@@ -841,9 +862,11 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
 
     frames = listCreate(id3v2PrintFrame, id3v2DeleteFrame, id3v2CompareFrame, id3v2CopyFrame);
 
+    // locate the start of the tag
     while(true){
 
         if(!byteStreamRead(stream, id, ID3V2_TAG_ID_SIZE)){
+            listFree(frames);
             return NULL;
         }
 
@@ -865,17 +888,19 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
             break;
         }
 
+        // shorten to exclude none tag data
+        byteStreamResize(stream, tagSize + read);
+
         if(id3v2ReadUnsynchronisationIndicator(header) == 1){
-
             size_t readCount = 0;
-
+            tagSize = tagSize / 2; // format is $xx $00 ...
             while(readCount < tagSize){
 
                 byteStreamSeek(stream, 1, SEEK_CUR);
                 if(!byteStreamDeleteCh(stream)){
                     break;
                 }
-                
+
                 readCount++;
             }
 
@@ -923,16 +948,30 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
                 stream->cursor = stream->cursor - (ID3V2_FRAME_ID_MAX_SIZE - 1);
             }
 
+            // check default pairings (pass 1/4)
             context = hashTableRetrieve(pairs, (char *)frameId);
 
+            // check user supplied ones (pass 2/4)
             if(context == NULL){
                 context = hashTableRetrieve(userPairs, (char *)frameId);
             }
 
+            // special considerations (pass 3/4)
             if(context == NULL){
-                context = hashTableRetrieve(userPairs, "?");
+                if(frameId[0] == 'T'){
+                    context = hashTableRetrieve(pairs, "T");
+                }
+                
+                if(frameId[0] == 'W'){
+                    context = hashTableRetrieve(pairs, "W");
+                }
             }
 
+            // use generic (pass 4/4)
+            if(context == NULL){
+                context = hashTableRetrieve(pairs, "?");
+            }
+            
             read = id3v2ParseFrame(stream, context, header->majorVersion, &frame);
 
             if(read == 0 || frame == NULL){

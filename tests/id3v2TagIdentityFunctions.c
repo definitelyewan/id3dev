@@ -7,7 +7,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include "id3v2.h"
+#include "id3v2TagIdentity.h"
+#include "id3v2Frame.h"
+#include "byteStream.h"
+#include "byteInt.h"
 
 static void id3v2NewTagHeader_validStruct(void **state){
     (void) state;
@@ -751,15 +754,500 @@ static void id3v2TagCreateAndDestroy_AllInOne(void **state){
 
 }
 
-// printf("%d%d%d%d%d%d%d%d\n",readBit(header->extendedHeader->restrictions, 7),
-//                             readBit(header->extendedHeader->restrictions, 6),
-//                             readBit(header->extendedHeader->restrictions, 5),
-//                             readBit(header->extendedHeader->restrictions, 4),
-//                             readBit(header->extendedHeader->restrictions, 3),
-//                             readBit(header->extendedHeader->restrictions, 2),
-//                             readBit(header->extendedHeader->restrictions, 1),
-//                             readBit(header->extendedHeader->restrictions, 0));
+static void id3v2ExtendedTagHeaderToStream_v3noCRC(void **state){
 
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(100, 0, 0, 0, 0);
+    ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_3);
+
+    assert_int_equal(byteStreamReturnInt(stream), 10);
+
+    assert_int_equal(byteStreamGetCh(stream), 0);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+    assert_int_equal(byteStreamGetCh(stream), 0);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamReturnInt(stream), 100);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyExtendedTagHeader(&ext);
+}
+
+static void id3v2ExtendedTagHeaderToStream_v3CRC(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(UINT32_MAX, UINT32_MAX, 1,1,1);
+    ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_3);
+
+    assert_int_equal(byteStreamReturnInt(stream), 14);
+
+    assert_int_equal(byteStreamGetCh(stream), 0x80);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamGetCh(stream), 0);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamReturnU32(stream), UINT32_MAX);
+    assert_int_equal(byteStreamReturnU32(stream), UINT32_MAX);
+    
+    byteStreamDestroy(stream);
+    id3v2DestroyExtendedTagHeader(&ext);
+}
+
+static void id3v2ExtendedTagHeaderToStream_null(void **state){
+
+    ByteStream *stream = id3v2ExtendedTagHeaderToStream(NULL, ID3V2_TAG_VERSION_3);
+
+    assert_null(stream);
+
+}
+
+static void id3v2ExtendedTagHeaderToStream_v4WithEverything(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(UINT32_MAX, UINT32_MAX, 1,1,0xfe);
+    ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_4);
+    
+    assert_int_equal(byteStreamReturnInt(stream), 12);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 6);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0x70);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+
+    unsigned char tmp[5] = {0,0,0,0,0};
+    byteStreamRead(stream, tmp, 5);
+
+    assert_int_equal(btost(tmp, 5), byteSyncintEncode(UINT32_MAX));
+    byteStreamSeek(stream, 5, SEEK_CUR);
+
+    
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0xfe);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyExtendedTagHeader(&ext);
+}
+
+static void id3v2ExtendedTagHeaderToStream_v4(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, 0, 0, 0);
+    ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_4);
+    
+    assert_int_equal(byteStreamReturnInt(stream), 6);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(stream->bufferSize, 6);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyExtendedTagHeader(&ext);
+}
+
+static void id3v2ExtendedTagHeaderToStream_v4crc(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 9000, 0, 0, 0);
+    ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_4);
+
+    assert_int_equal(byteStreamReturnInt(stream), 11);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 5);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0x20);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    unsigned char tmp[5] = {0,0,0,0,0};
+    byteStreamRead(stream, tmp, 5);
+
+    assert_int_equal(btost(tmp, 5), byteSyncintEncode(9000));
+
+    assert_int_equal(stream->bufferSize, 11);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyExtendedTagHeader(&ext);
+}
+
+static void id3v2ExtendedTagHeaderToStream_v4restrictions(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, 0, 1, 0xff);
+    ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_4);
+
+    assert_int_equal(byteStreamReturnInt(stream), 7);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 1);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0x10);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0xff);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(stream->bufferSize, 7);
+
+    byteStreamDestroy(stream);
+    id3v2DestroyExtendedTagHeader(&ext);
+}
+
+static void id3v2ExtendedTagHeaderToJSON_v3CRC(void **state){
+    
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(UINT32_MAX, UINT32_MAX, 1,1,0xfe);
+    char *json = id3v2ExtendedTagHeaderToJSON(ext, ID3V2_TAG_VERSION_3);
+
+    assert_non_null(json);
+    assert_string_equal(json,
+    "{\"padding\":4294967295,\"crc\":4294967295}");
+
+    free(json);
+    id3v2DestroyExtendedTagHeader(&ext);
+}
+
+
+static void id3v2ExtendedTagHeaderToJSON_v3noCRC(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(100, 0, 0, 0, 0);
+    char *json = id3v2ExtendedTagHeaderToJSON(ext, ID3V2_TAG_VERSION_3);
+
+    assert_non_null(json);
+    assert_string_equal(json,
+    "{\"padding\":100,\"crc\":0}");
+
+    free(json);
+    id3v2DestroyExtendedTagHeader(&ext);
+}
+
+static void id3v2ExtendedTagHeaderToJSON_null(void **state){
+
+    char *json = id3v2ExtendedTagHeaderToJSON(NULL, ID3V2_TAG_VERSION_2);
+
+    assert_non_null(json);
+    assert_string_equal(json, "{}");
+
+    free(json);
+
+}
+
+static void id3v2ExtendedTagHeaderToJSON_v4WithEverything(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(UINT32_MAX, UINT32_MAX, 1,1,0xfe);
+    char *json = id3v2ExtendedTagHeaderToJSON(ext, ID3V2_TAG_VERSION_4);
+    
+    assert_non_null(json);
+    assert_string_equal(json,
+    "{\"padding\":4294967295,\"crc\":4294967295,\"update\":true,\"tagRestrictions\":true,\"restrictions\":254}");
+    
+    free(json);
+    id3v2DestroyExtendedTagHeader(&ext);
+}
+
+
+static void id3v2ExtendedTagHeaderToJSON_v4crc(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 9000, 0, 0, 0);
+    char *json = id3v2ExtendedTagHeaderToJSON(ext, ID3V2_TAG_VERSION_4);
+
+    assert_non_null(json);
+    assert_string_equal(json,
+                        "{\"padding\":0,\"crc\":9000,\"update\":false,\"tagRestrictions\":false,\"restrictions\":0}");
+
+    free(json);
+    id3v2DestroyExtendedTagHeader(&ext);
+}
+
+static void id3v2ExtendedTagHeaderToJSON_v4restrictions(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, 0, 1, 0xff);
+    char *json = id3v2ExtendedTagHeaderToJSON(ext, ID3V2_TAG_VERSION_4);
+
+    assert_non_null(json);
+    assert_string_equal(json,
+    "{\"padding\":0,\"crc\":0,\"update\":false,\"tagRestrictions\":true,\"restrictions\":255}");
+    free(json);
+    id3v2DestroyExtendedTagHeader(&ext);
+}
+
+static void id3v2TagHeaderToStream_v2(void **state){
+
+    Id3v2TagHeader *h = id3v2CreateTagHeader(2, 0, 0, NULL);
+    ByteStream *stream = id3v2TagHeaderToStream(h, 1000);
+    unsigned char *tmp = NULL;
+
+
+    assert_non_null(stream);
+    
+    assert_memory_equal(byteStreamCursor(stream), "ID3", 3);
+    byteStreamSeek(stream, 3, SEEK_CUR);
+    
+    assert_int_equal(byteStreamCursor(stream)[0], 2);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    tmp = u32tob(byteSyncintEncode(1000));
+    assert_memory_equal(byteStreamCursor(stream), tmp, 4);
+    free(tmp);
+
+    id3v2DestroyTagHeader(&h);
+    byteStreamDestroy(stream);
+
+}
+
+static void id3v2TagHeaderToStream_unsupportedVersion(void **state){
+
+    Id3v2TagHeader *h = id3v2CreateTagHeader(10, 0, 0, NULL);
+    ByteStream *stream = id3v2TagHeaderToStream(h, 1000);
+
+    assert_null(stream);
+
+    id3v2DestroyTagHeader(&h);
+
+}
+
+static void id3v2TagHeaderToStream_null(void **state){
+
+    ByteStream *stream = id3v2TagHeaderToStream(NULL, 1000);
+    assert_null(stream);
+
+}
+
+
+static void id3v2TagHeaderToStream_v3(void **state){
+
+    Id3v2TagHeader *h = id3v2CreateTagHeader(3, 1, 0x20, NULL);
+    ByteStream *stream = id3v2TagHeaderToStream(h, 1000);
+    unsigned char *tmp = NULL;
+
+
+    assert_non_null(stream);
+    
+    assert_memory_equal(byteStreamCursor(stream), "ID3", 3);
+    byteStreamSeek(stream, 3, SEEK_CUR);
+    
+    assert_int_equal(byteStreamCursor(stream)[0], 3);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 1);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0x20);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    tmp = u32tob(byteSyncintEncode(1000));
+    assert_memory_equal(byteStreamCursor(stream), tmp, 4);
+    free(tmp);
+
+    id3v2DestroyTagHeader(&h);
+    byteStreamDestroy(stream);
+
+}
+
+static void id3v2TagHeaderToStream_v3WithExt(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(100, 0, 0, 0, 0);
+    Id3v2TagHeader *h = id3v2CreateTagHeader(3, 1, 0x60, ext);
+    ByteStream *stream = id3v2TagHeaderToStream(h, 1000);
+    unsigned char *tmp = NULL;
+
+
+    assert_non_null(stream);
+    
+    assert_memory_equal(byteStreamCursor(stream), "ID3", 3);
+    byteStreamSeek(stream, 3, SEEK_CUR);
+    
+    assert_int_equal(byteStreamCursor(stream)[0], 3);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 1);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0x60);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    tmp = u32tob(byteSyncintEncode(1000));
+    assert_memory_equal(byteStreamCursor(stream), tmp, 4);
+    free(tmp);
+    byteStreamSeek(stream, 4, SEEK_CUR);
+
+    assert_int_equal(byteStreamReturnU32(stream), 10);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_memory_equal(byteStreamCursor(stream), "\x00\x00", 2);
+    byteStreamSeek(stream, 2, SEEK_CUR);
+
+    assert_int_equal(byteStreamReturnU32(stream), 100);
+
+    id3v2DestroyTagHeader(&h);
+    byteStreamDestroy(stream);
+
+}
+
+
+static void id3v2TagHeaderToStream_v4(void **state){
+
+    Id3v2TagHeader *h = id3v2CreateTagHeader(4, 0, 0, NULL);
+    ByteStream *stream = id3v2TagHeaderToStream(h, 900);
+    unsigned char *tmp = NULL;
+
+
+    assert_non_null(stream);
+
+    assert_memory_equal(byteStreamCursor(stream), "ID3", 3);
+    byteStreamSeek(stream, 3, SEEK_CUR);
+    
+    assert_int_equal(byteStreamCursor(stream)[0], 4);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    tmp = u32tob(byteSyncintEncode(900));
+    assert_memory_equal(byteStreamCursor(stream), tmp, 4);
+    free(tmp);
+    byteStreamSeek(stream, 4, SEEK_CUR);
+
+    id3v2DestroyTagHeader(&h);
+    byteStreamDestroy(stream);
+
+}
+
+static void id3v2TagHeaderToStream_v4WithExt(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(80, 870, 1, 1, 0xff);
+    Id3v2TagHeader *h = id3v2CreateTagHeader(4, 0, 0xF0, ext);
+    ByteStream *stream = id3v2TagHeaderToStream(h, 900);
+    unsigned char *tmp = NULL;
+
+    assert_non_null(stream);
+
+    assert_memory_equal(byteStreamCursor(stream), "ID3", 3);
+    byteStreamSeek(stream, 3, SEEK_CUR);
+    
+    assert_int_equal(byteStreamCursor(stream)[0], 4);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0xF0);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    tmp = u32tob(byteSyncintEncode(900));
+    assert_memory_equal(byteStreamCursor(stream), tmp, 4);
+    free(tmp);
+    byteStreamSeek(stream, 4, SEEK_CUR);
+
+    assert_int_equal(byteStreamReturnInt(stream), 12);
+    
+    assert_int_equal(byteStreamCursor(stream)[0], 6);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0x70);
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    tmp = malloc(5);
+    byteStreamRead(stream, tmp, 5);
+    assert_int_equal(btost(tmp, 5), byteSyncintEncode(870));
+    free(tmp);
+
+    assert_int_equal(byteStreamCursor(stream)[0], 0xff);
+
+
+    id3v2DestroyTagHeader(&h);
+    byteStreamDestroy(stream);
+
+}
+
+static void id3v2TagHeaderToJSON_null(void **state){
+
+    char *json = id3v2TagHeaderToJSON(NULL);
+
+    assert_string_equal(json, "{}");
+
+    free(json);
+}
+
+static void id3v2TagHeaderToJSON_v2(void **state){
+
+    Id3v2TagHeader *header = id3v2CreateTagHeader(2, 99, 0, NULL);
+
+    char *json = id3v2TagHeaderToJSON(header);
+
+    assert_string_equal(json, "{\"major\":2,\"minor\":99,\"flags\":0}");
+
+    id3v2DestroyTagHeader(&header);
+    free(json);
+}
+
+static void id3v2TagHeaderToJSON_v3(void **state){
+
+    Id3v2TagHeader *header = id3v2CreateTagHeader(3, 0, 0, NULL);
+
+    char *json = id3v2TagHeaderToJSON(header);
+
+    assert_string_equal(json, "{\"major\":3,\"minor\":0,\"flags\":0,\"extended\":{}}");
+
+    id3v2DestroyTagHeader(&header);
+    free(json);
+}
+
+static void id3v2TagHeaderToJSON_v3ext(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(255, 0, 0, 0, 0);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(3, 0, 0, ext);
+
+    char *json = id3v2TagHeaderToJSON(header);
+
+    assert_string_equal(json, "{\"major\":3,\"minor\":0,\"flags\":0,\"extended\":{\"padding\":255,\"crc\":0}}");
+
+    id3v2DestroyTagHeader(&header);
+    free(json);
+}
+
+
+static void id3v2TagHeaderToJSON_v4(void **state){
+
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 0x40, NULL);
+
+    char *json = id3v2TagHeaderToJSON(header);
+
+    assert_string_equal(json, "{\"major\":4,\"minor\":0,\"flags\":64,\"extended\":{}}");
+
+    id3v2DestroyTagHeader(&header);
+    free(json);
+}
+
+static void id3v2TagHeaderToJSON_v4ext(void **state){
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(100, 3232, 1, 1, 0x1F);
+    Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 0xF0, ext);
+
+    char *json = id3v2TagHeaderToJSON(header);
+
+    assert_string_equal(json, "{\"major\":4,\"minor\":0,\"flags\":240,\"extended\":{\"padding\":100,\"crc\":3232,\"update\":true,\"tagRestrictions\":true,\"restrictions\":31}}");
+
+    id3v2DestroyTagHeader(&header);
+    free(json);
+}
+
+/**
+ * NOTE
+ * 
+ * the unsync flag does not work and will NOT work.
+ * there will be code within the write to file and tag to bytestream that will handle this.
+ * Its done this way as pretty much all structs are unaware of the unsync flag 
+ */
 
 int main(){
 
@@ -884,7 +1372,42 @@ int main(){
         cmocka_unit_test(id3v2ClearTagRestrictions_clear),
 
         // tag create/destroy
-        cmocka_unit_test(id3v2TagCreateAndDestroy_AllInOne)
+        cmocka_unit_test(id3v2TagCreateAndDestroy_AllInOne),
+
+        // id3v2ExtendedTagHeader tests
+        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v3noCRC),
+        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v3CRC),
+        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_null),
+        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v4WithEverything),
+        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v4),
+        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v4crc),
+        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v4restrictions),
+
+        // id3v2ExtendedTagHeaderToJSON
+        cmocka_unit_test(id3v2ExtendedTagHeaderToJSON_v3CRC),
+        cmocka_unit_test(id3v2ExtendedTagHeaderToJSON_v3noCRC),
+        cmocka_unit_test(id3v2ExtendedTagHeaderToJSON_null),
+        cmocka_unit_test(id3v2ExtendedTagHeaderToJSON_v4WithEverything),
+        cmocka_unit_test(id3v2ExtendedTagHeaderToJSON_v4crc),
+        cmocka_unit_test(id3v2ExtendedTagHeaderToJSON_v4restrictions),
+
+        // id3v2TagHeaderToStream
+        cmocka_unit_test(id3v2TagHeaderToStream_v2),
+        cmocka_unit_test(id3v2TagHeaderToStream_unsupportedVersion),
+        cmocka_unit_test(id3v2TagHeaderToStream_null),
+        cmocka_unit_test(id3v2TagHeaderToStream_v3),
+        cmocka_unit_test(id3v2TagHeaderToStream_v3WithExt),
+        cmocka_unit_test(id3v2TagHeaderToStream_v4),
+        cmocka_unit_test(id3v2TagHeaderToStream_v4WithExt),
+
+        // id3v2TagHeaderToJSON
+        cmocka_unit_test(id3v2TagHeaderToJSON_null),
+        cmocka_unit_test(id3v2TagHeaderToJSON_v2),
+        cmocka_unit_test(id3v2TagHeaderToJSON_v3),
+        cmocka_unit_test(id3v2TagHeaderToJSON_v3ext),
+        cmocka_unit_test(id3v2TagHeaderToJSON_v4),
+        cmocka_unit_test(id3v2TagHeaderToJSON_v4ext)
+        
 
     };
 

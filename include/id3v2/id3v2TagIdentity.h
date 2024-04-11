@@ -25,10 +25,12 @@ extern "C"{
 */
 
 //mem functions
+
 Id3v2TagHeader *id3v2CreateTagHeader(uint8_t majorVersion, uint8_t minorVersion, uint8_t flags, Id3v2ExtendedTagHeader *extendedHeader);
 void id3v2DestroyTagHeader(Id3v2TagHeader **toDelete);
 
 //flag functions
+
 bool id3v2WriteUnsynchronisationIndicator(Id3v2TagHeader *header, bool bit);
 bool id3v2WriteCompressionIndicator(Id3v2TagHeader *header, bool bit);
 bool id3v2WriteExtendedHeaderIndicator(Id3v2TagHeader *header, bool bit);
@@ -74,6 +76,19 @@ bool id3v2ClearTagRestrictions(Id3v2TagHeader *header);
 
 Id3v2Tag *id3v2CreateTag(Id3v2TagHeader *header, List *frames);
 void id3v2DestroyTag(Id3v2Tag **toDelete);
+
+
+/*
+    output
+*/
+
+ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t version);
+char *id3v2ExtendedTagHeaderToJSON(Id3v2ExtendedTagHeader *ext, uint8_t version);
+
+ByteStream *id3v2TagHeaderToStream(Id3v2TagHeader *header, uint32_t uintSize);
+char *id3v2TagHeaderToJSON(Id3v2TagHeader *header);
+
+
 
 
 #ifdef __cplusplus

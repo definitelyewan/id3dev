@@ -1,3 +1,13 @@
+/**
+ * @file id3v1Functions.c
+ * @author Ewan Jones
+ * @brief unit tests for id3v1
+ * @version 0.1
+ * @date 2024-03-25
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
 #include <stdio.h>
 #include <stdarg.h>
 #include <stddef.h>

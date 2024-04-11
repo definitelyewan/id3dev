@@ -1,8 +1,21 @@
+/**
+ * @file id3v2TagIdentity.c
+ * @author Ewan Jones
+ * @brief Functions realted to identifying an id3v2 tag
+ * @version 0.1
+ * @date 2024-04-11
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "byteInt.h"
 #include "id3v2TagIdentity.h"
+#include "byteStream.h"
+#include "byteInt.h"
 
 /**
  * @brief Creates an inits a tag header structure.
@@ -622,4 +635,348 @@ void id3v2DestroyTag(Id3v2Tag **toDelete){
         toDelete = NULL;
     }
 
+}
+
+/**
+ * @brief Converts an extended tag header into a stream. if this function fails it will
+ * return NULL otherwise, a stream.
+ * 
+ * @param ext 
+ * @param version 
+ * @return ByteStream* 
+ */
+ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t version){
+    
+    ByteStream *stream = NULL;
+    int offset = 0;
+    int toWrite = 0;
+    int buildSize = 0;
+    unsigned char *tmp = NULL;
+    unsigned char crcb[5] = {0,0,0,0,0};
+    
+    if(ext == NULL){
+        return stream;
+    }
+    
+    switch(version){
+        
+        case ID3V2_TAG_VERSION_3:
+
+            // size
+            buildSize = 10 + ((ext->crc) ? 4 : 0);
+
+            stream = byteStreamCreate(NULL, buildSize);
+
+            tmp = (unsigned char *) itob(buildSize);
+            byteStreamWrite(stream, tmp, 4);
+            free(tmp);
+
+            // flag
+            byteStreamWriteBit(stream, (ext->crc > 0) ? 1 : 0, 7);
+            byteStreamSeek(stream, 2, SEEK_CUR);
+            
+            // crc
+            tmp = u32tob(ext->padding);
+            byteStreamWrite(stream, tmp, 4);
+            free(tmp);
+
+            if(ext->crc){
+                tmp = u32tob(ext->crc);
+                byteStreamWrite(stream, tmp, 4);
+                free(tmp);
+            }
+            
+            break;
+
+        case ID3V2_TAG_VERSION_4:
+
+            buildSize = 6 + ((ext->crc) ? 5 : 0)  + ((ext->tagRestrictions) ? 1 : 0);
+
+            stream = byteStreamCreate(NULL, buildSize);
+
+
+            // ext size
+            tmp = u32tob(buildSize);
+            byteStreamWrite(stream, tmp, 4);
+            free(tmp);
+
+            // flag bytes
+            tmp = (unsigned char *) itob(buildSize - 6);
+            byteStreamWrite(stream, &tmp[3], 1);
+            free(tmp);
+
+            // flags
+            byteStreamWriteBit(stream, ext->update, 6);
+            byteStreamWriteBit(stream, (ext->crc > 0) ? 1 : 0, 5);
+            byteStreamWriteBit(stream, ext->tagRestrictions, 4);
+            byteStreamSeek(stream, 1, SEEK_CUR);
+
+            // crc
+            if(ext->crc){
+                tmp = sttob(byteSyncintEncode(ext->crc));
+
+                while(offset < sizeof(size_t) && tmp[offset] == 0){
+                    offset++;
+                }
+
+                // c4c is 5 bytes if the 0s are there they must be kept
+                if(offset > 3){
+                    offset = 3;
+                }
+
+                toWrite = sizeof(size_t) - offset > 5 ? 5 : sizeof(size_t) - offset;
+                memcpy(crcb, tmp + offset, toWrite);
+
+                byteStreamSeek(stream, 6, SEEK_SET);
+                byteStreamWrite(stream, crcb, 5);
+                free(tmp);
+            }
+
+            if(ext->tagRestrictions){
+                byteStreamWrite(stream, &ext->restrictions, 1);
+            }
+
+            break;
+
+        // no support or it does not exist
+        case ID3V2_TAG_VERSION_2:
+        default:
+            break;
+    }
+
+    byteStreamRewind(stream);
+    return stream;
+}
+
+/**
+ * @brief Converts an extended tag header into its structures representation as JSON.
+ * 
+ * @param ext 
+ * @param version 
+ * @return char* 
+ */
+char *id3v2ExtendedTagHeaderToJSON(Id3v2ExtendedTagHeader *ext, uint8_t version){
+    
+    char *json = NULL;
+    size_t memCount = 3;
+
+    if(ext == NULL){
+        json = calloc(memCount, sizeof(char));
+        memcpy(json, "{}\0", memCount);
+        return json;
+    }
+
+    switch(version){
+        case ID3V2_TAG_VERSION_3:
+
+            memCount += snprintf(NULL, 0,
+                                "{\"padding\":%"PRIu32",\"crc\":%"PRIu32"}",
+                                ext->padding,
+                                ext->crc);
+
+            json = calloc(memCount + 1, sizeof(char));
+
+            snprintf(json, memCount,
+                     "{\"padding\":%"PRIu32",\"crc\":%"PRIu32"}",
+                     ext->padding,
+                     ext->crc);
+
+            break;
+        case ID3V2_TAG_VERSION_4:
+            
+            memCount += snprintf(NULL, 0,
+                                "{\"padding\":%"PRIu32",\"crc\":%"PRIu32",\"update\":%s,\"tagRestrictions\":%s,\"restrictions\":%d}",
+                                ext->padding,
+                                ext->crc, 
+                                ext->update ? "true" : "false", 
+                                ext->tagRestrictions ? "true" : "false",
+                                ext->restrictions);
+
+            json = calloc(memCount + 1, sizeof(char));
+
+            snprintf(json, memCount,
+                     "{\"padding\":%"PRIu32",\"crc\":%"PRIu32",\"update\":%s,\"tagRestrictions\":%s,\"restrictions\":%d}",
+                     ext->padding,
+                     ext->crc, 
+                     ext->update ? "true" : "false", 
+                     ext->tagRestrictions ? "true" : "false",
+                     ext->restrictions);
+
+            break;
+
+        // no support
+        case ID3V2_TAG_VERSION_2:
+        default:
+            json = malloc(sizeof(char) * memCount);
+            memcpy(json, "{}\0", memCount);
+            break;
+    }
+    
+    
+    return json;
+}
+
+/**
+ * @brief Converts a tag header and tag size into a stream. if this function fails it will
+ * return NULL otherwise, a stream.
+ * 
+ * @param header 
+ * @param uintSize 
+ * @return ByteStream* 
+ */
+ByteStream *id3v2TagHeaderToStream(Id3v2TagHeader *header, uint32_t uintSize){    
+    
+    ByteStream *stream = NULL;
+    unsigned char *tmp = NULL;
+
+    if(header == NULL){
+        return stream;
+    }
+
+    // no support
+    if(header->majorVersion > ID3V2_TAG_VERSION_4){
+        return stream;
+    }
+
+    stream = byteStreamCreate(NULL, 10);
+
+    byteStreamWrite(stream, (uint8_t *)"ID3", ID3V2_TAG_ID_SIZE);
+
+    byteStreamWrite(stream, &header->majorVersion, 1);
+    byteStreamWrite(stream, &header->minorVersion, 1);
+
+
+    switch(header->majorVersion){
+
+        case ID3V2_TAG_VERSION_2:
+            
+            byteStreamWriteBit(stream, (bool)id3v2ReadUnsynchronisationIndicator(header), 7);
+            byteStreamWriteBit(stream, (bool)id3v2ReadCompressionIndicator(header), 6);
+
+            break;
+        case ID3V2_TAG_VERSION_3:
+
+            byteStreamWriteBit(stream, (bool)id3v2ReadUnsynchronisationIndicator(header), 7);
+            byteStreamWriteBit(stream, (bool)id3v2ReadExtendedHeaderIndicator(header), 6);
+            byteStreamWriteBit(stream, (bool)id3v2ReadExperimentalIndicator(header), 5);
+
+            break;
+        case ID3V2_TAG_VERSION_4:
+
+            byteStreamWriteBit(stream, (bool)id3v2ReadUnsynchronisationIndicator(header), 7);
+            byteStreamWriteBit(stream, (bool)id3v2ReadExtendedHeaderIndicator(header), 6);
+            byteStreamWriteBit(stream, (bool)id3v2ReadExperimentalIndicator(header), 5);
+            byteStreamWriteBit(stream, (bool)id3v2ReadFooterIndicator(header), 4);
+
+            break;
+    }
+    
+    byteStreamSeek(stream, 1, SEEK_CUR);
+
+    tmp = u32tob(byteSyncintEncode(uintSize));
+    byteStreamWrite(stream, tmp, sizeof(uint32_t));
+    free(tmp);
+
+    if(id3v2ReadExtendedHeaderIndicator(header)){
+        ByteStream *ext = id3v2ExtendedTagHeaderToStream(header->extendedHeader, header->majorVersion);
+
+        if(ext != NULL){
+            byteStreamResize(stream, stream->bufferSize + ext->bufferSize);
+            byteStreamWrite(stream, byteStreamCursor(ext), ext->bufferSize);
+            byteStreamDestroy(ext);    
+        }
+        
+    }
+
+    byteStreamRewind(stream);
+    return stream;
+}
+
+char *id3v2TagHeaderToJSON(Id3v2TagHeader *header){
+    
+    char *json = NULL;
+    size_t memCount = 3;
+    char *extJson = NULL;
+
+    if(header == NULL){
+        json = calloc(memCount, sizeof(char));
+        memcpy(json, "{}\0", memCount);
+        return json;
+    }
+
+    switch(header->majorVersion){
+        
+        case ID3V2_TAG_VERSION_2:
+
+            memCount += snprintf(NULL, 0,
+                                "{\"major\":%d,\"minor\":%d,\"flags\":%d}",
+                                header->majorVersion,
+                                header->minorVersion,
+                                header->flags);
+
+            json = calloc(memCount + 1, sizeof(char));            
+            
+            snprintf(json, memCount,
+                    "{\"major\":%d,\"minor\":%d,\"flags\":%d}",
+                    header->majorVersion,
+                    header->minorVersion,
+                    header->flags);
+
+            break;
+        case ID3V2_TAG_VERSION_3:
+
+            extJson = id3v2ExtendedTagHeaderToJSON(header->extendedHeader, ID3V2_TAG_VERSION_3);
+            
+            memCount += snprintf(NULL, 0,
+                                "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
+                                header->majorVersion,
+                                header->minorVersion,
+                                header->flags,
+                                extJson);
+
+            json = calloc(memCount + 1, sizeof(char)); 
+            
+
+            snprintf(json, memCount,
+                    "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
+                    header->majorVersion,
+                    header->minorVersion,
+                    header->flags,
+                    extJson);
+
+
+            free(extJson);
+            break;
+        case ID3V2_TAG_VERSION_4:
+            extJson = id3v2ExtendedTagHeaderToJSON(header->extendedHeader, ID3V2_TAG_VERSION_4);
+            
+            memCount += snprintf(NULL, 0,
+                                "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
+                                header->majorVersion,
+                                header->minorVersion,
+                                header->flags,
+                                extJson);
+
+            json = calloc(memCount + 1, sizeof(char)); 
+            
+
+            snprintf(json, memCount,
+                    "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
+                    header->majorVersion,
+                    header->minorVersion,
+                    header->flags,
+                    extJson);
+
+
+            free(extJson);
+            break;
+
+        // no support
+        default:
+            json = malloc(sizeof(char) * memCount);
+            memcpy(json, "{}\0", memCount);
+            break;
+    }
+    
+    return json;
 }

@@ -74,9 +74,16 @@ List *id3v2CreateTermsOfUseFrameContext(void);
 List *id3v2CreateUnsynchronisedLyricFrameContext(void);
 List *id3v2CreateGenericFrameContext(void);
 
+// pairings
 
 HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version);
 bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char key[ID3V2_FRAME_ID_MAX_SIZE], List *context);
+
+
+// convi
+
+ByteStream *id3v2ContextToStream(Id3v2ContentContext *cc);
+char *id3v2ContextToJSON(Id3v2ContentContext *cc);
 
 #ifdef __cplusplus
 } //extern c end

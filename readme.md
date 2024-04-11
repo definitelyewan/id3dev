@@ -1,4 +1,6 @@
-                                                |2.4 |2.3 |2.2|D|
+# id3dev status
+```bash
+                                                |2.4 |2.3 |2.2|SUPPORT?
 Audio encryption                                |AENC|AENC|CRA|X|
 Attached picture                                |APIC|APIC|PIC|X|
 seek point index                                |ASPI|    |   |X| 
@@ -11,19 +13,19 @@ General encapsulated object                     |GEOB|GEOB|GEO|X|
 Group identification registration               |GRID|GRID|   |X|
 Linked information                              |LINK|LINK|LNK|X|
 Music CD identifier                             |MCDI|MCDI|MCI|X|
-MPEG location lookup table                      |MLLT|MLLT|MLL|X|
+MPEG location lookup table                      |MLLT|MLLT|MLL|-|
 Ownership frame                                 |OWNE|OWNE|   |X|
 Private frame                                   |PRIV|PRIV|   |X|
 Play counter                                    |PCNT|PCNT|CNT|X|
 Popularimeter                                   |POPM|POPM|POP|X|
 Position synchronisation frame                  |POSS|POSS|   |X|
 Recommended buffer size                         |RBUF|RBUF|BUF|X|
-Relative volume adjustment                      |RVA2|RVAD|RVA|X|
+Relative volume adjustment                      |RVA2|RVAD|RVA|-|
 Reverb                                          |RVRB|RVRB|REV|X|
 Seek frame                                      |SEEK|    |   |X|
 Signature frame                                 |SIGN|    |   |X|
 Synchronised lyric/text                         |SYLT|SYLT|SLT|X|
-Synchronised tempo codes                        |SYTC|SYTC|STC|X|
+Synchronised tempo codes                        |SYTC|SYTC|STC|-|
 Album/Movie/Show title                          |TALB|TALB|TAL|X|
 BPM (beats per minute)                          |TBPM|TBPM|TBP|X|
 Composer                                        |TCOM|TCOM|TCM|X|
@@ -89,8 +91,9 @@ Recording dates                                 |    |TRDA|TRD|X|
 Size                                            |    |TSIZ|TSI|X|
 Year                                            |    |TYER|TYE|X|
 Encrypted meta frame                            |    |    |CRM|X|
-
+```
+X = full support, - = partial support, " " = no support
 
 TODO:
-    1. change example container to something better that doesnt look like a code block
-    2. create a homepage for the current page that links to doxygen somehow
+1. update frames to use a generic context if encrypted or compressed
+2. fix bit_context in parser to reflect the ToByteStream version
