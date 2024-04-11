@@ -1,3 +1,14 @@
+/**
+ * @file id3v2Context.c
+ * @author Ewan Jones
+ * @brief Functions for configuring the parser and any output of a tag
+ * @version 0.1
+ * @date 2024-04-11
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

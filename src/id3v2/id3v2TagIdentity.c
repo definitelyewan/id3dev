@@ -1,3 +1,14 @@
+/**
+ * @file id3v2TagIdentity.c
+ * @author Ewan Jones
+ * @brief Functions realted to identifying an id3v2 tag
+ * @version 0.1
+ * @date 2024-04-11
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

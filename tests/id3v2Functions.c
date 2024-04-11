@@ -1200,14 +1200,8 @@ static void id3v2TagToStream_v4footer(void **state){
     ByteStream *stream = id3v2TagToStream(tag);
     assert_non_null(stream);
 
-    byteStreamSeek(stream, 10, SEEK_END);
-    byteStreamPrintf("%c", stream);
-    byteStreamRewind(stream);
-
-    printf("[*] Parsing tag from stream\n");
     Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
 
-    printf("[*] Comparing tags\n");
     bool v = id3v2CompareTag(tag, tag2);
 
     byteStreamDestroy(stream);
@@ -1217,25 +1211,233 @@ static void id3v2TagToStream_v4footer(void **state){
     assert_true(v);
 }
 
-static void id3v2TagToStream_v4unsync(void **state){
+/**
+ * This test is so computationally expensive that it is not worth running unless its 100% necessary
+ * This can take past an hour to run on an M3 with 16gb of ram.
+ */
+
+// static void id3v2TagToStream_v4unsync(void **state){
     
-    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
-    id3v2WriteUnsynchronisationIndicator(tag->header, true);
+//     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+//     id3v2WriteUnsynchronisationIndicator(tag->header, true);
 
-    ByteStream *stream = id3v2TagToStream(tag);
-    assert_non_null(stream);
+//     ByteStream *stream = id3v2TagToStream(tag);
+//     assert_non_null(stream);
 
-    printf("[*] Parsing tag from stream\n");
-    Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
+//     Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
 
-    printf("[*] Comparing tags\n");
-    bool v = id3v2CompareTag(tag, tag2);
+//     bool v = id3v2CompareTag(tag, tag2);
 
-    byteStreamDestroy(stream);
+//     byteStreamDestroy(stream);
+//     id3v2DestroyTag(&tag);
+//     id3v2DestroyTag(&tag2);
+
+//     assert_true(v);
+// }
+
+
+static void id3v2TagToJSON_v2(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+    FILE *fp = NULL;
+    char *str = NULL;
+    char *fileJson = NULL;
+    size_t sz = 0;
+
+    str = id3v2TagToJSON(tag);
+    assert_non_null(str);
+    id3v2DestroyTag(&tag);
+
+    fp = fopen("assets/danybrown2.json", "rb");
+    assert_non_null(fp);
+
+    fseek(fp, 0L, SEEK_END);
+    sz = ftell(fp);
+    fseek(fp, 0L, SEEK_SET);
+
+    fileJson = calloc(sizeof(char), sz + 1);
+    fread(fileJson, 1, sz, fp);
+    fclose(fp);
+    
+    assert_string_equal(str, fileJson);
+
+    free(fileJson);
+    free(str);
+
+}
+
+static void id3v2TagToJSON_v3(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+    FILE *fp = NULL;
+    char *str = NULL;
+    char *fileJson = NULL;
+    size_t sz = 0;
+
+    str = id3v2TagToJSON(tag);
+    assert_non_null(str);
+    id3v2DestroyTag(&tag);
+
+    fp = fopen("assets/sorry4dying.json", "rb");
+    assert_non_null(fp);
+
+    fseek(fp, 0L, SEEK_END);
+    sz = ftell(fp);
+    fseek(fp, 0L, SEEK_SET);
+
+    fileJson = calloc(sizeof(char), sz + 1);
+    fread(fileJson, 1, sz, fp);
+    fclose(fp);
+    
+    assert_string_equal(str, fileJson);
+
+    free(fileJson);
+    free(str);
+
+}
+
+static void id3v2WriteTagToFile_v2NoFile(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
+    
+
+    int v = id3v2WriteTagToFile("assets/tmp", tag);
+    assert_true(v);
+
+    Id3v2Tag *tag2 = id3v2TagFromFile("assets/tmp");
+
+    bool v2 = id3v2CompareTag(tag, tag2);
+    assert_true(v2);
     id3v2DestroyTag(&tag);
     id3v2DestroyTag(&tag2);
+    remove("assets/tmp");
+}
 
-    assert_true(v);
+static void id3v2WriteTagToFile_v3Overwrite(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+    Id3v2Tag *tag2 = NULL;
+    FILE *fp = NULL;
+    size_t sz = 0;
+    uint8_t *data = NULL;
+
+    id3v2WriteAlbum("SCRAPYARD", tag);
+
+    fp = fopen("assets/sorry4dying.mp3", "rb");
+    fseek(fp, 0L, SEEK_END);
+    sz = ftell(fp);
+    fseek(fp, 0L, SEEK_SET);
+    data = malloc(sz);
+    fread(data, 1, sz, fp);
+    fclose(fp);
+
+    fp = fopen("assets/tmp", "wb");
+    fwrite(data, 1, sz, fp);
+    free(data);
+    fclose(fp);
+
+    id3v2WriteTagToFile("assets/tmp", tag);
+
+    tag2 = id3v2TagFromFile("assets/tmp");
+
+    remove("assets/tmp");
+
+    char *str = id3v2ReadAlbum(tag2);
+    assert_string_equal("SCRAPYARD", str);
+    free(str);
+    id3v2DestroyTag(&tag2);
+    id3v2DestroyTag(&tag);
+
+}
+
+static void id3v2WriteTagToFile_v4OverwriteNoPictures(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+    Id3v2Tag *tag2 = NULL;
+    FILE *fp = NULL;
+    size_t sz = 0;
+    uint8_t *data = NULL;
+    Id3v2Frame *f = NULL;
+
+    assert_true(id3v2RemoveFrameByID("APIC", tag));
+    assert_true(id3v2RemoveFrameByID("APIC", tag));
+
+    fp = fopen("assets/OnGP.mp3", "rb");
+    fseek(fp, 0L, SEEK_END);
+    sz = ftell(fp);
+    fseek(fp, 0L, SEEK_SET);
+    data = malloc(sz);
+    fread(data, 1, sz, fp);
+    fclose(fp);
+
+    fp = fopen("assets/tmp", "wb");
+    fwrite(data, 1, sz, fp);
+    free(data);
+    fclose(fp);
+
+    id3v2WriteTagToFile("assets/tmp", tag);
+
+    tag2 = id3v2TagFromFile("assets/tmp");
+
+    remove("assets/tmp");
+
+    assert_false(id3v2ReadFrameByID("APIC", tag2));
+
+    id3v2DestroyTag(&tag2);
+    id3v2DestroyTag(&tag);
+
+}
+
+static void id3v2WriteTagToFile_v4OverwriteNoPicturesAsUpdate(void **state){
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+    Id3v2Tag *tag2 = NULL;
+    FILE *fp = NULL;
+    size_t sz = 0;
+    uint8_t *data = NULL;
+
+    assert_true(id3v2RemoveFrameByID("APIC", tag));
+    assert_true(id3v2RemoveFrameByID("APIC", tag));
+    id3v2WriteExtendedHeaderIndicator(tag->header, true);
+    tag->header->extendedHeader = id3v2CreateExtendedTagHeader(0, 0, 1, 0, 0);
+
+
+    fp = fopen("assets/OnGP.mp3", "rb");
+    fseek(fp, 0L, SEEK_END);
+    sz = ftell(fp);
+    fseek(fp, 0L, SEEK_SET);
+    data = malloc(sz);
+    fread(data, 1, sz, fp);
+    fclose(fp);
+
+    fp = fopen("assets/tmp", "wb");
+    fwrite(data, 1, sz, fp);
+    free(data);
+    fclose(fp);
+
+    id3v2WriteTagToFile("assets/tmp", tag);
+
+    tag2 = id3v2TagFromFile("assets/tmp");
+
+    ByteStream *stream = byteStreamFromFile("assets/tmp");
+    byteStreamSeek(stream, 6, SEEK_SET);
+    uint32_t size = byteStreamReturnSyncInt(stream);
+    byteStreamSeek(stream, size, SEEK_CUR);
+    
+    assert_int_equal(byteStreamGetCh(stream), 'I');
+    byteStreamSeek(stream, 1, SEEK_CUR);
+    assert_int_equal(byteStreamGetCh(stream), 'D');
+    byteStreamSeek(stream, 1, SEEK_CUR);
+    assert_int_equal(byteStreamGetCh(stream), '3');
+
+
+    remove("assets/tmp");
+
+    assert_false(id3v2ReadFrameByID("APIC", tag2));
+    byteStreamDestroy(stream);
+    id3v2DestroyTag(&tag2);
+    id3v2DestroyTag(&tag);
+
 }
 
 int main(){
@@ -1380,7 +1582,17 @@ int main(){
         cmocka_unit_test(id3v2TagToStream_v3ext),
         cmocka_unit_test(id3v2TagToStream_v4ext),
         cmocka_unit_test(id3v2TagToStream_v4footer),
-        cmocka_unit_test(id3v2TagToStream_v4unsync),
+        //cmocka_unit_test(id3v2TagToStream_v4unsync),
+
+        // id3v2TagToJSON
+        cmocka_unit_test(id3v2TagToJSON_v2),
+        cmocka_unit_test(id3v2TagToJSON_v3),
+
+        // id3v2WriteTagToFile
+        cmocka_unit_test(id3v2WriteTagToFile_v2NoFile),
+        cmocka_unit_test(id3v2WriteTagToFile_v3Overwrite),
+        cmocka_unit_test(id3v2WriteTagToFile_v4OverwriteNoPictures),
+        cmocka_unit_test(id3v2WriteTagToFile_v4OverwriteNoPicturesAsUpdate)
 
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

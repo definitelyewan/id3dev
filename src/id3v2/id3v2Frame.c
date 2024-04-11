@@ -1,3 +1,14 @@
+/**
+ * @file id3v2Frame.c
+ * @author Ewan Jones
+ * @brief Functions for creating, destroying, and manipulating ID3v2 frames
+ * @version 0.1
+ * @date 2024-04-11
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -1,3 +1,14 @@
+/**
+ * @file id3v2.c
+ * @author Ewan Jones
+ * @brief Contains all main functions for the id3v2 library.
+ * @version 0.1
+ * @date 2024-04-11
+ * 
+ * @copyright Copyright (c) 2024
+ * 
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -1859,8 +1870,15 @@ int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t ty
     return ret;
 }
 
+/**
+ * @brief Converts an ID3v2.x tag data structure back to its binary representation. If this function fails
+ * NULL is returned otherwise, a ByteStream pointer.
+ * 
+ * @param tag 
+ * @return ByteStream* 
+ */
 ByteStream *id3v2TagToStream(Id3v2Tag *tag){
-    printf("[*] Entered id3v2TagToStream\n");
+
     if(tag == NULL){
         return NULL;
     }
@@ -1868,8 +1886,6 @@ ByteStream *id3v2TagToStream(Id3v2Tag *tag){
     if(tag->header == NULL || tag->frames == NULL){
         return NULL;
     }
-
-    printf("[*] Arguments are valid\n");
 
     ByteStream *stream = NULL;
     ByteStream *headerStream = NULL;
@@ -1881,7 +1897,6 @@ ByteStream *id3v2TagToStream(Id3v2Tag *tag){
     uint32_t padding = 0;
     uint8_t *sizeBytes = NULL;
 
-    printf("[*] Writing frames to a stream\n");
     // frame stream
     while((f = id3v2FrameTraverse(&frames)) != NULL){
         ByteStream *tmp = NULL;
@@ -1891,7 +1906,7 @@ ByteStream *id3v2TagToStream(Id3v2Tag *tag){
         if(tmp == NULL){
             break;
         }
-        printf("[*] total frame size = %d\n", tmp->bufferSize);
+
         if(frameStream == NULL){
             frameStream = byteStreamCreate(byteStreamCursor(tmp), tmp->bufferSize);
             byteStreamSeek(frameStream, 0, SEEK_END);
@@ -1907,7 +1922,6 @@ ByteStream *id3v2TagToStream(Id3v2Tag *tag){
 
     // unsync?
     if(id3v2ReadUnsynchronisationIndicator(tag->header)){
-        printf("[*] Unsynchronising frames\n");
         ByteStream *tmp = NULL;
 
         tmp = byteStreamCreate(NULL, frameStream->bufferSize * 2);
@@ -1929,8 +1943,6 @@ ByteStream *id3v2TagToStream(Id3v2Tag *tag){
     }else{
         fsize = frameStream->bufferSize;
     }
-
-    printf("[*] Finished writing frames to a stream with a fsize of %d\n", fsize);
 
     // header stream
     headerStream = id3v2TagHeaderToStream(tag->header, 0);
@@ -1980,13 +1992,13 @@ ByteStream *id3v2TagToStream(Id3v2Tag *tag){
         fsize += tag->header->extendedHeader->padding;
         padding = tag->header->extendedHeader->padding;
     }
-    printf("[*] fsize that will be written is %d\n", fsize);
+
     // insert size
     sizeBytes = u32tob(byteSyncintEncode(fsize));
     byteStreamSeek(headerStream, 6, SEEK_SET);
     byteStreamWrite(headerStream, sizeBytes, 4);
     byteStreamRewind(headerStream);
-    byteStreamPrintf("%x", headerStream);
+
     if(footerStream != NULL){
         byteStreamSeek(footerStream, 6, SEEK_SET);
         byteStreamWrite(footerStream, sizeBytes, 4);
@@ -1994,7 +2006,6 @@ ByteStream *id3v2TagToStream(Id3v2Tag *tag){
     }
 
     free(sizeBytes);
-
 
     // create stream
     stream = byteStreamCreate(NULL, frameStream->bufferSize + headerStream->bufferSize + ((footerStream != NULL) ? footerStream->bufferSize : 0));
@@ -2010,4 +2021,295 @@ ByteStream *id3v2TagToStream(Id3v2Tag *tag){
     byteStreamDestroy(frameStream);
     byteStreamRewind(stream);
     return stream;
+}
+
+/**
+ * @brief Converts an ID3v2.x tag data structure back to its json representation.
+ * 
+ * @param tag 
+ * @return char* 
+ */
+char *id3v2TagToJSON(Id3v2Tag *tag){
+
+    char *json = NULL;
+    char *headerJson = NULL;
+    char **contentJson = NULL;
+    char *concatenatedString = NULL;
+    size_t contentJsonSize = 0;
+    size_t memCount = 3;
+    size_t concatenatedStringLength = 0;
+
+    if(tag == NULL){
+        json = calloc(memCount, sizeof(char));
+        memcpy(json, "{}\0", memCount);
+        return json;
+    }
+
+    if(tag->frames == NULL || tag->header == NULL){
+        json = calloc(memCount, sizeof(char));
+        memcpy(json, "{}\0", memCount);
+        return json;
+    }
+
+    if(tag->header->majorVersion > ID3V2_TAG_VERSION_4){
+        json = calloc(memCount, sizeof(char));
+        memcpy(json, "{}\0", memCount);
+        return json;
+    }
+
+    // get frames
+
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+
+    while((f = id3v2FrameTraverse(&frames)) != NULL){
+        char *tmp = NULL;
+        size_t jsonSize = 0;
+
+        tmp = id3v2FrameToJSON(f, tag->header->majorVersion);
+        jsonSize = strlen(tmp);
+
+        contentJsonSize++;
+        if(contentJson == NULL){
+            contentJson = calloc(contentJsonSize, sizeof(char *));
+            contentJson[contentJsonSize - 1] = calloc(jsonSize + 1, sizeof(char));
+                
+        }else{
+            contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
+            contentJson[contentJsonSize - 1] = calloc(jsonSize + 1, sizeof(char)); 
+        }
+
+        memcpy(contentJson[contentJsonSize - 1], tmp, jsonSize);
+
+        free(tmp);
+
+    }
+
+    // get header
+    headerJson = id3v2TagHeaderToJSON(tag->header);
+
+
+    // concatenate all JSON data stored in contentJson into a single string split by ","
+    for(size_t i = 0; i < contentJsonSize; i++){
+        concatenatedStringLength += strlen(contentJson[i]) + 1;
+    }
+    
+
+    concatenatedString = calloc(concatenatedStringLength + 1, sizeof(char));
+    for(size_t i = 0; i < contentJsonSize; i++){
+        strcat(concatenatedString, contentJson[i]);
+        if(i < contentJsonSize - 1){
+            strcat(concatenatedString, ",");
+        }
+    }
+
+    memCount += snprintf(NULL, 0,
+                        "{\"header\":%s,\"content\":[%s]}",
+                        headerJson,
+                        concatenatedString);
+
+
+    json = malloc((memCount + 1) * sizeof(char));
+    strcpy(json, "{\"header\":");
+    strcat(json, headerJson);
+    strcat(json, ",\"content\":[");
+    strcat(json, concatenatedString);
+    strcat(json, "]}");
+
+
+    free(headerJson);
+
+    if(concatenatedString != NULL){
+        free(concatenatedString);
+    }
+
+    if(contentJson != NULL){
+        for(size_t i = 0; i < contentJsonSize; i++){
+            free(contentJson[i]);
+
+        }
+        free(contentJson);
+    }
+
+    return json;
+
+}
+
+/**
+ * @brief Writes an ID3v2.x tag data structure to a file. If this function fails false is returned otherwise, true.
+ * If the file does not exist it will be created if it does and there is no tag it will be prepended. If the update
+ * flag is set in the tag header it will be prepended to the file without overwriting any existing tags. 
+ * 
+ * @param filename 
+ * @param tag 
+ * @return int 
+ */
+int id3v2WriteTagToFile(const char *filePath, Id3v2Tag *tag){
+
+    if(filePath == NULL || tag == NULL){
+        return false;
+    }
+
+    FILE *fp = NULL;
+    ByteStream *stream = NULL;
+
+    stream = id3v2TagToStream(tag);
+    fp = fopen(filePath, "r+b");
+    
+    // write to a new file
+    if(fp == NULL){
+
+        // create a new file and write the bytes to it    
+        fp = fopen(filePath, "wb");
+
+        if(fp == NULL){
+            byteStreamDestroy(stream);
+            return false;
+        }
+
+        if((fwrite(byteStreamCursor(stream), 1, stream->bufferSize, fp)) == 0){
+            byteStreamDestroy(stream);
+            fclose(fp);
+            return false;
+        }
+
+    // update file
+    }else{
+
+        char id[ID3V2_TAG_ID_SIZE] = {0};
+        bool hasTag = false;
+        long fileSize = 0;
+        bool prepend = 0;
+        uint8_t *tmp = NULL;
+        uint8_t *upperTmp = NULL;
+        size_t upperBytes = 0;
+        uint32_t oldTagSize = 0;
+
+        // does the tag exist?
+        while(hasTag == false && feof(fp) == 0){
+            
+            upperBytes += fread(id, sizeof(char), ID3V2_TAG_ID_SIZE, fp);
+            hasTag = (memcmp(id, "ID3", ID3V2_TAG_ID_SIZE) != 0) ? false : true;
+            
+        }
+
+        // 1. update flag is set
+        if(hasTag == true && tag->header->extendedHeader != NULL){
+
+            prepend = false;
+            
+            if(tag->header->extendedHeader->update == true){
+                prepend = true;
+            }
+        
+        // 2. a tag exists
+        }else if(hasTag == true){
+            prepend = false;
+
+            // get the tag size
+            fseek(fp, 3, SEEK_CUR); // skips version and flag
+            tmp = malloc(4);
+            fread(tmp, 1, 4, fp);
+            oldTagSize = byteSyncintDecode(btou32(tmp, 4));
+            free(tmp);
+
+        // 3. no tag exists
+        }else{
+            prepend = true;
+        }
+
+        // correct for ID3 tag
+        upperBytes = (upperBytes > ID3V2_TAG_ID_SIZE) ? upperBytes - ID3V2_TAG_ID_SIZE : 0;
+
+        // get file size
+        fseek(fp, 0, SEEK_END);
+        fileSize = ftell(fp);
+        fseek(fp, 0, SEEK_SET);
+
+        // read the file
+        tmp = malloc(fileSize);
+        if(fread(tmp, 1, fileSize, fp) != fileSize){
+            free(tmp);
+            fclose(fp);
+            byteStreamDestroy(stream);
+            return 0;
+        }
+
+        fseek(fp, 0, SEEK_SET);
+
+        if(prepend){
+
+            // write the stream to a file
+            if(fwrite(byteStreamCursor(stream), 1, stream->bufferSize, fp) != stream->bufferSize){
+                free(tmp);
+                fclose(fp);
+                byteStreamDestroy(stream);
+                return 0;
+            }
+
+            // write the existing file data back to the file
+            if(fwrite(tmp, 1, fileSize, fp) != fileSize){
+                free(tmp);
+                fclose(fp);
+                byteStreamDestroy(stream);
+                return 0;
+            }
+
+            free(tmp);
+        }else{
+            
+            uint32_t offset = 10;
+
+            if(id3v2ReadFooterIndicator(tag->header) && tag->header->majorVersion == ID3V2_TAG_VERSION_4){
+                offset += 10;
+            }
+
+            if(tag->header->extendedHeader != NULL){
+                if(tag->header->extendedHeader->padding > 0){
+                    offset += tag->header->extendedHeader->padding;
+                }
+            }
+
+            // prepend data above the tag
+            if(upperBytes > 0){
+                
+                upperTmp = calloc(sizeof(char), upperBytes);
+                
+                if(fread(upperTmp, sizeof(char), upperBytes, fp) != upperBytes){
+                    free(upperTmp);
+                    free(tmp);
+                    fclose(fp);
+                    byteStreamDestroy(stream);
+                    return false;
+                }
+                free(upperTmp);
+
+                fseek(fp, 0, SEEK_SET);
+            }
+
+            // write the stream to a file
+            if(fwrite(byteStreamCursor(stream), 1, stream->bufferSize, fp) != stream->bufferSize){
+                free(tmp);
+                fclose(fp);
+                byteStreamDestroy(stream);
+                return 0;
+            }
+
+            // no need to read the old tag
+            fileSize = fileSize - (oldTagSize + offset) - upperBytes;
+
+            if(fwrite(tmp + upperBytes + oldTagSize + offset, 1, fileSize, fp)){
+                free(tmp);
+                fclose(fp);
+                byteStreamDestroy(stream);
+                return 0;
+            }
+
+            free(tmp);
+        }
+    }
+
+    fclose(fp);
+    byteStreamDestroy(stream);
+    return true;
 }

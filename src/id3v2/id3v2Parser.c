@@ -98,7 +98,7 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
         innerStream = byteStreamCreate(byteStreamCursor(stream), hSize - offset);
         stream->cursor = resetIndex;
     }
-    byteStreamPrintf("%x",innerStream);
+
     switch(version){
         case ID3V2_TAG_VERSION_3:
 
@@ -151,7 +151,7 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
             if(!(byteStreamSeek(innerStream, 1, SEEK_CUR))){
                 break;
             }
-byteStreamPrintf("%x",innerStream);
+
             // read crc
             if(hasCrc){
                 if(!(byteStreamRead(innerStream, (uint8_t *)crcBytes, 5))){
@@ -161,7 +161,7 @@ byteStreamPrintf("%x",innerStream);
                 crc = byteSyncintDecode(btoi(crcBytes, 5));
 
             }
-byteStreamPrintf("%x",innerStream);
+
             // read restrictions
             if(hasRestrictions){
     
@@ -182,7 +182,7 @@ byteStreamPrintf("%x",innerStream);
                     break;
                 }            
             }
-byteStreamPrintf("%x",innerStream);
+
             break;
 
         // no support
@@ -198,7 +198,7 @@ byteStreamPrintf("%x",innerStream);
     if(innerStream != NULL){
         byteStreamDestroy(innerStream);
     }
-    printf("\t[*] walk = %d\n", walk);
+
     return walk; 
 }
 
@@ -891,14 +891,10 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
         // shorten to exclude none tag data
         byteStreamResize(stream, tagSize + read);
 
-        printf("tagSize = %d\n", tagSize);
         if(id3v2ReadUnsynchronisationIndicator(header) == 1){
-            printf("[*] Unsynchronisation indicator found\n");
             size_t readCount = 0;
             tagSize = tagSize / 2; // format is $xx $00 ...
             while(readCount < tagSize){
-                
-                printf("is %ld < %ld\n", readCount, tagSize);
 
                 byteStreamSeek(stream, 1, SEEK_CUR);
                 if(!byteStreamDeleteCh(stream)){
