@@ -1,6 +1,11 @@
 /**
 
 @mainpage
-
-placeholder
+ID3dev is a versatile library crafted to manage various ID3 versions and standards, encompassing ID3v1, ID3v1.1, ID3v2.2, ID3v2.3, and ID3v2.4. 
+Its objective is to integrate all features outlined in the documentation of each version while upholding adaptability. Moreover, ID3dev provides 
+comprehensive programmability, empowering users to introduce custom frames via contexts. This adaptability extends to ID3dev's capacity to 
+generate binary tags, produce JSON output, and efficiently parse data. While this library can be compiled via GCC, Clang, and MinGW, MSCV has not 
+been fully tested and is not guaranteed to work. The modules LinkedListLib, HashTableLib, and ByteStream are essential for proper functionality 
+and have been tailored specifically for this project. Additionally, cmocka, valgrind (WSL, Linux) or leak (Mac OS) are necessary for tests to 
+compile and function accurately.
 */

@@ -4,5 +4,16 @@ var searchData=
   ['id3v1_2eh_1',['id3v1.h',['../id3v1_8h.html',1,'']]],
   ['id3v1parser_2ec_2',['id3v1Parser.c',['../id3v1_parser_8c.html',1,'']]],
   ['id3v1parser_2eh_3',['id3v1Parser.h',['../id3v1_parser_8h.html',1,'']]],
-  ['id3v1types_2eh_4',['id3v1Types.h',['../id3v1_types_8h.html',1,'']]]
+  ['id3v1types_2eh_4',['id3v1Types.h',['../id3v1_types_8h.html',1,'']]],
+  ['id3v2_2ec_5',['id3v2.c',['../id3v2_8c.html',1,'']]],
+  ['id3v2_2eh_6',['id3v2.h',['../id3v2_8h.html',1,'']]],
+  ['id3v2context_2ec_7',['id3v2Context.c',['../id3v2_context_8c.html',1,'']]],
+  ['id3v2context_2eh_8',['id3v2Context.h',['../id3v2_context_8h.html',1,'']]],
+  ['id3v2frame_2ec_9',['id3v2Frame.c',['../id3v2_frame_8c.html',1,'']]],
+  ['id3v2frame_2eh_10',['id3v2Frame.h',['../id3v2_frame_8h.html',1,'']]],
+  ['id3v2parser_2ec_11',['id3v2Parser.c',['../id3v2_parser_8c.html',1,'']]],
+  ['id3v2parser_2eh_12',['id3v2Parser.h',['../id3v2_parser_8h.html',1,'']]],
+  ['id3v2tagidentity_2ec_13',['id3v2TagIdentity.c',['../id3v2_tag_identity_8c.html',1,'']]],
+  ['id3v2tagidentity_2eh_14',['id3v2TagIdentity.h',['../id3v2_tag_identity_8h.html',1,'']]],
+  ['id3v2types_2eh_15',['id3v2Types.h',['../id3v2_types_8h.html',1,'']]]
 ];
