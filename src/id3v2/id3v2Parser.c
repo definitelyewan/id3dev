@@ -467,9 +467,10 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
     }
 
     *frameHeader = id3v2CreateFrameHeader(id, tagAlter, fileAlter, readOnly, unsync, decompressionSize, encryptionSymbol, groupSymbol);
-    *frameSize = tSize - flagOffset;
+    *frameSize = tSize;
     walk = stream->cursor - resetIndex;
     stream->cursor = resetIndex;
+    //printf("[*] frameSize = %zu, walk = %zu stream->cursor = %zu flagOffset = %d\n", *frameSize, walk, stream->cursor, flagOffset);
     return walk;
 }
 
@@ -537,6 +538,45 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
     stream->cursor = resetIndex;
 
     entries = listCreate(id3v2PrintContentEntry, id3v2DeleteContentEntry, id3v2CompareContentEntry, id3v2CopyContentEntry);
+
+
+    // is a frame compressed or encryped?
+    // if so a generic context will be used meaning its not up to me to decompress or unecrypt + if its a text frame none
+    // of the reads or writes will work until someone reparses the data after its changed.
+    if(header->encryptionSymbol > 0 || header->decompressionSize > 0){
+        
+        void * data = NULL;
+        size_t dataSize = 0;
+        List *gContext = id3v2CreateGenericFrameContext();
+        Id3v2ContentContext *cc = (Id3v2ContentContext *) gContext->head->data;
+
+        if(cc->min == cc->max){
+            dataSize = cc->min;
+        }else if(cc->min > cc->max){// no trust
+            dataSize = cc->min;
+        }else{
+            dataSize = cc->max;
+        }
+        
+        if(dataSize > expectedContentSize){
+            dataSize = expectedContentSize;
+        }
+        
+        data = malloc(dataSize);
+
+        if(!byteStreamRead(innerSream, (uint8_t *)data, dataSize)){
+            memset(data, 0, dataSize);
+        }
+
+        listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
+        free(data);
+
+        walk += innerSream->cursor;
+        *frame = id3v2CreateFrame(header, gContext, entries);
+        byteStreamDestroy(innerSream);
+        return walk;
+    }
+
     iter = listCreateIterator(context);
 
     while((contextData = listIteratorNext(&iter)) != NULL){

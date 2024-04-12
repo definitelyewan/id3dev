@@ -93,17 +93,14 @@ bool id3v2CompareTag(Id3v2Tag *tag1, Id3v2Tag *tag2){
     // check header
 
     if(tag1->header->majorVersion != tag2->header->majorVersion){
-        printf("[*]major version mismatch\n");
         return false;
     }
 
     if(tag1->header->minorVersion != tag2->header->minorVersion){
-        printf("[*]minor version mismatch\n");
         return false;
     }
 
     if(tag1->header->flags != tag2->header->flags){
-        printf("[*]flags mismatch\n");
         return false;
     }
 
@@ -111,27 +108,22 @@ bool id3v2CompareTag(Id3v2Tag *tag1, Id3v2Tag *tag2){
 
     if(tag1->header->extendedHeader != NULL && tag2->header->extendedHeader != NULL){
         if(tag1->header->extendedHeader->padding != tag2->header->extendedHeader->padding){
-            printf("[*]padding mismatch\n");
             return false;
         }
 
         if(tag1->header->extendedHeader->crc != tag2->header->extendedHeader->crc){
-            printf("[*]crc mismatch\n");
             return false;
         }
 
         if(tag1->header->extendedHeader->update != tag2->header->extendedHeader->update){
-            printf("[*]update mismatch\n");
             return false;
         }
 
         if(tag1->header->extendedHeader->tagRestrictions != tag2->header->extendedHeader->tagRestrictions){
-            printf("[*]tag restrictions mismatch %d %d\n", tag1->header->extendedHeader->tagRestrictions, tag2->header->extendedHeader->tagRestrictions);
             return false;
         }
 
         if(tag1->header->extendedHeader->restrictions != tag2->header->extendedHeader->restrictions){
-            printf("[*]restrictions mismatch\n");
             return false;
         }
 

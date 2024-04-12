@@ -1357,7 +1357,6 @@ static void id3v2WriteTagToFile_v4OverwriteNoPictures(void **state){
     FILE *fp = NULL;
     size_t sz = 0;
     uint8_t *data = NULL;
-    Id3v2Frame *f = NULL;
 
     assert_true(id3v2RemoveFrameByID("APIC", tag));
     assert_true(id3v2RemoveFrameByID("APIC", tag));
