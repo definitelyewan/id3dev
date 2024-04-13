@@ -38,13 +38,13 @@ set(ID3V2_SRC
 
 
 
-set(ID3DEV_HEADERS "${ID3V1_HEADERS}" "${ID3V2_HEADERS}")
-set(ID3DEV_SRC "${ID3V1_SRC}" "${ID3V2_SRC}")
+set(ID3DEV_HEADERS "${ID3V1_HEADERS}" "${ID3V2_HEADERS}" "${CMAKE_CURRENT_SOURCE_DIR}/include/id3dev.h")
+set(ID3DEV_SRC "${ID3V1_SRC}" "${ID3V2_SRC}" "${CMAKE_CURRENT_SOURCE_DIR}/src/id3dev.c")
 
 
 
 if(DEBUG_ID3_SYMBOLS)
-  if (MSVC)
+  if(MSVC)
     add_compile_options("/W4")
   else()
     add_compile_options("-Wall")
@@ -59,7 +59,7 @@ target_link_libraries(Id3dev LinkedList) #linked list library
 target_link_libraries(Id3dev HashTableLib) #hash table library
 target_link_libraries(Id3dev m) #math library
 
-target_include_directories(Id3dev PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v1" "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2")
+target_include_directories(Id3dev PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set_target_properties(Id3dev PROPERTIES C_STANDARD 99)
 
 

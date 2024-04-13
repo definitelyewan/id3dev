@@ -42,6 +42,8 @@ update.message("Compiling id3v2_frame_test program")
 compile_code("id3v2_frame_test")
 update.message("Compiling id3v2_test program")
 compile_code("id3v2_test")
+update.message("Compiling id3dev_test program")
+compile_code("id3dev_test")
 # call test execs
 try:
     if platform == "linux" or platform == "linux2":
@@ -53,6 +55,7 @@ try:
             subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v2_parser_test"])
             subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v2_frame_test"])
             subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3v2_test"])
+            subprocess.call(["valgrind", "--leak-check=full", "--show-leak-kinds=all", "./id3dev_test"])
         else:
             subprocess.call(["./id3v1_test"])
             subprocess.call(["./id3v2_tag_identity_test"])
@@ -60,6 +63,7 @@ try:
             subprocess.call(["./id3v2_parser_test"])
             subprocess.call(["./id3v2_frame_test"])
             subprocess.call(["./id3v2_test"])
+            subprocess.call(["./id3dev_test"])
         
     elif platform == "darwin":
 
@@ -79,6 +83,7 @@ try:
             subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_parser_test"])
             subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_frame_test"])
             subprocess.call(["leaks", "--atExit", "--list", "--", "./id3v2_test"])
+            subprocess.call(["leaks", "--atExit", "--list", "--", "./id3dev_test"])
 
             if(malloc_stack_logging == False):
                 os.environ["MallocStackLogging"] = "0"
@@ -89,6 +94,7 @@ try:
             subprocess.call(["./id3v2_parser_test"])
             subprocess.call(["./id3v2_frame_test"])
             subprocess.call(["./id3v2_test"])
+            subprocess.call(["./id3dev_test"])
 
 
     elif platform == "win32":
@@ -98,6 +104,7 @@ try:
         subprocess.call(["id3v2_parser_test.exe"])
         subprocess.call(["id3v2_frame_test.exe"])
         subprocess.call(["id3v2_test.exe"])
+        subprocess.call(["id3dev_test.exe"])
         
 except OSError as e:
     if e.errno == errno.ENOENT:

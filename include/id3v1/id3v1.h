@@ -17,7 +17,6 @@ extern "C"{
 #endif
 
 #include "id3v1Types.h"
-#include "id3v1Parser.h"
 
 Id3v1Tag *id3v1TagFromFile(const char *filePath);
 Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy);

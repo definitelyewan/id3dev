@@ -17,7 +17,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include "id3v1.h"
+#include "id3v1/id3v1.h"
+#include "id3v1/id3v1Parser.h"
 #include "byteInt.h"
 
 void Id3v1TagPrintf(Id3v1Tag *tag){

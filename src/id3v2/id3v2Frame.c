@@ -13,8 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include "id3v2Frame.h"
-#include "id3v2Context.h"
+#include "id3v2/id3v2Frame.h"
+#include "id3v2/id3v2Context.h"
 #include "byteInt.h"
 #include "byteUnicode.h"
 #include "byteStream.h"

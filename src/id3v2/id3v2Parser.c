@@ -13,10 +13,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include "id3v2Context.h"
-#include "id3v2Frame.h"
-#include "id3v2Parser.h"
-#include "id3v2TagIdentity.h"
+#include "id3v2/id3v2Context.h"
+#include "id3v2/id3v2Frame.h"
+#include "id3v2/id3v2Parser.h"
+#include "id3v2/id3v2TagIdentity.h"
 #include "byteStream.h"
 #include "byteInt.h"
 #include "byteUnicode.h"
@@ -315,7 +315,6 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
     // values for parsing
     uint8_t sizeBytes[ID3V2_FRAME_ID_MAX_SIZE]; 
     uint8_t flagBytes[ID3V2_FRAME_FLAG_SIZE];
-    uint8_t flagOffset = 0;
     size_t resetIndex = 0;
     uint32_t walk = 0;
     
@@ -378,24 +377,18 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
                 if(!(decompressionSize = byteStreamReturnInt(stream))){
                     break;
                 }
-
-                flagOffset += sizeof(uint32_t);
             }
 
             if(readBit(flagBytes[1], 6)){
                 if(!(byteStreamRead(stream, &encryptionSymbol, 1))){
                     break;
                 }
-
-                flagOffset++;
             }
 
             if(readBit(flagBytes[1], 5)){
                 if(!(byteStreamRead(stream, &groupSymbol, 1))){
                     break;
                 }
-
-                flagOffset++;
             }
 
             break;
@@ -435,16 +428,12 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
                 if(!byteStreamRead(stream, &groupSymbol, 1)){
                     break;
                 }
-
-                flagOffset++;
             }
 
             if(readBit(flagBytes[1], 2)){
                 if(!byteStreamRead(stream, &encryptionSymbol, 1)){
                     break;
                 }
-
-                flagOffset++;
             }
 
             if(readBit(flagBytes[1], 1)){
@@ -453,8 +442,6 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
 
             if(readBit(flagBytes[1], 3) || encryptionSymbol || readBit(flagBytes[1], 0)){
                 decompressionSize = byteStreamReturnSyncInt(stream);
-
-                flagOffset += sizeof(uint32_t);
             }
 
             break;
@@ -561,7 +548,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
         if(dataSize > expectedContentSize){
             dataSize = expectedContentSize;
         }
-        
+
         data = malloc(dataSize);
 
         if(!byteStreamRead(innerSream, (uint8_t *)data, dataSize)){

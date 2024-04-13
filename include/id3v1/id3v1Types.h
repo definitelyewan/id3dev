@@ -30,6 +30,9 @@ extern "C" {
 //! Max id3v1 and id3v1.1 tag size
 #define ID3V1_MAX_SIZE 128
 
+//! Major version for ID3v1 or ID3v1.1
+#define ID3V1_TAG_VERSION 1
+
 // https://en.wikipedia.org/wiki/List_of_ID3v1_Genres
 //! All supported genres with winamp extension
 typedef enum _Genre {

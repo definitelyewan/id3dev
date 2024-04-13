@@ -12,7 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "id3v1.h"
+#include "id3v1/id3v1Parser.h"
+#include "id3v1/id3v1.h"
 #include "byteStream.h"
 #include "byteInt.h"
 
