@@ -40,8 +40,10 @@ void id3Destroy(ID3 **toDelete);
 // util functions
 
 bool id3SetPreferedStandard(uint8_t standard);
-ID3 *id3TagFromFile(const char *filename);
-ID3 *id3CopyTag(Id3v2Tag *toCopy);
+uint8_t id3GetPreferedStandard(void);
+
+ID3 *id3FromFile(const char *filePath);
+ID3 *id3Copy(ID3 *toCopy);
 bool id3Compare(ID3 *metadata1, ID3 *metadata2);
 bool id3ConvertTagVersion(uint8_t standard, ID3 *metadata, ID3 **newMetadata); // take the highest version tag and convert that then backport if needed
 

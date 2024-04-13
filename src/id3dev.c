@@ -83,3 +83,39 @@ bool id3SetPreferedStandard(uint8_t standard){
 
     return true;
 }
+
+/**
+ * @brief Returns the current prefered standard
+ * 
+ * @return uint8_t 
+ */
+uint8_t id3GetPreferedStandard(void){
+    return id3PreferedStandard;
+}
+
+
+/**
+ * @brief Reads both ID3v1 and ID3v2 tags located in a provided file. If this function fails an
+ * ID3 strcuture will be returned but one or both versions will be set to NULL.
+ * 
+ * @param filePath 
+ * @return ID3* 
+ */
+ID3 *id3FromFile(const char *filePath){
+    return id3Create(id3v2TagFromFile(filePath), id3v1TagFromFile(filePath));
+}
+
+/**
+ * @brief Returns a copy of the given ID3 structure. If NUll is passed NULL is returned.
+ * 
+ * @param toCopy 
+ * @return ID3* 
+ */
+ID3 *id3Copy(ID3 *toCopy){
+
+    if(toCopy == NULL){
+        return NULL;
+    }
+
+    return id3Create(id3v2CopyTag(toCopy->id3v2), id3v1CopyTag(toCopy->id3v1));
+}
