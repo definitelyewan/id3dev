@@ -10,6 +10,7 @@
 #include "id3dev.h"
 #include "id3v2/id3v2.h"
 #include "id3v1/id3v1.h"
+#include "id3v1/id3v1Parser.h"
 
 static void id3CreateAndDestroy_allInOne(void **state){
 
@@ -73,6 +74,100 @@ static void id3FromFile_noV2(void **state){
     id3Destroy(&metadata);
 }
 
+static void id3Copy_fullTags(void **state){
+
+    ID3 *metadata = id3FromFile("assets/sorry4dying.mp3");
+    ID3 *metadata2 = NULL;
+
+    metadata2 = id3Copy(metadata);
+
+    assert_non_null(metadata2);
+    assert_true(id3v1CompareTag(metadata->id3v1, metadata2->id3v1));
+    assert_true(id3v2CompareTag(metadata->id3v2, metadata2->id3v2));
+    
+    id3Destroy(&metadata2);
+    id3Destroy(&metadata);
+}
+
+static void id3Copy_noId3v2(void **state){
+
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
+    ID3 *metadata2 = NULL;
+
+    metadata2 = id3Copy(metadata);
+
+    assert_non_null(metadata2);
+    assert_true(id3v1CompareTag(metadata->id3v1, metadata2->id3v1));
+    assert_false(id3v2CompareTag(metadata->id3v2, metadata2->id3v2));
+    
+    id3Destroy(&metadata2);
+    id3Destroy(&metadata);
+}
+
+static void id3Compare_sameTags(void **state){
+    
+    ID3 *metadata = id3FromFile("assets/sorry4dying.mp3");
+    ID3 *metadata2 = id3FromFile("assets/sorry4dying.mp3");
+
+    assert_true(id3Compare(metadata, metadata2));
+
+    id3Destroy(&metadata2);
+    id3Destroy(&metadata);
+}
+
+static void id3Compare_diffTags(void **state){
+    
+    ID3 *metadata = id3FromFile("assets/sorry4dying.mp3");
+    ID3 *metadata2 = id3FromFile("assets/OnGP.mp3");
+
+    assert_false(id3Compare(metadata, metadata2));
+
+    id3Destroy(&metadata2);
+    id3Destroy(&metadata);
+}
+
+static void id3Compare_nullId3v1Tag(void **state){
+    
+    ID3 *metadata = id3FromFile("assets/sorry4dying.mp3");
+    ID3 *metadata2 = id3FromFile("assets/OnGP.mp3");
+
+    id3v1DestroyTag(&metadata2->id3v1);
+
+
+    assert_false(id3Compare(metadata, metadata2));
+
+    id3Destroy(&metadata2);
+    id3Destroy(&metadata);
+}
+
+static void id3Compare_bothNullId3v1Tag(void **state){
+    
+    ID3 *metadata = id3FromFile("assets/sorry4dying.mp3");
+    ID3 *metadata2 = id3FromFile("assets/sorry4dying.mp3");
+
+    id3v1DestroyTag(&metadata->id3v1);
+    id3v1DestroyTag(&metadata2->id3v1);
+
+    assert_true(id3Compare(metadata, metadata2));
+
+    id3Destroy(&metadata2);
+    id3Destroy(&metadata);
+}
+
+static void id3Compare_bothNullId3v2Tag(void **state){
+    
+    ID3 *metadata = id3FromFile("assets/sorry4dying.mp3");
+    ID3 *metadata2 = id3FromFile("assets/sorry4dying.mp3");
+
+    id3v2DestroyTag(&metadata->id3v2);
+    id3v2DestroyTag(&metadata2->id3v2);
+
+    assert_true(id3Compare(metadata, metadata2));
+
+    id3Destroy(&metadata2);
+    id3Destroy(&metadata);
+}
+
 
 int main(){
     
@@ -87,7 +182,18 @@ int main(){
 
         // id3TagFromFile
         cmocka_unit_test(id3FromFile_badPath),
-        cmocka_unit_test(id3FromFile_noV2)
+        cmocka_unit_test(id3FromFile_noV2),
+
+        // id3Copy
+        cmocka_unit_test(id3Copy_fullTags),
+        cmocka_unit_test(id3Copy_noId3v2),
+
+        // id3Compare
+        cmocka_unit_test(id3Compare_sameTags),
+        cmocka_unit_test(id3Compare_diffTags),
+        cmocka_unit_test(id3Compare_nullId3v1Tag),
+        cmocka_unit_test(id3Compare_bothNullId3v1Tag),
+        cmocka_unit_test(id3Compare_bothNullId3v2Tag)
 
     };
 

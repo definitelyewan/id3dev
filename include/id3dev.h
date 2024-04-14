@@ -45,7 +45,9 @@ uint8_t id3GetPreferedStandard(void);
 ID3 *id3FromFile(const char *filePath);
 ID3 *id3Copy(ID3 *toCopy);
 bool id3Compare(ID3 *metadata1, ID3 *metadata2);
-bool id3ConvertTagVersion(uint8_t standard, ID3 *metadata, ID3 **newMetadata); // take the highest version tag and convert that then backport if needed
+bool id3ChangeId3v2Version(uint8_t version, ID3 *metadata);
+bool id3ConvertId3v1ToId3v2(ID3 *metadata);
+bool id3ConvertId3v2ToId3v1(ID3 *metadata);
 
 
 // compatability functions a.k.a getters
