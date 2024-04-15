@@ -168,6 +168,95 @@ static void id3Compare_bothNullId3v2Tag(void **state){
     id3Destroy(&metadata);
 }
 
+static void id3ConvertId3v1ToId3v2_nullArg(void **state){
+    assert_false(id3ConvertId3v1ToId3v2(NULL));
+}
+
+static void id3ConvertId3v1ToId3v2_noId3v2(void **state){
+    
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
+    char *str = 0;
+    
+
+    assert_true(id3ConvertId3v1ToId3v2(metadata));
+    assert_non_null(metadata->id3v2);
+
+    str = id3v2ReadTitle(metadata->id3v2);
+    assert_string_equal(str, "Beetlebum");
+    free(str);
+
+    str = id3v2ReadAlbum(metadata->id3v2);
+    assert_string_equal(str, "Blur");
+    free(str);
+
+    str = id3v2ReadArtist(metadata->id3v2);
+    assert_string_equal(str, "Blur");
+    free(str);
+
+    str = id3v2ReadComment(metadata->id3v2);
+    assert_string_equal(str, "test");
+    free(str);
+
+    str = id3v2ReadGenre(metadata->id3v2);
+    assert_string_equal(str, "Rock");
+    free(str);
+
+    str = id3v2ReadTrack(metadata->id3v2);
+    assert_null(str);
+
+    str = id3v2ReadYear(metadata->id3v2);
+    assert_string_equal(str, "1997");
+    free(str);
+
+    id3Destroy(&metadata);
+}
+
+static void id3ConvertId3v1ToId3v2_presentId3v2(void **state){
+    
+    ID3 *metadata = id3FromFile("assets/sorry4dying.mp3");
+    char *str = 0;
+
+    id3v2WriteAlbum("SCRAPYARD", metadata->id3v2);
+    id3v2WriteYear("2024", metadata->id3v2);
+    id3v2WriteTitle("Texas Blue (feat. Kevin Abstract)", metadata->id3v2);
+
+    assert_true(id3ConvertId3v1ToId3v2(metadata));
+    assert_non_null(metadata->id3v2);
+    
+    // str = id3v2ReadTitle(metadata->id3v2);
+    // assert_string_equal(str, "sorry4dying");
+    // free(str);
+
+    // str = id3v2ReadAlbum(metadata->id3v2);
+    // assert_string_equal(str, "I Didn't Mean To Haunt You");
+    // free(str);
+
+    // str = id3v2ReadArtist(metadata->id3v2);
+    // assert_string_equal(str, "Quadeca");
+    // free(str);
+
+    // str = id3v2ReadComment(metadata->id3v2);
+    // assert_null(str);
+    // free(str);
+
+    // str = id3v2ReadGenre(metadata->id3v2);
+    // assert_null(str);
+    // free(str);
+
+    str = id3v2ReadTrack(metadata->id3v2);
+    //assert_string_equal(str, "1");
+    free(str);
+
+    // str = id3v2ReadYear(metadata->id3v2);
+    // assert_string_equal(str, "2022");
+    // free(str);
+
+    assert_null(id3v2ReadFrameByID("TXXX", metadata->id3v2));
+
+    id3Destroy(&metadata);
+}
+
+
 
 int main(){
     
@@ -193,7 +282,12 @@ int main(){
         cmocka_unit_test(id3Compare_diffTags),
         cmocka_unit_test(id3Compare_nullId3v1Tag),
         cmocka_unit_test(id3Compare_bothNullId3v1Tag),
-        cmocka_unit_test(id3Compare_bothNullId3v2Tag)
+        cmocka_unit_test(id3Compare_bothNullId3v2Tag),
+
+        // id3ConvertId3v1ToId3v2
+        cmocka_unit_test(id3ConvertId3v1ToId3v2_nullArg),
+        cmocka_unit_test(id3ConvertId3v1ToId3v2_noId3v2),
+        cmocka_unit_test(id3ConvertId3v1ToId3v2_presentId3v2)
 
     };
 

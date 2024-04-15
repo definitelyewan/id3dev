@@ -122,7 +122,7 @@ ID3 *id3Copy(ID3 *toCopy){
 }
 
 /**
- * @brief Compares tow ID3 structures. If they are the same this function will return true otherwise it will return false.
+ * @brief Compares two ID3 structures. If they are the same this function will return true otherwise it will return false.
  * 
  * @param metadata1 
  * @param metadata2 
@@ -150,7 +150,7 @@ bool id3Compare(ID3 *metadata1, ID3 *metadata2){
 
     }
 
-    if(!v2 && (v1 && metadata1->id3v2 == NULL && metadata2->id3v2 == NULL)){
+    if(v2 == false && (v1 == true && metadata1->id3v2 == NULL && metadata2->id3v2 == NULL)){
         return true;
 
     }
@@ -159,117 +159,151 @@ bool id3Compare(ID3 *metadata1, ID3 *metadata2){
 }
 
 
-bool id3ChangeId3v2Version(uint8_t version, ID3 *metadata){
-
-    if(metadata == NULL || version > ID3V2_TAG_VERSION_4){
+/**
+ * @brief Converts the stored ID3v1 tag to an ID3v2 tag to be held in the ID3 structre. However, if there
+ * there is a stored ID3v2 tag it will be removed and replaced. On success this function will return true,
+ * otherwise it will return false. 
+ * 
+ * @param metadata 
+ * @return true 
+ * @return false 
+ */
+bool id3ConvertId3v1ToId3v2(ID3 *metadata){
+    printf("[*] Entered id3ConvertId3v1ToId3v2\n");
+    if(metadata == NULL){
         return false;
     }
 
-    if(metadata->id3v2 == NULL){
+    if(metadata->id3v1 == NULL){
         return false;
-
     }
 
-    Id3v2Frame *f = NULL;
-    ListIter i = {0};
-    List *newFrames = NULL;
-    uint8_t convi = 0;
+    printf("[*] Args are valid\n");
 
-    newFrames = listCreate(id3v2PrintFrame, id3v2DeleteFrame, id3v2CompareFrame, id3v2CopyFrame);
+    Id3v2Tag *newTag = NULL;
+    Id3v2TagHeader *header = NULL;
+    List *frames = NULL;
+    char *str = NULL;
+    int size = 0;
+    int ret = 0;
+
+    switch(id3GetPreferedStandard()){
+        case ID3V2_TAG_VERSION_2:
+            header = id3v2CreateTagHeader(ID3V2_TAG_VERSION_2, 0, 0, NULL);
+            break;
+        case ID3V2_TAG_VERSION_3:
+            header = id3v2CreateTagHeader(ID3V2_TAG_VERSION_3, 0, 0, NULL);
+            break;
+        case ID3V2_TAG_VERSION_4:
+            header = id3v2CreateTagHeader(ID3V2_TAG_VERSION_4, 0, 0, NULL);
+            break;
+        default:
+            return false;
+    }
+
+    printf("[*] Created a header\n");
+
+    frames = listCreate(id3v2PrintFrame, id3v2DeleteFrame, id3v2CompareFrame, id3v2CopyFrame);
+    newTag = id3v2CreateTag(header, frames);
 
 
-    // what am i converting from?
+    printf("[*] Set up tag\n");
 
-    if(version == metadata->id3v2->header->majorVersion){
-        return true;
+    if(metadata->id3v1->title[0] != 0x00){
+        if(!id3v2WriteTitle((char *)metadata->id3v1->title, newTag)){
+            id3v2DestroyTag(&newTag);
+            listFree(frames);
+            return false;
+        }
+        printf("[*] Wrote Title\n");
     }
 
     
 
+    if(metadata->id3v1->artist[0] != 0x00){
+        if(!id3v2WriteArtist((char *)metadata->id3v1->artist, newTag)){
+            id3v2DestroyTag(&newTag);
+            listFree(frames);
+            return false;
+        }
+        printf("[*] Wrote Artist\n");
+    }
 
+    
 
+    if(metadata->id3v1->albumTitle[0] != 0x00){
+        if(!id3v2WriteAlbum((char *)metadata->id3v1->albumTitle, newTag)){
+            id3v2DestroyTag(&newTag);
+            listFree(frames);
+            return false;
+        }
+        printf("[*] Wrote Album\n");
+    }
+    
+    
 
-    // switch(version){
-    //     case ID3V2_TAG_VERSION_2:
-    //         i = id3v2CreateFrameTraverser(metadata->id3v2);
+    if(metadata->id3v1->year != 0){
+        size = snprintf(NULL, 0, "%d", metadata->id3v1->year);
+        str = calloc(size + 1, sizeof(char));
+        snprintf(str, size + 1, "%d", metadata->id3v1->year);
+        if(!id3v2WriteYear((char *)str, newTag)){
+            id3v2DestroyTag(&newTag);
+            listFree(frames);
+            free(str);
+            return false;
+        }
+        free(str);
+        printf("[*] Wrote Year\n");
+    }
 
-    //         while((f = id3v2FrameTraverse(&i)) != NULL){
-    //             if(memcmp("BUF\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("CNT\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("COM\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("CRA\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("CRM\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("ETC\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("EQU\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("GEO\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("IPL\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("LNK\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("MCI\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("MLL\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("PIC\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("POP\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("REV\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("RVA\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("SLT\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("STC\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TAL\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TBP\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TCM\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TCO\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TCR\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TDA\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TDY\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TEN\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TFT\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TIM\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TKE\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TLA\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TLE\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TMT\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TOA\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TOF\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TOL\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TOR\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TOT\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TP1\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TP2\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TP3\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TP4\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TPA\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TPB\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TRC\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TRD\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TRK\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TSI\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TSS\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TT1\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TT2\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TT3\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TXT\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TXX\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("TYE\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("UFI\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("ULT\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("WAF\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("WAR\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("WAS\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("WCM\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("WCP\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("WPB\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //             if(memcmp("WXX\0", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){}
-    //         }
+    
 
+    if(metadata->id3v1->track != 0){
+        size = snprintf(NULL, 0, "%d", metadata->id3v1->track);
+        str = calloc(size + 1, sizeof(char));
+        snprintf(str, size + 1, "%d", metadata->id3v1->track);
 
-    //         break;
-    //     case ID3V2_TAG_VERSION_3:
-    //         break;
-    //     case ID3V2_TAG_VERSION_4:
-    //         break;
-        
-    //     default:
-    //         return false;
-    // }
+        printf("[*] Track: %s\n", str);
 
+        if(!id3v2WriteTrack((char *)str, newTag)){
+            id3v2DestroyTag(&newTag);
+            listFree(frames);
+            free(str);
+            return false;
+        }
+        free(str);
+        printf("[*] Wrote Track\n");
+    }
+
+    
+    printf("[*] Genre: %d\n", metadata->id3v1->genre);
+    if(metadata->id3v1->genre < PSYBIENT_GENRE){
+        if(!id3v2WriteGenre(id3v1GenreFromTable(metadata->id3v1->genre), newTag)){
+            id3v2DestroyTag(&newTag);
+            listFree(frames);
+            return false;
+        }
+        printf("[*] Wrote Genre\n");
+    }
+
+    
+
+    if(metadata->id3v1->comment[0] != 0x00){
+        if(!id3v2WriteComment((char *)metadata->id3v1->comment, newTag)){
+            id3v2DestroyTag(&newTag);
+            listFree(frames);
+            return false;
+        }
+        printf("[*] Wrote Comment\n");
+    }
+
+    
+
+    if(metadata->id3v2 != NULL){
+        id3v2DestroyTag(&(metadata->id3v2));
+    }
+
+    metadata->id3v2 = newTag;
+    
     return true;
 }
-

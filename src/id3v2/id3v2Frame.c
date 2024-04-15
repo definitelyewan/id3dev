@@ -563,6 +563,7 @@ void *id3v2ReadFrameEntry(ListIter *traverser, size_t *dataSize){
  * @return char* 
  */
 char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
+    printf("\t\t[+] Entered id3v2ReadFrameEntryAsChar\n");
     unsigned char *tmp = NULL;
     unsigned char *outString = NULL;
     unsigned char encoding = 0;
@@ -604,9 +605,15 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
     if(byteIsUtf8(tmp) && encoding == 0){
         encoding = BYTE_ISO_8859_1;
     }
-
+    printf("\t\t[+] Detected encoding as %d\n", encoding);
     // convert to UTF8
     convi = byteConvertTextFormat(tmp, encoding, *dataSize + (BYTE_PADDING * 2), &outString, BYTE_UTF8, &outLen);
+
+    printf("\t\t[+] Converted to UTF8 [");
+    for(size_t i = 0; i < outLen; i++){
+        printf("%x,", outString[i]);
+    }
+    printf("]\n");
 
     if(!convi && outLen == 0){
         free(tmp);

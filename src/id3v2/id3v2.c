@@ -230,7 +230,7 @@ int id3v2RemoveFrameByID(const char *id, Id3v2Tag *tag){
  * @return int 
  */
 int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t encoding, const char *string, Id3v2Tag *tag){
-
+    printf("\t\t\t[!] Entered id3v2InsertTextFrame\n");
     if(id == NULL || string == NULL || tag == NULL || encoding > BYTE_UTF8){
         return false;
     }
@@ -238,6 +238,8 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
     if(strlen(string) == 0){
         return false;
     }
+
+    printf("\t\t\t[!] Args are valid\n");
 
     Id3v2FrameHeader *header = NULL;
     Id3v2Frame *f = NULL;
@@ -258,23 +260,48 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
     convi = byteConvertTextFormat((unsigned char *)string, BYTE_UTF8, strlen(string), &usableString, encoding, &outLen);
     
     if(convi == false || outLen == 0 || usableString == NULL){
+        printf("\t\t\t[!] Conversion faild\n");
         id3v2DestroyFrame(&f);
         return false;
     }
 
     // already converted
     if(convi == true && outLen == 0){
+        printf("\t\t\t[!] No need to convert\n");
         usableString = (uint8_t *) string;
         outLen = strlen(string);
     }
 
+    printf("\t\t\t[!] Converted string = [");
+    for(size_t i = 0; i < outLen; i++){
+        printf("%x, ", usableString[i]);
+
+    }
+    printf("]\n");
+
+
     // reenable utf16 len support
     bytePrependBOM(encoding, &usableString, &outLen);
+
+    printf("\t\t\t[!] Prepend BOM = [");
+    for(size_t i = 0; i < outLen; i++){
+        printf("%x, ", usableString[i]);
+
+    }
+    printf("]\n");
+
 
     if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
         usableString = realloc(usableString, outLen + BYTE_PADDING);
         memset(usableString + outLen, 0, BYTE_PADDING);
     }
+
+    printf("\t\t\t[!] added padding to str (no change should be visible) = [");
+    for(size_t i = 0; i < outLen; i++){
+        printf("%x, ", usableString[i]);
+
+    }
+    printf("]\n");
 
     // add encoded text
     entry = id3v2CreateContentEntry((void *)usableString, outLen);
@@ -296,7 +323,7 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
  * @return char* 
  */
 char *id3v2ReadTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag *tag){
-    
+    printf("\t[-] Entered id3v2ReadTextFrameContent\n");
     Id3v2Frame *frame = id3v2ReadFrameByID(id, tag);
     ListIter entries = {0};
     ListIter context = {0};
@@ -337,11 +364,20 @@ char *id3v2ReadTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag
         }
     }
 
+    printf("\t[-] Args are valid\n");
+
     // read text frame
     entries = id3v2CreateFrameEntryTraverser(frame);
     id3v2ReadFrameEntryAsU8(&entries);
 
     ret = id3v2ReadFrameEntryAsChar(&entries, &dataSize);
+
+    printf("\t[-] returned string = [");
+    for(size_t i = 0; i < dataSize; i++){
+        printf("%x,", ret[i]);
+    }
+    printf("]\n");
+
     id3v2DestroyFrame(&frame);
 
     return ret;
@@ -536,12 +572,13 @@ char *id3v2ReadGenre(Id3v2Tag *tag){
  * @return char* 
  */
 char *id3v2ReadTrack(Id3v2Tag *tag){
-
+    printf("[*] Entered id3v2ReadTrack\n");
     if(tag == NULL){
         return NULL;
 
     }
 
+    printf("[*] Args are valid\n");
     char *str = NULL;
 
     switch(tag->header->majorVersion){
@@ -810,7 +847,7 @@ uint8_t *id3v2ReadPicture(uint8_t type, Id3v2Tag *tag, size_t *dataSize){
  * @return int 
  */
 int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const char *string, Id3v2Tag *tag){
-
+    printf("\t\t[+] Entered id3v2WriteTextFrameContent\n");
     if(id == NULL || string == NULL || tag == NULL){
         return false;
 
@@ -821,6 +858,8 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
         return false;
 
     }
+
+    printf("\t\t[+] Args are valid\n");
 
     Id3v2Frame *f = NULL;
     ListIter frames = id3v2CreateFrameTraverser(tag);
@@ -850,6 +889,7 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
     }
 
     if(f == NULL){
+        printf("\t\t[+] ID not found so it will be created\n");
         return id3v2InsertTextFrame(id, BYTE_UTF16LE, string, tag);
     }
 
@@ -1081,11 +1121,11 @@ int id3v2WriteGenre(const char *genre, Id3v2Tag *tag){
  * @return int 
  */
 int id3v2WriteTrack(const char *track, Id3v2Tag *tag){
-
+    printf("\t[-] Entered id3v2WriteTrack\n");
     if(track == NULL || tag == NULL){
         return false;
     }
-
+    printf("\t[-] Args are valid\n");
     switch(tag->header->majorVersion){
         case ID3V2_TAG_VERSION_2:
             return id3v2WriteTextFrameContent("TRK", track, tag);
