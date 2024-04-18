@@ -160,16 +160,17 @@ bool id3Compare(ID3 *metadata1, ID3 *metadata2){
 
 
 /**
- * @brief Converts the stored ID3v1 tag to an ID3v2 tag to be held in the ID3 structre. However, if there
- * there is a stored ID3v2 tag it will be removed and replaced. On success this function will return true,
- * otherwise it will return false. 
+ * @brief Converts the stored ID3v1 tag to an ID3v2 tag to be held in the ID3 structre. The prefered standard will
+ * be used to infer what version of ID3v2 is to be used but, if the standard is ID3V1 this function will fail. However, 
+ * if there is a stored ID3v2 tag it will be removed and replaced. On success this function will return true, otherwise 
+ * it will return false. 
  * 
  * @param metadata 
  * @return true 
  * @return false 
  */
 bool id3ConvertId3v1ToId3v2(ID3 *metadata){
-    printf("[*] Entered id3ConvertId3v1ToId3v2\n");
+
     if(metadata == NULL){
         return false;
     }
@@ -178,14 +179,11 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata){
         return false;
     }
 
-    printf("[*] Args are valid\n");
-
     Id3v2Tag *newTag = NULL;
     Id3v2TagHeader *header = NULL;
     List *frames = NULL;
     char *str = NULL;
     int size = 0;
-    int ret = 0;
 
     switch(id3GetPreferedStandard()){
         case ID3V2_TAG_VERSION_2:
@@ -201,13 +199,9 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata){
             return false;
     }
 
-    printf("[*] Created a header\n");
 
     frames = listCreate(id3v2PrintFrame, id3v2DeleteFrame, id3v2CompareFrame, id3v2CopyFrame);
     newTag = id3v2CreateTag(header, frames);
-
-
-    printf("[*] Set up tag\n");
 
     if(metadata->id3v1->title[0] != 0x00){
         if(!id3v2WriteTitle((char *)metadata->id3v1->title, newTag)){
@@ -215,7 +209,6 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata){
             listFree(frames);
             return false;
         }
-        printf("[*] Wrote Title\n");
     }
 
     
@@ -226,7 +219,6 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata){
             listFree(frames);
             return false;
         }
-        printf("[*] Wrote Artist\n");
     }
 
     
@@ -237,7 +229,6 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata){
             listFree(frames);
             return false;
         }
-        printf("[*] Wrote Album\n");
     }
     
     
@@ -253,7 +244,6 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata){
             return false;
         }
         free(str);
-        printf("[*] Wrote Year\n");
     }
 
     
@@ -263,8 +253,6 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata){
         str = calloc(size + 1, sizeof(char));
         snprintf(str, size + 1, "%d", metadata->id3v1->track);
 
-        printf("[*] Track: %s\n", str);
-
         if(!id3v2WriteTrack((char *)str, newTag)){
             id3v2DestroyTag(&newTag);
             listFree(frames);
@@ -272,18 +260,14 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata){
             return false;
         }
         free(str);
-        printf("[*] Wrote Track\n");
     }
 
-    
-    printf("[*] Genre: %d\n", metadata->id3v1->genre);
     if(metadata->id3v1->genre < PSYBIENT_GENRE){
         if(!id3v2WriteGenre(id3v1GenreFromTable(metadata->id3v1->genre), newTag)){
             id3v2DestroyTag(&newTag);
             listFree(frames);
             return false;
         }
-        printf("[*] Wrote Genre\n");
     }
 
     
@@ -294,10 +278,7 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata){
             listFree(frames);
             return false;
         }
-        printf("[*] Wrote Comment\n");
     }
-
-    
 
     if(metadata->id3v2 != NULL){
         id3v2DestroyTag(&(metadata->id3v2));
@@ -306,4 +287,654 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata){
     metadata->id3v2 = newTag;
     
     return true;
+}
+
+
+/**
+ * @brief Converts the stored ID3v2 tag to an ID3v1 tag to be held in the ID3 structre. However, if there
+ * there is a stored ID3v1 tag it will be removed and replaced. On success this function will return true,
+ * otherwise it will return false. 
+ * 
+ * @param metadata 
+ * @return true 
+ * @return false 
+ */
+bool id3ConvertId3v2ToId3v1(ID3 *metadata){
+
+    if(metadata == NULL){
+        return false;
+    }
+
+    if(metadata->id3v2 == NULL){
+        return false;
+    }
+
+    Id3v1Tag *newTag = NULL;
+    char *title = NULL;
+    char *artist = NULL;
+    char *album = NULL;
+    char *year = NULL;
+    char *track = NULL;
+    char *comment = NULL;
+    char *genre = NULL;
+
+    newTag = id3v1CreateTag(NULL, NULL, NULL, 0, 0, NULL, OTHER_GENRE);
+    title = id3v2ReadTitle(metadata->id3v2);
+    artist = id3v2ReadArtist(metadata->id3v2);
+    album = id3v2ReadAlbum(metadata->id3v2);
+    year = id3v2ReadYear(metadata->id3v2);
+    track = id3v2ReadTrack(metadata->id3v2);
+    comment = id3v2ReadComment(metadata->id3v2);
+    genre = id3v2ReadGenre(metadata->id3v2);
+
+    if(title != NULL){
+        id3v1WriteTitle(title, newTag);
+        free(title);
+    }
+
+    if(artist != NULL){
+        id3v1WriteArtist(artist, newTag);
+        free(artist);
+    }
+
+    if(album != NULL){
+        id3v1WriteAlbum(album, newTag);
+        free(album);
+    }
+
+    if(year != NULL){
+        id3v1WriteYear(atoi(year), newTag);
+        free(year);
+    }
+
+    if(track != NULL){
+
+        int i = 0;
+        int offset0 = 0;
+        int convi = 0;
+        char *dec = NULL;
+        char *end = NULL;
+        bool flag = false;
+        
+        while(track[i] != '\0'){
+            if(track[i] >= '0' && track[i] <= '9'){
+                if(!flag && track[i] == '0'){
+                    offset0++;
+                }else{
+                    flag = true;
+                }
+            }else{
+                break;
+            }
+            i++;
+        }
+
+        dec = calloc(i - offset0 + 1, sizeof(char));
+        memcpy(dec, track + offset0, i - offset0);
+        convi = strtol(dec, &end, 10);
+        id3v1WriteTrack(convi, newTag);
+
+        free(dec);
+        free(track);
+    }
+
+    if(comment != NULL){
+        id3v1WriteComment(comment, newTag);
+        free(comment);
+    }
+
+    if(genre != NULL){
+        id3v1WriteGenre(genre[0], newTag);
+        free(genre);
+    }
+
+    if(metadata->id3v1 != NULL){
+        id3v1DestroyTag(&(metadata->id3v1));
+    }
+
+    metadata->id3v1 = newTag;
+    return true;
+}
+
+/**
+ * @brief Reads the title from the given ID3 structure using the prefered standard. If the title is not found
+ * NULL is returned.
+ * 
+ * @param metadata 
+ * @return char* 
+ */
+char *id3ReadTitle(ID3 *metadata){
+
+    if(metadata == NULL){
+        return NULL;
+    }
+
+    if(metadata->id3v2 == NULL && metadata->id3v1 == NULL){
+        return NULL;
+    }
+
+    int input = 0;
+    int pref = id3GetPreferedStandard();
+
+    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
+        input = ID3V1_TAG_VERSION;
+    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
+        input = ID3V2_TAG_VERSION_3;
+    }else{
+        input = pref;
+    }
+
+    switch(input){
+        case ID3V1_TAG_VERSION:
+            return id3v1ReadTitle(metadata->id3v1);
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2ReadTitle(metadata->id3v2);
+        default:
+            return NULL;
+    }
+
+    // dummy
+    return NULL;
+}
+
+/**
+ * @brief Reads the artist from the given ID3 structure using the prefered standard. If the artist is not found
+ * NULL is returned.
+ * 
+ * @param metadata 
+ * @return char* 
+ */
+char *id3ReadArtist(ID3 *metadata){
+    
+    if(metadata == NULL){
+        return NULL;
+    }
+
+    if(metadata->id3v2 == NULL && metadata->id3v1 == NULL){
+        return NULL;
+    }
+
+    int input = 0;
+    int pref = id3GetPreferedStandard();
+
+    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
+        input = ID3V1_TAG_VERSION;
+    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
+        input = ID3V2_TAG_VERSION_3;
+    }else{
+        input = pref;
+    }
+
+    switch(input){
+        case ID3V1_TAG_VERSION:
+            return id3v1ReadArtist(metadata->id3v1);
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2ReadArtist(metadata->id3v2);
+        default:
+            return NULL;
+    }
+
+    // dummy
+    return NULL;
+}
+
+/**
+ * @brief Reads the album artist from the given ID3 structure using the prefered standard. If the album artist is not found
+ * NULL is returned.
+ * @details This function is only available in ID3v2 tags and will always return NULL for ID3v1.
+ * @param metadata 
+ * @return char* 
+ */
+char *id3ReadAlbumArtist(ID3 *metadata){
+
+    if(metadata == NULL){
+        return NULL;
+    }
+
+    if(metadata->id3v2 == NULL && metadata->id3v1 == NULL){
+        return NULL;
+    }
+
+    int input = 0;
+    int pref = id3GetPreferedStandard();
+
+    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
+        input = ID3V1_TAG_VERSION;
+    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
+        input = ID3V2_TAG_VERSION_3;
+    }else{
+        input = pref;
+    }
+
+    switch(input){
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2ReadAlbumArtist(metadata->id3v2);
+        case ID3V1_TAG_VERSION:
+        default:
+            return NULL;
+    }
+
+    // dummy
+    return NULL;
+}
+
+/**
+ * @brief Reads the album from the given ID3 structure using the prefered standard. If the album is not found
+ * NULL is returned.
+ * 
+ * @param metadata 
+ * @return char* 
+ */
+char *id3ReadAlbum(ID3 *metadata){
+
+    if(metadata == NULL){
+        return NULL;
+    }
+
+    if(metadata->id3v2 == NULL && metadata->id3v1 == NULL){
+        return NULL;
+    }
+
+    int input = 0;
+    int pref = id3GetPreferedStandard();
+
+    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
+        input = ID3V1_TAG_VERSION;
+    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
+        input = ID3V2_TAG_VERSION_3;
+    }else{
+        input = pref;
+    }
+
+    switch(input){
+        case ID3V1_TAG_VERSION:
+            return id3v1ReadAlbum(metadata->id3v1);
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2ReadAlbum(metadata->id3v2);
+        default:
+            return NULL;
+    }
+
+    // dummy
+    return NULL;
+}
+
+/**
+ * @brief Reads the year from the given ID3 structure using the prefered standard. If the year is not found
+ * NULL is returned.
+ * 
+ * @param metadata 
+ * @return char* 
+ */
+char *id3ReadYear(ID3 *metadata){
+
+    if(metadata == NULL){
+        return NULL;
+    }
+
+    if(metadata->id3v2 == NULL && metadata->id3v1 == NULL){
+        return NULL;
+    }
+
+    int input = 0;
+    int pref = id3GetPreferedStandard();
+
+    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
+        input = ID3V1_TAG_VERSION;
+    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
+        input = ID3V2_TAG_VERSION_3;
+    }else{
+        input = pref;
+    }
+
+    switch(input){
+        case ID3V1_TAG_VERSION:{
+            char *year = NULL;
+            int size = 0;
+            
+            size = snprintf(NULL, 0, "%d", metadata->id3v1->year);
+            year = calloc(size + 1, sizeof(char));
+            snprintf(year, size + 1, "%d", metadata->id3v1->year);
+            
+            return year;
+        }
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2ReadYear(metadata->id3v2);
+        default:
+            return NULL;
+    }
+
+    // dummy
+    return NULL;
+}
+
+/**
+ * @brief Reads the genre from the given ID3 structure using the prefered standard. If the genre is not found
+ * NULL is returned.
+ * 
+ * @param metadata 
+ * @return char* 
+ */
+char *id3ReadGenre(ID3 *metadata){
+
+    if(metadata == NULL){
+        return NULL;
+    }
+
+    if(metadata->id3v2 == NULL && metadata->id3v1 == NULL){
+        return NULL;
+    }
+
+    int input = 0;
+    int pref = id3GetPreferedStandard();
+
+    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
+        input = ID3V1_TAG_VERSION;
+    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
+        input = ID3V2_TAG_VERSION_3;
+    }else{
+        input = pref;
+    }
+
+    switch(input){
+        case ID3V1_TAG_VERSION:{
+            char *genre = NULL;
+            int size = 0;
+
+            size = strlen(id3v1GenreFromTable(metadata->id3v1->genre));
+            genre = calloc(size + 1, sizeof(char));
+            memcpy(genre, id3v1GenreFromTable(metadata->id3v1->genre), size);
+            return genre;
+        }
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2ReadGenre(metadata->id3v2);
+        default:
+            return NULL;
+    }
+
+    // dummy
+    return NULL;
+}
+
+/**
+ * @brief Reads the track from the given ID3 structure using the prefered standard. If the track is not found
+ * NULL is returned.
+ * 
+ * @param metadata 
+ * @return char* 
+ */
+char *id3ReadTrack(ID3 *metadata){
+
+    if(metadata == NULL){
+        return NULL;
+    }
+
+    if(metadata->id3v2 == NULL && metadata->id3v1 == NULL){
+        return NULL;
+    }
+
+    int input = 0;
+    int pref = id3GetPreferedStandard();
+
+    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
+        input = ID3V1_TAG_VERSION;
+    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
+        input = ID3V2_TAG_VERSION_3;
+    }else{
+        input = pref;
+    }
+
+    switch(input){
+        case ID3V1_TAG_VERSION:{
+            char *track = NULL;
+            int size = 0;
+
+            size = snprintf(NULL, 0, "%d", metadata->id3v1->track);
+            track = calloc(size + 1, sizeof(char));
+            snprintf(track, size + 1, "%d", metadata->id3v1->track);
+            return track;
+        }
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2ReadTrack(metadata->id3v2);
+        default:
+            return NULL;
+    }
+
+    // dummy
+    return NULL;
+
+}
+
+/**
+ * @brief Reads the composer from the given ID3 structure using the prefered standard. If the composer is not found
+ * NULL is returned.
+ * @details This function is only available in ID3v2 tags and will always return NULL for ID3v1.
+ * @param metadata 
+ * @return char* 
+ */
+char *id3ReadComposer(ID3 *metadata){
+    
+    if(metadata == NULL){
+        return NULL;
+    }
+
+    if(metadata->id3v2 == NULL && metadata->id3v1 == NULL){
+        return NULL;
+    }
+
+    int input = 0;
+    int pref = id3GetPreferedStandard();
+
+    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
+        input = ID3V1_TAG_VERSION;
+    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
+        input = ID3V2_TAG_VERSION_3;
+    }else{
+        input = pref;
+    }
+
+    switch(input){
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2ReadComposer(metadata->id3v2);
+        case ID3V1_TAG_VERSION:
+        default:
+            return NULL;
+    }
+
+    // dummy
+    return NULL;
+}
+
+/**
+ * @brief Reads the disc from the given ID3 structure using the prefered standard. If the disc is not found
+ * NULL is returned.
+ * @details This function is only available in ID3v2 tags and will always return NULL for ID3v1.
+ * @param metadata 
+ * @return char* 
+ */
+char *id3ReadDisc(ID3 *metadata){
+    
+    if(metadata == NULL){
+        return NULL;
+    }
+
+    if(metadata->id3v2 == NULL && metadata->id3v1 == NULL){
+        return NULL;
+    }
+
+    int input = 0;
+    int pref = id3GetPreferedStandard();
+
+    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
+        input = ID3V1_TAG_VERSION;
+    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
+        input = ID3V2_TAG_VERSION_3;
+    }else{
+        input = pref;
+    }
+
+    switch(input){
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2ReadDisc(metadata->id3v2);
+        case ID3V1_TAG_VERSION:
+        default:
+            return NULL;
+    }
+
+    // dummy
+    return NULL;
+}
+
+/**
+ * @brief Reads the lyrics from the given ID3 structure using the prefered standard. If the lyrics are not found
+ * NULL is returned.
+ * @details This function is only available in ID3v2 tags and will always return NULL for ID3v1.
+ * @param metadata 
+ * @return char* 
+ */
+char *id3ReadLyrics(ID3 *metadata){
+        
+    if(metadata == NULL){
+        return NULL;
+    }
+
+    if(metadata->id3v2 == NULL && metadata->id3v1 == NULL){
+        return NULL;
+    }
+
+    int input = 0;
+    int pref = id3GetPreferedStandard();
+
+    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
+        input = ID3V1_TAG_VERSION;
+    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
+        input = ID3V2_TAG_VERSION_3;
+    }else{
+        input = pref;
+    }
+
+    switch(input){
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2ReadLyrics(metadata->id3v2);
+        case ID3V1_TAG_VERSION:
+        default:
+            return NULL;
+    }
+
+    // dummy
+    return NULL;
+}
+
+/**
+ * @brief Reads the comment from the given ID3 structure using the prefered standard. If the comment is not found
+ * NULL is returned.
+ * 
+ * @param metadata 
+ * @return char* 
+ */
+char *id3ReadComment(ID3 *metadata){
+
+    if(metadata == NULL){
+        return NULL;
+    }
+
+    if(metadata->id3v2 == NULL && metadata->id3v1 == NULL){
+        return NULL;
+    }
+
+    int input = 0;
+    int pref = id3GetPreferedStandard();
+
+    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
+        input = ID3V1_TAG_VERSION;
+    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
+        input = ID3V2_TAG_VERSION_3;
+    }else{
+        input = pref;
+    }
+
+    switch(input){
+        case ID3V1_TAG_VERSION:
+            return id3v1ReadComment(metadata->id3v1);
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2ReadComment(metadata->id3v2);
+        default:
+            return NULL;
+    }
+
+    // dummy
+    return NULL;
+}
+
+/**
+ * @brief Reads the picture from the given ID3 structure using the prefered standard. If the picture is not found
+ * NULL is returned.
+ * @details This function is only available in ID3v2 tags and will always return NULL for ID3v1.
+ * @param type 
+ * @param metadata 
+ * @param dataSize 
+ * @return uint8_t* 
+ */
+uint8_t *id3ReadPicture(uint8_t type, ID3 *metadata, size_t *dataSize){
+
+    if(metadata == NULL){
+        *dataSize = 0;
+        return NULL;
+    }
+
+    if(metadata->id3v2 == NULL && metadata->id3v1 == NULL){
+        *dataSize = 0;
+        return NULL;
+    }
+
+    int input = 0;
+    int pref = id3GetPreferedStandard();
+
+    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
+        input = ID3V1_TAG_VERSION;
+    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
+        input = ID3V2_TAG_VERSION_3;
+    }else{
+        input = pref;
+    }
+
+    switch(input){
+        case ID3V1_TAG_VERSION:
+            *dataSize = 0;
+            return NULL;
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2ReadPicture(type, metadata->id3v2, dataSize);
+        default:
+            *dataSize = 0;
+            return NULL;
+    }
+
+    // dummy
+    *dataSize = 0;
+    return NULL;
+
 }

@@ -60,8 +60,8 @@ char *id3ReadGenre(ID3 *metadata);
 char *id3ReadTrack(ID3 *metadata);
 char *id3ReadComposer(ID3 *metadata);
 char *id3ReadDisc(ID3 *metadata);
-char *id3ReadLyrics(Id3v2Tag *tag);
-char *id3ReadComment(Id3v2Tag *tag);
+char *id3ReadLyrics(ID3 *metadata);
+char *id3ReadComment(ID3 *metadata);
 uint8_t *id3ReadPicture(uint8_t type, ID3 *metadata, size_t *dataSize);
 
 // change values within a id3v2 structure

@@ -62,7 +62,7 @@ Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy){
         return NULL;
     }
 
-    return id3v1NewTag(toCopy->title, toCopy->artist, toCopy->albumTitle, toCopy->year, toCopy->track, toCopy->comment, toCopy->genre);
+    return id3v1CreateTag(toCopy->title, toCopy->artist, toCopy->albumTitle, toCopy->year, toCopy->track, toCopy->comment, toCopy->genre);
 }
 
 /**
@@ -627,7 +627,9 @@ char *id3v1GenreFromTable(Genre val){
  * @return char* 
  */
 char *id3v1ReadTitle(Id3v1Tag *tag){
-    return (char *)tag->title;
+    char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
+    memcpy(r, tag->title, ID3V1_FIELD_SIZE);
+    return r;
 }
 
 /**
@@ -637,7 +639,9 @@ char *id3v1ReadTitle(Id3v1Tag *tag){
  * @return char* 
  */
 char *id3v1ReadArtist(Id3v1Tag *tag){
-    return (char *)tag->artist;
+    char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
+    memcpy(r, tag->artist, ID3V1_FIELD_SIZE);
+    return r;
 }
 
 /**
@@ -647,7 +651,9 @@ char *id3v1ReadArtist(Id3v1Tag *tag){
  * @return char* 
  */
 char *id3v1ReadAlbum(Id3v1Tag *tag){
-    return (char *)tag->albumTitle;
+    char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
+    memcpy(r, tag->albumTitle, ID3V1_FIELD_SIZE);
+    return r;
 }
 
 /**
@@ -667,7 +673,9 @@ int id3v1ReadYear(Id3v1Tag *tag){
  * @return char* 
  */
 char *id3v1ReadComment(Id3v1Tag *tag){
-    return (char *)tag->comment;
+    char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
+    memcpy(r, tag->comment, ID3V1_FIELD_SIZE);
+    return r;
 }
 
 /**

@@ -69,7 +69,7 @@ static void id3v1HasTag_noTag(void **state){
 static void id3v1NewTag_validTag(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *tag = id3v1NewTag((uint8_t *)"title",
+    Id3v1Tag *tag = id3v1CreateTag((uint8_t *)"title",
                                 (uint8_t *)"artist",
                                 (uint8_t *)"album",
                                 2020,
@@ -91,7 +91,7 @@ static void id3v1NewTag_validTag(void **state){
 static void id3v1NewTag_validTag2(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *tag = id3v1NewTag((uint8_t *)"123456789012345678901234567890x",
+    Id3v1Tag *tag = id3v1CreateTag((uint8_t *)"123456789012345678901234567890x",
                                 (uint8_t *)"123456789012345678901234567890x",
                                 (uint8_t *)"123456789012345678901234567890x",
                                 INT_MAX,
@@ -113,7 +113,7 @@ static void id3v1NewTag_validTag2(void **state){
 static void id3v1ClearTag_free(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *tag = id3v1NewTag((uint8_t *)"title",
+    Id3v1Tag *tag = id3v1CreateTag((uint8_t *)"title",
                                 (uint8_t *)"artist",
                                 (uint8_t *)"album",
                                 2020,
@@ -134,7 +134,7 @@ static void id3v1ClearTag_free(void **state){
 static void id3v1DestroyTag_free(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *tag = id3v1NewTag((uint8_t *)"title",
+    Id3v1Tag *tag = id3v1CreateTag((uint8_t *)"title",
                                 (uint8_t *)"artist",
                                 (uint8_t *)"album",
                                 2020,
@@ -479,7 +479,7 @@ static void id3v1WriteTitle_WithNullTitle(void **state){
     (void) state; /* unused */
 
 
-    Id3v1Tag *tag = id3v1NewTag((uint8_t *)"this is a title of a song",
+    Id3v1Tag *tag = id3v1CreateTag((uint8_t *)"this is a title of a song",
                                 NULL,
                                 NULL,
                                 0,
@@ -500,7 +500,7 @@ static void id3v1WriteTitle_WithBigTitle(void **state){
     (void) state; /* unused */
 
 
-    Id3v1Tag *tag = id3v1NewTag((uint8_t *)"this is a title of a song",
+    Id3v1Tag *tag = id3v1CreateTag((uint8_t *)"this is a title of a song",
                                 NULL,
                                 NULL,
                                 0,
@@ -520,7 +520,7 @@ static void id3v1WriteTitle_WithSmallTitle(void **state){
     (void) state; /* unused */
 
 
-    Id3v1Tag *tag = id3v1NewTag((uint8_t *)"this is a title of a song",
+    Id3v1Tag *tag = id3v1CreateTag((uint8_t *)"this is a title of a song",
                                 NULL,
                                 NULL,
                                 0,
@@ -542,7 +542,7 @@ static void id3v1WriteYear_save0(void **state){
     (void) state; /* unused */
 
 
-    Id3v1Tag *tag = id3v1NewTag(NULL,
+    Id3v1Tag *tag = id3v1CreateTag(NULL,
                                 NULL,
                                 NULL,
                                 2001,
@@ -561,7 +561,7 @@ static void id3v1WriteYear_saveBig(void **state){
     (void) state; /* unused */
 
 
-    Id3v1Tag *tag = id3v1NewTag(NULL,
+    Id3v1Tag *tag = id3v1CreateTag(NULL,
                                 NULL,
                                 NULL,
                                 0,
@@ -585,7 +585,7 @@ static void id3v1CompareTag_noTags(void **state){
 static void id3v1CompareTag_oneTag(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *tag = id3v1NewTag(NULL,
+    Id3v1Tag *tag = id3v1CreateTag(NULL,
                                 NULL,
                                 NULL,
                                 0,
@@ -602,7 +602,7 @@ static void id3v1CompareTag_oneTag(void **state){
 static void id3v1CompareTag_diffGenere(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *tag1 = id3v1NewTag(NULL,
+    Id3v1Tag *tag1 = id3v1CreateTag(NULL,
                                 NULL,
                                 NULL,
                                 0,
@@ -610,7 +610,7 @@ static void id3v1CompareTag_diffGenere(void **state){
                                 NULL,
                                 NOISE_GENRE);
 
-    Id3v1Tag *tag2 = id3v1NewTag(NULL,
+    Id3v1Tag *tag2 = id3v1CreateTag(NULL,
                                 NULL,
                                 NULL,
                                 0,
@@ -628,7 +628,7 @@ static void id3v1CompareTag_diffGenere(void **state){
 static void id3v1CompareTag_diffComment(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *tag1 = id3v1NewTag(NULL,
+    Id3v1Tag *tag1 = id3v1CreateTag(NULL,
                                 NULL,
                                 NULL,
                                 0,
@@ -636,7 +636,7 @@ static void id3v1CompareTag_diffComment(void **state){
                                 (uint8_t *)"this is the worst",
                                 0);
 
-    Id3v1Tag *tag2 = id3v1NewTag(NULL,
+    Id3v1Tag *tag2 = id3v1CreateTag(NULL,
                                 NULL,
                                 NULL,
                                 0,
@@ -654,7 +654,7 @@ static void id3v1CompareTag_diffComment(void **state){
 static void id3v1CompareTag_diffTrack(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *tag1 = id3v1NewTag(NULL,
+    Id3v1Tag *tag1 = id3v1CreateTag(NULL,
                                 NULL,
                                 NULL,
                                 0,
@@ -662,7 +662,7 @@ static void id3v1CompareTag_diffTrack(void **state){
                                 NULL,
                                 0);
 
-    Id3v1Tag *tag2 = id3v1NewTag(NULL,
+    Id3v1Tag *tag2 = id3v1CreateTag(NULL,
                                 NULL,
                                 NULL,
                                 0,
@@ -680,7 +680,7 @@ static void id3v1CompareTag_diffTrack(void **state){
 static void id3v1CompareTag_diffYear(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *tag1 = id3v1NewTag(NULL,
+    Id3v1Tag *tag1 = id3v1CreateTag(NULL,
                                 NULL,
                                 NULL,
                                 1800,
@@ -688,7 +688,7 @@ static void id3v1CompareTag_diffYear(void **state){
                                 NULL,
                                 0);
 
-    Id3v1Tag *tag2 = id3v1NewTag(NULL,
+    Id3v1Tag *tag2 = id3v1CreateTag(NULL,
                                 NULL,
                                 NULL,
                                 2023,
@@ -706,7 +706,7 @@ static void id3v1CompareTag_diffYear(void **state){
 static void id3v1CompareTag_diffAlbum(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *tag1 = id3v1NewTag(NULL,
+    Id3v1Tag *tag1 = id3v1CreateTag(NULL,
                                 NULL,
                                 (uint8_t *)"the money store",
                                 0,
@@ -714,7 +714,7 @@ static void id3v1CompareTag_diffAlbum(void **state){
                                 NULL,
                                 0);
 
-    Id3v1Tag *tag2 = id3v1NewTag(NULL,
+    Id3v1Tag *tag2 = id3v1CreateTag(NULL,
                                 NULL,
                                 (uint8_t *)"speak now",
                                 0,
@@ -732,7 +732,7 @@ static void id3v1CompareTag_diffAlbum(void **state){
 static void id3v1CompareTag_diffArtist(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *tag1 = id3v1NewTag(NULL,
+    Id3v1Tag *tag1 = id3v1CreateTag(NULL,
                                 (uint8_t *)"alvvays",
                                 NULL,
                                 0,
@@ -740,7 +740,7 @@ static void id3v1CompareTag_diffArtist(void **state){
                                 NULL,
                                 0);
 
-    Id3v1Tag *tag2 = id3v1NewTag(NULL,
+    Id3v1Tag *tag2 = id3v1CreateTag(NULL,
                                 (uint8_t *)"Lana del ray",
                                 NULL,
                                 0,
@@ -758,7 +758,7 @@ static void id3v1CompareTag_diffArtist(void **state){
 static void id3v1CompareTag_diffTitle(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *tag1 = id3v1NewTag((uint8_t *)"1999",
+    Id3v1Tag *tag1 = id3v1CreateTag((uint8_t *)"1999",
                                 NULL,
                                 NULL,
                                 0,
@@ -766,7 +766,7 @@ static void id3v1CompareTag_diffTitle(void **state){
                                 NULL,
                                 0);
 
-    Id3v1Tag *tag2 = id3v1NewTag((uint8_t *)"thank u, next",
+    Id3v1Tag *tag2 = id3v1CreateTag((uint8_t *)"thank u, next",
                                 NULL,
                                 NULL,
                                 0,
@@ -784,7 +784,7 @@ static void id3v1CompareTag_diffTitle(void **state){
 static void id3v1CompareTag_same(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *tag1 = id3v1NewTag((uint8_t *)"1999",
+    Id3v1Tag *tag1 = id3v1CreateTag((uint8_t *)"1999",
                                 (uint8_t *)"charli xcx",
                                 (uint8_t *)"charli",
                                 4,
@@ -792,7 +792,7 @@ static void id3v1CompareTag_same(void **state){
                                 NULL,
                                 POP_GENRE);
 
-    Id3v1Tag *tag2 = id3v1NewTag((uint8_t *)"1999",
+    Id3v1Tag *tag2 = id3v1CreateTag((uint8_t *)"1999",
                                 (uint8_t *)"charli xcx",
                                 (uint8_t *)"charli",
                                 4,
@@ -822,7 +822,7 @@ static void id3v1GenreFromTable_checkForHipHopGenre(void **state){
 static void id3v1ToJSON_fullTag(void **state){
     (void) state; /* unused */
 
-        Id3v1Tag *tag = id3v1NewTag((uint8_t *)"1999",
+        Id3v1Tag *tag = id3v1CreateTag((uint8_t *)"1999",
                                 (uint8_t *)"charli xcx",
                                 (uint8_t *)"charli",
                                 4,
@@ -847,7 +847,7 @@ static void id3v1ToJSON_fullTag(void **state){
 static void id3v1ToJSON_noGenere(void **state){
     (void) state; /* unused */
 
-        Id3v1Tag *tag = id3v1NewTag((uint8_t *)"1999",
+        Id3v1Tag *tag = id3v1CreateTag((uint8_t *)"1999",
                                 (uint8_t *)"charli xcx",
                                 (uint8_t *)"charli",
                                 4,
@@ -871,7 +871,7 @@ static void id3v1ToJSON_noGenere(void **state){
 static void id3v1ToJSON_noYear(void **state){
     (void) state; /* unused */
 
-        Id3v1Tag *tag = id3v1NewTag((uint8_t *)"1999",
+        Id3v1Tag *tag = id3v1CreateTag((uint8_t *)"1999",
                                 (uint8_t *)"charli xcx",
                                 (uint8_t *)"charli",
                                 4,
@@ -896,7 +896,7 @@ static void id3v1ToJSON_noYear(void **state){
 static void id3v1ToJSON_noTitle(void **state){
     (void) state; /* unused */
 
-        Id3v1Tag *tag = id3v1NewTag(NULL,
+        Id3v1Tag *tag = id3v1CreateTag(NULL,
                                 (uint8_t *)"charli xcx",
                                 (uint8_t *)"charli",
                                 4,
@@ -927,7 +927,7 @@ static void id3v1WriteTagToFile_noInputs(void **state){
 static void id3v1WriteTagToFile_CreateFile(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *tag = id3v1NewTag((uint8_t *)"1999",
+    Id3v1Tag *tag = id3v1CreateTag((uint8_t *)"1999",
                             (uint8_t *)"charli xcx",
                             (uint8_t *)"charli",
                             2019,
@@ -956,7 +956,7 @@ static void id3v1WriteTagToFile_CreateFile(void **state){
 static void id3v1WriteTagToFile_editExistingFile(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *pretag = id3v1NewTag((uint8_t *)"1999",
+    Id3v1Tag *pretag = id3v1CreateTag((uint8_t *)"1999",
                             (uint8_t *)"charli xcx",
                             (uint8_t *)"charli",
                             2019,
@@ -966,7 +966,7 @@ static void id3v1WriteTagToFile_editExistingFile(void **state){
 
 
 
-    Id3v1Tag *tag2 = id3v1NewTag((uint8_t *)"Headlines",
+    Id3v1Tag *tag2 = id3v1CreateTag((uint8_t *)"Headlines",
                             (uint8_t *)"Drake",
                             (uint8_t *)"Take Care",
                             2011,
@@ -1007,7 +1007,7 @@ static void id3v1WriteTagToFile_appendFile(void **state){
     fclose(fp);
 
 
-    Id3v1Tag *tag2 = id3v1NewTag((uint8_t *)"Headlines",
+    Id3v1Tag *tag2 = id3v1CreateTag((uint8_t *)"Headlines",
                             (uint8_t *)"Drake",
                             (uint8_t *)"Take Care",
                             2011,
@@ -1046,7 +1046,7 @@ static void id3v1WriteTagToFile_appendFileBig(void **state){
     fclose(fp);
 
 
-    Id3v1Tag *tag2 = id3v1NewTag((uint8_t *)"Headlines",
+    Id3v1Tag *tag2 = id3v1CreateTag((uint8_t *)"Headlines",
                             (uint8_t *)"Drake",
                             (uint8_t *)"Take Care",
                             2011,
@@ -1084,7 +1084,7 @@ int main(){
         cmocka_unit_test(id3v1HasTag_foundTag2),
         cmocka_unit_test(id3v1HasTag_noTag),
 
-        //id3v1NewTag tests
+        //id3v1CreateTag tests
         cmocka_unit_test(id3v1NewTag_validTag),
         cmocka_unit_test(id3v1NewTag_validTag2),
 

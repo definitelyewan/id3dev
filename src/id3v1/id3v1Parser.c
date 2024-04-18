@@ -39,7 +39,7 @@ bool id3v1HasTag(uint8_t *buffer){
  * @param genre 
  * @return Id3v1Tag* 
  */
-Id3v1Tag *id3v1NewTag(uint8_t *title, uint8_t *artist, uint8_t *albumTitle, int year, int track, uint8_t *comment, Genre genre){
+Id3v1Tag *id3v1CreateTag(uint8_t *title, uint8_t *artist, uint8_t *albumTitle, int year, int track, uint8_t *comment, Genre genre){
 
     Id3v1Tag *tag = malloc(sizeof(Id3v1Tag));
     
@@ -135,32 +135,32 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
 
     if(!byteStreamSeek(stream, ID3V1_TAG_ID_SIZE, SEEK_SET)){
         byteStreamDestroy(stream);
-        return id3v1NewTag(NULL, NULL, NULL, 0, 0, NULL, OTHER_GENRE);
+        return id3v1CreateTag(NULL, NULL, NULL, 0, 0, NULL, OTHER_GENRE);
     }
     //get song title and set index for next tag
     memset(holdTitle, 0, ID3V1_FIELD_SIZE);    
     if(!byteStreamRead(stream, holdTitle, ID3V1_FIELD_SIZE)){
         byteStreamDestroy(stream);
-        return id3v1NewTag(NULL, NULL, NULL, 0, 0, NULL, OTHER_GENRE);
+        return id3v1CreateTag(NULL, NULL, NULL, 0, 0, NULL, OTHER_GENRE);
     }
 
     //get artist and set index for next tag
     memset(holdArtist, 0, ID3V1_FIELD_SIZE);
     if(!byteStreamRead(stream, holdArtist, ID3V1_FIELD_SIZE)){
         byteStreamDestroy(stream);
-        return id3v1NewTag(holdTitle, NULL, NULL, 0, 0, NULL, OTHER_GENRE);
+        return id3v1CreateTag(holdTitle, NULL, NULL, 0, 0, NULL, OTHER_GENRE);
     }
     //get album title and set index for next tag
     memset(holdAlbum, 0, ID3V1_FIELD_SIZE); 
     if(!byteStreamRead(stream, holdAlbum, ID3V1_FIELD_SIZE)){
         byteStreamDestroy(stream);
-        return id3v1NewTag(holdTitle, holdArtist, NULL, 0, 0, NULL, OTHER_GENRE);
+        return id3v1CreateTag(holdTitle, holdArtist, NULL, 0, 0, NULL, OTHER_GENRE);
     }
     //get year and set index for next tag
     memset(year, 0, ID3V1_YEAR_SIZE);
     if(!byteStreamRead(stream, year, ID3V1_YEAR_SIZE)){
         byteStreamDestroy(stream);
-        return id3v1NewTag(holdTitle, holdArtist, holdAlbum, 0, 0, NULL, OTHER_GENRE);
+        return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, 0, 0, NULL, OTHER_GENRE);
     }else{
         if(memcmp(year,"\x00\x00\x00\x00\x00",ID3V1_YEAR_SIZE) != 0){
  
@@ -174,7 +174,7 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
     //check for a track number, ID3V1.1 has the 28th bit nulled so that the 29th can be a track number
     if(!byteStreamSeek(stream, ID3V1_FIELD_SIZE - 2, SEEK_CUR)){
         byteStreamDestroy(stream);
-        return id3v1NewTag(holdTitle, holdArtist, holdAlbum, nYear, 0, NULL, OTHER_GENRE);
+        return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, 0, NULL, OTHER_GENRE);
     }
     if(!byteStreamCursor(stream)[0] && byteStreamCursor(stream)[1]){
         trackno = 1;
@@ -187,7 +187,7 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
     memset(holdComment, 0, ID3V1_FIELD_SIZE);
     if(!byteStreamRead(stream, holdComment, ID3V1_FIELD_SIZE - trackno)){
         byteStreamDestroy(stream);
-        return id3v1NewTag(holdTitle, holdArtist, holdAlbum, nYear, 0, NULL, 0);
+        return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, 0, NULL, 0);
     }
 
 
@@ -195,12 +195,12 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
     if(trackno){
         if((trackno = byteStreamGetCh(stream)) == EOF){
             byteStreamDestroy(stream);
-            return id3v1NewTag(holdTitle, holdArtist, holdAlbum, nYear, 0, holdAlbum, 0);
+            return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, 0, holdAlbum, 0);
         }
 
         if(!byteStreamSeek(stream, 1, SEEK_CUR)){
             byteStreamDestroy(stream);
-            return id3v1NewTag(holdTitle, holdArtist, holdAlbum, nYear, trackno, holdComment, 0);
+            return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, trackno, holdComment, 0);
         }
         
     }else{
@@ -210,9 +210,9 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
     //read genre or last byte
     if((genre = byteStreamGetCh(stream)) == EOF){
         byteStreamDestroy(stream);
-        return id3v1NewTag(holdTitle, holdArtist, holdAlbum, nYear, trackno, holdComment, 0);
+        return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, trackno, holdComment, 0);
     }
 
     byteStreamDestroy(stream);
-    return id3v1NewTag(holdTitle, holdArtist, holdAlbum, nYear, trackno, holdComment, genre);
+    return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, trackno, holdComment, genre);
 }
