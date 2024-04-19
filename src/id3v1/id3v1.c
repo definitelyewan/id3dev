@@ -72,7 +72,7 @@ Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy){
  * @param dest 
  * @return int 
  */
-int _id3v1CharsToStructUint8(char *src, uint8_t *dest){
+static int _id3v1CharsToStructUint8(const char *src, uint8_t *dest){
 
     memset(dest, 0, ID3V1_FIELD_SIZE);
     
@@ -93,7 +93,7 @@ int _id3v1CharsToStructUint8(char *src, uint8_t *dest){
  * @param tag 
  * @return int 
  */
-int id3v1WriteTitle(char *title, Id3v1Tag *tag){
+int id3v1WriteTitle(const char *title, Id3v1Tag *tag){
     return (tag == NULL) ? 0: _id3v1CharsToStructUint8(title, tag->title);
 }
 
@@ -103,7 +103,7 @@ int id3v1WriteTitle(char *title, Id3v1Tag *tag){
  * @param tag 
  * @return int 
  */
-int id3v1WriteArtist(char *artist, Id3v1Tag *tag){
+int id3v1WriteArtist(const char *artist, Id3v1Tag *tag){
     return (tag == NULL) ? 0: _id3v1CharsToStructUint8(artist, tag->artist);
 }
 
@@ -113,7 +113,7 @@ int id3v1WriteArtist(char *artist, Id3v1Tag *tag){
  * @param tag 
  * @return int 
  */
-int id3v1WriteAlbum(char *album, Id3v1Tag *tag){
+int id3v1WriteAlbum(const char *album, Id3v1Tag *tag){
     return (tag == NULL) ? 0: _id3v1CharsToStructUint8(album, tag->albumTitle);
 }
 
@@ -139,7 +139,7 @@ int id3v1WriteYear(int year, Id3v1Tag *tag){
  * @param tag 
  * @return int 
  */
-int id3v1WriteComment(char *comment, Id3v1Tag *tag){
+int id3v1WriteComment(const char *comment, Id3v1Tag *tag){
     return (tag == NULL) ? 0: _id3v1CharsToStructUint8(comment, tag->comment);
 }
 

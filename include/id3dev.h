@@ -75,9 +75,9 @@ int id3WriteGenre(const char *genre, ID3 *metadata);
 int id3WriteTrack(const char *track, ID3 *metadata);
 int id3WriteDisc(const char *disc, ID3 *metadata);
 int id3WriteComposer(const char *composer, ID3 *metadata);
-
 int id3WriteLyrics(const char *lyrics, ID3 *metadata);
 int id3WriteComment(const char *comment, ID3 *metadata);
+
 int id3WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_t type, ID3 *metadata);
 int id3WritePictureFromFile(const char *filename, const char *kind, uint8_t type, ID3 *metadata);
 
@@ -85,7 +85,7 @@ int id3WritePictureFromFile(const char *filename, const char *kind, uint8_t type
 
 ByteStream *id3ToStream(ID3 *metadata);
 char *id3ToJSON(ID3 *metadata);
-int id3WriteToFile(const char *filename, ID3 *metadata);
+int id3WriteToFile(const char *filePath, ID3 *metadata);
 
 #ifdef __cplusplus
 } //extern c end

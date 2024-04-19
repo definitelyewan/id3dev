@@ -396,6 +396,26 @@ bool id3ConvertId3v2ToId3v1(ID3 *metadata){
     return true;
 }
 
+// internal -----------------------------------------------------------------
+// corrects the standard preferance if the prefered standard is not available
+static int _getSafePrefStd(ID3 *metadata){
+
+    int input = 0;
+    int pref = id3GetPreferedStandard();
+
+    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
+        input = ID3V1_TAG_VERSION;
+    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
+        // assumed because of its wide use
+        input = ID3V2_TAG_VERSION_3;
+    }else{
+        input = pref;
+    }
+
+
+    return input;
+}
+
 /**
  * @brief Reads the title from the given ID3 structure using the prefered standard. If the title is not found
  * NULL is returned.
@@ -413,18 +433,7 @@ char *id3ReadTitle(ID3 *metadata){
         return NULL;
     }
 
-    int input = 0;
-    int pref = id3GetPreferedStandard();
-
-    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
-        input = ID3V1_TAG_VERSION;
-    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
-        input = ID3V2_TAG_VERSION_3;
-    }else{
-        input = pref;
-    }
-
-    switch(input){
+    switch(_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:
             return id3v1ReadTitle(metadata->id3v1);
         case ID3V2_TAG_VERSION_2:
@@ -456,18 +465,7 @@ char *id3ReadArtist(ID3 *metadata){
         return NULL;
     }
 
-    int input = 0;
-    int pref = id3GetPreferedStandard();
-
-    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
-        input = ID3V1_TAG_VERSION;
-    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
-        input = ID3V2_TAG_VERSION_3;
-    }else{
-        input = pref;
-    }
-
-    switch(input){
+    switch(_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:
             return id3v1ReadArtist(metadata->id3v1);
         case ID3V2_TAG_VERSION_2:
@@ -499,18 +497,7 @@ char *id3ReadAlbumArtist(ID3 *metadata){
         return NULL;
     }
 
-    int input = 0;
-    int pref = id3GetPreferedStandard();
-
-    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
-        input = ID3V1_TAG_VERSION;
-    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
-        input = ID3V2_TAG_VERSION_3;
-    }else{
-        input = pref;
-    }
-
-    switch(input){
+    switch(_getSafePrefStd(metadata)){
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
@@ -541,18 +528,7 @@ char *id3ReadAlbum(ID3 *metadata){
         return NULL;
     }
 
-    int input = 0;
-    int pref = id3GetPreferedStandard();
-
-    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
-        input = ID3V1_TAG_VERSION;
-    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
-        input = ID3V2_TAG_VERSION_3;
-    }else{
-        input = pref;
-    }
-
-    switch(input){
+    switch(_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:
             return id3v1ReadAlbum(metadata->id3v1);
         case ID3V2_TAG_VERSION_2:
@@ -584,18 +560,7 @@ char *id3ReadYear(ID3 *metadata){
         return NULL;
     }
 
-    int input = 0;
-    int pref = id3GetPreferedStandard();
-
-    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
-        input = ID3V1_TAG_VERSION;
-    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
-        input = ID3V2_TAG_VERSION_3;
-    }else{
-        input = pref;
-    }
-
-    switch(input){
+    switch(_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:{
             char *year = NULL;
             int size = 0;
@@ -635,18 +600,7 @@ char *id3ReadGenre(ID3 *metadata){
         return NULL;
     }
 
-    int input = 0;
-    int pref = id3GetPreferedStandard();
-
-    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
-        input = ID3V1_TAG_VERSION;
-    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
-        input = ID3V2_TAG_VERSION_3;
-    }else{
-        input = pref;
-    }
-
-    switch(input){
+    switch(_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:{
             char *genre = NULL;
             int size = 0;
@@ -685,18 +639,7 @@ char *id3ReadTrack(ID3 *metadata){
         return NULL;
     }
 
-    int input = 0;
-    int pref = id3GetPreferedStandard();
-
-    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
-        input = ID3V1_TAG_VERSION;
-    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
-        input = ID3V2_TAG_VERSION_3;
-    }else{
-        input = pref;
-    }
-
-    switch(input){
+    switch(_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:{
             char *track = NULL;
             int size = 0;
@@ -736,18 +679,7 @@ char *id3ReadComposer(ID3 *metadata){
         return NULL;
     }
 
-    int input = 0;
-    int pref = id3GetPreferedStandard();
-
-    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
-        input = ID3V1_TAG_VERSION;
-    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
-        input = ID3V2_TAG_VERSION_3;
-    }else{
-        input = pref;
-    }
-
-    switch(input){
+    switch(_getSafePrefStd(metadata)){
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
@@ -778,18 +710,7 @@ char *id3ReadDisc(ID3 *metadata){
         return NULL;
     }
 
-    int input = 0;
-    int pref = id3GetPreferedStandard();
-
-    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
-        input = ID3V1_TAG_VERSION;
-    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
-        input = ID3V2_TAG_VERSION_3;
-    }else{
-        input = pref;
-    }
-
-    switch(input){
+    switch(_getSafePrefStd(metadata)){
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
@@ -820,18 +741,7 @@ char *id3ReadLyrics(ID3 *metadata){
         return NULL;
     }
 
-    int input = 0;
-    int pref = id3GetPreferedStandard();
-
-    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
-        input = ID3V1_TAG_VERSION;
-    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
-        input = ID3V2_TAG_VERSION_3;
-    }else{
-        input = pref;
-    }
-
-    switch(input){
+    switch(_getSafePrefStd(metadata)){
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
@@ -862,18 +772,7 @@ char *id3ReadComment(ID3 *metadata){
         return NULL;
     }
 
-    int input = 0;
-    int pref = id3GetPreferedStandard();
-
-    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
-        input = ID3V1_TAG_VERSION;
-    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
-        input = ID3V2_TAG_VERSION_3;
-    }else{
-        input = pref;
-    }
-
-    switch(input){
+    switch(_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:
             return id3v1ReadComment(metadata->id3v1);
         case ID3V2_TAG_VERSION_2:
@@ -909,18 +808,7 @@ uint8_t *id3ReadPicture(uint8_t type, ID3 *metadata, size_t *dataSize){
         return NULL;
     }
 
-    int input = 0;
-    int pref = id3GetPreferedStandard();
-
-    if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
-        input = ID3V1_TAG_VERSION;
-    }else if(pref == ID3V1_TAG_VERSION && metadata->id3v1 == NULL){
-        input = ID3V2_TAG_VERSION_3;
-    }else{
-        input = pref;
-    }
-
-    switch(input){
+    switch(_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:
             *dataSize = 0;
             return NULL;
@@ -937,4 +825,452 @@ uint8_t *id3ReadPicture(uint8_t type, ID3 *metadata, size_t *dataSize){
     *dataSize = 0;
     return NULL;
 
+}
+
+/**
+ * @brief Writes a title to the given ID3 structure using the prefered standard. If the title is not written
+ * this function will return false otherwise it will return true.
+ * 
+ * @param title 
+ * @param metadata 
+ * @return int 
+ */
+int id3WriteTitle(const char *title, ID3 *metadata){
+
+    if(metadata == NULL || title == NULL){
+        return false;
+    }
+
+    if(metadata->id3v1 == NULL && metadata->id3v2 == NULL){
+        return false;
+    }
+
+    switch(_getSafePrefStd(metadata)){
+        case ID3V1_TAG_VERSION:
+            return id3v1WriteTitle(title, metadata->id3v1);
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteTitle(title, metadata->id3v2);
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes an artist to the given ID3 structure using the prefered standard. If the artist is not written
+ * this function will return false otherwise it will return true.
+ * 
+ * @param artist 
+ * @param metadata 
+ * @return int 
+ */
+int id3WriteArtist(const char *artist, ID3 *metadata){
+
+    if(metadata == NULL || artist == NULL){
+        return false;
+    }
+
+    if(metadata->id3v1 == NULL && metadata->id3v2 == NULL){
+        return false;
+    }
+
+    switch(_getSafePrefStd(metadata)){
+        case ID3V1_TAG_VERSION:
+            return id3v1WriteArtist(artist, metadata->id3v1);
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteArtist(artist, metadata->id3v2);
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes an album artist to the given ID3 structure using the prefered standard. If the album artist is not written
+ * this function will return false otherwise it will return true.
+ * @details This function is only available in ID3v2 tags and will always return false for ID3v1.
+ * @param albumArtist 
+ * @param metadata 
+ * @return int 
+ */
+int id3WriteAlbumArtist(const char *albumArtist, ID3 *metadata){
+
+    if(metadata == NULL || albumArtist == NULL){
+        return false;
+    }
+
+    if(metadata->id3v1 == NULL && metadata->id3v2 == NULL){
+        return false;
+    }
+
+    switch(_getSafePrefStd(metadata)){
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteAlbumArtist(albumArtist, metadata->id3v2);
+        case ID3V1_TAG_VERSION:
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes an album to the given ID3 structure using the prefered standard. If the album is not written
+ * this function will return false otherwise it will return true.
+ * 
+ * @param album 
+ * @param metadata 
+ * @return int 
+ */
+int id3WriteAlbum(const char *album, ID3 *metadata){
+    
+    if(metadata == NULL || album == NULL){
+        return false;
+    }
+
+    if(metadata->id3v1 == NULL && metadata->id3v2 == NULL){
+        return false;
+    }
+
+    switch(_getSafePrefStd(metadata)){
+        case ID3V1_TAG_VERSION:
+            return id3v1WriteAlbum(album, metadata->id3v1);
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteAlbum(album, metadata->id3v2);
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes a year to the given ID3 structure using the prefered standard. If the year is not written
+ * this function will return false otherwise it will return true.
+ * 
+ * @param year 
+ * @param metadata 
+ * @return int 
+ */
+int id3WriteYear(const char *year, ID3 *metadata){
+
+    if(metadata == NULL || year == NULL){
+        return false;
+    }
+
+    if(metadata->id3v1 == NULL && metadata->id3v2 == NULL){
+        return false;
+    }
+
+    switch(_getSafePrefStd(metadata)){
+        case ID3V1_TAG_VERSION:{
+            int convi = 0;
+            char *end = NULL;
+            convi = strtol(year, &end, 10);
+            return id3v1WriteYear(convi, metadata->id3v1);
+        }
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteYear(year, metadata->id3v2);
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes a genre to the given ID3 structure using the prefered standard. If the genre is not written
+ * this function will return false otherwise it will return true. If the prefered standard is ID3V1 the genre
+ * will consist of a single byte from 0 to 192 (check id3v1Types.h for the genre table).
+ * 
+ * @param genre 
+ * @param metadata 
+ * @return int 
+ */
+int id3WriteGenre(const char *genre, ID3 *metadata){
+    
+    if(metadata == NULL || genre == NULL){
+        return false;
+    }
+
+    if(metadata->id3v1 == NULL && metadata->id3v2 == NULL){
+        return false;
+    }
+
+    switch(_getSafePrefStd(metadata)){
+        case ID3V1_TAG_VERSION:{    
+            uint8_t usableGenre = (uint8_t) genre[0] > PSYBIENT_GENRE ? OTHER_GENRE : (uint8_t) genre[0];        
+            return id3v1WriteGenre(usableGenre, metadata->id3v1);
+        }
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteGenre(genre, metadata->id3v2);
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes a track to the given ID3 structure using the prefered standard. If the track is not written
+ * this function will return false otherwise it will return true.
+ * 
+ * @param track 
+ * @param metadata 
+ * @return int 
+ */
+int id3WriteTrack(const char *track, ID3 *metadata){
+
+    if(metadata == NULL || track == NULL){
+        return false;
+    }
+
+    if(metadata->id3v1 == NULL && metadata->id3v2 == NULL){
+        return false;
+    }
+
+    switch(_getSafePrefStd(metadata)){
+        case ID3V1_TAG_VERSION:{
+            int convi = 0;
+            char *end = NULL;
+            convi = strtol(track, &end, 10);
+
+            if(convi > UINT8_MAX){
+                convi = UINT8_MAX;
+            }else if(convi < 0){
+                convi = 0;
+            }
+
+            return id3v1WriteTrack(convi, metadata->id3v1);
+        }
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteTrack(track, metadata->id3v2);
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief writes a disc number to the given ID3 structure using the prefered standard. If the disc number is not written
+ * this function will return false otherwise it will return true.
+ * @details This function is only available in ID3v2 tags and will always return false for ID3v1.
+ * @param disc 
+ * @param metadata 
+ * @return int 
+ */
+int id3WriteDisc(const char *disc, ID3 *metadata){
+
+    if(metadata == NULL || disc == NULL){
+        return false;
+    }
+
+    if(metadata->id3v1 == NULL && metadata->id3v2 == NULL){
+        return false;
+    }
+
+    switch(_getSafePrefStd(metadata)){
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteDisc(disc, metadata->id3v2);
+        case ID3V1_TAG_VERSION:
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes composers to the given ID3 structure using the prefered standard. If a composer are not written
+ * this function will return false otherwise it will return true.
+ * @details This function is only available in ID3v2 tags and will always return false for ID3v1.
+ * @param composer 
+ * @param metadata 
+ * @return int 
+ */
+int id3WriteComposer(const char *composer, ID3 *metadata){
+    
+    if(metadata == NULL || composer == NULL){
+        return false;
+    }
+
+    if(metadata->id3v1 == NULL && metadata->id3v2 == NULL){
+        return false;
+    }
+
+    switch(_getSafePrefStd(metadata)){
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteComposer(composer, metadata->id3v2);
+        case ID3V1_TAG_VERSION:
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes lyrics to the given ID3 structure using the prefered standard. If the lyrics are not written
+ * this function will return false otherwise it will return true.
+ * @details This function is only available in ID3v2 tags and will always return false for ID3v1.
+ * @param lyrics 
+ * @param metadata 
+ * @return int 
+ */
+int id3WriteLyrics(const char *lyrics, ID3 *metadata){
+
+    if(metadata == NULL || lyrics == NULL){
+        return false;
+    }
+
+    if(metadata->id3v1 == NULL && metadata->id3v2 == NULL){
+        return false;
+    }
+
+    switch(_getSafePrefStd(metadata)){
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteLyrics(lyrics, metadata->id3v2);
+        case ID3V1_TAG_VERSION:
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes a comment to the given ID3 structure using the prefered standard. If the comment is not written
+ * this function will return false otherwise it will return true.
+ * 
+ * @param comment 
+ * @param metadata 
+ * @return int 
+ */
+int id3WriteComment(const char *comment, ID3 *metadata){
+
+    if(metadata == NULL || comment == NULL){
+        return false;
+    }
+
+    if(metadata->id3v1 == NULL && metadata->id3v2 == NULL){
+        return false;
+    }
+
+    switch(_getSafePrefStd(metadata)){
+        case ID3V1_TAG_VERSION:
+            return id3v1WriteComment(comment, metadata->id3v1);
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WriteComment(comment, metadata->id3v2);
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes a picture to the given ID3 structure using the prefered standard. If the picture is not written
+ * this function will return false otherwise it will return true.
+ * @details This function is only available in ID3v2 tags and will always return false for ID3v1.
+ * 
+ * @param image 
+ * @param imageSize 
+ * @param kind 
+ * @param type 
+ * @param metadata 
+ * @return int 
+ */
+int id3WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_t type, ID3 *metadata){
+    
+    if(metadata == NULL || image == NULL || kind == NULL){
+        return false;
+    }
+
+    if(metadata->id3v1 == NULL && metadata->id3v2 == NULL){
+        return false;
+    }
+
+    switch(_getSafePrefStd(metadata)){
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WritePicture(image, imageSize, kind, type, metadata->id3v2);
+        case ID3V1_TAG_VERSION:
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
+}
+
+/**
+ * @brief Writes a picture from a file to the given ID3 structure using the prefered standard. If the picture is not written
+ * this function will return false otherwise it will return true.
+ * @details This function is only available in ID3v2 tags and will always return false for ID3v1.
+ * 
+ * @param filename 
+ * @param kind 
+ * @param type 
+ * @param metadata 
+ * @return int 
+ */
+int id3WritePictureFromFile(const char *filename, const char *kind, uint8_t type, ID3 *metadata){
+    
+    if(metadata == NULL || filename == NULL || kind == NULL){
+        return false;
+    }
+
+    if(metadata->id3v1 == NULL && metadata->id3v2 == NULL){
+        return false;
+    }
+
+    switch(_getSafePrefStd(metadata)){
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            return id3v2WritePictureFromFile(filename, kind, type, metadata->id3v2);
+        case ID3V1_TAG_VERSION:
+        default:
+            return false;
+    }
+
+    // dummy
+    return false;
 }
