@@ -22,6 +22,7 @@ set(TEST_ASSETS
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/cat.png"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/danybrown2.json"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/sorry4dying.json"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../assets/beetlebum.json"
 )
 
 

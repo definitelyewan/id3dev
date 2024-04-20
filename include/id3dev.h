@@ -83,7 +83,6 @@ int id3WritePictureFromFile(const char *filename, const char *kind, uint8_t type
 
 // writes
 
-ByteStream *id3ToStream(ID3 *metadata);
 char *id3ToJSON(ID3 *metadata);
 int id3WriteToFile(const char *filePath, ID3 *metadata);
 

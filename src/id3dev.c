@@ -184,8 +184,11 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata){
     List *frames = NULL;
     char *str = NULL;
     int size = 0;
+    int input = 0;
 
-    switch(id3GetPreferedStandard()){
+    input = id3GetPreferedStandard() > ID3V1_TAG_VERSION ? id3GetPreferedStandard() : ID3V2_TAG_VERSION_3;
+
+    switch(input){
         case ID3V2_TAG_VERSION_2:
             header = id3v2CreateTagHeader(ID3V2_TAG_VERSION_2, 0, 0, NULL);
             break;
@@ -1273,4 +1276,67 @@ int id3WritePictureFromFile(const char *filename, const char *kind, uint8_t type
 
     // dummy
     return false;
+}
+
+/**
+ * @brief Converts the given ID3 structure to a JSON string. If the ID3 structure is NULL empty JSON is returned.
+ * 
+ * @param metadata 
+ * @return char* 
+ */
+char *id3ToJSON(ID3 *metadata){
+    
+    char *json = NULL;
+    char *id3v1 = NULL;
+    char *id3v2 = NULL;
+    size_t memCount = 3;
+
+    if(metadata == NULL){
+        json = calloc(memCount, sizeof(char));
+        memcpy(json, "{}\0", memCount);
+        return json;
+    }
+
+    id3v1 = id3v1ToJSON(metadata->id3v1);
+    id3v2 = id3v2TagToJSON(metadata->id3v2);
+
+    memCount += snprintf(NULL, 0, "{\"id3v1\":%s,\"id3v2\":%s}", id3v1, id3v2);
+    json = calloc(memCount, sizeof(char));
+    snprintf(json, memCount, "{\"ID3v1\":%s,\"ID3v2\":%s}", id3v1, id3v2);
+
+    free(id3v1);
+    free(id3v2);
+
+    return json;
+}
+
+/**
+ * @brief Writes both ID3v1 and ID3v2 tags to a file using the given ID3 structure. If a tag is found
+ * it will be updated, otherwise it will be created.
+ * 
+ * @param filePath 
+ * @param metadata 
+ * @return int 
+ */
+int id3WriteToFile(const char *filePath, ID3 *metadata){
+
+    if(filePath == NULL || metadata == NULL){
+        return false;
+    }
+
+    // no point in trying
+    if(metadata->id3v1 == NULL && metadata->id3v2 == NULL){
+        return false;
+
+    }
+
+    if(!id3v1WriteTagToFile(filePath, metadata->id3v1)){
+        return false;
+    }
+
+    if(!id3v2WriteTagToFile(filePath, metadata->id3v2)){
+        return false;
+    }
+
+    return true;
 }

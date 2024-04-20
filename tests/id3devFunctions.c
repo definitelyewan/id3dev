@@ -891,10 +891,8 @@ static void id3WritePrictureFromFile_v1v2(void **state){
     fread(picture, 1, picSize, fp);
     fclose(fp);
 
-
     id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
     id3ConvertId3v1ToId3v2(metadata);
-
 
     v = id3WritePictureFromFile("assets/cat.png", "png", 0, metadata);
     assert_true(v);
@@ -910,6 +908,75 @@ static void id3WritePrictureFromFile_v1v2(void **state){
     id3Destroy(&metadata);
 }
 
+static void id3ToJSON_v1Only(void **state){
+    
+    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    char *json = NULL;
+
+    json = id3ToJSON(metadata);
+
+
+
+    assert_string_equal(json, 
+                        "{\"ID3v1\":{\"title\":\"Beetlebum\",\"artist\":\"Blur\",\"album\":\"Blur\",\"year\":1997,\"track\":0,\"comment\":\"test\",\"genreNumber\":17,\"genre\":\"Rock\"},\"ID3v2\":{}}");
+
+    free(json);
+    id3Destroy(&metadata);
+}
+
+static void id3ToJSON_v2Only(void **state){
+    
+    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    char *json = NULL;
+
+    id3ConvertId3v1ToId3v2(metadata);
+    id3v1DestroyTag(&metadata->id3v1);
+
+    json = id3ToJSON(metadata);
+
+    assert_string_equal(json,
+    "{\"ID3v1\":{},\"ID3v2\":{\"header\":{\"major\":3,\"minor\":0,\"flags\":0,\"extended\":{}},\"content\":[{\"header\":{\"id\":\"TIT2\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0},\"content\":[{\"value\":\"1\",\"size\":1},{\"value\":\"Beetlebum\",\"size\":9}]},{\"header\":{\"id\":\"TPE1\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0},\"content\":[{\"value\":\"1\",\"size\":1},{\"value\":\"Blur\",\"size\":4}]},{\"header\":{\"id\":\"TALB\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0},\"content\":[{\"value\":\"1\",\"size\":1},{\"value\":\"Blur\",\"size\":4}]},{\"header\":{\"id\":\"TYER\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0},\"content\":[{\"value\":\"1\",\"size\":1},{\"value\":\"1997\",\"size\":4}]},{\"header\":{\"id\":\"TCON\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0},\"content\":[{\"value\":\"1\",\"size\":1},{\"value\":\"Rock\",\"size\":4}]},{\"header\":{\"id\":\"COMM\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0},\"content\":[{\"value\":\"1\",\"size\":1},{\"value\":\"enh4\",\"size\":3},{\"value\":\"\",\"size\":1},{\"value\":\"test\",\"size\":4}]}]}}");
+
+    free(json);
+    id3Destroy(&metadata);
+}
+
+static void id3ToJSON_v1v2(void **state){
+    
+    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    FILE *fp = NULL;
+    size_t sz = 0;
+    char *json = NULL;
+    uint8_t *data = NULL;
+    
+
+    fp = fopen("assets/beetlebum.json", "rb");
+    fseek(fp, 0, SEEK_END);
+    sz = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+    data = calloc(sz + 1, 1);
+    fread(data, 1, sz, fp);    
+    fclose(fp);
+
+
+    id3ConvertId3v1ToId3v2(metadata);
+
+
+    json = id3ToJSON(metadata);
+
+    assert_string_equal(json, (char *)data);
+
+    free(json);
+    free(data);
+    id3Destroy(&metadata);
+}
+
+static void id3WriteToFile(void **state){
+    
+    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+
+    //id3WriteToFile("assets/tmp", metadata);
+}
 
 int main(){
     
@@ -974,8 +1041,14 @@ int main(){
         cmocka_unit_test(id3WriteLyrics_v1v2),
         cmocka_unit_test(id3WriteComment_v1v2),
         cmocka_unit_test(id3WritePicture_v1v2),
-        cmocka_unit_test(id3WritePrictureFromFile_v1v2)
+        cmocka_unit_test(id3WritePrictureFromFile_v1v2),
 
+        // id3ToJSON
+        cmocka_unit_test(id3ToJSON_v1Only),
+        cmocka_unit_test(id3ToJSON_v2Only),
+        cmocka_unit_test(id3ToJSON_v1v2),
+
+        // id3WriteToFile
 
     };
 
