@@ -1330,13 +1330,27 @@ int id3WriteToFile(const char *filePath, ID3 *metadata){
 
     }
 
-    if(!id3v1WriteTagToFile(filePath, metadata->id3v1)){
-        return false;
+
+    bool v1 = false;
+    bool v2 = false;
+
+    v1 = id3v1WriteTagToFile(filePath, metadata->id3v1);
+    v2 = id3v2WriteTagToFile(filePath, metadata->id3v2);
+
+
+    if(v1 && v2){
+        return true;
     }
 
-    if(!id3v2WriteTagToFile(filePath, metadata->id3v2)){
-        return false;
+    if(v1 == false && (v2 == true && metadata->id3v1 == NULL)){
+        return true;
+
     }
 
-    return true;
+    if(v2 == false && (v1 == true && metadata->id3v2 == NULL)){
+        return true;
+
+    }
+
+    return false;
 }

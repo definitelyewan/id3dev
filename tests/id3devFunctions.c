@@ -407,7 +407,7 @@ static void id3ReadAlbumArtist_v1v2(void **state){
 
 static void id3ReadAlbum_v1v2(void **state){
 
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *str = NULL;
 
     id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
@@ -426,7 +426,7 @@ static void id3ReadAlbum_v1v2(void **state){
 
 static void id3ReadYear_v1v2(void **state){
     
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *str = NULL;
 
     id3SetPreferedStandard(ID3V2_TAG_VERSION_4);
@@ -534,7 +534,7 @@ static void id3ReadLyrics_v1v2(void **state){
 
 static void id3ReadComment_v1v2(void **state){
 
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *str = NULL;
 
     id3SetPreferedStandard(ID3V2_TAG_VERSION_2);
@@ -639,7 +639,7 @@ static void id3WriteArtist_v1v2(void **state){
 
 static void id3WriteAlbumArtist_v1v2(void **state){
     
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *str = NULL;
     bool v = false;
 
@@ -662,7 +662,7 @@ static void id3WriteAlbumArtist_v1v2(void **state){
 
 static void id3WriteYear_v1v2(void **state){
     
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *str = NULL;
     bool v = false;
 
@@ -688,7 +688,7 @@ static void id3WriteYear_v1v2(void **state){
 
 static void id3WriteGenre_v1v2(void **state){
     
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *str = NULL;
     bool v = false;
 
@@ -714,7 +714,7 @@ static void id3WriteGenre_v1v2(void **state){
 
 static void id3WriteTrack_v1v2(void **state){
     
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *str = NULL;
     bool v = false;
 
@@ -741,7 +741,7 @@ static void id3WriteTrack_v1v2(void **state){
 
 static void id3WriteDisc_v1v2(void **state){
     
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *str = NULL;
     bool v = false;
 
@@ -764,7 +764,7 @@ static void id3WriteDisc_v1v2(void **state){
 
 static void id3WriteComposer_v1v2(void **state){
     
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *str = NULL;
     bool v = false;
 
@@ -787,7 +787,7 @@ static void id3WriteComposer_v1v2(void **state){
 
 static void id3WriteLyrics_v1v2(void **state){
     
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *str = NULL;
     bool v = false;
 
@@ -810,7 +810,7 @@ static void id3WriteLyrics_v1v2(void **state){
 
 static void id3WriteComment_v1v2(void **state){
     
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *str = NULL;
     bool v = false;
 
@@ -836,7 +836,7 @@ static void id3WriteComment_v1v2(void **state){
 
 static void id3WritePicture_v1v2(void **state){
     
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     uint8_t *data = NULL;
     bool v = false;
     uint8_t *picture = NULL;
@@ -874,7 +874,7 @@ static void id3WritePicture_v1v2(void **state){
 
 static void id3WritePrictureFromFile_v1v2(void **state){
     
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     uint8_t *data = NULL;
     bool v = false;
     uint8_t *picture = NULL;
@@ -910,7 +910,7 @@ static void id3WritePrictureFromFile_v1v2(void **state){
 
 static void id3ToJSON_v1Only(void **state){
     
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *json = NULL;
 
     json = id3ToJSON(metadata);
@@ -926,7 +926,7 @@ static void id3ToJSON_v1Only(void **state){
 
 static void id3ToJSON_v2Only(void **state){
     
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *json = NULL;
 
     id3ConvertId3v1ToId3v2(metadata);
@@ -943,7 +943,7 @@ static void id3ToJSON_v2Only(void **state){
 
 static void id3ToJSON_v1v2(void **state){
     
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     FILE *fp = NULL;
     size_t sz = 0;
     char *json = NULL;
@@ -971,15 +971,208 @@ static void id3ToJSON_v1v2(void **state){
     id3Destroy(&metadata);
 }
 
-static void id3WriteToFile(void **state){
+static void id3WriteToFile_v1NoTag(void **state){
     
-    ID3 *metadata = id3FromFile("assets/beetlebum.mp3");
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
+    ID3 *metadata2 = NULL;
 
-    //id3WriteToFile("assets/tmp", metadata);
+    assert_true(id3WriteToFile("assets/tmp", metadata));
+    metadata2 = id3FromFile("assets/tmp");
+    remove("assets/tmp");
+
+    assert_non_null(metadata2);
+    assert_non_null(metadata2->id3v1);
+
+    assert_memory_equal(metadata->id3v1->albumTitle, metadata2->id3v1->albumTitle, 30);
+    assert_memory_equal(metadata->id3v1->artist, metadata2->id3v1->artist, 30);
+    assert_memory_equal(metadata->id3v1->comment, metadata2->id3v1->comment, 30);
+    assert_int_equal(metadata->id3v1->genre, metadata2->id3v1->genre);
+    assert_memory_equal(metadata->id3v1->title, metadata2->id3v1->title, 30);
+    assert_int_equal(metadata->id3v1->track, metadata2->id3v1->track);
+    assert_int_equal(metadata->id3v1->year, metadata2->id3v1->year);
+    
+
+    
+    id3Destroy(&metadata2);
+    id3Destroy(&metadata);
+}
+
+
+static void id3WriteToFile_v1UpdateExisting(void **state){
+
+    ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
+    ID3 *metadata2 = NULL;
+
+    id3v1WriteTagToFile("assets/tmp", metadata->id3v1);
+
+
+    id3WriteTitle("test title", metadata);
+    assert_true(id3WriteToFile("assets/tmp", metadata));
+    
+    metadata2 = id3FromFile("assets/tmp");
+    remove("assets/tmp");
+
+    assert_non_null(metadata2);
+    assert_non_null(metadata2->id3v1);
+
+    assert_memory_equal(metadata->id3v1->albumTitle, metadata2->id3v1->albumTitle, 30);
+    assert_memory_equal(metadata->id3v1->artist, metadata2->id3v1->artist, 30);
+    assert_memory_equal(metadata->id3v1->comment, metadata2->id3v1->comment, 30);
+    assert_int_equal(metadata->id3v1->genre, metadata2->id3v1->genre);
+    assert_string_equal("test title", (char *)metadata2->id3v1->title);
+    assert_int_equal(metadata->id3v1->track, metadata2->id3v1->track);
+    assert_int_equal(metadata->id3v1->year, metadata2->id3v1->year);
+    
+
+    
+    id3Destroy(&metadata2);
+    id3Destroy(&metadata);
+}
+
+static void id3WriteToFile_v1AppendTag(void **state){
+
+    char str[6] = "music";
+
+    FILE *fp = fopen("assets/tmp", "w");
+    ID3 *metadata = NULL;
+
+
+    assert_non_null(fp);
+    fwrite(str, sizeof(char), strlen(str), fp);
+    fclose(fp);
+
+
+    metadata = id3FromFile("assets/Beetlebum.mp3");
+    assert_true(id3WriteToFile("assets/tmp", metadata));
+    
+
+    fp = fopen("assets/tmp", "r");
+    assert_non_null(fp);
+    fread(str, sizeof(char), 5, fp);
+    fclose(fp);
+
+    assert_memory_equal(str, "music", 5);
+
+    remove("assets/tmp");
+    id3Destroy(&metadata);
+}
+
+static void id3WriteToFile_v2NoTag(void **state){
+
+    ID3 *metadata = NULL;
+    ID3 *metadata2 = NULL;
+    bool v = false;
+
+    metadata = id3FromFile("assets/Beetlebum.mp3");
+    id3ConvertId3v1ToId3v2(metadata);
+    id3v1DestroyTag(&metadata->id3v1);
+
+    v = id3WriteToFile("assets/tmp", metadata);
+    assert_true(v);
+
+    metadata2 = id3FromFile("assets/tmp");
+
+    v = id3Compare(metadata, metadata2);
+    assert_true(v);
+
+    remove("assets/tmp");
+    id3Destroy(&metadata);
+    id3Destroy(&metadata2);
+}
+
+static void id3WriteToFile_v2UpdateExisting(void **state){
+
+    ID3 *metadata = NULL;
+    ID3 *metadata2 = NULL;
+    bool v = false;
+
+    metadata = id3FromFile("assets/Beetlebum.mp3");
+    id3ConvertId3v1ToId3v2(metadata);
+    id3v1DestroyTag(&metadata->id3v1);
+
+    v = id3WriteToFile("assets/tmp", metadata);
+    assert_true(v);
+
+    metadata2 = id3FromFile("assets/tmp");
+    id3WriteTitle("test title", metadata2);
+    v = id3WriteToFile("assets/tmp", metadata2);
+    assert_true(v);
+
+    id3Destroy(&metadata);
+    metadata = id3FromFile("assets/tmp");
+    v = id3Compare(metadata, metadata2);
+    assert_true(v);
+
+
+    id3Destroy(&metadata);
+    id3Destroy(&metadata2);
+}
+
+static void id3WriteToFile_v2PrependTag(void **state){
+
+    char str[6] = "music";
+
+    FILE *fp = fopen("assets/tmp", "w");
+    ID3 *metadata = NULL;
+
+
+    assert_non_null(fp);
+    fwrite(str, sizeof(char), strlen(str), fp);
+    fclose(fp);
+
+
+    metadata = id3FromFile("assets/Beetlebum.mp3");
+    id3ConvertId3v1ToId3v2(metadata);
+    id3v1DestroyTag(&metadata->id3v1);
+    assert_true(id3WriteToFile("assets/tmp", metadata));
+    
+
+    fp = fopen("assets/tmp", "r");
+    assert_non_null(fp);
+    fseek(fp, -5, SEEK_END);
+    fread(str, sizeof(char), 5, fp);
+    fclose(fp);
+
+    assert_memory_equal(str, "music", 5);
+
+    remove("assets/tmp");
+    id3Destroy(&metadata);
+}
+
+static void id3WriteToFile_v1v2NoTags(void **state){
+
+    ID3 *metadata = NULL;
+    ID3 *metadata2 = NULL;
+    bool v = false;
+
+    metadata = id3FromFile("assets/sorry4dying.mp3");
+
+    v = id3WriteToFile("assets/tmp", metadata);
+    assert_true(v);
+    
+    metadata2 = id3FromFile("assets/tmp");
+    remove("assets/tmp");
+
+
+    v = id3Compare(metadata, metadata2);
+    assert_true(v);
+
+    id3Destroy(&metadata);
+    id3Destroy(&metadata2);
 }
 
 int main(){
     
+    FILE *fp = NULL;
+
+    fp = fopen("assets/tmp", "r");
+
+    if(fp != NULL){
+        fclose(fp);
+        remove("assets/tmp");
+    }
+
+
     const struct CMUnitTest tests[] = {
 
         // id3Create & id3Destroy
@@ -1049,6 +1242,13 @@ int main(){
         cmocka_unit_test(id3ToJSON_v1v2),
 
         // id3WriteToFile
+        cmocka_unit_test(id3WriteToFile_v1NoTag),
+        cmocka_unit_test(id3WriteToFile_v1UpdateExisting),
+        cmocka_unit_test(id3WriteToFile_v1AppendTag),
+        cmocka_unit_test(id3WriteToFile_v2NoTag),
+        cmocka_unit_test(id3WriteToFile_v2UpdateExisting),
+        cmocka_unit_test(id3WriteToFile_v2PrependTag),
+        cmocka_unit_test(id3WriteToFile_v1v2NoTags),
 
     };
 
