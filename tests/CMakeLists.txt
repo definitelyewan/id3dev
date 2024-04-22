@@ -9,13 +9,11 @@ set(TEST_ID3V2 "${CMAKE_CURRENT_SOURCE_DIR}/id3v2Functions.c")
 set(TEST_ID3DEV "${CMAKE_CURRENT_SOURCE_DIR}/id3devFunctions.c")
 
 set(TEST_ASSETS
-  "${CMAKE_CURRENT_SOURCE_DIR}/../assets/Archangel.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/Beetlebum.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/boniver.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/dannybrown.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/danybrown2.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/empty.mp3"
-  "${CMAKE_CURRENT_SOURCE_DIR}/../assets/emptyb.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/OnGP.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/sorry4dying.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/null.mp3"

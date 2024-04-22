@@ -96,4 +96,3 @@ X = full support, - = partial support, " " = no support
 
 TODO:
 1. fix bit_context in parser to reflect the ToByteStream versions
-2. move hashtable to before parsing loop should be pass 1
