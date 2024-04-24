@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
      * the image type is usually set to 3 for cover art in mp3 files
      * 
      */
-    picture = id3ReadPicture(0, id3, &pictureSize);
+    picture = id3ReadPicture(3, id3, &pictureSize);
 
     /**
      * Check to see if the ID3 structure contains a picture, if not exit. Not all
