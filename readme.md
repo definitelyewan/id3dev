@@ -94,5 +94,14 @@ Encrypted meta frame                            |    |    |CRM|X|
 ```
 X = full support, - = partial support, " " = no support
 
-TODO:
-1. fix bit_context in parser to reflect the ToByteStream versions
+### Possible interfaces
+1. Go
+2. Java
+3. Java Script
+4. Julia
+5. Kotlin
+6. Perl
+7. Python <- must
+8. Ruby
+9. Rust <- must
+10. Swift

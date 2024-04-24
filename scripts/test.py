@@ -44,6 +44,7 @@ update.message("Compiling id3v2_test program")
 compile_code("id3v2_test")
 update.message("Compiling id3dev_test program")
 compile_code("id3dev_test")
+
 # call test execs
 try:
     if platform == "linux" or platform == "linux2":
