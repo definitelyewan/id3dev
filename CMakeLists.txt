@@ -9,9 +9,6 @@ option(BUILD_ID3_TESTS "build tests" OFF)
 option(DEDUB_ID3_SYMBOLS "enables debugging" ON)
 option(BUILD_ID3_C_EXAMPLES "builds examples" OFF)
 
-# interface options
-option(BUILD_PYTHON_INTERFACE_MODULE "build python interface module" OFF)
-
 set(ID3V1_HEADERS
   "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v1/id3v1.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v1/id3v1Parser.h"
