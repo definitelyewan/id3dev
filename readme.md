@@ -1,16 +1,135 @@
-# id3dev status
+# ID3dev
+ID3dev is a library crafted to support all versions of the ID3 standard including ID3v1, ID3v1.1, ID3v2.2, ID3v2.3, and ID3v2.4. It is versatile and programmable allowing users to generate custom metadata that better suits their needs.
+
+## Table Of Contents
+- [Table Of Contents](#table-of-contents)
+- 
+
+
+
+
+- [What Can It Do?](#what-can-it-do-)
+  * [Frame Support](#frame-support)
+- [Building and Installing](#building-and-installing)
+  * [Building Using GNU Make in UNIX Systems](#building-using-gnu-make-in-unix-systems)
+  * [Building Using CMake](#building-using-cmake)
+- [Usage](#usage)
+- [API](#api)
+  * [File Functions](#file-functions)
+  * [Tag Functions](#tag-functions)
+    + [Getter Functions](#getter-functions)
+    + [Setter Functions](#setter-functions)
+    + [Delete Functions](#delete-functions)
+- [Examples](#examples)
+    + [Load Tags](#load-tags)
+    + [Edit Tags](#edit-tags)
+    + [Delete Tags](#delete-tags)
+- [Extending Functionality](#extending-functionality)
+    + [Read New Frames](#read-new-frames)
+    + [Edit New Frames](#edit-new-frames)
+- [Compatibility Layer](#compatibility-layer)
+- [Projects](#projects)
+- [Copyright](#copyright)
+- [Questions?](#questions-)
+
+## What Can It Do?
+ID3dev is capable of reading, manipulating, converting, and outputting all supported frames found within the ID3v2.x specifications with only a couple of exceptions when it comes to features (see below table). Additionally, it supports all previously mentioned features for ID3v1.x with the ability to dynamically switch between ID3v2.x and ID3v1.x standards.
+
+### Frame Support
+Keep in mind that not all frames are supported in every version.
+✅ = full support, 🟡 = partial support, ❌ = no support.
+
+| Frame | ID3v1 | ID3v1.1 | ID3v2.2 ID | ID3v2.3 ID | ID3v2.4 ID | Library Support |
+|-------|-------|---------|------------|------------|------------|-----------------|
+| Audio encryption                  |       |         | CRA        | AENC       | AENC       | ✅               |
+| Attached picture                  |       |         | PIC        | APIC       | APIC       | ✅               |
+| Seek point index                  |       |         |            |            | ASPI       | ✅               |
+| Comments                          | Yes   | Yes     | COM        | COMM       | COMM       | ✅               |
+| Commercial                        |       |         |            | COMR       | COMR       | ✅               |
+| Encryption method registration    |       |         |            | ENCR       | ENCR       | ✅               |
+| Equalization                      |       |         | EQU        | EQU2       | EQU2       | ✅               |
+| Event timing codes                |       |         | ETC        | ETCO       | ETCO       | ✅               |
+| General encapsulated object       |       |         | GEO        | GEOB       | GEOB       | ✅               |
+| Group identification registration |       |         |            | GRID       | GRID       | ✅               |
+
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+
+
 ```bash
                                                 |2.4 |2.3 |2.2|SUPPORT?
-Audio encryption                                |AENC|AENC|CRA|X|
-Attached picture                                |APIC|APIC|PIC|X|
-seek point index                                |ASPI|    |   |X| 
-Comments                                        |COMM|COMM|COM|X|
-Commercial frame                                |COMR|COMR|   |X|
-Encryption method registration                  |ENCR|ENCR|   |X|
-Equalization                                    |EQU2|EQUA|EQU|X|
-Event timing codes                              |ETCO|ETCO|ETC|X|
-General encapsulated object                     |GEOB|GEOB|GEO|X|
-Group identification registration               |GRID|GRID|   |X|
 Linked information                              |LINK|LINK|LNK|X|
 Music CD identifier                             |MCDI|MCDI|MCI|X|
 MPEG location lookup table                      |MLLT|MLLT|MLL|-|
@@ -92,16 +211,3 @@ Size                                            |    |TSIZ|TSI|X|
 Year                                            |    |TYER|TYE|X|
 Encrypted meta frame                            |    |    |CRM|X|
 ```
-X = full support, - = partial support, " " = no support
-
-### Possible interfaces
-1. Go
-2. Java
-3. Java Script
-4. Julia
-5. Kotlin
-6. Perl
-7. Python <- must
-8. Ruby
-9. Rust <- must
-10. Swift
