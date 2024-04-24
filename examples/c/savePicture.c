@@ -31,8 +31,7 @@ int main(int argc, char *argv[]){
 
     /**
      * Reads the attached picture from an ID3v2.x tag with the image type of 0.
-     * the image type is usually set to 0 for cover art in mp3 files despite not
-     * matching the ID3v2.x specification.
+     * the image type is usually set to 3 for cover art in mp3 files
      * 
      */
     picture = id3ReadPicture(0, id3, &pictureSize);
