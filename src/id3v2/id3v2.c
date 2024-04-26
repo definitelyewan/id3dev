@@ -499,7 +499,7 @@ char *id3v2ReadYear(Id3v2Tag *tag){
 }
 
 /**
- * @brief Reads the first Track number/Position in set (TRK or TRCK) of a tag.
+ * @brief Reads the first Content type (TCO or TCON) of a tag.
  * If no track is found, NULL is returned.
  * 
  * @param tag 
