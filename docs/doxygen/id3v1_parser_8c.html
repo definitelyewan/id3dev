@@ -87,8 +87,8 @@ $(function() {
 <div class="textblock"><code>#include &lt;stdio.h&gt;</code><br />
 <code>#include &lt;stdlib.h&gt;</code><br />
 <code>#include &lt;string.h&gt;</code><br />
-<code>#include &quot;<a class="el" href="id3v1_types_8h_source.html">id3v1Types.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="id3v1_parser_8h_source.html">id3v1Parser.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="id3v1_types_8h_source.html">id3v1/id3v1Types.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="id3v1_parser_8h_source.html">id3v1/id3v1Parser.h</a>&quot;</code><br />
 <code>#include &quot;byteStream.h&quot;</code><br />
 <code>#include &quot;byteInt.h&quot;</code><br />
 </div><table class="memberdecls">
@@ -97,9 +97,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a7eac56ee8feaf452f3b9f88c45427d0a" id="r_a7eac56ee8feaf452f3b9f88c45427d0a"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7eac56ee8feaf452f3b9f88c45427d0a">id3v1HasTag</a> (uint8_t *buffer)</td></tr>
 <tr class="memdesc:a7eac56ee8feaf452f3b9f88c45427d0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Detect a "TAG" magic number/ID to identify the use of id3v1.  <br /></td></tr>
 <tr class="separator:a7eac56ee8feaf452f3b9f88c45427d0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac6b66e55a3ca2fe4d8668c0dbb00e979" id="r_ac6b66e55a3ca2fe4d8668c0dbb00e979"><td class="memItemLeft" align="right" valign="top"><a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac6b66e55a3ca2fe4d8668c0dbb00e979">id3v1NewTag</a> (uint8_t *title, uint8_t *artist, uint8_t *albumTitle, int year, int track, uint8_t *comment, <a class="el" href="id3v1_types_8h.html#aa6d6dd12fa3caefc5ad3b07dd45b0219">Genre</a> genre)</td></tr>
-<tr class="memdesc:ac6b66e55a3ca2fe4d8668c0dbb00e979"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an Id3v1Tag structure.  <br /></td></tr>
-<tr class="separator:ac6b66e55a3ca2fe4d8668c0dbb00e979"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5af98f4cfa0fea41a60ebff631013b4" id="r_ae5af98f4cfa0fea41a60ebff631013b4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae5af98f4cfa0fea41a60ebff631013b4">id3v1CreateTag</a> (uint8_t *title, uint8_t *artist, uint8_t *albumTitle, int year, int track, uint8_t *comment, <a class="el" href="id3v1_types_8h.html#aa6d6dd12fa3caefc5ad3b07dd45b0219">Genre</a> genre)</td></tr>
+<tr class="memdesc:ae5af98f4cfa0fea41a60ebff631013b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates an Id3v1Tag structure.  <br /></td></tr>
+<tr class="separator:ae5af98f4cfa0fea41a60ebff631013b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a43bfa9ef125cafd792dde1a8e0638fe2" id="r_a43bfa9ef125cafd792dde1a8e0638fe2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a43bfa9ef125cafd792dde1a8e0638fe2">id3v1ClearTag</a> (<a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> *tag)</td></tr>
 <tr class="memdesc:a43bfa9ef125cafd792dde1a8e0638fe2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets all structure members to empty.  <br /></td></tr>
 <tr class="separator:a43bfa9ef125cafd792dde1a8e0638fe2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -139,6 +139,67 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ae5af98f4cfa0fea41a60ebff631013b4" name="ae5af98f4cfa0fea41a60ebff631013b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5af98f4cfa0fea41a60ebff631013b4">&#9670;&#160;</a></span>id3v1CreateTag()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> * id3v1CreateTag </td>
+          <td>(</td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>title</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>artist</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>albumTitle</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>year</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>track</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>comment</em>, </span></td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="id3v1_types_8h.html#aa6d6dd12fa3caefc5ad3b07dd45b0219">Genre</a></td>          <td class="paramname"><span class="paramname"><em>genre</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Creates an Id3v1Tag structure. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">title</td><td></td></tr>
+    <tr><td class="paramname">artist</td><td></td></tr>
+    <tr><td class="paramname">albumTitle</td><td></td></tr>
+    <tr><td class="paramname">year</td><td></td></tr>
+    <tr><td class="paramname">track</td><td></td></tr>
+    <tr><td class="paramname">comment</td><td></td></tr>
+    <tr><td class="paramname">genre</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Id3v1Tag* </dd></dl>
 
 </div>
 </div>
@@ -192,67 +253,6 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>true </dd>
 <dd>
 false </dd></dl>
-
-</div>
-</div>
-<a id="ac6b66e55a3ca2fe4d8668c0dbb00e979" name="ac6b66e55a3ca2fe4d8668c0dbb00e979"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac6b66e55a3ca2fe4d8668c0dbb00e979">&#9670;&#160;</a></span>id3v1NewTag()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> * id3v1NewTag </td>
-          <td>(</td>
-          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>title</em>, </span></td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>artist</em>, </span></td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>albumTitle</em>, </span></td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>year</em>, </span></td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>track</em>, </span></td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *</td>          <td class="paramname"><span class="paramname"><em>comment</em>, </span></td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="id3v1_types_8h.html#aa6d6dd12fa3caefc5ad3b07dd45b0219">Genre</a></td>          <td class="paramname"><span class="paramname"><em>genre</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Creates an Id3v1Tag structure. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">title</td><td></td></tr>
-    <tr><td class="paramname">artist</td><td></td></tr>
-    <tr><td class="paramname">albumTitle</td><td></td></tr>
-    <tr><td class="paramname">year</td><td></td></tr>
-    <tr><td class="paramname">track</td><td></td></tr>
-    <tr><td class="paramname">comment</td><td></td></tr>
-    <tr><td class="paramname">genre</td><td></td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>Id3v1Tag* </dd></dl>
 
 </div>
 </div>

@@ -12,7 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "id3v1.h"
+#include "id3v1/id3v1Parser.h"
+#include "id3v1/id3v1.h"
 #include "byteStream.h"
 #include "byteInt.h"
 
@@ -61,7 +62,7 @@ Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy){
         return NULL;
     }
 
-    return id3v1NewTag(toCopy->title, toCopy->artist, toCopy->albumTitle, toCopy->year, toCopy->track, toCopy->comment, toCopy->genre);
+    return id3v1CreateTag(toCopy->title, toCopy->artist, toCopy->albumTitle, toCopy->year, toCopy->track, toCopy->comment, toCopy->genre);
 }
 
 /**
@@ -71,7 +72,7 @@ Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy){
  * @param dest 
  * @return int 
  */
-int _id3v1CharsToStructUint8(char *src, uint8_t *dest){
+static int _id3v1CharsToStructUint8(const char *src, uint8_t *dest){
 
     memset(dest, 0, ID3V1_FIELD_SIZE);
     
@@ -92,7 +93,7 @@ int _id3v1CharsToStructUint8(char *src, uint8_t *dest){
  * @param tag 
  * @return int 
  */
-int id3v1WriteTitle(char *title, Id3v1Tag *tag){
+int id3v1WriteTitle(const char *title, Id3v1Tag *tag){
     return (tag == NULL) ? 0: _id3v1CharsToStructUint8(title, tag->title);
 }
 
@@ -102,7 +103,7 @@ int id3v1WriteTitle(char *title, Id3v1Tag *tag){
  * @param tag 
  * @return int 
  */
-int id3v1WriteArtist(char *artist, Id3v1Tag *tag){
+int id3v1WriteArtist(const char *artist, Id3v1Tag *tag){
     return (tag == NULL) ? 0: _id3v1CharsToStructUint8(artist, tag->artist);
 }
 
@@ -112,7 +113,7 @@ int id3v1WriteArtist(char *artist, Id3v1Tag *tag){
  * @param tag 
  * @return int 
  */
-int id3v1WriteAlbum(char *album, Id3v1Tag *tag){
+int id3v1WriteAlbum(const char *album, Id3v1Tag *tag){
     return (tag == NULL) ? 0: _id3v1CharsToStructUint8(album, tag->albumTitle);
 }
 
@@ -138,7 +139,7 @@ int id3v1WriteYear(int year, Id3v1Tag *tag){
  * @param tag 
  * @return int 
  */
-int id3v1WriteComment(char *comment, Id3v1Tag *tag){
+int id3v1WriteComment(const char *comment, Id3v1Tag *tag){
     return (tag == NULL) ? 0: _id3v1CharsToStructUint8(comment, tag->comment);
 }
 
@@ -626,7 +627,9 @@ char *id3v1GenreFromTable(Genre val){
  * @return char* 
  */
 char *id3v1ReadTitle(Id3v1Tag *tag){
-    return (char *)tag->title;
+    char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
+    memcpy(r, tag->title, ID3V1_FIELD_SIZE);
+    return r;
 }
 
 /**
@@ -636,7 +639,9 @@ char *id3v1ReadTitle(Id3v1Tag *tag){
  * @return char* 
  */
 char *id3v1ReadArtist(Id3v1Tag *tag){
-    return (char *)tag->artist;
+    char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
+    memcpy(r, tag->artist, ID3V1_FIELD_SIZE);
+    return r;
 }
 
 /**
@@ -646,7 +651,9 @@ char *id3v1ReadArtist(Id3v1Tag *tag){
  * @return char* 
  */
 char *id3v1ReadAlbum(Id3v1Tag *tag){
-    return (char *)tag->albumTitle;
+    char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
+    memcpy(r, tag->albumTitle, ID3V1_FIELD_SIZE);
+    return r;
 }
 
 /**
@@ -666,7 +673,9 @@ int id3v1ReadYear(Id3v1Tag *tag){
  * @return char* 
  */
 char *id3v1ReadComment(Id3v1Tag *tag){
-    return (char *)tag->comment;
+    char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
+    memcpy(r, tag->comment, ID3V1_FIELD_SIZE);
+    return r;
 }
 
 /**

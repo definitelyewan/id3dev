@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "byteInt.h"
-#include "id3v2TagIdentity.h"
+#include "id3v2/id3v2TagIdentity.h"
 #include "byteStream.h"
 #include "byteInt.h"
 

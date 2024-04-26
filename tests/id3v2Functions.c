@@ -17,10 +17,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include "id3v2.h"
-#include "id3v2Frame.h"
+#include "id3v2/id3v2.h"
+#include "id3v2/id3v2Frame.h"
 #include "byteStream.h"
-#include "id3v2Parser.h"
+#include "id3v2/id3v2Parser.h"
 
 static void id3v2TagFromFile_v3(void **state){
 
@@ -1357,7 +1357,6 @@ static void id3v2WriteTagToFile_v4OverwriteNoPictures(void **state){
     FILE *fp = NULL;
     size_t sz = 0;
     uint8_t *data = NULL;
-    Id3v2Frame *f = NULL;
 
     assert_true(id3v2RemoveFrameByID("APIC", tag));
     assert_true(id3v2RemoveFrameByID("APIC", tag));

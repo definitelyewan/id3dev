@@ -6,21 +6,21 @@ set(TEST_ID3V2_CONTEXT "${CMAKE_CURRENT_SOURCE_DIR}/id3v2ContextFunctions.c")
 set(TEST_ID3V2_PARSER "${CMAKE_CURRENT_SOURCE_DIR}/id3v2ParserFunctions.c")
 set(TEST_ID3V2_FRAME "${CMAKE_CURRENT_SOURCE_DIR}/id3v2FrameFunctions.c")
 set(TEST_ID3V2 "${CMAKE_CURRENT_SOURCE_DIR}/id3v2Functions.c")
+set(TEST_ID3DEV "${CMAKE_CURRENT_SOURCE_DIR}/id3devFunctions.c")
 
 set(TEST_ASSETS
-  "${CMAKE_CURRENT_SOURCE_DIR}/../assets/Archangel.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/Beetlebum.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/boniver.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/dannybrown.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/danybrown2.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/empty.mp3"
-  "${CMAKE_CURRENT_SOURCE_DIR}/../assets/emptyb.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/OnGP.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/sorry4dying.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/null.mp3"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/cat.png"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/danybrown2.json"
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/sorry4dying.json"
+  "${CMAKE_CURRENT_SOURCE_DIR}/../assets/beetlebum.json"
 )
 
 
@@ -61,6 +61,12 @@ set_target_properties(id3v2_test PROPERTIES C_STANDARD 99)
 target_link_libraries(id3v2_test PRIVATE Id3dev)
 target_link_libraries(id3v2_test PRIVATE ByteStream)
 target_link_libraries(id3v2_test PRIVATE cmocka)
+
+add_executable(id3dev_test ${TEST_ID3DEV})
+set_target_properties(id3dev_test PROPERTIES C_STANDARD 99)
+target_link_libraries(id3dev_test PRIVATE Id3dev)
+target_link_libraries(id3dev_test PRIVATE ByteStream)
+target_link_libraries(id3dev_test PRIVATE cmocka)
 
 
 file(

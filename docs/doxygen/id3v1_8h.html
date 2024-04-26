@@ -85,7 +85,6 @@ $(function() {
 <p>Declarations used by utility functions.  
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="id3v1_types_8h_source.html">id3v1Types.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="id3v1_parser_8h_source.html">id3v1Parser.h</a>&quot;</code><br />
 </div>
 <p><a href="id3v1_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -97,21 +96,21 @@ Functions</h2></td></tr>
 <tr class="memitem:a05c58ed2a035439a31df356736ba27e8" id="r_a05c58ed2a035439a31df356736ba27e8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a05c58ed2a035439a31df356736ba27e8">id3v1CopyTag</a> (<a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> *toCopy)</td></tr>
 <tr class="memdesc:a05c58ed2a035439a31df356736ba27e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Deep copies an Id3v1Tag structure.  <br /></td></tr>
 <tr class="separator:a05c58ed2a035439a31df356736ba27e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab12a4456e1276ca7aacf7d3faf147c36" id="r_ab12a4456e1276ca7aacf7d3faf147c36"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab12a4456e1276ca7aacf7d3faf147c36">id3v1WriteTitle</a> (char *title, <a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> *tag)</td></tr>
-<tr class="memdesc:ab12a4456e1276ca7aacf7d3faf147c36"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a title to tag.  <br /></td></tr>
-<tr class="separator:ab12a4456e1276ca7aacf7d3faf147c36"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5a0b228ff0fddc25e95aabe39c0e4dc5" id="r_a5a0b228ff0fddc25e95aabe39c0e4dc5"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5a0b228ff0fddc25e95aabe39c0e4dc5">id3v1WriteArtist</a> (char *artist, <a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> *tag)</td></tr>
-<tr class="memdesc:a5a0b228ff0fddc25e95aabe39c0e4dc5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a artist to tag.  <br /></td></tr>
-<tr class="separator:a5a0b228ff0fddc25e95aabe39c0e4dc5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab9608890c443712d9d43ffe2e658b825" id="r_ab9608890c443712d9d43ffe2e658b825"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab9608890c443712d9d43ffe2e658b825">id3v1WriteAlbum</a> (char *album, <a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> *tag)</td></tr>
-<tr class="memdesc:ab9608890c443712d9d43ffe2e658b825"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes an album to tag.  <br /></td></tr>
-<tr class="separator:ab9608890c443712d9d43ffe2e658b825"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9f4efa158e28627c4f2006d81b76c3e" id="r_ab9f4efa158e28627c4f2006d81b76c3e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab9f4efa158e28627c4f2006d81b76c3e">id3v1WriteTitle</a> (const char *title, <a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> *tag)</td></tr>
+<tr class="memdesc:ab9f4efa158e28627c4f2006d81b76c3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a title to tag.  <br /></td></tr>
+<tr class="separator:ab9f4efa158e28627c4f2006d81b76c3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3809bac1e3d5144c60efeae06fb2722f" id="r_a3809bac1e3d5144c60efeae06fb2722f"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3809bac1e3d5144c60efeae06fb2722f">id3v1WriteArtist</a> (const char *artist, <a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> *tag)</td></tr>
+<tr class="memdesc:a3809bac1e3d5144c60efeae06fb2722f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a artist to tag.  <br /></td></tr>
+<tr class="separator:a3809bac1e3d5144c60efeae06fb2722f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab78275a33ab10a48b691181b68656031" id="r_ab78275a33ab10a48b691181b68656031"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab78275a33ab10a48b691181b68656031">id3v1WriteAlbum</a> (const char *album, <a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> *tag)</td></tr>
+<tr class="memdesc:ab78275a33ab10a48b691181b68656031"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes an album to tag.  <br /></td></tr>
+<tr class="separator:ab78275a33ab10a48b691181b68656031"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac9df9ba66d7b15c379fc9e65e653132e" id="r_ac9df9ba66d7b15c379fc9e65e653132e"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac9df9ba66d7b15c379fc9e65e653132e">id3v1WriteYear</a> (int year, <a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> *tag)</td></tr>
 <tr class="memdesc:ac9df9ba66d7b15c379fc9e65e653132e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a year to tag.  <br /></td></tr>
 <tr class="separator:ac9df9ba66d7b15c379fc9e65e653132e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad2d936e7ed01d12a9726d51a3386f9bf" id="r_ad2d936e7ed01d12a9726d51a3386f9bf"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad2d936e7ed01d12a9726d51a3386f9bf">id3v1WriteComment</a> (char *comment, <a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> *tag)</td></tr>
-<tr class="memdesc:ad2d936e7ed01d12a9726d51a3386f9bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a comment to tag.  <br /></td></tr>
-<tr class="separator:ad2d936e7ed01d12a9726d51a3386f9bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ade086f02e14d043bd7a4fc9eaea1e6" id="r_a9ade086f02e14d043bd7a4fc9eaea1e6"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9ade086f02e14d043bd7a4fc9eaea1e6">id3v1WriteComment</a> (const char *comment, <a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> *tag)</td></tr>
+<tr class="memdesc:a9ade086f02e14d043bd7a4fc9eaea1e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a comment to tag.  <br /></td></tr>
+<tr class="separator:a9ade086f02e14d043bd7a4fc9eaea1e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a540dae8e8e2d0c88884b4ad02536206b" id="r_a540dae8e8e2d0c88884b4ad02536206b"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a540dae8e8e2d0c88884b4ad02536206b">id3v1WriteGenre</a> (<a class="el" href="id3v1_types_8h.html#aa6d6dd12fa3caefc5ad3b07dd45b0219">Genre</a> genre, <a class="el" href="id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e">Id3v1Tag</a> *tag)</td></tr>
 <tr class="memdesc:a540dae8e8e2d0c88884b4ad02536206b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a genere to tag.  <br /></td></tr>
 <tr class="separator:a540dae8e8e2d0c88884b4ad02536206b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -478,8 +477,8 @@ false </dd></dl>
 
 </div>
 </div>
-<a id="ab9608890c443712d9d43ffe2e658b825" name="ab9608890c443712d9d43ffe2e658b825"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab9608890c443712d9d43ffe2e658b825">&#9670;&#160;</a></span>id3v1WriteAlbum()</h2>
+<a id="ab78275a33ab10a48b691181b68656031" name="ab78275a33ab10a48b691181b68656031"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab78275a33ab10a48b691181b68656031">&#9670;&#160;</a></span>id3v1WriteAlbum()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -487,7 +486,7 @@ false </dd></dl>
         <tr>
           <td class="memname">int id3v1WriteAlbum </td>
           <td>(</td>
-          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>album</em>, </span></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>album</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -509,8 +508,8 @@ false </dd></dl>
 
 </div>
 </div>
-<a id="a5a0b228ff0fddc25e95aabe39c0e4dc5" name="a5a0b228ff0fddc25e95aabe39c0e4dc5"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5a0b228ff0fddc25e95aabe39c0e4dc5">&#9670;&#160;</a></span>id3v1WriteArtist()</h2>
+<a id="a3809bac1e3d5144c60efeae06fb2722f" name="a3809bac1e3d5144c60efeae06fb2722f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3809bac1e3d5144c60efeae06fb2722f">&#9670;&#160;</a></span>id3v1WriteArtist()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -518,7 +517,7 @@ false </dd></dl>
         <tr>
           <td class="memname">int id3v1WriteArtist </td>
           <td>(</td>
-          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>artist</em>, </span></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>artist</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -540,8 +539,8 @@ false </dd></dl>
 
 </div>
 </div>
-<a id="ad2d936e7ed01d12a9726d51a3386f9bf" name="ad2d936e7ed01d12a9726d51a3386f9bf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad2d936e7ed01d12a9726d51a3386f9bf">&#9670;&#160;</a></span>id3v1WriteComment()</h2>
+<a id="a9ade086f02e14d043bd7a4fc9eaea1e6" name="a9ade086f02e14d043bd7a4fc9eaea1e6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ade086f02e14d043bd7a4fc9eaea1e6">&#9670;&#160;</a></span>id3v1WriteComment()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -549,7 +548,7 @@ false </dd></dl>
         <tr>
           <td class="memname">int id3v1WriteComment </td>
           <td>(</td>
-          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>comment</em>, </span></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>comment</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -633,8 +632,8 @@ false </dd></dl>
 
 </div>
 </div>
-<a id="ab12a4456e1276ca7aacf7d3faf147c36" name="ab12a4456e1276ca7aacf7d3faf147c36"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab12a4456e1276ca7aacf7d3faf147c36">&#9670;&#160;</a></span>id3v1WriteTitle()</h2>
+<a id="ab9f4efa158e28627c4f2006d81b76c3e" name="ab9f4efa158e28627c4f2006d81b76c3e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab9f4efa158e28627c4f2006d81b76c3e">&#9670;&#160;</a></span>id3v1WriteTitle()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -642,7 +641,7 @@ false </dd></dl>
         <tr>
           <td class="memname">int id3v1WriteTitle </td>
           <td>(</td>
-          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>title</em>, </span></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>title</em>, </span></td>
         </tr>
         <tr>
           <td class="paramkey"></td>

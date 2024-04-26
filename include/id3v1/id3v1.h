@@ -17,7 +17,6 @@ extern "C"{
 #endif
 
 #include "id3v1Types.h"
-#include "id3v1Parser.h"
 
 Id3v1Tag *id3v1TagFromFile(const char *filePath);
 Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy);
@@ -25,11 +24,11 @@ Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy);
 
 //functions to change values within a id3v1 structure
 
-int id3v1WriteTitle(char *title, Id3v1Tag *tag);
-int id3v1WriteArtist(char *artist, Id3v1Tag *tag);
-int id3v1WriteAlbum(char *album, Id3v1Tag *tag);
+int id3v1WriteTitle(const char *title, Id3v1Tag *tag);
+int id3v1WriteArtist(const char *artist, Id3v1Tag *tag);
+int id3v1WriteAlbum(const char *album, Id3v1Tag *tag);
 int id3v1WriteYear(int year, Id3v1Tag *tag);
-int id3v1WriteComment(char *comment, Id3v1Tag *tag);
+int id3v1WriteComment(const char *comment, Id3v1Tag *tag);
 int id3v1WriteGenre(Genre genre, Id3v1Tag *tag);
 int id3v1WriteTrack(int track, Id3v1Tag *tag);
 

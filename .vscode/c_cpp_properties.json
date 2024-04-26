@@ -6,7 +6,8 @@
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/modules/cmocka/include",
                 "${workspaceFolder}/modules/LinkedListLib/include",
-                "${workspaceFolder}/modules/ByteStream/include"
+                "${workspaceFolder}/modules/ByteStream/include",
+                "/opt/homebrew/Cellar/python@3.12/3.12.3/Frameworks/Python.framework/Versions/3.12/include/python3.12/"
             ],
             "defines": [
                 "_DEBUG",

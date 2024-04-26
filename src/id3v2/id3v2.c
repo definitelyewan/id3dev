@@ -14,11 +14,11 @@
 #include <string.h>
 #include "byteStream.h"
 #include "byteUnicode.h"
-#include "id3v2.h"
-#include "id3v2Frame.h"
-#include "id3v2Parser.h"
-#include "id3v2Context.h"
-#include "id3v2TagIdentity.h"
+#include "id3v2/id3v2.h"
+#include "id3v2/id3v2Frame.h"
+#include "id3v2/id3v2Parser.h"
+#include "id3v2/id3v2Context.h"
+#include "id3v2/id3v2TagIdentity.h"
 #include "byteInt.h"
 
 /**
@@ -93,17 +93,14 @@ bool id3v2CompareTag(Id3v2Tag *tag1, Id3v2Tag *tag2){
     // check header
 
     if(tag1->header->majorVersion != tag2->header->majorVersion){
-        printf("[*]major version mismatch\n");
         return false;
     }
 
     if(tag1->header->minorVersion != tag2->header->minorVersion){
-        printf("[*]minor version mismatch\n");
         return false;
     }
 
     if(tag1->header->flags != tag2->header->flags){
-        printf("[*]flags mismatch\n");
         return false;
     }
 
@@ -111,27 +108,22 @@ bool id3v2CompareTag(Id3v2Tag *tag1, Id3v2Tag *tag2){
 
     if(tag1->header->extendedHeader != NULL && tag2->header->extendedHeader != NULL){
         if(tag1->header->extendedHeader->padding != tag2->header->extendedHeader->padding){
-            printf("[*]padding mismatch\n");
             return false;
         }
 
         if(tag1->header->extendedHeader->crc != tag2->header->extendedHeader->crc){
-            printf("[*]crc mismatch\n");
             return false;
         }
 
         if(tag1->header->extendedHeader->update != tag2->header->extendedHeader->update){
-            printf("[*]update mismatch\n");
             return false;
         }
 
         if(tag1->header->extendedHeader->tagRestrictions != tag2->header->extendedHeader->tagRestrictions){
-            printf("[*]tag restrictions mismatch %d %d\n", tag1->header->extendedHeader->tagRestrictions, tag2->header->extendedHeader->tagRestrictions);
             return false;
         }
 
         if(tag1->header->extendedHeader->restrictions != tag2->header->extendedHeader->restrictions){
-            printf("[*]restrictions mismatch\n");
             return false;
         }
 
@@ -304,7 +296,6 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
  * @return char* 
  */
 char *id3v2ReadTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag *tag){
-    
     Id3v2Frame *frame = id3v2ReadFrameByID(id, tag);
     ListIter entries = {0};
     ListIter context = {0};
@@ -350,6 +341,7 @@ char *id3v2ReadTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag
     id3v2ReadFrameEntryAsU8(&entries);
 
     ret = id3v2ReadFrameEntryAsChar(&entries, &dataSize);
+
     id3v2DestroyFrame(&frame);
 
     return ret;
@@ -507,7 +499,7 @@ char *id3v2ReadYear(Id3v2Tag *tag){
 }
 
 /**
- * @brief Reads the first Track number/Position in set (TRK or TRCK) of a tag.
+ * @brief Reads the first Content type (TCO or TCON) of a tag.
  * If no track is found, NULL is returned.
  * 
  * @param tag 
@@ -818,7 +810,7 @@ uint8_t *id3v2ReadPicture(uint8_t type, Id3v2Tag *tag, size_t *dataSize){
  * @return int 
  */
 int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const char *string, Id3v2Tag *tag){
-
+    
     if(id == NULL || string == NULL || tag == NULL){
         return false;
 

@@ -7,6 +7,7 @@ option(BUILD_SHARED_LIBS "building a shared lib" OFF)
 option(BUILD_ID3_DOCS "build docs" OFF)
 option(BUILD_ID3_TESTS "build tests" OFF)
 option(DEDUB_ID3_SYMBOLS "enables debugging" ON)
+option(BUILD_ID3_C_EXAMPLES "builds examples" OFF)
 
 set(ID3V1_HEADERS
   "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v1/id3v1.h"
@@ -38,13 +39,13 @@ set(ID3V2_SRC
 
 
 
-set(ID3DEV_HEADERS "${ID3V1_HEADERS}" "${ID3V2_HEADERS}")
-set(ID3DEV_SRC "${ID3V1_SRC}" "${ID3V2_SRC}")
+set(ID3DEV_HEADERS "${ID3V1_HEADERS}" "${ID3V2_HEADERS}" "${CMAKE_CURRENT_SOURCE_DIR}/include/id3dev.h")
+set(ID3DEV_SRC "${ID3V1_SRC}" "${ID3V2_SRC}" "${CMAKE_CURRENT_SOURCE_DIR}/src/id3dev.c")
 
 
 
 if(DEBUG_ID3_SYMBOLS)
-  if (MSVC)
+  if(MSVC)
     add_compile_options("/W4")
   else()
     add_compile_options("-Wall")
@@ -59,7 +60,7 @@ target_link_libraries(Id3dev LinkedList) #linked list library
 target_link_libraries(Id3dev HashTableLib) #hash table library
 target_link_libraries(Id3dev m) #math library
 
-target_include_directories(Id3dev PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v1" "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v2")
+target_include_directories(Id3dev PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set_target_properties(Id3dev PROPERTIES C_STANDARD 99)
 
 
@@ -77,4 +78,8 @@ endif()
 
 if(BUILD_ID3_DOCS)
   add_subdirectory("docs")
+endif()
+
+if(BUILD_ID3_C_EXAMPLES)
+  add_subdirectory("examples")
 endif()
