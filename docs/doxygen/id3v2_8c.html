@@ -89,11 +89,11 @@ $(function() {
 <code>#include &lt;string.h&gt;</code><br />
 <code>#include &quot;byteStream.h&quot;</code><br />
 <code>#include &quot;byteUnicode.h&quot;</code><br />
-<code>#include &quot;<a class="el" href="id3v2_8h_source.html">id3v2.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="id3v2_frame_8h_source.html">id3v2Frame.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="id3v2_parser_8h_source.html">id3v2Parser.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="id3v2_context_8h_source.html">id3v2Context.h</a>&quot;</code><br />
-<code>#include &quot;<a class="el" href="id3v2_tag_identity_8h_source.html">id3v2TagIdentity.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="id3v2_8h_source.html">id3v2/id3v2.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="id3v2_frame_8h_source.html">id3v2/id3v2Frame.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="id3v2_parser_8h_source.html">id3v2/id3v2Parser.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="id3v2_context_8h_source.html">id3v2/id3v2Context.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="id3v2_tag_identity_8h_source.html">id3v2/id3v2TagIdentity.h</a>&quot;</code><br />
 <code>#include &quot;byteInt.h&quot;</code><br />
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
@@ -135,7 +135,7 @@ Functions</h2></td></tr>
 <tr class="memdesc:a3efd416948fb12b666e3f6b7006d5a50"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the first Year (TYE or TYER) of a tag. If no year is found, NULL is returned.  <br /></td></tr>
 <tr class="separator:a3efd416948fb12b666e3f6b7006d5a50"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3b1795d0f27d7924e7adb55a0649de89" id="r_a3b1795d0f27d7924e7adb55a0649de89"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3b1795d0f27d7924e7adb55a0649de89">id3v2ReadGenre</a> (<a class="el" href="id3v2_types_8h.html#a470730b75a95acb88dfb1736f05e8e81">Id3v2Tag</a> *tag)</td></tr>
-<tr class="memdesc:a3b1795d0f27d7924e7adb55a0649de89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the first Track number/Position in set (TRK or TRCK) of a tag. If no track is found, NULL is returned.  <br /></td></tr>
+<tr class="memdesc:a3b1795d0f27d7924e7adb55a0649de89"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the first Content type (TCO or TCON) of a tag. If no track is found, NULL is returned.  <br /></td></tr>
 <tr class="separator:a3b1795d0f27d7924e7adb55a0649de89"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3c84045f05241789567247d87bfc12c4" id="r_a3c84045f05241789567247d87bfc12c4"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3c84045f05241789567247d87bfc12c4">id3v2ReadTrack</a> (<a class="el" href="id3v2_types_8h.html#a470730b75a95acb88dfb1736f05e8e81">Id3v2Tag</a> *tag)</td></tr>
 <tr class="memdesc:a3c84045f05241789567247d87bfc12c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reads the first Track number/Position in set (TRK or TRCK) of a tag. If no track is found, NULL is returned.  <br /></td></tr>
@@ -518,7 +518,7 @@ false </dd></dl>
       </table>
 </div><div class="memdoc">
 
-<p>Reads the first Track number/Position in set (TRK or TRCK) of a tag. If no track is found, NULL is returned. </p>
+<p>Reads the first Content type (TCO or TCON) of a tag. If no track is found, NULL is returned. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">tag</td><td></td></tr>
