@@ -9,6 +9,9 @@ option(BUILD_ID3_TESTS "build tests" OFF)
 option(DEDUB_ID3_SYMBOLS "enables debugging" ON)
 option(BUILD_ID3_C_EXAMPLES "builds examples" OFF)
 
+#interface options
+option(BUILD_ID3_PYTHON_INTERFACE "builds a python module" OFF)
+
 set(ID3V1_HEADERS
   "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v1/id3v1.h"
   "${CMAKE_CURRENT_SOURCE_DIR}/include/id3v1/id3v1Parser.h"
@@ -82,4 +85,13 @@ endif()
 
 if(BUILD_ID3_C_EXAMPLES)
   add_subdirectory("examples")
+endif()
+
+if(BUILD_ID3_PYTHON_INTERFACE)
+  add_custom_command(TARGET Id3dev POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Id3dev> ${CMAKE_CURRENT_BINARY_DIR}/interfaces/python/core/$<TARGET_FILE_NAME:Id3dev>
+                   COMMENT "Copying Id3dev to build/interfaces/python/core")
+
+  add_custom_target(CopyId3dev ALL DEPENDS Id3dev)
+  add_subdirectory("interfaces/python")
 endif()

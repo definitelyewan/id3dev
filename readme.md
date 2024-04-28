@@ -123,7 +123,7 @@ ID3dev utilizes four distinct C libraries to operate. These libraries include Li
 
 To download this project and all of it's dependencies run :
 ```bash
-git clone git clone --recurse-submodules https://github.com/definitelyewan/id3dev.git
+git clone --recurse-submodules https://github.com/definitelyewan/id3dev.git
 ```
 
 ## Building
