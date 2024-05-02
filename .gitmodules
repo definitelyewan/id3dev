@@ -1,13 +1,13 @@
-[submodule "modules/LinkedListLib"]
-	path = modules/LinkedListLib
+[submodule "id3dependencies/LinkedListLib"]
+	path = id3dependencies/LinkedListLib
 	url = https://github.com/definitelyewan/LinkedListLib.git
-[submodule "modules/ByteStream"]
-	path = modules/ByteStream
+[submodule "id3dependencies/ByteStream"]
+	path = id3dependencies/ByteStream
 	url = https://github.com/definitelyewan/ByteStream.git
-[submodule "modules/cmocka"]
-	path = modules/cmocka
+[submodule "id3dependencies/cmocka"]
+	path = id3dependencies/cmocka
 	url = https://gitlab.com/cmocka/cmocka.git
 	branch = stable-1.1
-[submodule "modules/HashTableLib"]
-	path = modules/HashTableLib
+[submodule "id3dependencies/HashTableLib"]
+	path = id3dependencies/HashTableLib
 	url = https://github.com/definitelyewan/HashTableLib.git
