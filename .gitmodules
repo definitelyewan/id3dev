@@ -11,3 +11,12 @@
 [submodule "modules/HashTableLib"]
 	path = modules/HashTableLib
 	url = https://github.com/definitelyewan/HashTableLib.git
+[submodule "id3dependencies/id3HashTableLib"]
+	path = id3dependencies/id3HashTableLib
+	url = https://github.com/definitelyewan/HashTableLib.git
+[submodule "id3dependencies/id3LinkedListLib"]
+	path = id3dependencies/id3LinkedListLib
+	url = https://github.com/definitelyewan/LinkedListLib.git
+[submodule "id3dependencies/id3ByteStream"]
+	path = id3dependencies/id3ByteStream
+	url = https://github.com/definitelyewan/ByteStream.git
