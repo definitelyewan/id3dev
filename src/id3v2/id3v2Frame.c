@@ -15,9 +15,9 @@
 #include <limits.h>
 #include "id3v2/id3v2Frame.h"
 #include "id3v2/id3v2Context.h"
-#include "byteInt.h"
-#include "byteUnicode.h"
-#include "byteStream.h"
+#include "id3dependencies/ByteStream/include/byteInt.h"
+#include "id3dependencies/ByteStream/include/byteUnicode.h"
+#include "id3dependencies/ByteStream/include/byteStream.h"
 
 static char *base64Encode(const unsigned char *input, size_t inputLength){
     const char *base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

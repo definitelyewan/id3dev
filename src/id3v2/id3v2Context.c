@@ -13,10 +13,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#include "LinkedList.h"
 #include "id3v2/id3v2Context.h"
-#include "byteStream.h"
-#include "byteInt.h"
+#include "id3dependencies/ByteStream/include/byteStream.h"
+#include "id3dependencies/ByteStream/include/byteInt.h"
 
 //djb2 algorithm for stings
 unsigned long id3v2djb2(char *str){

@@ -18,7 +18,6 @@ extern "C"{
 
 
 #include "id3v2Types.h"
-#include "byteTypes.h"
 
 
 

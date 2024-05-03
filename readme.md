@@ -149,46 +149,39 @@ $ make
 ### Linux Systems
 To install this library system wide you can do the following:
 ```bash
-cp ./build/modules/HashTableLib/libHashTableLib.so /usr/lib
-cp ./build/modules/LinkedListLib/libLinkedList.so /usr/lib
-cp ./build/modules/ByteStream/libByteStream.so /usr/lib
 cp ./build/libid3dev.so /usr/lib
 ```
 ```bash
 cp -r ./include/* /usr/include/
-cp ./modules/ByteStream/include/* /usr/include/
-cp ./modules/HashTableLib/include/* /usr/include/
-cp ./modules/LinkedListLib/include/* /usr/include/
+rsync -avm --include='*.h' --include='*/' --exclude='cmocka/' --exclude='*' ./id3dependencies /usr/include
 ```
 
 ### Mac Systems
 To install this library system wide you can do the following:
 ```bash
-cp ./build/modules/HashTableLib/libHashTableLib.dylib /usr/lib
-cp ./build/modules/LinkedListLib/libLinkedList.dylib /usr/lib
-cp ./build/modules/ByteStream/libByteStream.dylib /usr/lib
 cp ./build/libid3dev.dylib /usr/lib
 ```
 ```bash
 cp -r ./include/* /usr/include/
-cp ./modules/ByteStream/include/* /usr/include/
-cp ./modules/HashTableLib/include/* /usr/include/
-cp ./modules/LinkedListLib/include/* /usr/include/
+rsync -avm --include='*.h' --include='*/' --exclude='cmocka/' --exclude='*' ./id3dependencies /usr/include
 ```
 
 ### Windows Systems
-Instead of installing ID3dev system wide on Windows its recommended that you just install it along side a single project.
+Instead of installing ID3dev system wide on Windows its recommended that you just install it along side a single project. You can copy this script to a `.ps1` file and run it to install alongside a project.
 ```powershell
-Copy-Item -Path .\build\modules\HashTableLib\libHashTableLib.dylib -Destination "your project dir"
-Copy-Item -Path .\build\modules\LinkedListLib\libLinkedList.dylib -Destination "your project dir"
-Copy-Item -Path .\build\modules\ByteStream\libByteStream.dylib -Destination "your project dir" 
 Copy-Item -Path .\build\libid3dev.dylib -Destination "your project dir"
 ```
 ```powershell
-Copy-Item -Path .\include\* -Destination "your project dir" -Recurse
-Copy-Item -Path .\modules\ByteStream\include\* -Destination "your project dir"
-Copy-Item -Path .\modules\HashTableLib\include\* -Destination "your project dir"
-Copy-Item -Path .\modules\LinkedListLib\include\* -Destination "your project dir"
+Copy-Item -Path .\include\* -Destination "your project dir" -Recurse -Force
+
+Get-ChildItem -Path .\id3dependencies -Recurse -Include *.h | Where-Object { $_.FullName -notmatch 'cmocka' } | ForEach-Object {
+    $destination = $_.FullName.Replace(".\id3dependencies", "your project dir")
+    $destinationDir = Split-Path -Path $destination -Parent
+    if (!(Test-Path -Path $destinationDir)) {
+        New-Item -ItemType Directory -Path $destinationDir | Out-Null
+    }
+    Copy-Item -Path $_.FullName -Destination $destination
+}
 ```
 ## Usage
 Depending on the feature set you wish to use you may want to include different headers

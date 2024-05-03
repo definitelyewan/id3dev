@@ -17,9 +17,9 @@
 #include "id3v2/id3v2Frame.h"
 #include "id3v2/id3v2Parser.h"
 #include "id3v2/id3v2TagIdentity.h"
-#include "byteStream.h"
-#include "byteInt.h"
-#include "byteUnicode.h"
+#include "id3dependencies/ByteStream/include/byteStream.h"
+#include "id3dependencies/ByteStream/include/byteInt.h"
+#include "id3dependencies/ByteStream/include/byteUnicode.h"
 
 static void copyNBits(unsigned char* src, unsigned char* dest, int startBit, int nBits) {
     int byteIndex = startBit /  CHAR_BIT;
