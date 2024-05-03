@@ -13,8 +13,8 @@
 #include <string.h>
 #include "id3v1/id3v1Types.h"
 #include "id3v1/id3v1Parser.h"
-#include "byteStream.h"
-#include "byteInt.h"
+#include "id3dependencies/ByteStream/include/ByteStream.h"
+#include "id3dependencies/ByteStream/include/byteInt.h"
 
 /**
  * @brief Detect a "TAG" magic number/ID to identify the use of id3v1.

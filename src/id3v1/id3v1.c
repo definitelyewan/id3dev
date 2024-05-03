@@ -14,8 +14,8 @@
 #include <math.h>
 #include "id3v1/id3v1Parser.h"
 #include "id3v1/id3v1.h"
-#include "byteStream.h"
-#include "byteInt.h"
+#include "id3dependencies/ByteStream/include/byteStream.h"
+#include "id3dependencies/ByteStream/include/byteInt.h"
 
 /**
  * @brief Creates an Id3v1Tag from a provided file path.
