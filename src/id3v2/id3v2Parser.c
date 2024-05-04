@@ -853,7 +853,10 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
 
     }
 
-    walk += innerSream->cursor;
+
+    // enforce frame size from header parsing
+    walk += innerSream->bufferSize;
+    
     *frame = id3v2CreateFrame(header, listDeepCopy(context), entries);
     byteStreamDestroy(innerSream);
     return walk;
