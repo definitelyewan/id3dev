@@ -48,19 +48,19 @@ Id3v1Tag *id3v1CreateTag(uint8_t *title, uint8_t *artist, uint8_t *albumTitle, i
     
     //set values
     if(title != NULL){
-        memcpy(tag->title, title, ((strlen((char *)title) == ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : strlen((char *)title)));  
+        memcpy(tag->title, title, ((strlen((char *)title) >= ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : strlen((char *)title)));  
     }
     
     if(artist != NULL){
-        memcpy(tag->artist, artist, ((strlen((char *)artist) == ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : strlen((char *)artist)));
+        memcpy(tag->artist, artist, ((strlen((char *)artist) >= ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : strlen((char *)artist)));
     }
 
     if(albumTitle != NULL){
-        memcpy(tag->albumTitle, albumTitle, ((strlen((char *)albumTitle) == ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : strlen((char *)albumTitle)));
+        memcpy(tag->albumTitle, albumTitle, ((strlen((char *)albumTitle) >= ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : strlen((char *)albumTitle)));
     }
 
     if(comment != NULL){
-        memcpy(tag->comment, comment, ((strlen((char *)comment) == ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : strlen((char *)comment)));
+        memcpy(tag->comment, comment, ((strlen((char *)comment) >= ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : strlen((char *)comment)));
     }
     
     tag->year = year;
@@ -117,10 +117,10 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
 
     int trackno = 0;
     int nYear = 0;
-    uint8_t holdTitle[ID3V1_FIELD_SIZE];
-    uint8_t holdArtist[ID3V1_FIELD_SIZE];
-    uint8_t holdAlbum[ID3V1_FIELD_SIZE];
-    uint8_t holdComment[ID3V1_FIELD_SIZE];
+    uint8_t holdTitle[ID3V1_FIELD_SIZE + 1] = {0};
+    uint8_t holdArtist[ID3V1_FIELD_SIZE + 1] = {0};
+    uint8_t holdAlbum[ID3V1_FIELD_SIZE + 1] = {0};
+    uint8_t holdComment[ID3V1_FIELD_SIZE + 1] = {0};
     uint8_t year[ID3V1_YEAR_SIZE + 1]; //must be +1. without it holdtitle gets overwritten somehow
     Genre genre;
     ByteStream *stream = NULL;
