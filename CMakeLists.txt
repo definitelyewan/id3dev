@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22.1)
 
-project(Id3dev VERSION 1.0.0.0)
+project(Id3dev VERSION 1.0.0.1)
 
 
 option(BUILD_SHARED_LIBS "building a shared lib" OFF)

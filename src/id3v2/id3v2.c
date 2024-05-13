@@ -288,6 +288,26 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
 }
 
 /**
+ * @brief Returns the major version of a tag. On success, a positive integer will be returned. Otherwise, -1 will be returned.
+ * @details This function just returns tag->header->majorVersion so i dont see a need to test it considering all the error checking.
+ * @param tag 
+ * @return int 
+ */
+int id3v2ReadTagVersion(Id3v2Tag *tag){
+    
+    if(tag == NULL){
+        return -1;
+    }
+
+    if(tag->header == NULL){
+        return -1;
+    }
+
+    return tag->header->majorVersion;
+
+}
+
+/**
  * @brief Reads the content of a text frame with the given id. If no frame is found,
  * NULL is returned.
  * 

@@ -1,0 +1,7 @@
+<map id="/mnt/d/code/id3dev/include/id3v2/id3v2Frame.h" name="/mnt/d/code/id3dev/include/id3v2/id3v2Frame.h">
+<area shape="rect" id="node1" title="function declerations for frame operations" alt="" coords="283,5,489,47"/>
+<area shape="rect" id="node2" href="$id3v2Parser_8c.html" title="Functions related to parsing content." alt="" coords="5,95,180,136"/>
+<area shape="rect" id="node3" href="$id3v2Frame_8c.html" title="Functions for creating, destroying, and manipulating ID3v2 frames." alt="" coords="204,95,381,136"/>
+<area shape="rect" id="node4" href="$id3v2_8c.html" title="Contains all main functions for the id3v2 library." alt="" coords="406,95,553,136"/>
+<area shape="rect" id="node5" href="$id3dev_8c.html" title="Main functions for interacting with ID3 metadata." alt="" coords="577,95,723,136"/>
+</map>
