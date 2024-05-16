@@ -458,6 +458,28 @@ Id3v2Frame *id3v2CreateEmptyFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], uint8_
 }
 
 /**
+ * @brief Compares a provided frame ID with the ID of a provided frame. If the IDs match
+ * This function will return true otherwise, false.
+ * 
+ * @param frame 
+ * @param id 
+ * @return true 
+ * @return false 
+ */
+bool id3v2CompareFrameId(Id3v2Frame *frame, const char id[ID3V2_FRAME_ID_MAX_SIZE]){
+    if(frame == NULL){
+        return false;
+    }
+
+    if(frame->header == NULL){
+        return false;
+    }
+
+    return memcmp(frame->header->id, id, ID3V2_FRAME_ID_MAX_SIZE) == 0 ? true : false;
+}
+
+
+/**
  * @brief Creates a list iter specific to frame content
  * 
  * @param tag 

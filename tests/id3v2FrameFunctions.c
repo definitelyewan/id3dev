@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include "id3v2/id3v2.h"
 #include "id3v2/id3v2Frame.h"
 #include "id3v2/id3v2Parser.h"
 #include "id3v2/id3v2Context.h"
@@ -995,6 +996,42 @@ static void id3v2CreateEmptyFrame_TT2(void **state){
     id3v2DestroyFrame(&f);
 }
 
+
+static void id3v2CompareFrameId_badArgs(void **state){
+
+    char *id = "TIT2";
+    bool v = id3v2CompareFrameId(NULL, id);
+
+    assert_false(v);
+
+}
+
+static void id3v2CompareFrameId_EQU(void **state){
+
+    // EQU 
+    uint8_t equ[15] = {'E', 'Q', 'U', 0x00, 0x00, 0x09,
+                        2U,
+                        0x03, 0xe9, // 000000111110100 1  inc/dec 
+                        0x40, 0x00,
+                        0x00, 0x28, // 000000000010100 0  inc/dec
+                        0xfc, 0x00
+    };
+
+    
+
+    ByteStream *stream = byteStreamCreate(equ, 15);
+    Id3v2Frame *f = NULL;
+    List *context = id3v2CreateEqulizationFrameContext(ID3V2_TAG_VERSION_2);
+
+    id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_2, &f);
+
+    byteStreamDestroy(stream);
+    listFree(context);
+    assert_true(id3v2CompareFrameId(f, "EQU"));
+    id3v2DestroyFrame(&f);
+
+}
+
 int main(){
 
     const struct CMUnitTest tests[] = {
@@ -1044,7 +1081,11 @@ int main(){
 
         // id3v2CreateEmptyFrame
         cmocka_unit_test(id3v2CreateEmptyFrame_noID),
-        cmocka_unit_test(id3v2CreateEmptyFrame_TT2)
+        cmocka_unit_test(id3v2CreateEmptyFrame_TT2),
+
+        // id3v2CompareFrameId 
+        cmocka_unit_test(id3v2CompareFrameId_badArgs),
+        cmocka_unit_test(id3v2CompareFrameId_EQU)
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

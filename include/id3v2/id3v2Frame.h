@@ -51,6 +51,8 @@ Id3v2Frame *id3v2CreateEmptyFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], uint8_
     Frame access
 */
 
+bool id3v2CompareFrameId(Id3v2Frame *frame, const char id[ID3V2_FRAME_ID_MAX_SIZE]);
+
 ListIter id3v2CreateFrameTraverser(Id3v2Tag *tag);
 Id3v2Frame *id3v2FrameTraverse(ListIter *traverser);
 
