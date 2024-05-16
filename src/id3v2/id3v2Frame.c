@@ -900,20 +900,22 @@ Id3v2Frame *id3v2DetatchFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame){
 
 /**
  * @brief Converts a frame header into its binary representation. If this 
- * function fails it will return NULL otherwise, a ByteStream structure.
+ * function fails it will return NULL otherwise, an uint8_t pointer.
  * 
  * @param header 
  * @param version 
  * @param frameSize 
  * @return ByteStream* 
  */
-ByteStream *id3v2FrameHeaderToStream(Id3v2FrameHeader *header, uint8_t version, uint32_t frameSize){
+uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, uint32_t frameSize, size_t *outl){
 
     unsigned char *tmp = NULL;
     ByteStream *stream = NULL;
+    uint8_t *out = NULL;
 
     if(header == NULL || version > ID3V2_TAG_VERSION_4){
-        return stream;
+        *outl = 0;
+        return NULL;
     }
 
     switch(version){
@@ -1010,12 +1012,17 @@ ByteStream *id3v2FrameHeaderToStream(Id3v2FrameHeader *header, uint8_t version, 
 
             break;
         default:
-            return stream;
+            *outl = 0;
+            return NULL;
     }
 
 
     byteStreamRewind(stream);
-    return stream;
+    out = calloc(stream->bufferSize, sizeof(uint8_t));
+    *outl = stream->bufferSize;
+    byteStreamRead(stream, out, stream->bufferSize);
+    byteStreamDestroy(stream);
+    return out;
 }
 
 /**
@@ -1131,19 +1138,20 @@ char *id3v2FrameHeaderToJSON(Id3v2FrameHeader *header, uint8_t version){
 
 /**
  * @brief Converts a frame structure into its binary representation. If this
- * function fails it will return NULL otherwise, a ByteStream structure.
+ * function fails it will return NULL otherwise, an uint8_t structure.
  * 
  * @param frame 
  * @param version 
  * @return ByteStream* 
  */
-ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
+uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
     
     ByteStream *stream = NULL;
     Id3v2ContentContext *cc = NULL;
 
     if(frame == NULL || version > ID3V2_TAG_VERSION_4){
-        return stream;        
+        *outl = 0;
+        return NULL;        
     }
 
     ListIter context = listCreateIterator(frame->contexts);
@@ -1152,13 +1160,19 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
     size_t readSize = 0;
     size_t contentSize = 0;
     size_t currIterations = 0;
+    size_t headerSize = 0;
+    uint8_t *header = NULL;
+    uint8_t *out = NULL;
     unsigned char *tmp = NULL;
     bool exit = false;
     bool bitFlag = false;
 
     // the frame size will be updated later as it cannot be calculated 
     // before processing frame entries
-    stream = id3v2FrameHeaderToStream(frame->header, version, 0);    
+    header = id3v2FrameHeaderSerialize(frame->header, version, 0, &headerSize);
+    stream = byteStreamCreate(header, headerSize);
+    free(header);
+
     byteStreamSeek(stream, 0, SEEK_END);
 
     while((cc = listIteratorNext(&context)) != NULL){
@@ -1672,7 +1686,12 @@ ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version){
     }
 
     byteStreamRewind(stream);
-    return stream;
+    *outl = stream->bufferSize;
+    out = calloc(stream->bufferSize, sizeof(uint8_t));
+    byteStreamRead(stream, out, stream->bufferSize);
+    byteStreamDestroy(stream);
+
+    return out;
 }
 
 /**

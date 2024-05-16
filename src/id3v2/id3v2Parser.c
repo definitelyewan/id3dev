@@ -49,12 +49,20 @@ static void copyNBits(unsigned char* src, unsigned char* dest, int startBit, int
  * states for this function but if a size of 0 is returned or extendedTagHeader = NULL it likly failed but this could 
  * also mean an unsupported version was passed. 
  * 
- * @param stream 
+ * @param in
+ * @param inl 
  * @param version 
  * @param extendedTagHeader 
  * @return uint32_t 
  */
-uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2ExtendedTagHeader **extendedTagHeader){
+uint32_t id3v2ParseExtendedTagHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2ExtendedTagHeader **extendedTagHeader){
+
+    if(in == NULL || inl == 0){
+        *extendedTagHeader = NULL;
+        return 0;        
+    }
+
+    ByteStream *stream = byteStreamCreate(in, inl);
 
     if(!stream){
         *extendedTagHeader = NULL;
@@ -71,7 +79,6 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
     // values for parsing
     int8_t flags = 0;
     size_t offset = 0;
-    size_t resetIndex = 0;
     unsigned char crcBytes[5] = {0,0,0,0,0};
     bool hasCrc = false;
     bool hasRestrictions = false;
@@ -83,11 +90,9 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
 
     if(version == ID3V2_TAG_VERSION_3 || version == ID3V2_TAG_VERSION_4){
 
-        resetIndex = stream->cursor;
-
         if(!(hSize = byteStreamReturnInt(stream))){  
-            stream->cursor = resetIndex;
             *extendedTagHeader = NULL;
+            byteStreamDestroy(stream);
             return 0;
         }
 
@@ -96,7 +101,6 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
         }
 
         innerStream = byteStreamCreate(byteStreamCursor(stream), hSize - offset);
-        stream->cursor = resetIndex;
     }
 
     switch(version){
@@ -192,6 +196,7 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
     }
 
     // clean up
+    byteStreamDestroy(stream);
     *extendedTagHeader = id3v2CreateExtendedTagHeader(padding, crc, update, tagRestrictions, restrictions);
     walk = innerStream->cursor + 4;
 
@@ -208,12 +213,21 @@ uint32_t id3v2ParseExtendedTagHeader(ByteStream *stream, uint8_t version, Id3v2E
  * are returned by referance. There are no error states but a tagSize of 0 and a NULL header 
  * means it likely failed to retrive anything useful.
  * 
- * @param stream 
+ * @param out
+ * @param outl 
  * @param tagHeader 
  * @param tagSize 
  * @return uint32_t 
  */
-uint32_t id3v2ParseTagHeader(ByteStream *stream, Id3v2TagHeader **tagHeader, uint32_t *tagSize){
+uint32_t id3v2ParseTagHeader(uint8_t *in, size_t inl, Id3v2TagHeader **tagHeader, uint32_t *tagSize){
+
+    if(in == NULL || inl == 0){
+        *tagHeader = NULL;
+        return 0;
+    }
+
+    ByteStream *stream = byteStreamCreate(in, inl);
+
 
     if(!stream){
         *tagHeader = NULL;
@@ -226,16 +240,13 @@ uint32_t id3v2ParseTagHeader(ByteStream *stream, Id3v2TagHeader **tagHeader, uin
     uint8_t flags = 0;
 
     // values for parsing
-    size_t resetIndex = 0;
     uint32_t hSize = 0;
     uint32_t walk = 0;
     uint8_t id[ID3V2_TAG_ID_SIZE];
     uint32_t idAsInt = 0;
 
     // check for magic number
-    resetIndex = stream->cursor;
     if(!(byteStreamRead(stream, id, ID3V2_TAG_ID_SIZE))){
-        stream->cursor = resetIndex;
         *tagHeader = NULL;
         return 0;
     }
@@ -245,7 +256,6 @@ uint32_t id3v2ParseTagHeader(ByteStream *stream, Id3v2TagHeader **tagHeader, uin
     }
 
     if(ID3V2_TAG_ID_MAGIC_NUMBER_H != idAsInt){
-        stream->cursor = resetIndex;
         *tagHeader = NULL;
         return ID3V2_TAG_ID_SIZE;
     }
@@ -275,26 +285,35 @@ uint32_t id3v2ParseTagHeader(ByteStream *stream, Id3v2TagHeader **tagHeader, uin
         break;
     }
 
-    walk = stream->cursor - resetIndex;
-    stream->cursor = resetIndex;
+    walk = stream->cursor;
     *tagSize = hSize;
     *tagHeader = id3v2CreateTagHeader(major, minor, flags, NULL);
+    byteStreamDestroy(stream);
     return walk;
 }
 
 /**
  * @brief Parses an ID3 version 2, 3 or 4 frame header. This function returns a couple values back to the caller, first
- * it returns the number of bytes it read to to create a frame header structure. The structure itself is returned as a
+ * it returns the number of bytes it read to create a frame header structure. The structure itself is returned as a
  * heap allocated structure which will need to be provided by the caller along with the size reported by the metadata.
  * There are no error states but a frameSize of 0 and a NULL frameHeader will likely mean nothing useful was gathered. 
  * 
- * @param stream 
+ * @param in
+ * @param inl
  * @param version 
  * @param frameHeader 
  * @param frameSize 
  * @return uint32_t 
  */
-uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHeader **frameHeader, uint32_t *frameSize){
+uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2FrameHeader **frameHeader, uint32_t *frameSize){
+
+    if(in == NULL || inl == 0){
+        *frameHeader = NULL;
+        *frameSize = 0;
+        return 0;
+    }
+
+    ByteStream *stream = byteStreamCreate(in, inl);
 
     if(!stream){
         *frameHeader = NULL;
@@ -315,12 +334,7 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
     // values for parsing
     uint8_t sizeBytes[ID3V2_FRAME_ID_MAX_SIZE]; 
     uint8_t flagBytes[ID3V2_FRAME_FLAG_SIZE];
-    size_t resetIndex = 0;
     uint32_t walk = 0;
-    
-
-
-    resetIndex = stream->cursor;
 
     switch(version){
         case ID3V2_TAG_VERSION_2:
@@ -328,12 +342,14 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
             if(!byteStreamRead(stream, id, ID3V2_FRAME_ID_MAX_SIZE - 1)){
                 *frameHeader = NULL;
                 *frameSize = 0;
+                byteStreamDestroy(stream);
                 return 0;
             }
 
             if(!byteStreamRead(stream, sizeBytes, ID3V2_FRAME_ID_MAX_SIZE - 1)){
                 *frameHeader = NULL;
                 *frameSize = 0;
+                byteStreamDestroy(stream);
                 return ID3V2_FRAME_ID_MAX_SIZE - 1;
             }
 
@@ -346,18 +362,21 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
             if(!byteStreamRead(stream, id, ID3V2_FRAME_ID_MAX_SIZE)){
                 *frameHeader = NULL;
                 *frameSize = 0;
+                byteStreamDestroy(stream);
                 return 0;
             }
 
             if(!(tSize = byteStreamReturnU32(stream))){
                 *frameHeader = NULL;
                 *frameSize = 0;
+                byteStreamDestroy(stream);
                 return ID3V2_FRAME_ID_MAX_SIZE;
             }
 
             if(!(byteStreamRead(stream, flagBytes, ID3V2_FRAME_FLAG_SIZE))){
                 *frameHeader = NULL;
                 *frameSize = tSize;
+                byteStreamDestroy(stream);
                 return ID3V2_FRAME_ID_MAX_SIZE * 2;
             }
 
@@ -397,18 +416,21 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
             if(!byteStreamRead(stream, id, ID3V2_FRAME_ID_MAX_SIZE)){
                 *frameHeader = NULL;
                 *frameSize = 0;
+                byteStreamDestroy(stream);
                 return 0;
             }
 
             if(!(tSize = byteStreamReturnSyncInt(stream))){
                 *frameHeader = NULL;
                 *frameSize = 0;
+                byteStreamDestroy(stream);
                 return ID3V2_FRAME_ID_MAX_SIZE;
             }
 
             if(!(byteStreamRead(stream, flagBytes, ID3V2_FRAME_FLAG_SIZE))){
                 *frameHeader = NULL;
                 *frameSize = tSize;
+                byteStreamDestroy(stream);
                 return ID3V2_FRAME_ID_MAX_SIZE * 2;
             }
 
@@ -450,14 +472,15 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
         default:
             *frameHeader = NULL;
             *frameSize = 0;
+            byteStreamDestroy(stream);
             return 0;
     }
 
     *frameHeader = id3v2CreateFrameHeader(id, tagAlter, fileAlter, readOnly, unsync, decompressionSize, encryptionSymbol, groupSymbol);
     *frameSize = tSize;
-    walk = stream->cursor - resetIndex;
-    stream->cursor = resetIndex;
-    //printf("[*] frameSize = %zu, walk = %zu stream->cursor = %zu flagOffset = %d\n", *frameSize, walk, stream->cursor, flagOffset);
+    walk = stream->cursor;
+    byteStreamDestroy(stream);
+    // printf("[*] frameSize = %zu, walk = %zu stream->cursor = %zu\n", *frameSize, walk, stream->cursor); // debug info i dont wanna rewrite
     return walk;
 }
 
@@ -468,14 +491,22 @@ uint32_t id3v2ParseFrameHeader(ByteStream *stream, uint8_t version, Id3v2FrameHe
  * no error state for this function but a returned size of 0 or an incomplete frame such as a missing entry list may
  * indicate one.
  * 
- * @param stream 
+ * @param in
+ * @param inl
  * @param context 
  * @param version 
  * @param frame 
  * @return uint32_t 
  */
-uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3v2Frame **frame){
+uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version, Id3v2Frame **frame){
     
+    if(in == NULL || inl == 0){
+        *frame = NULL;
+        return 0;
+    }
+
+    ByteStream *stream = byteStreamCreate(in, inl);
+
     if(!stream || !context){
         *frame = NULL;
         return 0;
@@ -487,7 +518,6 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
     *frame = NULL;
 
     // needed for parsing
-    size_t resetIndex = 0;
     size_t walk = 0;
     size_t currIterations = 0;
     size_t concurrentBitCount = 0;
@@ -498,15 +528,14 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
     ListIter iterStorage;
     void *contextData = NULL;
 
-    resetIndex = stream->cursor;
-
-    expectedHeaderSize = id3v2ParseFrameHeader(stream, version, &header, &expectedContentSize);
+    expectedHeaderSize = id3v2ParseFrameHeader(stream->buffer, stream->bufferSize, version, &header, &expectedContentSize);
     walk += expectedHeaderSize;
     if(!expectedHeaderSize){
         if(header != NULL){
             id3v2DestroyFrameHeader(&header);
         }
-        stream->cursor = resetIndex;
+
+        byteStreamDestroy(stream);
         return 0;
     }
 
@@ -515,15 +544,14 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
         if(header != NULL){
             id3v2DestroyFrameHeader(&header);
         }
-        stream->cursor = resetIndex;
+
+        byteStreamDestroy(stream);
         return expectedHeaderSize;
     }
 
     byteStreamSeek(stream, expectedHeaderSize, SEEK_CUR);
 
     innerSream = byteStreamCreate(byteStreamCursor(stream), expectedContentSize);
-    stream->cursor = resetIndex;
-
     entries = listCreate(id3v2PrintContentEntry, id3v2DeleteContentEntry, id3v2CompareContentEntry, id3v2CopyContentEntry);
 
 
@@ -561,6 +589,7 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
         walk += innerSream->cursor;
         *frame = id3v2CreateFrame(header, gContext, entries);
         byteStreamDestroy(innerSream);
+        byteStreamDestroy(stream);
         return walk;
     }
 
@@ -859,23 +888,30 @@ uint32_t id3v2ParseFrame(ByteStream *stream, List *context, uint8_t version, Id3
     
     *frame = id3v2CreateFrame(header, listDeepCopy(context), entries);
     byteStreamDestroy(innerSream);
+    byteStreamDestroy(stream);
     return walk;
 }
 
 /**
- * @brief Parses an ID3 version 2, 3, or 4 tag from a stream. This function will load the default frame
+ * @brief Parses an ID3 version 2, 3, or 4 tag from a buffer. This function will load the default frame
  * ID, context pairings and any user supplied ones to extract frames within a tag. If this function fails
  * it will return NULL to the caller otherwise, some form of parsed tag will be returned based on the
- * completness of the stream.
- * @details Unlike other parsing functions this one consumes the stream it uses so sending in a copy is
- * recommended. Additionally, unsynchronisation will take a long time to parse as 0s are stripped before
+ * completness of the buffer.
+ * @details unsynchronisation will take a long time to parse as 0s are stripped before
  * frame parsing begins, which is increadibly expensive to do. A fast system is recommended for this 
  * feature.
- * @param stream 
+ * @param in
+ * @param inl 
  * @param userPairs 
  * @return Id3v2Tag* 
  */
-Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
+Id3v2Tag *id3v2ParseTagFromBuffer(uint8_t *in, size_t inl, HashTable *userPairs){
+
+    if(in == NULL || inl == 0){
+        return NULL;
+    }
+
+    ByteStream *stream = byteStreamCreate(in, inl);
 
     if(!stream){
         return NULL;
@@ -897,6 +933,7 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
 
         if(!byteStreamRead(stream, id, ID3V2_TAG_ID_SIZE)){
             listFree(frames);
+            byteStreamDestroy(stream);
             return NULL;
         }
 
@@ -908,7 +945,7 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
 
     while(true){
 
-        read = id3v2ParseTagHeader(stream, &header, &tagSize);
+        read = id3v2ParseTagHeader(byteStreamCursor(stream), stream->bufferSize - stream->cursor, &header, &tagSize);
 
         if(read == 0 || header == NULL || tagSize == 0){
             break;
@@ -938,7 +975,7 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
         }
 
         if((header->majorVersion == ID3V2_TAG_VERSION_3 || header->majorVersion == ID3V2_TAG_VERSION_4) && id3v2ReadExtendedHeaderIndicator(header) == 1){
-            read = id3v2ParseExtendedTagHeader(stream, header->majorVersion, &ext);
+            read = id3v2ParseExtendedTagHeader(byteStreamCursor(stream), stream->bufferSize - stream->cursor, header->majorVersion, &ext);
             header->extendedHeader = ext;
 
             if(read == 0 || ext == NULL){
@@ -1002,7 +1039,7 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
                 context = hashTableRetrieve(pairs, "?");
             }
             
-            read = id3v2ParseFrame(stream, context, header->majorVersion, &frame);
+            read = id3v2ParseFrame(byteStreamCursor(stream), stream->bufferSize - stream->cursor, context, header->majorVersion, &frame);
 
             if(read == 0 || frame == NULL){
                 exit = true;
@@ -1024,10 +1061,12 @@ Id3v2Tag *id3v2ParseTagFromStream(ByteStream *stream, HashTable *userPairs){
             break;
         }
 
+        byteStreamDestroy(stream);
         return id3v2CreateTag(header, frames);
 
     }
 
+    byteStreamDestroy(stream);
     return id3v2CreateTag(header, frames);
 
 }

@@ -17,7 +17,6 @@ extern "C" {
 #endif
 
 #include "id3v1/id3v1Types.h"
-#include "id3dependencies/ByteStream/include/byteTypes.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <inttypes.h>
@@ -25,7 +24,7 @@ extern "C" {
 // data structures
 
 #include "id3dependencies/LinkedListLib/include/LinkedList.h"
-#include "id3dependencies/HashTableLib/include/HashTable.h"
+#include "id3dependencies/HashTableLib/include/hashTable.h"
 
 //! Size of ID3v2 tag identifier "ID3" or "3DI"
 #define ID3V2_TAG_ID_SIZE 3

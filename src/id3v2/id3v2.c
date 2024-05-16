@@ -41,7 +41,7 @@ Id3v2Tag *id3v2TagFromFile(const char *filename){
         return NULL;
     }
 
-    tag = id3v2ParseTagFromStream(stream, NULL);
+    tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     byteStreamDestroy(stream);
 
     return tag;
@@ -1884,18 +1884,20 @@ int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t ty
 
 /**
  * @brief Converts an ID3v2.x tag data structure back to its binary representation. If this function fails
- * NULL is returned otherwise, a ByteStream pointer.
+ * NULL is returned otherwise, an uint8_t pointer.
  * 
  * @param tag 
  * @return ByteStream* 
  */
-ByteStream *id3v2TagToStream(Id3v2Tag *tag){
+uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl){
 
     if(tag == NULL){
+        *outl = 0;
         return NULL;
     }
 
     if(tag->header == NULL || tag->frames == NULL){
+        *outl = 0;
         return NULL;
     }
 
@@ -1908,13 +1910,26 @@ ByteStream *id3v2TagToStream(Id3v2Tag *tag){
     uint32_t fsize = 0;
     uint32_t padding = 0;
     uint8_t *sizeBytes = NULL;
+    uint8_t *headerOut = NULL;
+    uint8_t *out = NULL;
+    size_t headerOutl = 0;
 
     // frame stream
     while((f = id3v2FrameTraverse(&frames)) != NULL){
+        
         ByteStream *tmp = NULL;
+        size_t frameOutl = 0;
+        uint8_t *frameOut = NULL;
 
-        tmp = id3v2FrameToStream(f, tag->header->majorVersion);
+        frameOut = id3v2FrameSerialize(f, tag->header->majorVersion, &frameOutl);
 
+        if(frameOut == NULL && frameOutl == 0){
+            break;
+        }
+
+        tmp = byteStreamCreate(frameOut, frameOutl);
+        free(frameOut);
+        
         if(tmp == NULL){
             break;
         }
@@ -1957,7 +1972,16 @@ ByteStream *id3v2TagToStream(Id3v2Tag *tag){
     }
 
     // header stream
-    headerStream = id3v2TagHeaderToStream(tag->header, 0);
+    headerOut = id3v2TagHeaderSerialize(tag->header, 0, &headerOutl);
+
+    if(headerOut == NULL && headerOutl == 0){
+        byteStreamDestroy(frameStream);
+        *outl = 0;
+        return NULL;
+    }
+    
+    headerStream = byteStreamCreate(headerOut, headerOutl);
+    free(headerOut);
 
     // unsync?
     if(id3v2ReadUnsynchronisationIndicator(tag->header) && headerStream->bufferSize > 10){
@@ -2032,7 +2056,13 @@ ByteStream *id3v2TagToStream(Id3v2Tag *tag){
     byteStreamDestroy(headerStream);
     byteStreamDestroy(frameStream);
     byteStreamRewind(stream);
-    return stream;
+
+    out = calloc(stream->bufferSize, sizeof(uint8_t));
+    *outl = stream->bufferSize;
+    byteStreamRead(stream, out, stream->bufferSize);
+    byteStreamDestroy(stream);
+
+    return out;
 }
 
 /**
@@ -2163,9 +2193,19 @@ int id3v2WriteTagToFile(const char *filePath, Id3v2Tag *tag){
     }
 
     FILE *fp = NULL;
+    uint8_t *out = NULL;
+    size_t outl = 0;
     ByteStream *stream = NULL;
 
-    stream = id3v2TagToStream(tag);
+    out = id3v2TagSerialize(tag, &outl);
+
+    if(out == NULL && outl == 0){
+        return false;
+    }
+
+    stream = byteStreamCreate(out, outl);
+    free(out);
+
     fp = fopen(filePath, "r+b");
     
     // write to a new file

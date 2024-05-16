@@ -57,8 +57,8 @@ set(BYTE_STREAM_FILES
   "${CMAKE_CURRENT_SOURCE_DIR}/id3dependencies/ByteStream/src/byteStream.c"
 )
 
-add_library(ByteStream OBJECT ${BYTE_STREAM_FILES})
-target_include_directories(ByteStream PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/id3dependencies/ByteStream/include")
+add_library(ByteStream_priv OBJECT ${BYTE_STREAM_FILES})
+target_include_directories(ByteStream_priv PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/id3dependencies/ByteStream/include")
 
 #LinkedListLib shinanigans
 
@@ -99,11 +99,11 @@ endif()
 
 
 add_library(Id3dev ${ID3DEV_HEADERS} ${ID3DEV_SRC}
-  $<TARGET_OBJECTS:ByteStream>
   $<TARGET_OBJECTS:LinkedListLib>
   $<TARGET_OBJECTS:HashTableLib>
 )
 
+target_link_libraries(Id3dev PRIVATE ByteStream_priv) # ByteStream private library
 target_link_libraries(Id3dev PRIVATE m) #math library
 
 target_include_directories(Id3dev PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -115,6 +115,9 @@ if(BUILD_ID3_TESTS)
   option(UNIT_TESTING OFF)
   option(WITH_EXAMPLES OFF)
   add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/id3dependencies/cmocka/")
+  # good for testing my code but i really dont want a user using it because its not necessary.
+  # if its installed by itself great but... theres no point in making it public during a regular build
+  add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/id3dependencies/ByteStream/")
   add_subdirectory("tests")
 endif()
 

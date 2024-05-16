@@ -13,7 +13,7 @@
 #include <string.h>
 #include "id3v1/id3v1Types.h"
 #include "id3v1/id3v1Parser.h"
-#include "id3dependencies/ByteStream/include/ByteStream.h"
+#include "id3dependencies/ByteStream/include/byteStream.h"
 #include "id3dependencies/ByteStream/include/byteInt.h"
 
 /**

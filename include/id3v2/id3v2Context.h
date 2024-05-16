@@ -82,7 +82,7 @@ bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char ke
 
 // convi
 
-ByteStream *id3v2ContextToStream(Id3v2ContentContext *cc);
+uint8_t *id3v2ContextSerialize(Id3v2ContentContext *cc, size_t *outl);
 char *id3v2ContextToJSON(Id3v2ContentContext *cc);
 
 #ifdef __cplusplus

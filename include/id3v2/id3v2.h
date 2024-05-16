@@ -69,7 +69,7 @@ int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t ty
 
 // writes
 
-ByteStream *id3v2TagToStream(Id3v2Tag *tag);
+uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl);
 char *id3v2TagToJSON(Id3v2Tag *tag);
 int id3v2WriteTagToFile(const char *filename, Id3v2Tag *tag);
 

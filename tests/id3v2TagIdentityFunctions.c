@@ -754,10 +754,13 @@ static void id3v2TagCreateAndDestroy_AllInOne(void **state){
 
 }
 
-static void id3v2ExtendedTagHeaderToStream_v3noCRC(void **state){
+static void id3v2ExtendedTagHeaderSerialize_v3noCRC(void **state){
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(100, 0, 0, 0, 0);
-    ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_3);
+    size_t outl = 0;
+    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_3, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
+
 
     assert_int_equal(byteStreamReturnInt(stream), 10);
 
@@ -769,13 +772,16 @@ static void id3v2ExtendedTagHeaderToStream_v3noCRC(void **state){
     assert_int_equal(byteStreamReturnInt(stream), 100);
 
     byteStreamDestroy(stream);
+    free(out);
     id3v2DestroyExtendedTagHeader(&ext);
 }
 
-static void id3v2ExtendedTagHeaderToStream_v3CRC(void **state){
+static void id3v2ExtendedTagHeaderSerialize_v3CRC(void **state){
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(UINT32_MAX, UINT32_MAX, 1,1,1);
-    ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_3);
+    size_t outl = 0;
+    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_3, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
 
     assert_int_equal(byteStreamReturnInt(stream), 14);
 
@@ -788,23 +794,27 @@ static void id3v2ExtendedTagHeaderToStream_v3CRC(void **state){
     assert_int_equal(byteStreamReturnU32(stream), UINT32_MAX);
     assert_int_equal(byteStreamReturnU32(stream), UINT32_MAX);
     
+    free(out);
     byteStreamDestroy(stream);
     id3v2DestroyExtendedTagHeader(&ext);
 }
 
-static void id3v2ExtendedTagHeaderToStream_null(void **state){
+static void id3v2ExtendedTagHeaderSerialize_null(void **state){
 
-    ByteStream *stream = id3v2ExtendedTagHeaderToStream(NULL, ID3V2_TAG_VERSION_3);
+    size_t outl = 0;
+    uint8_t *out = id3v2ExtendedTagHeaderSerialize(NULL, ID3V2_TAG_VERSION_3, &outl);
 
-    assert_null(stream);
+    assert_null(out);
 
 }
 
-static void id3v2ExtendedTagHeaderToStream_v4WithEverything(void **state){
+static void id3v2ExtendedTagHeaderSerialize_v4WithEverything(void **state){
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(UINT32_MAX, UINT32_MAX, 1,1,0xfe);
-    ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_4);
-    
+    size_t outl = 0;
+    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
+
     assert_int_equal(byteStreamReturnInt(stream), 12);
 
     assert_int_equal(byteStreamCursor(stream)[0], 6);
@@ -826,13 +836,16 @@ static void id3v2ExtendedTagHeaderToStream_v4WithEverything(void **state){
     byteStreamSeek(stream, 1, SEEK_CUR);
 
     byteStreamDestroy(stream);
+    free(out);
     id3v2DestroyExtendedTagHeader(&ext);
 }
 
-static void id3v2ExtendedTagHeaderToStream_v4(void **state){
+static void id3v2ExtendedTagHeaderSerialize_v4(void **state){
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, 0, 0, 0);
-    ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_4);
+    size_t outl = 0;
+    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
     
     assert_int_equal(byteStreamReturnInt(stream), 6);
 
@@ -845,13 +858,16 @@ static void id3v2ExtendedTagHeaderToStream_v4(void **state){
     assert_int_equal(stream->bufferSize, 6);
 
     byteStreamDestroy(stream);
+    free(out);
     id3v2DestroyExtendedTagHeader(&ext);
 }
 
-static void id3v2ExtendedTagHeaderToStream_v4crc(void **state){
+static void id3v2ExtendedTagHeaderSerialize_v4crc(void **state){
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 9000, 0, 0, 0);
-    ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_4);
+    size_t outl = 0;
+    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
 
     assert_int_equal(byteStreamReturnInt(stream), 11);
 
@@ -869,13 +885,16 @@ static void id3v2ExtendedTagHeaderToStream_v4crc(void **state){
     assert_int_equal(stream->bufferSize, 11);
 
     byteStreamDestroy(stream);
+    free(out);
     id3v2DestroyExtendedTagHeader(&ext);
 }
 
-static void id3v2ExtendedTagHeaderToStream_v4restrictions(void **state){
+static void id3v2ExtendedTagHeaderSerialize_v4restrictions(void **state){
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, 0, 1, 0xff);
-    ByteStream *stream = id3v2ExtendedTagHeaderToStream(ext, ID3V2_TAG_VERSION_4);
+    size_t outl = 0;
+    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
 
     assert_int_equal(byteStreamReturnInt(stream), 7);
 
@@ -891,6 +910,7 @@ static void id3v2ExtendedTagHeaderToStream_v4restrictions(void **state){
     assert_int_equal(stream->bufferSize, 7);
 
     byteStreamDestroy(stream);
+    free(out);
     id3v2DestroyExtendedTagHeader(&ext);
 }
 
@@ -971,13 +991,15 @@ static void id3v2ExtendedTagHeaderToJSON_v4restrictions(void **state){
     id3v2DestroyExtendedTagHeader(&ext);
 }
 
-static void id3v2TagHeaderToStream_v2(void **state){
+static void id3v2TagHeaderSerialize_v2(void **state){
 
     Id3v2TagHeader *h = id3v2CreateTagHeader(2, 0, 0, NULL);
-    ByteStream *stream = id3v2TagHeaderToStream(h, 1000);
+    size_t outl = 0;
+    uint8_t *out = id3v2TagHeaderSerialize(h, 1000, &outl);
     unsigned char *tmp = NULL;
 
-
+    ByteStream *stream = byteStreamCreate(out, outl);
+    
     assert_non_null(stream);
     
     assert_memory_equal(byteStreamCursor(stream), "ID3", 3);
@@ -997,33 +1019,41 @@ static void id3v2TagHeaderToStream_v2(void **state){
     free(tmp);
 
     id3v2DestroyTagHeader(&h);
+    free(out);
     byteStreamDestroy(stream);
 
 }
 
-static void id3v2TagHeaderToStream_unsupportedVersion(void **state){
+static void id3v2TagHeaderSerialize_unsupportedVersion(void **state){
 
     Id3v2TagHeader *h = id3v2CreateTagHeader(10, 0, 0, NULL);
-    ByteStream *stream = id3v2TagHeaderToStream(h, 1000);
+    size_t outl = 0;
+    uint8_t *out = id3v2TagHeaderSerialize(h, 1000, &outl);
 
-    assert_null(stream);
+    assert_null(out);
+    assert_int_equal(outl, 0);
 
     id3v2DestroyTagHeader(&h);
 
 }
 
-static void id3v2TagHeaderToStream_null(void **state){
+static void id3v2TagHeaderSerialize_null(void **state){
 
-    ByteStream *stream = id3v2TagHeaderToStream(NULL, 1000);
-    assert_null(stream);
+    size_t outl = 0;
+    uint8_t *out = id3v2TagHeaderSerialize(NULL, 1000, &outl);
+
+    assert_null(out);
+    assert_int_equal(outl, 0);
 
 }
 
 
-static void id3v2TagHeaderToStream_v3(void **state){
+static void id3v2TagHeaderSerialize_v3(void **state){
 
     Id3v2TagHeader *h = id3v2CreateTagHeader(3, 1, 0x20, NULL);
-    ByteStream *stream = id3v2TagHeaderToStream(h, 1000);
+    size_t outl = 0;
+    uint8_t *out = id3v2TagHeaderSerialize(h, 1000, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
     unsigned char *tmp = NULL;
 
 
@@ -1046,15 +1076,18 @@ static void id3v2TagHeaderToStream_v3(void **state){
     free(tmp);
 
     id3v2DestroyTagHeader(&h);
+    free(out);
     byteStreamDestroy(stream);
 
 }
 
-static void id3v2TagHeaderToStream_v3WithExt(void **state){
+static void id3v2TagHeaderSerialize_v3WithExt(void **state){
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(100, 0, 0, 0, 0);
     Id3v2TagHeader *h = id3v2CreateTagHeader(3, 1, 0x60, ext);
-    ByteStream *stream = id3v2TagHeaderToStream(h, 1000);
+    size_t outl = 0;
+    uint8_t *out = id3v2TagHeaderSerialize(h, 1000, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
     unsigned char *tmp = NULL;
 
 
@@ -1086,15 +1119,18 @@ static void id3v2TagHeaderToStream_v3WithExt(void **state){
     assert_int_equal(byteStreamReturnU32(stream), 100);
 
     id3v2DestroyTagHeader(&h);
+    free(out);
     byteStreamDestroy(stream);
 
 }
 
 
-static void id3v2TagHeaderToStream_v4(void **state){
+static void id3v2TagHeaderSerialize_v4(void **state){
 
     Id3v2TagHeader *h = id3v2CreateTagHeader(4, 0, 0, NULL);
-    ByteStream *stream = id3v2TagHeaderToStream(h, 900);
+    size_t outl = 0;
+    uint8_t *out = id3v2TagHeaderSerialize(h, 900, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
     unsigned char *tmp = NULL;
 
 
@@ -1118,15 +1154,18 @@ static void id3v2TagHeaderToStream_v4(void **state){
     byteStreamSeek(stream, 4, SEEK_CUR);
 
     id3v2DestroyTagHeader(&h);
+    free(out);
     byteStreamDestroy(stream);
 
 }
 
-static void id3v2TagHeaderToStream_v4WithExt(void **state){
+static void id3v2TagHeaderSerialize_v4WithExt(void **state){
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(80, 870, 1, 1, 0xff);
     Id3v2TagHeader *h = id3v2CreateTagHeader(4, 0, 0xF0, ext);
-    ByteStream *stream = id3v2TagHeaderToStream(h, 900);
+    size_t outl = 0;
+    uint8_t *out = id3v2TagHeaderSerialize(h, 900, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
     unsigned char *tmp = NULL;
 
     assert_non_null(stream);
@@ -1165,6 +1204,7 @@ static void id3v2TagHeaderToStream_v4WithExt(void **state){
 
 
     id3v2DestroyTagHeader(&h);
+    free(out);
     byteStreamDestroy(stream);
 
 }
@@ -1375,13 +1415,13 @@ int main(){
         cmocka_unit_test(id3v2TagCreateAndDestroy_AllInOne),
 
         // id3v2ExtendedTagHeader tests
-        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v3noCRC),
-        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v3CRC),
-        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_null),
-        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v4WithEverything),
-        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v4),
-        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v4crc),
-        cmocka_unit_test(id3v2ExtendedTagHeaderToStream_v4restrictions),
+        cmocka_unit_test(id3v2ExtendedTagHeaderSerialize_v3noCRC),
+        cmocka_unit_test(id3v2ExtendedTagHeaderSerialize_v3CRC),
+        cmocka_unit_test(id3v2ExtendedTagHeaderSerialize_null),
+        cmocka_unit_test(id3v2ExtendedTagHeaderSerialize_v4WithEverything),
+        cmocka_unit_test(id3v2ExtendedTagHeaderSerialize_v4),
+        cmocka_unit_test(id3v2ExtendedTagHeaderSerialize_v4crc),
+        cmocka_unit_test(id3v2ExtendedTagHeaderSerialize_v4restrictions),
 
         // id3v2ExtendedTagHeaderToJSON
         cmocka_unit_test(id3v2ExtendedTagHeaderToJSON_v3CRC),
@@ -1391,14 +1431,14 @@ int main(){
         cmocka_unit_test(id3v2ExtendedTagHeaderToJSON_v4crc),
         cmocka_unit_test(id3v2ExtendedTagHeaderToJSON_v4restrictions),
 
-        // id3v2TagHeaderToStream
-        cmocka_unit_test(id3v2TagHeaderToStream_v2),
-        cmocka_unit_test(id3v2TagHeaderToStream_unsupportedVersion),
-        cmocka_unit_test(id3v2TagHeaderToStream_null),
-        cmocka_unit_test(id3v2TagHeaderToStream_v3),
-        cmocka_unit_test(id3v2TagHeaderToStream_v3WithExt),
-        cmocka_unit_test(id3v2TagHeaderToStream_v4),
-        cmocka_unit_test(id3v2TagHeaderToStream_v4WithExt),
+        // id3v2TagHeaderSerialize
+        cmocka_unit_test(id3v2TagHeaderSerialize_v2),
+        cmocka_unit_test(id3v2TagHeaderSerialize_unsupportedVersion),
+        cmocka_unit_test(id3v2TagHeaderSerialize_null),
+        cmocka_unit_test(id3v2TagHeaderSerialize_v3),
+        cmocka_unit_test(id3v2TagHeaderSerialize_v3WithExt),
+        cmocka_unit_test(id3v2TagHeaderSerialize_v4),
+        cmocka_unit_test(id3v2TagHeaderSerialize_v4WithExt),
 
         // id3v2TagHeaderToJSON
         cmocka_unit_test(id3v2TagHeaderToJSON_null),

@@ -1332,56 +1332,52 @@ static void id3v2CreateGenericContext_valid(void **state){
 
 }
 
-static void id3v2ContextToStream_valid(void **state){
+static void id3v2ContextSerialize_valid(void **state){
 
     Id3v2ContentContext *cc = id3v2CreateContentContext(iter_context, id3v2djb2("test"), INT16_MAX, 1);
+    size_t outl = 0;
+    uint8_t *out = id3v2ContextSerialize(cc, &outl);
+    uint8_t *start = out;
 
-    ByteStream *stream = id3v2ContextToStream(cc);
-    unsigned char test[sizeof(size_t)] = {0};
+    assert_non_null(out);
+    assert_int_equal(out[0], 7U);
+    out++;
 
+    assert_int_equal(id3v2djb2("test"), btost(out, sizeof(size_t)));
+    out += sizeof(size_t);
 
-    assert_non_null(stream);
-    assert_memory_equal(byteStreamCursor(stream), "\x07", 1);
-    byteStreamSeek(stream, 1, SEEK_CUR);
+    assert_int_equal(INT16_MAX, btost(out, sizeof(size_t)));
+    out += sizeof(size_t);
 
-    byteStreamRead(stream, test, sizeof(size_t));
-    assert_int_equal(id3v2djb2("test"), btost(test, sizeof(size_t)));
-    
-    byteStreamRead(stream, test, sizeof(size_t));
-    assert_int_equal(INT16_MAX, btost(test, sizeof(size_t)));
-
-    byteStreamRead(stream, test, sizeof(size_t));
-    assert_int_equal(1, btost(test, sizeof(size_t)));
+    assert_int_equal(1, btost(out, sizeof(size_t)));
 
     id3v2DestroyContentContext(&cc);
-    byteStreamDestroy(stream);
+    free(start);
 }
 
 
-static void id3v2ContextToStream_minned(void **state){
+static void id3v2ContextSerialize_minned(void **state){
 
 
     Id3v2ContentContext *cc = id3v2CreateContentContext(0, 0, 0, 0);
+    size_t outl = 0;
+    uint8_t *out = id3v2ContextSerialize(cc, &outl);
+    uint8_t *start = out;
 
-    ByteStream *stream = id3v2ContextToStream(cc);
-    unsigned char test[sizeof(size_t)] = {0};
+    assert_non_null(out);
+    assert_int_equal(out[0], 0U);
+    out++;
 
+    assert_int_equal(0U, btost(out, sizeof(size_t)));
+    out += sizeof(size_t);
 
-    assert_non_null(stream);
-    assert_memory_equal(byteStreamCursor(stream), "\x00", 1);
-    byteStreamSeek(stream, 1, SEEK_CUR);
+    assert_int_equal(0U, btost(out, sizeof(size_t)));
+    out += sizeof(size_t);
 
-    byteStreamRead(stream, test, sizeof(size_t));
-    assert_int_equal(0, btost(test, sizeof(size_t)));
-    
-    byteStreamRead(stream, test, sizeof(size_t));
-    assert_int_equal(0, btost(test, sizeof(size_t)));
-
-    byteStreamRead(stream, test, sizeof(size_t));
-    assert_int_equal(0, btost(test, sizeof(size_t)));
+    assert_int_equal(0U, btost(out, sizeof(size_t)));
 
     id3v2DestroyContentContext(&cc);
-    byteStreamDestroy(stream);
+    free(start);
 }
 
 static void id3v2ContextToJSON_valid(void **state){
@@ -1537,8 +1533,8 @@ int main(){
         cmocka_unit_test(id3v2CreateGenericContext_valid),
 
         // id3v2ContextToStream tests
-        cmocka_unit_test(id3v2ContextToStream_valid),
-        cmocka_unit_test(id3v2ContextToStream_minned),
+        cmocka_unit_test(id3v2ContextSerialize_valid),
+        cmocka_unit_test(id3v2ContextSerialize_minned),
 
         // id3v2ContextToJSON tests
         cmocka_unit_test(id3v2ContextToJSON_valid),
