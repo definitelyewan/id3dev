@@ -73,8 +73,8 @@ target_include_directories(LinkedListLib PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/id3
 #HashTableLib shinanigans
 
 set(HASH_TABLE_LIB_FILES
-  "${CMAKE_CURRENT_SOURCE_DIR}/id3dependencies/HashTableLib/include/HashTable.h"
-  "${CMAKE_CURRENT_SOURCE_DIR}/id3dependencies/HashTableLib/src/HashTable.c"
+  "${CMAKE_CURRENT_SOURCE_DIR}/id3dependencies/HashTableLib/include/hashTable.h"
+  "${CMAKE_CURRENT_SOURCE_DIR}/id3dependencies/HashTableLib/src/hashTable.c"
 )
 
 add_library(HashTableLib OBJECT ${HASH_TABLE_LIB_FILES})
