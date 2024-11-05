@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Id3dev: /mnt/d/code/id3dev/include/id3v2/id3v2.h File Reference</title>
+<title>Id3dev: /home/junk/projects/id3dev/include/id3v2/id3v2.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -78,33 +78,6 @@ $(function() {
 <a href="#details">More...</a></p>
 <div class="textblock"><code>#include &quot;<a class="el" href="id3v2Types_8h_source.html">id3v2Types.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="id3v2TagIdentity_8h_source.html">id3v2TagIdentity.h</a>&quot;</code><br />
-</div><div class="textblock"><div class="dynheader">
-Include dependency graph for id3v2.h:</div>
-<div class="dyncontent">
-<div class="center"><img src="id3v2_8h__incl.png" border="0" usemap="#a_2mnt_2d_2code_2id3dev_2include_2id3v2_2id3v2_8h" alt=""/></div>
-<map name="a_2mnt_2d_2code_2id3dev_2include_2id3v2_2id3v2_8h" id="a_2mnt_2d_2code_2id3dev_2include_2id3v2_2id3v2_8h">
-<area shape="rect" title="Declarations used by utility functions." alt="" coords="272,5,437,47"/>
-<area shape="rect" href="id3v2Types_8h.html" title="Defintions and types for id3v2 types." alt="" coords="301,169,408,196"/>
-<area shape="rect" href="id3v2TagIdentity_8h.html" title="Declarations for id3v2 tag headers and extended headers." alt="" coords="339,95,479,121"/>
-<area shape="rect" href="id3v1Types_8h.html" title="Defintions and types for id3v1 types." alt="" coords="27,251,173,278"/>
-<area shape="rect" title=" " alt="" coords="5,333,88,360"/>
-<area shape="rect" title=" " alt="" coords="117,333,187,360"/>
-<area shape="rect" title=" " alt="" coords="248,244,461,285"/>
-<area shape="rect" title=" " alt="" coords="486,251,573,278"/>
-<area shape="rect" title=" " alt="" coords="597,244,798,285"/>
-<area shape="rect" title=" " alt="" coords="823,244,1025,285"/>
-</map>
-</div>
-</div><div class="textblock"><div class="dynheader">
-This graph shows which files directly or indirectly include this file:</div>
-<div class="dyncontent">
-<div class="center"><img src="id3v2_8h__dep__incl.png" border="0" usemap="#a_2mnt_2d_2code_2id3dev_2include_2id3v2_2id3v2_8hdep" alt=""/></div>
-<map name="a_2mnt_2d_2code_2id3dev_2include_2id3v2_2id3v2_8hdep" id="a_2mnt_2d_2code_2id3dev_2include_2id3v2_2id3v2_8hdep">
-<area shape="rect" title="Declarations used by utility functions." alt="" coords="81,5,247,47"/>
-<area shape="rect" href="id3v2_8c.html" title="Contains all main functions for the id3v2 library." alt="" coords="5,95,152,136"/>
-<area shape="rect" href="id3dev_8c.html" title="Main functions for interacting with ID3 metadata." alt="" coords="176,95,323,136"/>
-</map>
-</div>
 </div>
 <p><a href="id3v2_8h_source.html">Go to the source code of this file.</a></p>
 <table class="memberdecls">
@@ -212,9 +185,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a292fd4e8b40a7895ba5aef2d8872651d"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="id3v2_8h.html#a292fd4e8b40a7895ba5aef2d8872651d">id3v2WritePictureFromFile</a> (const char *filename, const char *kind, uint8_t type, <a class="el" href="id3v2Types_8h.html#a470730b75a95acb88dfb1736f05e8e81">Id3v2Tag</a> *tag)</td></tr>
 <tr class="memdesc:a292fd4e8b40a7895ba5aef2d8872651d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes a new picture from a file to the first Attached picture (PIC or APIC) frame of a tag that matches the given type. It will additionally write the mime type via the null terminated string kind. If this function fails or any argument is null, false is returned otherwise, true.  <a href="id3v2_8h.html#a292fd4e8b40a7895ba5aef2d8872651d">More...</a><br /></td></tr>
 <tr class="separator:a292fd4e8b40a7895ba5aef2d8872651d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a78b68d9586ba65fdede2c4328691cd66"><td class="memItemLeft" align="right" valign="top">ByteStream *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="id3v2_8h.html#a78b68d9586ba65fdede2c4328691cd66">id3v2TagToStream</a> (<a class="el" href="id3v2Types_8h.html#a470730b75a95acb88dfb1736f05e8e81">Id3v2Tag</a> *tag)</td></tr>
-<tr class="memdesc:a78b68d9586ba65fdede2c4328691cd66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an ID3v2.x tag data structure back to its binary representation. If this function fails NULL is returned otherwise, a ByteStream pointer.  <a href="id3v2_8h.html#a78b68d9586ba65fdede2c4328691cd66">More...</a><br /></td></tr>
-<tr class="separator:a78b68d9586ba65fdede2c4328691cd66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27721d66806c03fd3e3fe5f3ff575c3d"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="id3v2_8h.html#a27721d66806c03fd3e3fe5f3ff575c3d">id3v2TagSerialize</a> (<a class="el" href="id3v2Types_8h.html#a470730b75a95acb88dfb1736f05e8e81">Id3v2Tag</a> *tag, size_t *outl)</td></tr>
+<tr class="memdesc:a27721d66806c03fd3e3fe5f3ff575c3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an ID3v2.x tag data structure back to its binary representation. If this function fails NULL is returned otherwise, an uint8_t pointer.  <a href="id3v2_8h.html#a27721d66806c03fd3e3fe5f3ff575c3d">More...</a><br /></td></tr>
+<tr class="separator:a27721d66806c03fd3e3fe5f3ff575c3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ace11857db6d7cda87867f743143bdc14"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="id3v2_8h.html#ace11857db6d7cda87867f743143bdc14">id3v2TagToJSON</a> (<a class="el" href="id3v2Types_8h.html#a470730b75a95acb88dfb1736f05e8e81">Id3v2Tag</a> *tag)</td></tr>
 <tr class="memdesc:ace11857db6d7cda87867f743143bdc14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts an ID3v2.x tag data structure back to its json representation.  <a href="id3v2_8h.html#ace11857db6d7cda87867f743143bdc14">More...</a><br /></td></tr>
 <tr class="separator:ace11857db6d7cda87867f743143bdc14"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -857,6 +830,43 @@ false </dd></dl>
 
 </div>
 </div>
+<a id="a27721d66806c03fd3e3fe5f3ff575c3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27721d66806c03fd3e3fe5f3ff575c3d">&#9670;&nbsp;</a></span>id3v2TagSerialize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t* id3v2TagSerialize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="id3v2Types_8h.html#a470730b75a95acb88dfb1736f05e8e81">Id3v2Tag</a> *&#160;</td>
+          <td class="paramname"><em>tag</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>outl</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts an ID3v2.x tag data structure back to its binary representation. If this function fails NULL is returned otherwise, an uint8_t pointer. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tag</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>ByteStream* </dd></dl>
+
+</div>
+</div>
 <a id="ace11857db6d7cda87867f743143bdc14"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ace11857db6d7cda87867f743143bdc14">&#9670;&nbsp;</a></span>id3v2TagToJSON()</h2>
 
@@ -881,33 +891,6 @@ false </dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>char* </dd></dl>
-
-</div>
-</div>
-<a id="a78b68d9586ba65fdede2c4328691cd66"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a78b68d9586ba65fdede2c4328691cd66">&#9670;&nbsp;</a></span>id3v2TagToStream()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">ByteStream* id3v2TagToStream </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="id3v2Types_8h.html#a470730b75a95acb88dfb1736f05e8e81">Id3v2Tag</a> *&#160;</td>
-          <td class="paramname"><em>tag</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Converts an ID3v2.x tag data structure back to its binary representation. If this function fails NULL is returned otherwise, a ByteStream pointer. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">tag</td><td></td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>ByteStream* </dd></dl>
 
 </div>
 </div>

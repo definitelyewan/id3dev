@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
 <meta name="generator" content="Doxygen 1.9.1"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Id3dev: /mnt/d/code/id3dev/src/id3v2/id3v2Frame.c File Reference</title>
+<title>Id3dev: /home/junk/projects/id3dev/src/id3v2/id3v2Frame.c File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -85,31 +85,6 @@ $(function() {
 <code>#include &quot;id3dependencies/ByteStream/include/byteInt.h&quot;</code><br />
 <code>#include &quot;id3dependencies/ByteStream/include/byteUnicode.h&quot;</code><br />
 <code>#include &quot;id3dependencies/ByteStream/include/byteStream.h&quot;</code><br />
-</div><div class="textblock"><div class="dynheader">
-Include dependency graph for id3v2Frame.c:</div>
-<div class="dyncontent">
-<div class="center"><img src="id3v2Frame_8c__incl.png" border="0" usemap="#a_2mnt_2d_2code_2id3dev_2src_2id3v2_2id3v2Frame_8c" alt=""/></div>
-<map name="a_2mnt_2d_2code_2id3dev_2src_2id3v2_2id3v2Frame_8c" id="a_2mnt_2d_2code_2id3dev_2src_2id3v2_2id3v2Frame_8c">
-<area shape="rect" title="Functions for creating, destroying, and manipulating ID3v2 frames." alt="" coords="367,5,545,47"/>
-<area shape="rect" title=" " alt="" coords="5,102,72,129"/>
-<area shape="rect" title=" " alt="" coords="97,102,167,129"/>
-<area shape="rect" title=" " alt="" coords="191,102,262,129"/>
-<area shape="rect" title=" " alt="" coords="286,102,357,129"/>
-<area shape="rect" href="id3v2Frame_8h.html" title="function declerations for frame operations" alt="" coords="381,102,531,129"/>
-<area shape="rect" href="id3v2Context_8h.html" title="provides the ability to generate a context and a list of contexts that represent the ruleset of a fra..." alt="" coords="555,102,717,129"/>
-<area shape="rect" title=" " alt="" coords="741,95,955,136"/>
-<area shape="rect" title=" " alt="" coords="979,95,1192,136"/>
-<area shape="rect" title=" " alt="" coords="1216,95,1429,136"/>
-<area shape="rect" href="id3v2Types_8h.html" title="Defintions and types for id3v2 types." alt="" coords="492,184,599,211"/>
-<area shape="rect" href="id3v1Types_8h.html" title="Defintions and types for id3v1 types." alt="" coords="217,266,364,293"/>
-<area shape="rect" title=" " alt="" coords="196,348,279,375"/>
-<area shape="rect" title=" " alt="" coords="307,348,378,375"/>
-<area shape="rect" title=" " alt="" coords="439,259,652,300"/>
-<area shape="rect" title=" " alt="" coords="677,266,763,293"/>
-<area shape="rect" title=" " alt="" coords="787,259,989,300"/>
-<area shape="rect" title=" " alt="" coords="1013,259,1216,300"/>
-</map>
-</div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
@@ -155,6 +130,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a3c42bacdbd35a06a5b95a3c84a8e25b3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="id3v2Types_8h.html#a632a0a92f37060c749ceb7b8959dd2db">Id3v2Frame</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="id3v2Frame_8c.html#a3c42bacdbd35a06a5b95a3c84a8e25b3">id3v2CreateEmptyFrame</a> (const char id[<a class="el" href="id3v2Types_8h.html#a47cdc13e643e1d7ae075aec5d2b6d000">ID3V2_FRAME_ID_MAX_SIZE</a>], uint8_t version, HashTable *userPairs)</td></tr>
 <tr class="memdesc:a3c42bacdbd35a06a5b95a3c84a8e25b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a frame with each entry set to 0 with the correct context. default pairings will be scanned first and then userPairs will be scanned. If no pairings are found this function will use a generic pairing. If this function fails it will return NULL.  <a href="id3v2Frame_8c.html#a3c42bacdbd35a06a5b95a3c84a8e25b3">More...</a><br /></td></tr>
 <tr class="separator:a3c42bacdbd35a06a5b95a3c84a8e25b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea7ba77639841465381fb371d4ae60d7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="id3v2Frame_8c.html#aea7ba77639841465381fb371d4ae60d7">id3v2CompareFrameId</a> (<a class="el" href="id3v2Types_8h.html#a632a0a92f37060c749ceb7b8959dd2db">Id3v2Frame</a> *frame, const char id[<a class="el" href="id3v2Types_8h.html#a47cdc13e643e1d7ae075aec5d2b6d000">ID3V2_FRAME_ID_MAX_SIZE</a>])</td></tr>
+<tr class="memdesc:aea7ba77639841465381fb371d4ae60d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares a provided frame ID with the ID of a provided frame. If the IDs match This function will return true otherwise, false.  <a href="id3v2Frame_8c.html#aea7ba77639841465381fb371d4ae60d7">More...</a><br /></td></tr>
+<tr class="separator:aea7ba77639841465381fb371d4ae60d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d085236794797710b7c657732d1c705"><td class="memItemLeft" align="right" valign="top">ListIter&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="id3v2Frame_8c.html#a3d085236794797710b7c657732d1c705">id3v2CreateFrameTraverser</a> (<a class="el" href="id3v2Types_8h.html#a470730b75a95acb88dfb1736f05e8e81">Id3v2Tag</a> *tag)</td></tr>
 <tr class="memdesc:a3d085236794797710b7c657732d1c705"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a list iter specific to frame content.  <a href="id3v2Frame_8c.html#a3d085236794797710b7c657732d1c705">More...</a><br /></td></tr>
 <tr class="separator:a3d085236794797710b7c657732d1c705"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -188,15 +166,15 @@ Functions</h2></td></tr>
 <tr class="memitem:a51b7b068bb7b3280f2e90b0f4fbc156c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="id3v2Types_8h.html#a632a0a92f37060c749ceb7b8959dd2db">Id3v2Frame</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="id3v2Frame_8c.html#a51b7b068bb7b3280f2e90b0f4fbc156c">id3v2DetatchFrameFromTag</a> (<a class="el" href="id3v2Types_8h.html#a470730b75a95acb88dfb1736f05e8e81">Id3v2Tag</a> *tag, <a class="el" href="id3v2Types_8h.html#a632a0a92f37060c749ceb7b8959dd2db">Id3v2Frame</a> *frame)</td></tr>
 <tr class="memdesc:a51b7b068bb7b3280f2e90b0f4fbc156c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Removes a frame from a tag and returns it to the caller otherwise, NULL.  <a href="id3v2Frame_8c.html#a51b7b068bb7b3280f2e90b0f4fbc156c">More...</a><br /></td></tr>
 <tr class="separator:a51b7b068bb7b3280f2e90b0f4fbc156c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2465e8dbb656bdde16dff1c6f1ec145"><td class="memItemLeft" align="right" valign="top">ByteStream *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="id3v2Frame_8c.html#ac2465e8dbb656bdde16dff1c6f1ec145">id3v2FrameHeaderToStream</a> (<a class="el" href="id3v2Types_8h.html#ae58277360e304167f2d5bbcd3e9cee99">Id3v2FrameHeader</a> *header, uint8_t version, uint32_t frameSize)</td></tr>
-<tr class="memdesc:ac2465e8dbb656bdde16dff1c6f1ec145"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a frame header into its binary representation. If this function fails it will return NULL otherwise, a ByteStream structure.  <a href="id3v2Frame_8c.html#ac2465e8dbb656bdde16dff1c6f1ec145">More...</a><br /></td></tr>
-<tr class="separator:ac2465e8dbb656bdde16dff1c6f1ec145"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba2e4da82f27bf3e130c81b3d2719fb6"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="id3v2Frame_8c.html#aba2e4da82f27bf3e130c81b3d2719fb6">id3v2FrameHeaderSerialize</a> (<a class="el" href="id3v2Types_8h.html#ae58277360e304167f2d5bbcd3e9cee99">Id3v2FrameHeader</a> *header, uint8_t version, uint32_t frameSize, size_t *outl)</td></tr>
+<tr class="memdesc:aba2e4da82f27bf3e130c81b3d2719fb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a frame header into its binary representation. If this function fails it will return NULL otherwise, an uint8_t pointer.  <a href="id3v2Frame_8c.html#aba2e4da82f27bf3e130c81b3d2719fb6">More...</a><br /></td></tr>
+<tr class="separator:aba2e4da82f27bf3e130c81b3d2719fb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7f83c8908547713a76febaf9ccbd3afb"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="id3v2Frame_8c.html#a7f83c8908547713a76febaf9ccbd3afb">id3v2FrameHeaderToJSON</a> (<a class="el" href="id3v2Types_8h.html#ae58277360e304167f2d5bbcd3e9cee99">Id3v2FrameHeader</a> *header, uint8_t version)</td></tr>
 <tr class="memdesc:a7f83c8908547713a76febaf9ccbd3afb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a frame header structure into its representation as JSON.  <a href="id3v2Frame_8c.html#a7f83c8908547713a76febaf9ccbd3afb">More...</a><br /></td></tr>
 <tr class="separator:a7f83c8908547713a76febaf9ccbd3afb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a169d075780cd66fd5efdcc028f0a6453"><td class="memItemLeft" align="right" valign="top">ByteStream *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="id3v2Frame_8c.html#a169d075780cd66fd5efdcc028f0a6453">id3v2FrameToStream</a> (<a class="el" href="id3v2Types_8h.html#a632a0a92f37060c749ceb7b8959dd2db">Id3v2Frame</a> *frame, uint8_t version)</td></tr>
-<tr class="memdesc:a169d075780cd66fd5efdcc028f0a6453"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a frame structure into its binary representation. If this function fails it will return NULL otherwise, a ByteStream structure.  <a href="id3v2Frame_8c.html#a169d075780cd66fd5efdcc028f0a6453">More...</a><br /></td></tr>
-<tr class="separator:a169d075780cd66fd5efdcc028f0a6453"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa1cce374f0c2f2cd9b69d811e06ca8d2"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="id3v2Frame_8c.html#aa1cce374f0c2f2cd9b69d811e06ca8d2">id3v2FrameSerialize</a> (<a class="el" href="id3v2Types_8h.html#a632a0a92f37060c749ceb7b8959dd2db">Id3v2Frame</a> *frame, uint8_t version, size_t *outl)</td></tr>
+<tr class="memdesc:aa1cce374f0c2f2cd9b69d811e06ca8d2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a frame structure into its binary representation. If this function fails it will return NULL otherwise, an uint8_t structure.  <a href="id3v2Frame_8c.html#aa1cce374f0c2f2cd9b69d811e06ca8d2">More...</a><br /></td></tr>
+<tr class="separator:aa1cce374f0c2f2cd9b69d811e06ca8d2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a71d61003dc010ad959e701c4272bf51d"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="id3v2Frame_8c.html#a71d61003dc010ad959e701c4272bf51d">id3v2FrameToJSON</a> (<a class="el" href="id3v2Types_8h.html#a632a0a92f37060c749ceb7b8959dd2db">Id3v2Frame</a> *frame, uint8_t version)</td></tr>
 <tr class="memdesc:a71d61003dc010ad959e701c4272bf51d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a frame structure into its JSON representation.  <a href="id3v2Frame_8c.html#a71d61003dc010ad959e701c4272bf51d">More...</a><br /></td></tr>
 <tr class="separator:a71d61003dc010ad959e701c4272bf51d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -323,6 +301,46 @@ false </dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>int </dd></dl>
+
+</div>
+</div>
+<a id="aea7ba77639841465381fb371d4ae60d7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aea7ba77639841465381fb371d4ae60d7">&#9670;&nbsp;</a></span>id3v2CompareFrameId()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool id3v2CompareFrameId </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="id3v2Types_8h.html#a632a0a92f37060c749ceb7b8959dd2db">Id3v2Frame</a> *&#160;</td>
+          <td class="paramname"><em>frame</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char&#160;</td>
+          <td class="paramname"><em>id</em>[ID3V2_FRAME_ID_MAX_SIZE]&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Compares a provided frame ID with the ID of a provided frame. If the IDs match This function will return true otherwise, false. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">frame</td><td></td></tr>
+    <tr><td class="paramname">id</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true </dd>
+<dd>
+false </dd></dl>
 
 </div>
 </div>
@@ -781,6 +799,57 @@ false </dd></dl>
 
 </div>
 </div>
+<a id="aba2e4da82f27bf3e130c81b3d2719fb6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aba2e4da82f27bf3e130c81b3d2719fb6">&#9670;&nbsp;</a></span>id3v2FrameHeaderSerialize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">uint8_t* id3v2FrameHeaderSerialize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="id3v2Types_8h.html#ae58277360e304167f2d5bbcd3e9cee99">Id3v2FrameHeader</a> *&#160;</td>
+          <td class="paramname"><em>header</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>version</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint32_t&#160;</td>
+          <td class="paramname"><em>frameSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>outl</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts a frame header into its binary representation. If this function fails it will return NULL otherwise, an uint8_t pointer. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">header</td><td></td></tr>
+    <tr><td class="paramname">version</td><td></td></tr>
+    <tr><td class="paramname">frameSize</td><td></td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>ByteStream* </dd></dl>
+
+</div>
+</div>
 <a id="a7f83c8908547713a76febaf9ccbd3afb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7f83c8908547713a76febaf9ccbd3afb">&#9670;&nbsp;</a></span>id3v2FrameHeaderToJSON()</h2>
 
@@ -819,17 +888,17 @@ false </dd></dl>
 
 </div>
 </div>
-<a id="ac2465e8dbb656bdde16dff1c6f1ec145"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac2465e8dbb656bdde16dff1c6f1ec145">&#9670;&nbsp;</a></span>id3v2FrameHeaderToStream()</h2>
+<a id="aa1cce374f0c2f2cd9b69d811e06ca8d2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa1cce374f0c2f2cd9b69d811e06ca8d2">&#9670;&nbsp;</a></span>id3v2FrameSerialize()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">ByteStream* id3v2FrameHeaderToStream </td>
+          <td class="memname">uint8_t* id3v2FrameSerialize </td>
           <td>(</td>
-          <td class="paramtype"><a class="el" href="id3v2Types_8h.html#ae58277360e304167f2d5bbcd3e9cee99">Id3v2FrameHeader</a> *&#160;</td>
-          <td class="paramname"><em>header</em>, </td>
+          <td class="paramtype"><a class="el" href="id3v2Types_8h.html#a632a0a92f37060c749ceb7b8959dd2db">Id3v2Frame</a> *&#160;</td>
+          <td class="paramname"><em>frame</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -840,8 +909,8 @@ false </dd></dl>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">uint32_t&#160;</td>
-          <td class="paramname"><em>frameSize</em>&#160;</td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>outl</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -851,16 +920,16 @@ false </dd></dl>
       </table>
 </div><div class="memdoc">
 
-<p>Converts a frame header into its binary representation. If this function fails it will return NULL otherwise, a ByteStream structure. </p>
+<p>Converts a frame structure into its binary representation. If this function fails it will return NULL otherwise, an uint8_t structure. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">header</td><td></td></tr>
+    <tr><td class="paramname">frame</td><td></td></tr>
     <tr><td class="paramname">version</td><td></td></tr>
-    <tr><td class="paramname">frameSize</td><td></td></tr>
   </table>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>ByteStream* </dd></dl>
+<p>This will go on forever until a failure condition is met by a previous context i.e latin1_context detects null</p>
 
 </div>
 </div>
@@ -899,45 +968,6 @@ false </dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>char* </dd></dl>
-
-</div>
-</div>
-<a id="a169d075780cd66fd5efdcc028f0a6453"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a169d075780cd66fd5efdcc028f0a6453">&#9670;&nbsp;</a></span>id3v2FrameToStream()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">ByteStream* id3v2FrameToStream </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="id3v2Types_8h.html#a632a0a92f37060c749ceb7b8959dd2db">Id3v2Frame</a> *&#160;</td>
-          <td class="paramname"><em>frame</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t&#160;</td>
-          <td class="paramname"><em>version</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Converts a frame structure into its binary representation. If this function fails it will return NULL otherwise, a ByteStream structure. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">frame</td><td></td></tr>
-    <tr><td class="paramname">version</td><td></td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>ByteStream* </dd></dl>
-<p>This will go on forever until a failure condition is met by a previous context i.e latin1_context detects null</p>
 
 </div>
 </div>
