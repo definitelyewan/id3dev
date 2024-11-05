@@ -490,7 +490,9 @@ uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2Fr
  * the meat of the parser and requires 'hints' in the form of a context list to prase a frame successfully. There is
  * no error state for this function but a returned size of 0 or an incomplete frame such as a missing entry list may
  * indicate one.
- * 
+ * @details The bit context implmentation in this function is not correct and doesnt work as expected. I completly missed
+ * this when I made it at the start of this project :(. I dont know how I can fix it so if legit anyone ever looks at this
+ * code and wants to fix it, please do.
  * @param in
  * @param inl
  * @param context 
