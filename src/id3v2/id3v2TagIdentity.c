@@ -638,15 +638,16 @@ void id3v2DestroyTag(Id3v2Tag **toDelete){
 
 /**
  * @brief Converts an extended tag header into a stream. if this function fails it will
- * return NULL otherwise, a stream.
+ * return NULL otherwise, an uint8_t pointer.
  * 
  * @param ext 
  * @param version 
- * @return ByteStream* 
+ * @return uint8_t* 
  */
-ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t version){
+uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t version, size_t *outl){
     
     ByteStream *stream = NULL;
+    uint8_t *out = NULL;
     int offset = 0;
     int toWrite = 0;
     int buildSize = 0;
@@ -654,7 +655,8 @@ ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t 
     unsigned char crcb[5] = {0,0,0,0,0};
     
     if(ext == NULL){
-        return stream;
+        *outl = 0;
+        return NULL;
     }
     
     switch(version){
@@ -744,7 +746,12 @@ ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t 
     }
 
     byteStreamRewind(stream);
-    return stream;
+    out = calloc(stream->bufferSize, sizeof(uint8_t));
+    *outl = stream->bufferSize;
+    byteStreamRead(stream, out, stream->bufferSize);
+    byteStreamDestroy(stream);
+
+    return out;
 }
 
 /**
@@ -816,25 +823,28 @@ char *id3v2ExtendedTagHeaderToJSON(Id3v2ExtendedTagHeader *ext, uint8_t version)
 }
 
 /**
- * @brief Converts a tag header and tag size into a stream. if this function fails it will
- * return NULL otherwise, a stream.
+ * @brief Converts a tag header and tag size into an uint8_t pointer. if this function fails it will
+ * return NULL otherwise, an uint8_t pointer.
  * 
  * @param header 
  * @param uintSize 
- * @return ByteStream* 
+ * @return uint8_t* 
  */
-ByteStream *id3v2TagHeaderToStream(Id3v2TagHeader *header, uint32_t uintSize){    
+uint8_t *id3v2TagHeaderSerialize(Id3v2TagHeader *header, uint32_t uintSize, size_t *outl){    
     
     ByteStream *stream = NULL;
+    uint8_t *out = NULL;
     unsigned char *tmp = NULL;
 
     if(header == NULL){
-        return stream;
+        *outl = 0;
+        return NULL;
     }
 
     // no support
     if(header->majorVersion > ID3V2_TAG_VERSION_4){
-        return stream;
+        *outl = 0;
+        return NULL;
     }
 
     stream = byteStreamCreate(NULL, 10);
@@ -877,18 +887,23 @@ ByteStream *id3v2TagHeaderToStream(Id3v2TagHeader *header, uint32_t uintSize){
     free(tmp);
 
     if(id3v2ReadExtendedHeaderIndicator(header)){
-        ByteStream *ext = id3v2ExtendedTagHeaderToStream(header->extendedHeader, header->majorVersion);
+        size_t extSize = 0;
+        uint8_t *ext = id3v2ExtendedTagHeaderSerialize(header->extendedHeader, header->majorVersion, &extSize);
 
         if(ext != NULL){
-            byteStreamResize(stream, stream->bufferSize + ext->bufferSize);
-            byteStreamWrite(stream, byteStreamCursor(ext), ext->bufferSize);
-            byteStreamDestroy(ext);    
+            byteStreamResize(stream, stream->bufferSize + extSize);
+            byteStreamWrite(stream, ext, extSize);
+            free(ext);   
         }
         
     }
 
     byteStreamRewind(stream);
-    return stream;
+    *outl = stream->bufferSize;
+    out = calloc(stream->bufferSize, sizeof(uint8_t));
+    byteStreamRead(stream, out, stream->bufferSize);
+    byteStreamDestroy(stream);
+    return out;
 }
 
 char *id3v2TagHeaderToJSON(Id3v2TagHeader *header){

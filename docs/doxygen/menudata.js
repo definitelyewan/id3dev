@@ -83,5 +83,5 @@ var menudata={children:[
 {text:"Enumerator",url:"globals_eval.html"},
 {text:"Macros",url:"globals_defs.html"}]}]},
 {text:"Standard Documentation",url:"../standard.html"},
-{text:"Repo",url:"^https://github.com/definitelyewan/id3dev"},
-{text:"Official Source",url:"^https://id3.org/"}]}
+{text:"Repo",url:"https://github.com/definitelyewan/id3dev"},
+{text:"Official Source",url:"https://id3.org/"}]}

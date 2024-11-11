@@ -30,6 +30,8 @@ Id3v2Frame *id3v2ReadFrameByID(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag 
 int id3v2RemoveFrameByID(const char *id, Id3v2Tag *tag);
 int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t encoding, const char *string, Id3v2Tag *tag);
 
+int id3v2ReadTagVersion(Id3v2Tag *tag);
+
 // compatability functions a.k.a getters
 
 char *id3v2ReadTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag *tag);
@@ -67,7 +69,7 @@ int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t ty
 
 // writes
 
-ByteStream *id3v2TagToStream(Id3v2Tag *tag);
+uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl);
 char *id3v2TagToJSON(Id3v2Tag *tag);
 int id3v2WriteTagToFile(const char *filename, Id3v2Tag *tag);
 

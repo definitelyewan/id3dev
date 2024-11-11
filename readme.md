@@ -218,3 +218,6 @@ A couple examples on how to use this project are located in the `example` folder
 ### Tests
 There are well over 100 test cases located in the test folder for proof of functionallity. to build and run these tests cmocka must be installed on your system for `python3 ./scripts/test.py`.
 
+### Known Bugs
+- id3v2ParseFrame has a bit_context implementation that can result in incorrect return values when the number of bits is more then 8. Tests will need to be updated to match whatever fix is made across the board.
+

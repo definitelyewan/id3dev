@@ -51,6 +51,8 @@ Id3v2Frame *id3v2CreateEmptyFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], uint8_
     Frame access
 */
 
+bool id3v2CompareFrameId(Id3v2Frame *frame, const char id[ID3V2_FRAME_ID_MAX_SIZE]);
+
 ListIter id3v2CreateFrameTraverser(Id3v2Tag *tag);
 Id3v2Frame *id3v2FrameTraverse(ListIter *traverser);
 
@@ -72,10 +74,10 @@ Id3v2Frame *id3v2DetatchFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame);
     output
 */
 
-ByteStream *id3v2FrameHeaderToStream(Id3v2FrameHeader *header, uint8_t version, uint32_t frameSize);
+uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, uint32_t frameSize, size_t *outl);
 char *id3v2FrameHeaderToJSON(Id3v2FrameHeader *header, uint8_t version);
 
-ByteStream *id3v2FrameToStream(Id3v2Frame *frame, uint8_t version);
+uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl);
 char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version);
 
 

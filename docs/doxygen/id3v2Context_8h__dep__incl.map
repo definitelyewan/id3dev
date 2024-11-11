@@ -1,0 +1,7 @@
+<map id="/mnt/d/code/id3dev/include/id3v2/id3v2Context.h" name="/mnt/d/code/id3dev/include/id3v2/id3v2Context.h">
+<area shape="rect" id="node1" title="provides the ability to generate a context and a list of contexts that represent the ruleset of a fra..." alt="" coords="296,5,512,47"/>
+<area shape="rect" id="node2" href="$id3v2Context_8c.html" title="Functions for configuring the parser and any output of a tag." alt="" coords="5,95,192,136"/>
+<area shape="rect" id="node3" href="$id3v2Parser_8c.html" title="Functions related to parsing content." alt="" coords="217,95,391,136"/>
+<area shape="rect" id="node4" href="$id3v2Frame_8c.html" title="Functions for creating, destroying, and manipulating ID3v2 frames." alt="" coords="415,95,593,136"/>
+<area shape="rect" id="node5" href="$id3v2_8c.html" title="Contains all main functions for the id3v2 library." alt="" coords="617,95,764,136"/>
+</map>

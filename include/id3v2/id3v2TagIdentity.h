@@ -82,10 +82,10 @@ void id3v2DestroyTag(Id3v2Tag **toDelete);
     output
 */
 
-ByteStream *id3v2ExtendedTagHeaderToStream(Id3v2ExtendedTagHeader *ext, uint8_t version);
+uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t version, size_t *outl);
 char *id3v2ExtendedTagHeaderToJSON(Id3v2ExtendedTagHeader *ext, uint8_t version);
 
-ByteStream *id3v2TagHeaderToStream(Id3v2TagHeader *header, uint32_t uintSize);
+uint8_t *id3v2TagHeaderSerialize(Id3v2TagHeader *header, uint32_t uintSize, size_t *outl);
 char *id3v2TagHeaderToJSON(Id3v2TagHeader *header);
 
 

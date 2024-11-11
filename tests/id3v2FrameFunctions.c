@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include "id3v2/id3v2.h"
 #include "id3v2/id3v2Frame.h"
 #include "id3v2/id3v2Parser.h"
 #include "id3v2/id3v2Context.h"
@@ -82,7 +83,7 @@ static void id3v2CreateAndDestroyHeader_allInOne(void **state){
 static void id3v2Traverse_allInOne(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/boniver.mp3");
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
 
     ListIter frames = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
@@ -103,7 +104,7 @@ static void id3v2Traverse_allInOne(void **state){
 static void id3v2ReadFrameEntry_allEntries(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/boniver.mp3");
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
 
     ListIter frames = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
@@ -140,7 +141,7 @@ static void id3v2ReadFrameEntry_allEntries(void **state){
 static void id3v2ReadFrameEntry_TextFrameAsChar(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/sorry4dying.mp3");
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
 
     ListIter frames = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
@@ -180,7 +181,7 @@ static void id3v2ReadFrameEntry_TextFrameAsChar(void **state){
 static void id3v2ReadFrameEntry_TextFrameEncodings(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
 
     ListIter frames = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
@@ -220,7 +221,7 @@ static void id3v2ReadFrameEntry_TextFrameEncodings(void **state){
 static void id3v2ReadFrameEntry_checkETCO(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
 
     ListIter frames = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
@@ -248,7 +249,7 @@ static void id3v2ReadFrameEntry_checkETCO(void **state){
 static void id3v2WriteFrameEntry_greatestHits(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/boniver.mp3");
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
 
     ListIter frames = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
@@ -294,7 +295,7 @@ static void id3v2WriteFrameEntry_greatestHits(void **state){
 static void id3v2WriteFrameEntry_updateTitle(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
 
     ListIter frames = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
@@ -328,7 +329,7 @@ static void id3v2WriteFrameEntry_updateTitle(void **state){
 static void id3v2AtatchFrameFromTag_TSOA(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     
     
     List *entries = listCreate(id3v2PrintContentEntry, id3v2DeleteContentEntry, id3v2CompareContentEntry, id3v2CopyContentEntry);
@@ -351,7 +352,7 @@ static void id3v2AtatchFrameFromTag_TSOA(void **state){
 static void id3v2DetatchFrameFromTag_TIT2(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
 
     ListIter frames = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
@@ -389,104 +390,117 @@ static void id3v2DetatchFrameFromTag_TIT2(void **state){
     assert_false(exit);
 }
 
-static void id3v2FrameHeaderToStream_null(void **state){
+static void id3v2FrameHeaderSerialize_null(void **state){
 
-    ByteStream *stream = id3v2FrameHeaderToStream(NULL, 0, 0);
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameHeaderSerialize(NULL, 0, 0, &outl);
     
-    assert_null(stream);
+    assert_null(out);
 }
 
-static void id3v2FrameHeaderToStream_v2(void **state){
+static void id3v2FrameHeaderSerialize_v2(void **state){
 
     Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *)"TT2", false, false, false, false, 0, 0, 0);
-    ByteStream *stream = id3v2FrameHeaderToStream(frameHeader, ID3V2_TAG_VERSION_2, 100);
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameHeaderSerialize(frameHeader, ID3V2_TAG_VERSION_2, 100, &outl);
+    uint8_t *start = out;
 
-    assert_memory_equal("TT2", byteStreamCursor(stream), 3);
-    byteStreamSeek(stream, 3, SEEK_CUR);
+    assert_memory_equal("TT2", out, 3);
+    out += 3;
 
-    assert_memory_equal("\x00\x00\x64", byteStreamCursor(stream), 3);
-    byteStreamSeek(stream, 3, SEEK_CUR);
+    assert_memory_equal("\x00\x00\x64", out, 3);
 
-    byteStreamDestroy(stream);
     id3v2DestroyFrameHeader(&frameHeader);
+    free(start);
 }
 
-static void id3v2FrameHeaderToStream_v3(void **state){
+static void id3v2FrameHeaderSerialize_v3(void **state){
 
     Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *)"TIT2", false, false, false, false, 0, 0, 0);
-    ByteStream *stream = id3v2FrameHeaderToStream(frameHeader, ID3V2_TAG_VERSION_3, 300);
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameHeaderSerialize(frameHeader, ID3V2_TAG_VERSION_3, 300, &outl);
+    uint8_t *start = out;
 
-    assert_memory_equal("TIT2", byteStreamCursor(stream), 4);
-    byteStreamSeek(stream, 4, SEEK_CUR);
+    assert_memory_equal("TIT2", out, 4);
+    out += 4;
 
-    assert_int_equal(300, byteStreamReturnU32(stream));
+    assert_int_equal(300, btou32(out, 4));
+    out += 4;
 
-    assert_memory_equal("\x00\x00", byteStreamCursor(stream), 2);
+    assert_memory_equal("\x00\x00", out, 2);
 
-    byteStreamDestroy(stream);
+    free(start);
     id3v2DestroyFrameHeader(&frameHeader);
 }
 
-static void id3v2FrameHeaderToStream_v3AllFlags(void **state){
+static void id3v2FrameHeaderSerialize_v3AllFlags(void **state){
 
     Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *)"TALB", true, true, true, false, 500, 0x0F, 0xFF);
-    ByteStream *stream = id3v2FrameHeaderToStream(frameHeader, ID3V2_TAG_VERSION_3, 600);
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameHeaderSerialize(frameHeader, ID3V2_TAG_VERSION_3, 600, &outl);
+    uint8_t *start = out;
 
-    
+    assert_memory_equal("TALB", out, 4);
+    out += 4;
 
-    assert_memory_equal("TALB", byteStreamCursor(stream), 4);
-    byteStreamSeek(stream, 4, SEEK_CUR);
+    assert_int_equal(600, btou32(out, 4));
+    out += 4;
 
-    assert_int_equal(600, byteStreamReturnU32(stream));
+    assert_int_equal(0xE0, out[0]);
+    out++;
 
-    assert_int_equal(0xE0, byteStreamCursor(stream)[0]);
-    byteStreamSeek(stream, 1, SEEK_CUR);
+    assert_int_equal(0xE0, out[0]);
+    out++;
 
-    assert_int_equal(0xE0, byteStreamCursor(stream)[0]);
-    byteStreamSeek(stream, 1, SEEK_CUR);
+    assert_int_equal(500, btou32(out, 4));
+    out += 4;
 
-    assert_int_equal(500, byteStreamReturnU32(stream));
+    assert_int_equal(0x0F, out[0]);
+    out++;
 
-    assert_int_equal(0x0F, byteStreamCursor(stream)[0]);
-    byteStreamSeek(stream, 1, SEEK_CUR);
+    assert_int_equal(0xFF, out[0]);
+    out++;
 
-    assert_int_equal(0xFF, byteStreamCursor(stream)[0]);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    byteStreamDestroy(stream);
+    free(start);
     id3v2DestroyFrameHeader(&frameHeader);
 }
 
-static void id3v2FrameHeaderToStream_v3OnlySymbols(void **state){
+static void id3v2FrameHeaderSerialize_v3OnlySymbols(void **state){
 
     Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *)"TALB", false, false, false, false, 0, 0xAF, 0x56);
-    ByteStream *stream = id3v2FrameHeaderToStream(frameHeader, ID3V2_TAG_VERSION_3, 100);
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameHeaderSerialize(frameHeader, ID3V2_TAG_VERSION_3, 100, &outl);
+    uint8_t *start = out;
 
-    assert_memory_equal("TALB", byteStreamCursor(stream), 4);
-    byteStreamSeek(stream, 4, SEEK_CUR);
+    assert_memory_equal("TALB", out, 4);
+    out += 4;
 
-    assert_int_equal(100, byteStreamReturnU32(stream));
+    assert_int_equal(100, btou32(out, 4));
+    out += 4;
 
-    assert_int_equal(0x00, byteStreamCursor(stream)[0]);
-    byteStreamSeek(stream, 1, SEEK_CUR);
+    assert_int_equal(0x00, out[0]);
+    out++;
 
-    assert_int_equal(0x60, byteStreamCursor(stream)[0]);
-    byteStreamSeek(stream, 1, SEEK_CUR);
+    assert_int_equal(0x60, out[0]);
+    out++;
 
-    assert_int_equal(0xAF, byteStreamCursor(stream)[0]);
-    byteStreamSeek(stream, 1, SEEK_CUR);
+    assert_int_equal(0xAF, out[0]);
+    out++;
 
-    assert_int_equal(0x56, byteStreamCursor(stream)[0]);
-    byteStreamSeek(stream, 1, SEEK_CUR);
+    assert_int_equal(0x56, out[0]);
+    out++;
 
-    byteStreamDestroy(stream);
+    free(start);
     id3v2DestroyFrameHeader(&frameHeader);
 }
 
-static void id3v2FrameHeaderToStream_v4(void **state){
+static void id3v2FrameHeaderSerialize_v4(void **state){
 
     Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *)"TSOA", false, false, false, false, 0, 0, 0);
-    ByteStream *stream = id3v2FrameHeaderToStream(frameHeader, ID3V2_TAG_VERSION_3, 100);
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameHeaderSerialize(frameHeader, ID3V2_TAG_VERSION_3, 100, &outl);
+
+    ByteStream *stream = byteStreamCreate(out, outl);
 
     assert_memory_equal("TSOA", byteStreamCursor(stream), 4);
     byteStreamSeek(stream, 4, SEEK_CUR);
@@ -496,14 +510,18 @@ static void id3v2FrameHeaderToStream_v4(void **state){
     assert_memory_equal("\x00\x00", byteStreamCursor(stream), 2);
     byteStreamSeek(stream, 2, SEEK_CUR);
 
+    free(out);
     byteStreamDestroy(stream);
     id3v2DestroyFrameHeader(&frameHeader);
 }
 
-static void id3v2FrameHeaderToStream_v4AllFlags(void **state){
+static void id3v2FrameHeaderSerialize_v4AllFlags(void **state){
 
     Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *)"TSOA", true, true, true, true, 12345, 0x11, 0x22);
-    ByteStream *stream = id3v2FrameHeaderToStream(frameHeader, ID3V2_TAG_VERSION_4, 500);
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameHeaderSerialize(frameHeader, ID3V2_TAG_VERSION_4, 500, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
+
 
     assert_memory_equal("TSOA", byteStreamCursor(stream), 4);
     byteStreamSeek(stream, 4, SEEK_CUR);
@@ -520,15 +538,18 @@ static void id3v2FrameHeaderToStream_v4AllFlags(void **state){
     byteStreamSeek(stream, 1, SEEK_CUR);
 
     assert_int_equal(12345, byteStreamReturnU32(stream));
-
+    
+    free(out);
     byteStreamDestroy(stream);
     id3v2DestroyFrameHeader(&frameHeader);
 }
 
-static void id3v2FrameHeaderToStream_v4NoUnsync(void **state){
+static void id3v2FrameHeaderSerialize_v4NoUnsync(void **state){
 
     Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *)"TSOA", true, true, true, false, 12345, 0x11, 0x22);
-    ByteStream *stream = id3v2FrameHeaderToStream(frameHeader, ID3V2_TAG_VERSION_4, 500);
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameHeaderSerialize(frameHeader, ID3V2_TAG_VERSION_4, 500, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
 
     assert_memory_equal("TSOA", byteStreamCursor(stream), 4);
     byteStreamSeek(stream, 4, SEEK_CUR);
@@ -546,6 +567,7 @@ static void id3v2FrameHeaderToStream_v4NoUnsync(void **state){
 
     assert_int_equal(12345, byteStreamReturnU32(stream));
 
+    free(out);
     byteStreamDestroy(stream);
     id3v2DestroyFrameHeader(&frameHeader);
 }
@@ -607,13 +629,15 @@ static void id3v2FrameHeaderToJSON_v4WithUnsync(void **state){
     id3v2DestroyFrameHeader(&frame);
 }
 
-static void id3v2FrameToStream_v4TALB(void **state){
+static void id3v2FrameSerialize_v4TALB(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
 
-    ByteStream *rep = id3v2FrameToStream((Id3v2Frame *)tag->frames->head->data, ID3V2_TAG_VERSION_4);
-    
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameSerialize((Id3v2Frame *)tag->frames->head->data, ID3V2_TAG_VERSION_4, &outl);
+    ByteStream *rep = byteStreamCreate(out, outl);
+
 
     assert_memory_equal(byteStreamCursor(rep), "TALB", 4);
     byteStreamSeek(rep, 4, SEEK_CUR);
@@ -630,15 +654,16 @@ static void id3v2FrameToStream_v4TALB(void **state){
     assert_memory_equal(byteStreamCursor(rep), "The Powers That Butf8ÛȾℲⅧ♈ ♉ ♊ ♋ ♌ ♍ ♎ ♏utf8", 67);
     byteStreamSeek(rep, 67, SEEK_CUR);
 
+    free(out);
     byteStreamDestroy(rep);
     byteStreamDestroy(stream);
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2FrameToStream_v4WCOM(void **state){
+static void id3v2FrameSerialize_v4WCOM(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
 
     ListIter iter = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
@@ -648,7 +673,11 @@ static void id3v2FrameToStream_v4WCOM(void **state){
     while((f = id3v2FrameTraverse(&iter)) != NULL){
         if(memcmp(f->header->id, "WCOM", ID3V2_FRAME_ID_MAX_SIZE) == 0){
             
-            rep = id3v2FrameToStream(f, ID3V2_TAG_VERSION_4);
+            size_t outl = 0;
+            uint8_t *out = id3v2FrameSerialize(f, ID3V2_TAG_VERSION_4, &outl);
+            rep = byteStreamCreate(out, outl);
+
+            free(out);
 
             break;
         }
@@ -672,10 +701,10 @@ static void id3v2FrameToStream_v4WCOM(void **state){
 
 }
 
-static void id3v2FrameToStream_v4ETCO(void **state){
+static void id3v2FrameSerialize_v4ETCO(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
 
     ListIter iter = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
@@ -685,8 +714,12 @@ static void id3v2FrameToStream_v4ETCO(void **state){
     while((f = id3v2FrameTraverse(&iter)) != NULL){
         
         if(memcmp(f->header->id, "ETCO", ID3V2_FRAME_ID_MAX_SIZE) == 0){
-            rep = id3v2FrameToStream(f, ID3V2_TAG_VERSION_4);
+            size_t outl = 0;
+            uint8_t *out = id3v2FrameSerialize(f, ID3V2_TAG_VERSION_4, &outl);
 
+            rep = byteStreamCreate(out, outl);
+
+            free(out);
             break;
         }
     }
@@ -721,7 +754,7 @@ static void id3v2FrameToStream_v4ETCO(void **state){
 
 }
 
-static void id3v2FrameToStream_v2EQU(void **state){
+static void id3v2FrameSerialize_v2EQU(void **state){
     
     // EQU 
     uint8_t equ[15] = {'E', 'Q', 'U', 0x00, 0x00, 0x09,
@@ -739,11 +772,13 @@ static void id3v2FrameToStream_v2EQU(void **state){
     Id3v2Frame *f = NULL;
     List *context = id3v2CreateEqulizationFrameContext(ID3V2_TAG_VERSION_2);
 
-    id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_2, &f);
+    id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_2, &f);
 
     assert_non_null(f);
 
-    rep = id3v2FrameToStream(f, ID3V2_TAG_VERSION_2);
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameSerialize(f, ID3V2_TAG_VERSION_2, &outl);
+    rep = byteStreamCreate(out, outl);
 
     assert_memory_equal(byteStreamCursor(rep), "EQU", 3);
     byteStreamSeek(rep, 3, SEEK_CUR);
@@ -766,21 +801,19 @@ static void id3v2FrameToStream_v2EQU(void **state){
     assert_memory_equal(byteStreamCursor(rep), "\xfc\x00", 2);
     byteStreamSeek(rep, 2, SEEK_CUR);
 
-    
-    
-
+    free(out);
     listFree(context);
     byteStreamDestroy(stream);
     byteStreamDestroy(rep);
     id3v2DestroyFrame(&f);
 }
 
-static void id3v2FrameToStream_v3TXXX(void **state){
+static void id3v2FrameSerialize_v3TXXX(void **state){
     
     ByteStream *stream = byteStreamFromFile("assets/sorry4dying.mp3");
     ByteStream *rep = NULL;
 
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     ListIter iter = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
     
@@ -791,7 +824,12 @@ static void id3v2FrameToStream_v3TXXX(void **state){
         if(memcmp(f->header->id, "TXXX", ID3V2_FRAME_ID_MAX_SIZE) == 0){
             
             if(c == 1){
-                rep = id3v2FrameToStream(f, ID3V2_TAG_VERSION_3);
+                
+                size_t outl = 0;
+                uint8_t *out = id3v2FrameSerialize(f, ID3V2_TAG_VERSION_3, &outl);
+                rep = byteStreamCreate(out, outl);
+                free(out);
+
                 break;
             }
             c++;
@@ -830,7 +868,7 @@ static void id3v2FrameToJSON_v3TXXX(void **state){
     ByteStream *stream = byteStreamFromFile("assets/sorry4dying.mp3");
     char *json = NULL;
 
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     ListIter iter = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
     
@@ -862,7 +900,7 @@ static void id3v2FrameToJSON_v3APIC(void **state){
     ByteStream *stream = byteStreamFromFile("assets/sorry4dying.mp3");
     char *json = NULL;
 
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     ListIter iter = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
     
@@ -894,7 +932,7 @@ static void id3v2FrameToJSON_v4ETCO(void **state){
     ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
     char *json = NULL;
 
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     ListIter iter = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
     
@@ -958,6 +996,42 @@ static void id3v2CreateEmptyFrame_TT2(void **state){
     id3v2DestroyFrame(&f);
 }
 
+
+static void id3v2CompareFrameId_badArgs(void **state){
+
+    char *id = "TIT2";
+    bool v = id3v2CompareFrameId(NULL, id);
+
+    assert_false(v);
+
+}
+
+static void id3v2CompareFrameId_EQU(void **state){
+
+    // EQU 
+    uint8_t equ[15] = {'E', 'Q', 'U', 0x00, 0x00, 0x09,
+                        2U,
+                        0x03, 0xe9, // 000000111110100 1  inc/dec 
+                        0x40, 0x00,
+                        0x00, 0x28, // 000000000010100 0  inc/dec
+                        0xfc, 0x00
+    };
+
+    
+
+    ByteStream *stream = byteStreamCreate(equ, 15);
+    Id3v2Frame *f = NULL;
+    List *context = id3v2CreateEqulizationFrameContext(ID3V2_TAG_VERSION_2);
+
+    id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_2, &f);
+
+    byteStreamDestroy(stream);
+    listFree(context);
+    assert_true(id3v2CompareFrameId(f, "EQU"));
+    id3v2DestroyFrame(&f);
+
+}
+
 int main(){
 
     const struct CMUnitTest tests[] = {
@@ -976,15 +1050,15 @@ int main(){
         cmocka_unit_test(id3v2AtatchFrameFromTag_TSOA),
         cmocka_unit_test(id3v2DetatchFrameFromTag_TIT2),
 
-        // id3v2FrameHeaderToStream
-        cmocka_unit_test(id3v2FrameHeaderToStream_null),
-        cmocka_unit_test(id3v2FrameHeaderToStream_v2),
-        cmocka_unit_test(id3v2FrameHeaderToStream_v3),
-        cmocka_unit_test(id3v2FrameHeaderToStream_v3AllFlags),
-        cmocka_unit_test(id3v2FrameHeaderToStream_v3OnlySymbols),
-        cmocka_unit_test(id3v2FrameHeaderToStream_v4),
-        cmocka_unit_test(id3v2FrameHeaderToStream_v4AllFlags),
-        cmocka_unit_test(id3v2FrameHeaderToStream_v4NoUnsync),
+        // id3v2FrameHeaderSerialize
+        cmocka_unit_test(id3v2FrameHeaderSerialize_null),
+        cmocka_unit_test(id3v2FrameHeaderSerialize_v2),
+        cmocka_unit_test(id3v2FrameHeaderSerialize_v3),
+        cmocka_unit_test(id3v2FrameHeaderSerialize_v3AllFlags),
+        cmocka_unit_test(id3v2FrameHeaderSerialize_v3OnlySymbols),
+        cmocka_unit_test(id3v2FrameHeaderSerialize_v4),
+        cmocka_unit_test(id3v2FrameHeaderSerialize_v4AllFlags),
+        cmocka_unit_test(id3v2FrameHeaderSerialize_v4NoUnsync),
 
         // id3v2FrameHeaderToJSON
         cmocka_unit_test(id3v2FrameHeaderToJSON_null),
@@ -993,12 +1067,12 @@ int main(){
         cmocka_unit_test(id3v2FrameHeaderToJSON_v3Symbol),
         cmocka_unit_test(id3v2FrameHeaderToJSON_v4WithUnsync),
 
-        // id3v2FrameToStream
-        cmocka_unit_test(id3v2FrameToStream_v4TALB),
-        cmocka_unit_test(id3v2FrameToStream_v4WCOM),
-        cmocka_unit_test(id3v2FrameToStream_v4ETCO),
-        cmocka_unit_test(id3v2FrameToStream_v2EQU),
-        cmocka_unit_test(id3v2FrameToStream_v3TXXX),
+        // id3v2FrameSerialize
+        cmocka_unit_test(id3v2FrameSerialize_v4TALB),
+        cmocka_unit_test(id3v2FrameSerialize_v4WCOM),
+        cmocka_unit_test(id3v2FrameSerialize_v4ETCO),
+        cmocka_unit_test(id3v2FrameSerialize_v2EQU),
+        cmocka_unit_test(id3v2FrameSerialize_v3TXXX),
 
         // id3v2FrameToJSON
         cmocka_unit_test(id3v2FrameToJSON_v3TXXX),
@@ -1007,7 +1081,11 @@ int main(){
 
         // id3v2CreateEmptyFrame
         cmocka_unit_test(id3v2CreateEmptyFrame_noID),
-        cmocka_unit_test(id3v2CreateEmptyFrame_TT2)
+        cmocka_unit_test(id3v2CreateEmptyFrame_TT2),
+
+        // id3v2CompareFrameId 
+        cmocka_unit_test(id3v2CompareFrameId_badArgs),
+        cmocka_unit_test(id3v2CompareFrameId_EQU)
     };
 
     return cmocka_run_group_tests(tests, NULL, NULL);

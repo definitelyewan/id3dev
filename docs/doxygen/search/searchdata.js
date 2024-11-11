@@ -8,8 +8,7 @@ var indexSectionsWithContent =
   5: "gi",
   6: "_",
   7: "abeilnpu",
-  8: "i",
-  9: "i"
+  8: "i"
 };
 
 var indexSectionNames =
@@ -22,8 +21,7 @@ var indexSectionNames =
   5: "typedefs",
   6: "enums",
   7: "enumvalues",
-  8: "defines",
-  9: "pages"
+  8: "defines"
 };
 
 var indexSectionLabels =
@@ -36,7 +34,6 @@ var indexSectionLabels =
   5: "Typedefs",
   6: "Enumerations",
   7: "Enumerator",
-  8: "Macros",
-  9: "Pages"
+  8: "Macros"
 };
 

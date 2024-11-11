@@ -23,7 +23,6 @@ set(TEST_ASSETS
   "${CMAKE_CURRENT_SOURCE_DIR}/../assets/beetlebum.json"
 )
 
-
 #id3v1 tests
 add_executable(id3v1_test ${TEST_ID3V1})
 set_target_properties(id3v1_test PROPERTIES C_STANDARD 99)

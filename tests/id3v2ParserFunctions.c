@@ -56,7 +56,7 @@ static void id3v2ParseExtendedTagHeader_nullData(void **state){
     
     Id3v2ExtendedTagHeader *h;
     
-    uint32_t v = id3v2ParseExtendedTagHeader(NULL, ID3V2_TAG_VERSION_2, &h);
+    uint32_t v = id3v2ParseExtendedTagHeader(NULL, 0, ID3V2_TAG_VERSION_2, &h);
     
     assert_int_equal(v, 0),
     assert_null(h);
@@ -68,7 +68,7 @@ static void id3v2ParseExtendedTagHeader_v2(void **state){
     
     Id3v2ExtendedTagHeader *h;
     
-    uint32_t v = id3v2ParseExtendedTagHeader(stream, ID3V2_TAG_VERSION_2, &h);
+    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, 0, ID3V2_TAG_VERSION_2, &h);
 
     byteStreamDestroy(stream);
     assert_null(h);
@@ -85,7 +85,7 @@ static void id3v2ParseExtendedTagHeader_v3(void **state){
     ByteStream *stream = byteStreamCreate(ext, 14);
 
     Id3v2ExtendedTagHeader *h;
-    uint32_t v = id3v2ParseExtendedTagHeader(stream, ID3V2_TAG_VERSION_3, &h);
+    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_3, &h);
 
     assert_int_equal(v, 14);
 
@@ -108,7 +108,7 @@ static void id3v2ParseExtendedTagHeader_v3NoCrc(void **state){
 
     Id3v2ExtendedTagHeader *h;
     
-    uint32_t v = id3v2ParseExtendedTagHeader(stream, ID3V2_TAG_VERSION_3, &h);
+    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_3, &h);
 
     assert_int_equal(v, 10);
 
@@ -130,7 +130,7 @@ static void id3v2ParseExtendedTagHeader_v3NoPadding(void **state){
 
     Id3v2ExtendedTagHeader *h;
     
-    uint32_t v = id3v2ParseExtendedTagHeader(stream, ID3V2_TAG_VERSION_3, &h);
+    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_3, &h);
 
     assert_non_null(h);
     assert_int_equal(v, 6);
@@ -152,7 +152,7 @@ static void id3v2ParseExtendedTagHeader_v3UnsupportedSize(void **state){
     ByteStream *stream = byteStreamCreate(ext, 14);
 
     Id3v2ExtendedTagHeader *h;
-    uint32_t v = id3v2ParseExtendedTagHeader(stream, ID3V2_TAG_VERSION_3, &h);
+    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_3, &h);
 
     assert_int_equal(v, 14);
 
@@ -173,7 +173,7 @@ static void id3v2ParseExtendedTagHeader_v3SmallSizeWithData(void **state){
     ByteStream *stream = byteStreamCreate(ext, 6);
 
     Id3v2ExtendedTagHeader *h;
-    uint32_t v = id3v2ParseExtendedTagHeader(stream, ID3V2_TAG_VERSION_3, &h);
+    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_3, &h);
 
     assert_int_equal(v, 6);
 
@@ -199,7 +199,7 @@ static void id3v2ParseExtendedTagHeader_v4(void **state){
     ByteStream *stream = byteStreamCreate(ext, 12);
 
     Id3v2ExtendedTagHeader *h;
-    uint32_t v = id3v2ParseExtendedTagHeader(stream, ID3V2_TAG_VERSION_4, &h);
+    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_4, &h);
 
     assert_int_equal(v, 12);
 
@@ -223,7 +223,7 @@ static void id3v2ParseExtendedTagHeader_v4NoRestrictions(void **state){
     ByteStream *stream = byteStreamCreate(ext, 11);
 
     Id3v2ExtendedTagHeader *h;
-    uint32_t v = id3v2ParseExtendedTagHeader(stream, ID3V2_TAG_VERSION_4, &h);
+    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_4, &h);
 
     assert_int_equal(v, 11);
     assert_int_equal(h->crc, 8008);
@@ -245,7 +245,7 @@ static void id3v2ParseExtendedTagHeader_v4NoCRC(void **state){
     ByteStream *stream = byteStreamCreate(ext, 6);
 
     Id3v2ExtendedTagHeader *h;
-    uint32_t v = id3v2ParseExtendedTagHeader(stream, ID3V2_TAG_VERSION_4, &h);
+    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_4, &h);
     
     assert_int_equal(v, 6);
     assert_int_equal(h->crc, 0);
@@ -271,7 +271,7 @@ static void id3v2ParseTagHeader_happyPath(void **state){
     Id3v2TagHeader *h;
     uint32_t size = 0;
 
-    uint32_t v = id3v2ParseTagHeader(stream, &h, &size);
+    uint32_t v = id3v2ParseTagHeader(stream->buffer, stream->bufferSize, &h, &size);
     assert_int_equal(stream->cursor, 0);
     assert_int_equal(v,10);
     assert_non_null(h);
@@ -298,7 +298,7 @@ static void id3v2ParseTagHeader_noTagSize(void **state){
     Id3v2TagHeader *h;
     uint32_t size = 0;
 
-    uint32_t v = id3v2ParseTagHeader(stream, &h, &size);
+    uint32_t v = id3v2ParseTagHeader(stream->buffer, stream->bufferSize, &h, &size);
     assert_int_equal(stream->cursor, 0);
     assert_int_equal(v,6);
     assert_non_null(h);
@@ -324,7 +324,7 @@ static void id3v2ParseTagHeader_noFlags(void **state){
     Id3v2TagHeader *h;
     uint32_t size = 0;
 
-    uint32_t v = id3v2ParseTagHeader(stream, &h, &size);
+    uint32_t v = id3v2ParseTagHeader(stream->buffer, stream->bufferSize, &h, &size);
     assert_int_equal(stream->cursor, 0);
     assert_int_equal(v,5);
     assert_non_null(h);
@@ -347,7 +347,7 @@ static void id3v2ParseTagHeader_noVersions(void **state){
     Id3v2TagHeader *h;
     uint32_t size = 0;
 
-    uint32_t v = id3v2ParseTagHeader(stream, &h, &size);
+    uint32_t v = id3v2ParseTagHeader(stream->buffer, stream->bufferSize, &h, &size);
     assert_int_equal(stream->cursor, 0);
     assert_int_equal(v,3);
     assert_non_null(h);
@@ -370,7 +370,7 @@ static void id3v2ParseFrameHeader_noSupport(void **state){
     ByteStream *stream = byteStreamCreate(ext, 6);
     Id3v2FrameHeader *h;
     uint32_t size = 0;
-    uint32_t v = id3v2ParseFrameHeader(stream, 99, &h, &size);
+    uint32_t v = id3v2ParseFrameHeader(stream->buffer, stream->bufferSize, 99, &h, &size);
 
     assert_null(h);
     assert_int_equal(v, 0);
@@ -391,7 +391,7 @@ static void id3v2ParseFrameHeader_v2(void **state){
     ByteStream *stream = byteStreamCreate(ext, 6);
     Id3v2FrameHeader *h;
     uint32_t size = 0;
-    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_2, &h, &size);
+    uint32_t v = id3v2ParseFrameHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_2, &h, &size);
 
     assert_non_null(h);
     assert_memory_equal(h->id, "TAL", 3);
@@ -411,7 +411,7 @@ static void id3v2ParseFrameHeader_v2MissingSize(void **state){
     ByteStream *stream = byteStreamCreate(ext, 3);
     Id3v2FrameHeader *h;
     uint32_t size = 0;
-    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_2, &h, &size);
+    uint32_t v = id3v2ParseFrameHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_2, &h, &size);
 
     assert_null(h);
     assert_int_equal(v, 3);
@@ -434,7 +434,7 @@ static void id3v2ParseFrameHeader_v3(void **state){
     ByteStream *stream = byteStreamCreate(ext, 16);
     Id3v2FrameHeader *h;
     uint32_t size = 0;
-    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_3, &h, &size);
+    uint32_t v = id3v2ParseFrameHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_3, &h, &size);
 
     assert_non_null(h);
     assert_int_equal(v, 16);
@@ -465,7 +465,7 @@ static void id3v2ParseFrameHeader_v3FlagsButNoSymbols(void **state){
     ByteStream *stream = byteStreamCreate(ext, 14);
     Id3v2FrameHeader *h;
     uint32_t size = 0;
-    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_3, &h, &size);
+    uint32_t v = id3v2ParseFrameHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_3, &h, &size);
 
     assert_non_null(h);
     assert_int_equal(v, 14);
@@ -495,7 +495,7 @@ static void id3v2ParseFrameHeader_v3noFlags(void **state){
     ByteStream *stream = byteStreamCreate(ext, 10);
     Id3v2FrameHeader *h;
     uint32_t size = 0;
-    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_3, &h, &size);
+    uint32_t v = id3v2ParseFrameHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_3, &h, &size);
 
     assert_non_null(h);
     assert_int_equal(v, 10);
@@ -524,7 +524,7 @@ static void id3v2ParseFrameHeader_v3noFlagBytes(void **state){
     ByteStream *stream = byteStreamCreate(ext, 8);
     Id3v2FrameHeader *h;
     uint32_t size = 0;
-    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_3, &h, &size);
+    uint32_t v = id3v2ParseFrameHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_3, &h, &size);
 
     assert_null(h);
     assert_int_equal(v, 8);
@@ -551,7 +551,7 @@ static void id3v2ParseFrameHeader_v4(void **state){
     ByteStream *stream = byteStreamCreate(ext, 16);
     Id3v2FrameHeader *h;
     uint32_t size = 0;
-    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_4, &h, &size);
+    uint32_t v = id3v2ParseFrameHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_4, &h, &size);
 
     assert_non_null(h);
     assert_int_equal(v, 16);
@@ -586,7 +586,7 @@ static void id3v2ParseFrameHeader_v4SetFlagButNoContent(void **state){
     ByteStream *stream = byteStreamCreate(ext, 12);
     Id3v2FrameHeader *h;
     uint32_t size = 0;
-    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_4, &h, &size);
+    uint32_t v = id3v2ParseFrameHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_4, &h, &size);
 
     assert_non_null(h);
     assert_int_equal(v, 12);
@@ -622,7 +622,7 @@ static void id3v2ParseFrameHeader_v4NoSetFlagsButContent(void **state){
     ByteStream *stream = byteStreamCreate(ext, 16);
     Id3v2FrameHeader *h;
     uint32_t size = 0;
-    uint32_t v = id3v2ParseFrameHeader(stream, ID3V2_TAG_VERSION_4, &h, &size);
+    uint32_t v = id3v2ParseFrameHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_4, &h, &size);
 
     assert_non_null(h);
     assert_int_equal(v, 10);
@@ -661,7 +661,7 @@ static void id3v2ParseFrame_parseTALBUTF8(void **state){
     List *context = id3v2CreateTextFrameContext();
     uint32_t frameSize = 0;
 
-    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_4, &f);
+    frameSize = id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_4, &f);
 
 
     assert_non_null(f);
@@ -707,7 +707,7 @@ static void id3v2ParseFrame_parseTIT2UTF16(void **state){
     List *context = id3v2CreateTextFrameContext();
     uint32_t frameSize = 0;
 
-    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_3, &f);
+    frameSize = id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_3, &f);
 
     assert_non_null(f);
     assert_non_null(f->header);
@@ -754,7 +754,7 @@ static void id3v2ParseFrame_parseTXXXUTF16(void **state){
     List *context = id3v2CreateUserDefinedTextFrameContext();
     uint32_t frameSize = 0;
 
-    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_3, &f);
+    frameSize = id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_3, &f);
 
     assert_non_null(f);
     assert_non_null(f->header);
@@ -805,7 +805,7 @@ static void id3v2ParseFrame_parseTXXXLatin1(void **state){
     List *context = id3v2CreateUserDefinedTextFrameContext();
     uint32_t frameSize = 0;
 
-    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_4, &f);
+    frameSize = id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_4, &f);
 
     assert_non_null(f);
     assert_non_null(f->header);
@@ -854,7 +854,7 @@ static void id3v2ParseFrame_parseWCOM(void **state){
     List *context = id3v2CreateURLFrameContext();
     uint32_t frameSize = 0;
 
-    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_4, &f);
+    frameSize = id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_4, &f);
 
     assert_non_null(f);
     assert_non_null(f->header);
@@ -896,7 +896,7 @@ static void id3v2ParseFrame_parseWXXUTF16(void **state){
     List *context = id3v2CreateUserDefinedURLFrameContext();
     uint32_t frameSize = 0;
 
-    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_2, &f);
+    frameSize = id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_2, &f);
 
     assert_non_null(f);
     assert_non_null(f->header);
@@ -949,7 +949,7 @@ static void id3v2ParseFrame_parseCOMLatain1(void **state){
     List *context = id3v2CreateCommentFrameContext();
     uint32_t frameSize = 0;
 
-    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_2, &f);
+    frameSize = id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_2, &f);
 
     assert_non_null(f);
     assert_non_null(f->header);
@@ -1010,7 +1010,7 @@ static void id3v2ParseFrame_parseIPLLatin1(void **state){
     List *context = id3v2CreateInvolvedPeopleListFrameContext();
     uint32_t frameSize = 0;
 
-    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_2, &f);
+    frameSize = id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_2, &f);
 
     assert_non_null(f);
     assert_non_null(f->header);
@@ -1084,7 +1084,7 @@ static void id3v2ParseFrame_parseSYLTUTF16(void **state){
     List *context = id3v2CreateSynchronisedLyricFrameContext();
     uint32_t frameSize = 0;
 
-    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_3, &f);
+    frameSize = id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_3, &f);
 
     assert_non_null(f);
     assert_non_null(f->header);
@@ -1143,7 +1143,7 @@ static void id3v2ParseFrame_parseEQU(void **state){
     List *context = id3v2CreateEqulizationFrameContext(ID3V2_TAG_VERSION_2);
     uint32_t frameSize = 0;
 
-    frameSize = id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_2, &f);
+    frameSize = id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_2, &f);
 
     assert_non_null(f);
     assert_non_null(f->header);
@@ -1212,7 +1212,7 @@ static void id3v2ParseFrame_parseEncrypted(void **state){
     Id3v2Frame *f;
     List *context = id3v2CreateUserDefinedTextFrameContext();
 
-    id3v2ParseFrame(stream, context, ID3V2_TAG_VERSION_4, &f);
+    id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_4, &f);
 
 
     testFrameHeader(f, "TXXX", 0, 0, 0, 0, byteSyncintDecode(1763421), 0, 0xff);
@@ -1231,7 +1231,7 @@ static void id3v2ParseFrame_parseEncrypted(void **state){
 static void id3v2ParseTagFromStream_v3(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/sorry4dying.mp3");
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     uint8_t encodings[2] = {0,1};
 
     assert_non_null(tag);
@@ -1539,7 +1539,7 @@ static void id3v2ParseTagFromStream_v3(void **state){
 static void id3v2ParseTagFromStream_v4(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     uint8_t encodings[4] = {0,1,2,3};
 
     assert_non_null(tag);
@@ -1761,7 +1761,7 @@ static void id3v2ParseTagFromStream_v2unsync(void **state){
                         'F', 0x00, 'a', 0x00, 'm', 0x00, 'i', 0x00, 'l', 0x00, 'y', 0x00, ' ', 0x00, 'G', 0x00, 'u', 0x00, 'y'};
 
     ByteStream *stream = byteStreamCreate(data, 43);
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     uint8_t encoding = 0;
 
     assert_non_null(tag);
@@ -1794,7 +1794,7 @@ static void id3v2ParseTagFromStream_v3ext(void **state){
                         'F', 'a', 'm', 'i', 'l', 'y', ' ', 'G', 'u', 'y'};
 
     ByteStream *stream = byteStreamCreate(data, 45);
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     uint8_t encoding = 0;
 
     assert_non_null(tag);
@@ -1824,7 +1824,7 @@ static void id3v2ParseTagFromStream_v3ext(void **state){
 static void id3v2ParseTagFromStream_v2ULTWithMissingDesc(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/danybrown2.mp3");
-    Id3v2Tag *tag = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     ListIter iter = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
     Id3v2ContentEntry *ce = NULL;

@@ -1100,111 +1100,130 @@ static void id3v2InsertTextFrame_NoID(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2TagToStream_v3(void **state){
+static void id3v2TagSerialize_v3(void **state){
     
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
-    ByteStream *stream = id3v2TagToStream(tag);
-    
+    size_t outl = 0;
+    uint8_t *out = id3v2TagSerialize(tag, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
+
     assert_non_null(stream);
 
-    Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag2 = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     bool v = id3v2CompareTag(tag, tag2);
 
     byteStreamDestroy(stream);
+    free(out);
     id3v2DestroyTag(&tag);
     id3v2DestroyTag(&tag2);
 
     assert_true(v);
 }
 
-static void id3v2TagToStream_v2(void **state){
+static void id3v2TagSerialize_v2(void **state){
     
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
-    ByteStream *stream = id3v2TagToStream(tag);
+    size_t outl = 0;
+    uint8_t *out = id3v2TagSerialize(tag, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
     
     assert_non_null(stream);
 
-    Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag2 = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     bool v = id3v2CompareTag(tag, tag2);
 
     byteStreamDestroy(stream);
+    free(out);
     id3v2DestroyTag(&tag);
     id3v2DestroyTag(&tag2);
 
     assert_true(v);
 }
 
-static void id3v2TagToStream_v4(void **state){
+static void id3v2TagSerialize_v4(void **state){
     
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
-    ByteStream *stream = id3v2TagToStream(tag);
+    size_t outl = 0;
+    uint8_t *out = id3v2TagSerialize(tag, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
     
     assert_non_null(stream);
 
-    Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag2 = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     bool v = id3v2CompareTag(tag, tag2);
     
 
     byteStreamDestroy(stream);
+    free(out);
     id3v2DestroyTag(&tag);
     id3v2DestroyTag(&tag2);
 
     assert_true(v);
 }
 
-static void id3v2TagToStream_v3ext(void **state){
+static void id3v2TagSerialize_v3ext(void **state){
     
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
     tag->header->extendedHeader = id3v2CreateExtendedTagHeader(0, 0x74657374, 0, 0, 0); // crc is equal to test in hex
     id3v2WriteExtendedHeaderIndicator(tag->header, true);
+    
+    size_t outl = 0;
+    uint8_t *out = id3v2TagSerialize(tag, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
 
-    ByteStream *stream = id3v2TagToStream(tag);
     assert_non_null(stream);
 
-    Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag2 = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
 
     bool v = id3v2CompareTag(tag, tag2);
 
     byteStreamDestroy(stream);
+    free(out);
     id3v2DestroyTag(&tag);
     id3v2DestroyTag(&tag2);
 
     assert_true(v);
 }
 
-static void id3v2TagToStream_v4ext(void **state){
+static void id3v2TagSerialize_v4ext(void **state){
     
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
     tag->header->extendedHeader = id3v2CreateExtendedTagHeader(0, 0, 0, 1, 0);
     id3v2WriteExtendedHeaderIndicator(tag->header, true);
 
-    ByteStream *stream = id3v2TagToStream(tag);
+    size_t outl = 0;
+    uint8_t *out = id3v2TagSerialize(tag, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
     assert_non_null(stream);
 
-    Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag2 = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
 
     bool v = id3v2CompareTag(tag, tag2);
 
     byteStreamDestroy(stream);
+    free(out);
     id3v2DestroyTag(&tag);
     id3v2DestroyTag(&tag2);
 
     assert_true(v);
 }
 
-static void id3v2TagToStream_v4footer(void **state){
+static void id3v2TagSerialize_v4footer(void **state){
     
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
     id3v2WriteFooterIndicator(tag->header, true);
 
-    ByteStream *stream = id3v2TagToStream(tag);
+    size_t outl = 0;
+    uint8_t *out = id3v2TagSerialize(tag, &outl);
+    ByteStream *stream = byteStreamCreate(out, outl);
     assert_non_null(stream);
 
-    Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag2 = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
 
     bool v = id3v2CompareTag(tag, tag2);
 
     byteStreamDestroy(stream);
+    free(out);
     id3v2DestroyTag(&tag);
     id3v2DestroyTag(&tag2);
 
@@ -1575,13 +1594,15 @@ int main(){
         cmocka_unit_test(id3v2InsertTextFrame_NoID),
 
         // id3v2TagToStream
-        cmocka_unit_test(id3v2TagToStream_v3),
-        cmocka_unit_test(id3v2TagToStream_v2),
-        cmocka_unit_test(id3v2TagToStream_v4),
-        cmocka_unit_test(id3v2TagToStream_v3ext),
-        cmocka_unit_test(id3v2TagToStream_v4ext),
-        cmocka_unit_test(id3v2TagToStream_v4footer),
-        //cmocka_unit_test(id3v2TagToStream_v4unsync),
+        cmocka_unit_test(id3v2TagSerialize_v3),
+        cmocka_unit_test(id3v2TagSerialize_v2),
+        cmocka_unit_test(id3v2TagSerialize_v4),
+        cmocka_unit_test(id3v2TagSerialize_v3ext),
+        cmocka_unit_test(id3v2TagSerialize_v4ext),
+        cmocka_unit_test(id3v2TagSerialize_v4footer),
+        
+        // outdated!
+        // cmocka_unit_test(id3v2TagToStream_v4unsync),
 
         // id3v2TagToJSON
         cmocka_unit_test(id3v2TagToJSON_v2),

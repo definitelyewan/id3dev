@@ -14,6 +14,7 @@
 #include <string.h>
 #include <limits.h>
 #include "id3v2/id3v2Context.h"
+#include "id3dependencies/ByteStream/include/byteTypes.h"
 #include "id3dependencies/ByteStream/include/byteStream.h"
 #include "id3dependencies/ByteStream/include/byteInt.h"
 
@@ -1620,19 +1621,21 @@ bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char ke
 }
 
 /**
- * @brief Creates a stream that represents the passed context
+ * @brief Creates a binary representation of a context structure.
  * 
  * @param cc 
- * @return ByteStream* 
+ * @return uint8_t * 
  */
-ByteStream *id3v2ContextToStream(Id3v2ContentContext *cc){
+uint8_t *id3v2ContextSerialize(Id3v2ContentContext *cc, size_t *outl){
     
     ByteStream *stream = NULL;
     size_t s = 0;
     unsigned char *convi = NULL;
+    uint8_t *out = NULL;
 
     if(cc == NULL){
-        return stream;
+        *outl = 0;
+        return out;
     }
 
     s += (sizeof(size_t) * 3) + 1;
@@ -1654,7 +1657,12 @@ ByteStream *id3v2ContextToStream(Id3v2ContentContext *cc){
     free(convi);
 
     byteStreamRewind(stream);
-    return stream;
+
+    out = calloc(stream->bufferSize, sizeof(uint8_t));
+    *outl = stream->bufferSize;
+    byteStreamRead(stream, out, stream->bufferSize);
+    byteStreamDestroy(stream);
+    return out;
 }
 
 /**

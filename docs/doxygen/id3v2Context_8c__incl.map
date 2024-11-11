@@ -1,0 +1,18 @@
+<map id="/mnt/d/code/id3dev/src/id3v2/id3v2Context.c" name="/mnt/d/code/id3dev/src/id3v2/id3v2Context.c">
+<area shape="rect" id="node1" title="Functions for configuring the parser and any output of a tag." alt="" coords="228,5,415,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,102,72,129"/>
+<area shape="rect" id="node3" title=" " alt="" coords="97,102,167,129"/>
+<area shape="rect" id="node4" title=" " alt="" coords="191,102,262,129"/>
+<area shape="rect" id="node5" title=" " alt="" coords="286,102,357,129"/>
+<area shape="rect" id="node6" href="$id3v2Context_8h.html" title="provides the ability to generate a context and a list of contexts that represent the ruleset of a fra..." alt="" coords="381,102,542,129"/>
+<area shape="rect" id="node15" title=" " alt="" coords="567,95,780,136"/>
+<area shape="rect" id="node16" title=" " alt="" coords="804,95,1017,136"/>
+<area shape="rect" id="node7" href="$id3v2Types_8h.html" title="Defintions and types for id3v2 types." alt="" coords="408,184,515,211"/>
+<area shape="rect" id="node8" href="$id3v1Types_8h.html" title="Defintions and types for id3v1 types." alt="" coords="133,266,280,293"/>
+<area shape="rect" id="node9" title=" " alt="" coords="112,348,195,375"/>
+<area shape="rect" id="node10" title=" " alt="" coords="223,348,294,375"/>
+<area shape="rect" id="node11" title=" " alt="" coords="355,259,568,300"/>
+<area shape="rect" id="node12" title=" " alt="" coords="593,266,679,293"/>
+<area shape="rect" id="node13" title=" " alt="" coords="703,259,905,300"/>
+<area shape="rect" id="node14" title=" " alt="" coords="929,259,1132,300"/>
+</map>
