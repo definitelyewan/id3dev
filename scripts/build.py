@@ -9,7 +9,7 @@ replace_folder("build")
 
 # build with cmake
 update.message("Running Cmake")
-cmake_build(".", "build", ["-DBUILD_SHARED_LIBS=ON", "-DDEDUB_ID3_SYMBOLS=OFF"])
+cmake_build(".", "build", ["-DBUILD_SHARED_LIBS=ON", "-DDEDUG_ID3_SYMBOLS=OFF"])
     
 # move to the build folder
 update.message("moving to build dir")
@@ -19,6 +19,6 @@ else:
     quit()
 
 update.message("Compiling")
-compile_code("Id3dev")
+compile_code("id3dev")
 
 update.message("Done!")

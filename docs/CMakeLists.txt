@@ -18,7 +18,7 @@ if(DOXYGEN_FOUND)
     set(_target_doxyfile "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.docs")
     configure_file("${_doxyfile_template}" "${_target_doxyfile}")
 
-    doxygen_add_docs(docs
+    doxygen_add_docs(docsfiles
                     ${CMAKE_CURRENT_SOURCE_DIR} 
                     ${ID3DEV_HEADERS}
                     ${ID3DEV_SRC})
