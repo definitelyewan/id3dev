@@ -1,12 +1,9 @@
 #include <stdio.h>
-#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
-#include <string.h>
-#include <limits.h>
 #include "id3v2/id3v2TagIdentity.h"
 #include "id3v2/id3v2Frame.h"
 #include "byteStream.h"
@@ -165,7 +162,7 @@ static void id3v2SetExperimentalIndicator_set1(void **state){
     id3v2DestroyTagHeader(&header);
 }
 
-static void id3v2SetExperimentalIndicator_setsetWrongVersion(void **state){
+static void id3v2SetExperimentalIndicator_setWrongVersion(void **state){
     (void) state;
     
     Id3v2TagHeader *header = id3v2CreateTagHeader(2,0,0,NULL);
@@ -1317,7 +1314,7 @@ int main(){
 
         //id3v2WriteExperimentalIndicator tests
         cmocka_unit_test(id3v2SetExperimentalIndicator_set1),
-        cmocka_unit_test(id3v2SetExperimentalIndicator_setsetWrongVersion),
+        cmocka_unit_test(id3v2SetExperimentalIndicator_setWrongVersion),
 
         //id3v2WriteFooterIndicator tests
         cmocka_unit_test(id3v2SetFooterIndicator_set0),

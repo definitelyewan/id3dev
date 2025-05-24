@@ -9,14 +9,11 @@
  * 
  */
 #include <stdio.h>
-#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
-#include <string.h>
-#include <limits.h>
 #include "id3v2/id3v2.h"
 #include "id3v2/id3v2Frame.h"
 #include "byteStream.h"
@@ -623,7 +620,7 @@ static void id3v2ReadPicture_PIC(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadPictre_APIC(void **state){
+static void id3v2ReadPicture_APIC(void **state){
 
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
 
@@ -1532,7 +1529,7 @@ int main(){
 
         // id3v2ReadPicture
         cmocka_unit_test(id3v2ReadPicture_PIC),
-        cmocka_unit_test(id3v2ReadPictre_APIC),
+        cmocka_unit_test(id3v2ReadPicture_APIC),
 
         // id3v2WriteTextFrameContent
         cmocka_unit_test(id3v2WriteTextFrameContent_TIT2),

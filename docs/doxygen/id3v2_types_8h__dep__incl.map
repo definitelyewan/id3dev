@@ -1,0 +1,34 @@
+<map id="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2Types.h" name="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2Types.h">
+<area shape="rect" id="Node000001" title="Definitions and types for id3v2 types." alt="" coords="591,5,815,46"/>
+<area shape="rect" id="Node000002" href="$id3dev_8h.html" title="decleations of main library functions" alt="" coords="5,102,182,142"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="576,42,394,64,194,97,163,104,162,98,193,91,394,59,575,37"/>
+<area shape="rect" id="Node000003" href="$id3v2_8h.html" title="Declarations used by utility functions." alt="" coords="1183,198,1372,238"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="831,32,927,40,1028,53,1116,70,1152,80,1179,92,1209,114,1235,143,1270,196,1265,199,1231,146,1206,118,1176,96,1150,85,1115,75,1027,58,927,46,830,37"/>
+<area shape="rect" id="Node000005" href="$id3v2_context_8h.html" title="provides the ability to generate a context and a list of contexts that represent the ruleset of a fra..." alt="" coords="205,102,440,142"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="609,53,403,104,402,98,608,48"/>
+<area shape="rect" id="Node000009" href="$id3v2_frame_8h.html" title="function declarations for frame operations" alt="" coords="464,102,691,142"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="667,57,605,103,602,99,663,53"/>
+<area shape="rect" id="Node000010" href="$id3v2_parser_8h.html" title="functions that make up the parser" alt="" coords="715,102,941,142"/>
+<area shape="poly" id="edge13_Node000001_Node000010" title=" " alt="" coords="742,53,804,99,801,103,739,57"/>
+<area shape="rect" id="Node000011" href="$id3v2_tag_identity_8h.html" title="Declarations for id3v2 tag headers and extended headers." alt="" coords="966,94,1165,150"/>
+<area shape="poly" id="edge16_Node000001_Node000011" title=" " alt="" coords="794,48,966,92,965,97,793,53"/>
+<area shape="rect" id="Node000004" href="$id3v2_8c.html" title="Contains all main functions for the id3v2 library." alt="" coords="753,286,930,327"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="1168,244,931,290,930,285,1167,238"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="226,149,130,176,94,189,77,199,69,219,71,227,77,236,89,245,110,253,173,266,259,277,359,286,572,297,753,302,753,307,572,302,359,291,258,283,172,272,108,258,87,250,73,240,66,229,64,218,73,196,92,184,129,171,225,144"/>
+<area shape="rect" id="Node000006" href="$id3v2_context_8c.html" title="Functions for configuring the parser and any output of a tag." alt="" coords="87,198,300,238"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="285,153,222,199,219,195,282,149"/>
+<area shape="rect" id="Node000007" href="$id3v2_frame_8c.html" title="Functions for creating, destroying, and manipulating ID3v2 frames." alt="" coords="324,198,527,238"/>
+<area shape="poly" id="edge7_Node000005_Node000007" title=" " alt="" coords="357,151,406,195,402,199,353,155"/>
+<area shape="rect" id="Node000008" href="$id3v2_parser_8c.html" title="Functions related to parsing content." alt="" coords="601,198,804,238"/>
+<area shape="poly" id="edge8_Node000005_Node000008" title=" " alt="" coords="418,144,624,195,623,200,417,149"/>
+<area shape="poly" id="edge10_Node000009_Node000004" title=" " alt="" coords="574,158,575,199,581,219,591,237,616,253,656,268,754,290,753,295,655,273,614,258,588,240,576,221,570,200,569,158"/>
+<area shape="poly" id="edge11_Node000009_Node000007" title=" " alt="" coords="534,153,459,199,456,195,531,148"/>
+<area shape="poly" id="edge12_Node000009_Node000008" title=" " alt="" coords="617,149,678,195,675,199,614,153"/>
+<area shape="poly" id="edge14_Node000010_Node000004" title=" " alt="" coords="833,158,843,286,837,286,828,158"/>
+<area shape="poly" id="edge15_Node000010_Node000008" title=" " alt="" coords="792,153,730,199,727,195,789,149"/>
+<area shape="poly" id="edge17_Node000011_Node000003" title=" " alt="" coords="1142,154,1234,195,1232,200,1140,159"/>
+<area shape="poly" id="edge18_Node000011_Node000004" title=" " alt="" coords="1106,160,1119,179,1129,199,1131,220,1122,240,1110,251,1092,261,1044,277,988,290,931,299,930,293,987,284,1043,272,1090,256,1107,247,1118,237,1125,219,1123,201,1115,181,1102,163"/>
+<area shape="poly" id="edge19_Node000011_Node000008" title=" " alt="" coords="951,155,780,200,778,194,950,150"/>
+<area shape="rect" id="Node000012" href="$id3v2_tag_identity_8c.html" title="Functions related to identifying an id3v2 tag." alt="" coords="879,198,1108,238"/>
+<area shape="poly" id="edge20_Node000011_Node000012" title=" " alt="" coords="1038,164,1010,199,1006,196,1033,160"/>
+</map>

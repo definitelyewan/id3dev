@@ -1,0 +1,38 @@
+var id3v2_types_8h =
+[
+    [ "_Id3v2ExtendedTagHeader", "struct___id3v2_extended_tag_header.html", "struct___id3v2_extended_tag_header" ],
+    [ "_Id3v2TagHeader", "struct___id3v2_tag_header.html", "struct___id3v2_tag_header" ],
+    [ "_Id3v2FrameHeader", "struct___id3v2_frame_header.html", "struct___id3v2_frame_header" ],
+    [ "_Id3v2ContentContext", "struct___id3v2_content_context.html", "struct___id3v2_content_context" ],
+    [ "_Id3v2ContentEntry", "struct___id3v2_content_entry.html", "struct___id3v2_content_entry" ],
+    [ "_Id3v2Frame", "struct___id3v2_frame.html", "struct___id3v2_frame" ],
+    [ "_Id3v2Tag", "struct___id3v2_tag.html", "struct___id3v2_tag" ],
+    [ "ID3V2_FRAME_FLAG_SIZE", "id3v2_types_8h.html#ab995a3723fc01c423c67bfd3787d6a4d", null ],
+    [ "ID3V2_FRAME_ID_MAX_SIZE", "id3v2_types_8h.html#a47cdc13e643e1d7ae075aec5d2b6d000", null ],
+    [ "ID3V2_TAG_ID_MAGIC_NUMBER_F", "id3v2_types_8h.html#a5fab31555a6492eeed075fb3b8d7c058", null ],
+    [ "ID3V2_TAG_ID_MAGIC_NUMBER_H", "id3v2_types_8h.html#aee4af0c1a100fa1fb4f3540d8eb81b76", null ],
+    [ "ID3V2_TAG_ID_SIZE", "id3v2_types_8h.html#ad1e200a092cf7919b1b032046225d9ef", null ],
+    [ "ID3V2_TAG_VERSION_2", "id3v2_types_8h.html#a51c8a8752da1a1b8d97beac614faefd4", null ],
+    [ "ID3V2_TAG_VERSION_3", "id3v2_types_8h.html#a2306a8be5c2e536202f005012ec44ba2", null ],
+    [ "ID3V2_TAG_VERSION_4", "id3v2_types_8h.html#adbc0592aa03e5e4d7ad2abec033dacdf", null ],
+    [ "Id3v2ContentContext", "id3v2_types_8h.html#a33f4c5a4b231538bd0355c6b7c2ddb32", null ],
+    [ "Id3v2ContentEntry", "id3v2_types_8h.html#a25e212cca44bc517c663b73bc6c6456a", null ],
+    [ "Id3v2ContextType", "id3v2_types_8h.html#a5f977e2531cb5395519cb402fa1bea3a", null ],
+    [ "Id3v2ExtendedTagHeader", "id3v2_types_8h.html#a5d12fad26c30eeb3ef82d95cd51e4a39", null ],
+    [ "Id3v2Frame", "id3v2_types_8h.html#a632a0a92f37060c749ceb7b8959dd2db", null ],
+    [ "Id3v2FrameHeader", "id3v2_types_8h.html#ae58277360e304167f2d5bbcd3e9cee99", null ],
+    [ "Id3v2Tag", "id3v2_types_8h.html#a470730b75a95acb88dfb1736f05e8e81", null ],
+    [ "Id3v2TagHeader", "id3v2_types_8h.html#af4ab0764a4a3f59536c479369ee27df2", null ],
+    [ "_Id3v2ContextType", "id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0", [
+      [ "unknown_context", "id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0ae7adab00dd10834fe882ea87e003e286", null ],
+      [ "noEncoding_context", "id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0a03cc5f4513b8de28cac19bde5d09b987", null ],
+      [ "binary_context", "id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0abff99d3f3111c80023ac4bdc8c5b3747", null ],
+      [ "encodedString_context", "id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0a659bac8a34a2c09f3aabd75bcca46555", null ],
+      [ "latin1Encoding_context", "id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0a776f17554d2dcd50285ee035307a9e13", null ],
+      [ "numeric_context", "id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0a4ca25f75bba189290a28dc0ab6950f76", null ],
+      [ "precision_context", "id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0ae13bc5bc34f2d629746252949f1bbbe6", null ],
+      [ "bit_context", "id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0ac138e995190318025d0ed2d40d9f0350", null ],
+      [ "iter_context", "id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0a41cc8eeca49ec075af9c4f0e01822060", null ],
+      [ "adjustment_context", "id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0a8ce069d917f9f241b3f9b6b87b5aae30", null ]
+    ] ]
+];

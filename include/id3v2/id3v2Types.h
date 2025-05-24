@@ -1,7 +1,7 @@
 /**
  * @file id3v2Types.h
  * @author Ewan Jones
- * @brief Defintions and types for id3v2 types
+ * @brief Definitions and types for id3v2 types
  * @version 2.0
  * @date 2023-12-13
  *
@@ -29,10 +29,10 @@ extern "C" {
 //! Size of ID3v2 tag identifier "ID3" or "3DI"
 #define ID3V2_TAG_ID_SIZE 3
 
-//! Memory representation of the tag identifer "ID3"
+//! Memory representation of the tag identifier "ID3"
 #define ID3V2_TAG_ID_MAGIC_NUMBER_H 0x494433
 
-//! Memory representation of the tag identifer "3DI"
+//! Memory representation of the tag identifier "3DI"
 #define ID3V2_TAG_ID_MAGIC_NUMBER_F 0x334449
 
 //! Major version for ID3v2.2
@@ -61,7 +61,7 @@ extern "C" {
  * @brief The extended header contains information that can provide further
  * insight in the structure of the tag, but is not vital to the correct parsing
  * of the tag information; hence the extended header is optional.
- * @details A programmer should never need to use this structure manually and it
+ * @details A programmer should never need to use this structure manually, and it
  * will be created, accessed, and deleted automatically
  */
 typedef struct _Id3v2ExtendedTagHeader {
@@ -115,13 +115,13 @@ typedef struct _Id3v2TagHeader {
  */
 typedef struct _Id3v2FrameHeader {
 
-  //! The ID used to identify a frame e.g TIT2
+  //! The ID used to identify a frame for example, TIT2
   uint8_t id[ID3V2_FRAME_ID_MAX_SIZE];
 
   //! Marks the frame as unknown if the tag is altered
   bool tagAlterPreservation;
 
-  //! Marks the frame as unkown if the file is altered
+  //! Marks the frame as unknown if the file is altered
   bool fileAlterPreservation;
 
   //! Marks the frame as read only
@@ -187,11 +187,11 @@ typedef enum _Id3v2ContextType {
   precision_context,
 
   /**
-   * @brief Identifes 1 to n bits. With this context the current byte being read
+   * @brief Identifies 1 to n bits. With this context the current byte being read
    * will not be incremented until 8 sequential bits are read. for example, this 
    * means if the following context is a binary_context it will read the same byte 
    * twice. If this context is followed by more then one bit_context it will continue
-   * reading from the position in which the the proceeding context left off. Do note
+   * reading from the position in which the proceeding context left off. Do note
    * that max and min within the context structure now represent max and min bits 
    * instead of bytes.
    */
@@ -206,7 +206,7 @@ typedef enum _Id3v2ContextType {
   iter_context,
 
   /**
-   * @brief Allows for a redefinition of a contexts upper bound if a proir context
+   * @brief Allows for a redefinition of a contexts upper bound if a prior context
    * is defined with the label 'adjustment'. 
    * 
    */
@@ -215,7 +215,7 @@ typedef enum _Id3v2ContextType {
 } Id3v2ContextType;
 
 /**
- * @brief Context used to determin how an entry in a frame should be handled
+ * @brief Context used to determine how an entry in a frame should be handled
  *
  */
 typedef struct _Id3v2ContentContext {
@@ -228,7 +228,7 @@ typedef struct _Id3v2ContentContext {
 
   /**
    * @brief Smallest number of bytes that can represent this block of data.
-   * If the bolck is an iter context this will be the min node when the iter
+   * If the block is an iter context this will be the min node when the iter
    * will start
    */
   size_t min;
@@ -246,7 +246,7 @@ typedef struct _Id3v2ContentContext {
  * @brief An entry in a frame
  * @details There is no context to this structure and the struct with that
  * information is external. This is done so a user could potentially program
- * there own frames into the parser.
+ * their own frames into the parser.
  */
 typedef struct _Id3v2ContentEntry {
 

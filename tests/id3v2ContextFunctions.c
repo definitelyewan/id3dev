@@ -10,16 +10,13 @@
  */
 
 #include <stdio.h>
-#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
-#include <string.h>
 #include <limits.h>
 #include "id3v2/id3v2Context.h"
-#include "byteStream.h"
 #include "byteInt.h"
 
 static void id3v2CreateContentContext_validStruct(void **state){
@@ -298,7 +295,7 @@ static void id3v2CreateAttachedPictureFrameContext_version3(void **state){
 
 }
 
-static void id3v2CreateAudioencryptionContext_valid(void **state){
+static void id3v2CreateAudioEncryptionContext_valid(void **state){
 
     List* l = id3v2CreateAudioEncryptionFrameContext();
 
@@ -537,9 +534,9 @@ static void id3v2CreatePlayCounterFrameContext_valid(void **state){
     listFree(l);
 }
 
-static void id3v2CreateEqulizationFrameContext_validVersion2(void **state){
+static void id3v2CreateEqualizationFrameContext_validVersion2(void **state){
 
-    List* l = id3v2CreateEqulizationFrameContext(ID3V2_TAG_VERSION_2);
+    List* l = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_2);
 
     assert_non_null(l);
 
@@ -583,9 +580,9 @@ static void id3v2CreateEqulizationFrameContext_validVersion2(void **state){
     listFree(l);
 }
 
-void id3v2CreateEqulizationFrameContext_wrongVersion(void **state){
+void id3v2CreateEqualizationFrameContext_wrongVersion(void **state){
 
-    List* l = id3v2CreateEqulizationFrameContext(123);
+    List* l = id3v2CreateEqualizationFrameContext(123);
 
     assert_non_null(l);
 
@@ -596,15 +593,15 @@ void id3v2CreateEqulizationFrameContext_wrongVersion(void **state){
     assert_int_equal(c->type, unknown_context);
     assert_int_equal(c->max, 1);
     assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, id3v2djb2("unkown"));
+    assert_int_equal(c->key, id3v2djb2("unknown"));
 
     listFree(l);
 
 }
 
-void id3v2CreateEqulizationFrameContext_validVersion4(void **state){
+void id3v2CreateEqualizationFrameContext_validVersion4(void **state){
 
-    List* l = id3v2CreateEqulizationFrameContext(ID3V2_TAG_VERSION_4);
+    List* l = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_4);
 
     assert_non_null(l);
 
@@ -1356,7 +1353,7 @@ static void id3v2ContextSerialize_valid(void **state){
 }
 
 
-static void id3v2ContextSerialize_minned(void **state){
+static void id3v2ContextSerialize_min(void **state){
 
 
     Id3v2ContentContext *cc = id3v2CreateContentContext(0, 0, 0, 0);
@@ -1394,7 +1391,7 @@ static void id3v2ContextToJSON_valid(void **state){
 }
 
 
-static void id3v2ContextToJSON_minned(void **state){
+static void id3v2ContextToJSON_min(void **state){
     (void) state;
 
     Id3v2ContentContext *cc = id3v2CreateContentContext(0, 0, 0, 0);
@@ -1446,8 +1443,8 @@ int main(){
         cmocka_unit_test(id3v2CreateAttachedPictureFrameContext_version2),
         cmocka_unit_test(id3v2CreateAttachedPictureFrameContext_version3),
 
-        // id3v2CreateAudioencryptionContext tests
-        cmocka_unit_test(id3v2CreateAudioencryptionContext_valid),
+        // id3v2CreateAudioEncryptionContext tests
+        cmocka_unit_test(id3v2CreateAudioEncryptionContext_valid),
 
         // id3v2CreateAudioSeekPointIndexFrameContext tests
         cmocka_unit_test(id3v2CreateAudioSeekPointIndexFrameContext_valid),
@@ -1467,10 +1464,10 @@ int main(){
         // id3v2CreatePlayCounterFrameContext tests
         cmocka_unit_test(id3v2CreatePlayCounterFrameContext_valid),
 
-        // id3v2CreateEqulizationFrameContext tests
-        cmocka_unit_test(id3v2CreateEqulizationFrameContext_wrongVersion),
-        cmocka_unit_test(id3v2CreateEqulizationFrameContext_validVersion2),
-        cmocka_unit_test(id3v2CreateEqulizationFrameContext_validVersion4),
+        // id3v2CreateEqualizationFrameContext tests
+        cmocka_unit_test(id3v2CreateEqualizationFrameContext_wrongVersion),
+        cmocka_unit_test(id3v2CreateEqualizationFrameContext_validVersion2),
+        cmocka_unit_test(id3v2CreateEqualizationFrameContext_validVersion4),
         
         // id3v2CreateEventTimingCodesFrameContext tests
         cmocka_unit_test(id3v2CreateEventTimingCodesFrameContext_valid),
@@ -1534,11 +1531,11 @@ int main(){
 
         // id3v2ContextToStream tests
         cmocka_unit_test(id3v2ContextSerialize_valid),
-        cmocka_unit_test(id3v2ContextSerialize_minned),
+        cmocka_unit_test(id3v2ContextSerialize_min),
 
         // id3v2ContextToJSON tests
         cmocka_unit_test(id3v2ContextToJSON_valid),
-        cmocka_unit_test(id3v2ContextToJSON_minned),
+        cmocka_unit_test(id3v2ContextToJSON_min),
         cmocka_unit_test(id3v2ContextToJSON_NULL)
 
     };

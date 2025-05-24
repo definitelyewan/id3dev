@@ -326,7 +326,7 @@ static void id3v2WriteFrameEntry_updateTitle(void **state){
     byteStreamDestroy(stream);
 }
 
-static void id3v2AtatchFrameFromTag_TSOA(void **state){
+static void id3v2AttachFrameFromTag_TSOA(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
     Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
@@ -349,7 +349,7 @@ static void id3v2AtatchFrameFromTag_TSOA(void **state){
 
 }
 
-static void id3v2DetatchFrameFromTag_TIT2(void **state){
+static void id3v2DetachFrameFromTag_TIT2(void **state){
 
     ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
     Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
@@ -361,7 +361,7 @@ static void id3v2DetatchFrameFromTag_TIT2(void **state){
         
         if(memcmp(f->header->id, "TIT2", 4) == 0){
 
-            Id3v2Frame *detach = id3v2DetatchFrameFromTag(tag, f);
+            Id3v2Frame *detach = id3v2DetachFrameFromTag(tag, f);
 
             assert_non_null(detach);
 
@@ -770,7 +770,7 @@ static void id3v2FrameSerialize_v2EQU(void **state){
     ByteStream *stream = byteStreamCreate(equ, 15);
     ByteStream *rep = NULL;
     Id3v2Frame *f = NULL;
-    List *context = id3v2CreateEqulizationFrameContext(ID3V2_TAG_VERSION_2);
+    List *context = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_2);
 
     id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_2, &f);
 
@@ -1021,7 +1021,7 @@ static void id3v2CompareFrameId_EQU(void **state){
 
     ByteStream *stream = byteStreamCreate(equ, 15);
     Id3v2Frame *f = NULL;
-    List *context = id3v2CreateEqulizationFrameContext(ID3V2_TAG_VERSION_2);
+    List *context = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_2);
 
     id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_2, &f);
 
@@ -1047,8 +1047,8 @@ int main(){
 
         cmocka_unit_test(id3v2WriteFrameEntry_greatestHits),
         cmocka_unit_test(id3v2WriteFrameEntry_updateTitle),
-        cmocka_unit_test(id3v2AtatchFrameFromTag_TSOA),
-        cmocka_unit_test(id3v2DetatchFrameFromTag_TIT2),
+        cmocka_unit_test(id3v2AttachFrameFromTag_TSOA),
+        cmocka_unit_test(id3v2DetachFrameFromTag_TIT2),
 
         // id3v2FrameHeaderSerialize
         cmocka_unit_test(id3v2FrameHeaderSerialize_null),

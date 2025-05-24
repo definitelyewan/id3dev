@@ -49,7 +49,7 @@ char *id3v2ReadLyrics(Id3v2Tag *tag);
 char *id3v2ReadComment(Id3v2Tag *tag);
 uint8_t *id3v2ReadPicture(uint8_t type, Id3v2Tag *tag, size_t *dataSize);
 
-// change values within a id3v2 structure
+// change values within an id3v2 structure
 
 int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const char *string, Id3v2Tag *tag);
 int id3v2WriteTitle(const char *title, Id3v2Tag *tag);

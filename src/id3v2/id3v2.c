@@ -158,7 +158,7 @@ bool id3v2CompareTag(Id3v2Tag *tag1, Id3v2Tag *tag2){
 }
 
 /**
- * @brief Returns a copy of the first occurance of a frame with the given id. If
+ * @brief Returns a copy of the first occurrence of a frame with the given id. If
  * no frame is found, this function will return NULL.
  * 
  * @param id 
@@ -207,7 +207,7 @@ int id3v2RemoveFrameByID(const char *id, Id3v2Tag *tag){
     Id3v2Frame *remove = NULL;
 
     test = id3v2ReadFrameByID(id, tag);
-    remove = id3v2DetatchFrameFromTag(tag, test);
+    remove = id3v2DetachFrameFromTag(tag, test);
 
     id3v2DestroyFrame(&test);
 
@@ -268,7 +268,7 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
         outLen = strlen(string);
     }
 
-    // reenable utf16 len support
+    // re enable utf16 len support
     bytePrependBOM(encoding, &usableString, &outLen);
 
     if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
@@ -289,7 +289,7 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
 
 /**
  * @brief Returns the major version of a tag. On success, a positive integer will be returned. Otherwise, -1 will be returned.
- * @details This function just returns tag->header->majorVersion so i dont see a need to test it considering all the error checking.
+ * @details This function just returns tag->header->majorVersion, so I don't see a need to test it considering all the error checking.
  * @param tag 
  * @return int 
  */
@@ -779,11 +779,12 @@ char *id3v2ReadComment(Id3v2Tag *tag){
 }
 
 /**
- * @brief Reads the first Attached pircutre (PIC or APIC) of a tag. 
+ * @brief Reads the first Attached picture (PIC or APIC) of a tag.
  * If no picture is found, NULL is returned.
  * 
  * @param type 
- * @param tag 
+ * @param tag
+ * @param dataSize
  * @return char* 
  */
 uint8_t *id3v2ReadPicture(uint8_t type, Id3v2Tag *tag, size_t *dataSize){
@@ -824,7 +825,8 @@ uint8_t *id3v2ReadPicture(uint8_t type, Id3v2Tag *tag, size_t *dataSize){
  * The provided string will be converted to the appropriate encoding for the frame.
  * If no text frame is found one will be created with a UTF16LE encoding.
  * Any failure will result in this function returning false otherwise, true.
- * 
+ *
+ * @param id
  * @param string 
  * @param tag 
  * @return int 
@@ -907,7 +909,7 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
 
     bytePrependBOM(encoding, &usableString, &outLen);
 
-    // reenable utf16 len support
+    // re enable utf16 len support
     if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
         usableString = realloc(usableString, outLen + BYTE_PADDING);
         memset(usableString + outLen, 0, BYTE_PADDING);
@@ -1189,7 +1191,7 @@ static int _id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *lyrics, Id
     }
 
     Id3v2Frame *f = NULL;
-    ListIter entires = {0};
+    ListIter entries = {0};
     uint8_t encoding = BYTE_UTF16LE;
     uint8_t *usableString = NULL;
     size_t outLen = 0;
@@ -1213,28 +1215,28 @@ static int _id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *lyrics, Id
     }
 
     // update entries
-    entires = id3v2CreateFrameEntryTraverser(f);
+    entries = id3v2CreateFrameEntryTraverser(f);
 
     // add encoding
-    if(!id3v2WriteFrameEntry(f, &entires, 1, (void *) &encoding)){
+    if(!id3v2WriteFrameEntry(f, &entries, 1, (void *) &encoding)){
         id3v2DestroyFrame(&f);
         return false;
     }
-    id3v2ReadFrameEntryAsU8(&entires);
+    id3v2ReadFrameEntryAsU8(&entries);
 
     // add language
-    if(!id3v2WriteFrameEntry(f, &entires, 3, (void *) "zxx")){ // unknown language
+    if(!id3v2WriteFrameEntry(f, &entries, 3, (void *) "zxx")){ // unknown language
         id3v2DestroyFrame(&f);
         return false;
     }
-    id3v2ReadFrameEntryAsU8(&entires);
+    id3v2ReadFrameEntryAsU8(&entries);
 
     // ensure description is nothing
-    if(!id3v2WriteFrameEntry(f, &entires, 1, (void *) "\0")){
+    if(!id3v2WriteFrameEntry(f, &entries, 1, (void *) "\0")){
         id3v2DestroyFrame(&f);
         return false;
     }
-    id3v2ReadFrameEntryAsU8(&entires);
+    id3v2ReadFrameEntryAsU8(&entries);
 
     // add lyrics
 
@@ -1251,12 +1253,12 @@ static int _id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *lyrics, Id
     memset(usableString + outLen, 0, BYTE_PADDING);
     
 
-    if(!id3v2WriteFrameEntry(f, &entires, outLen, (void *) usableString)){
+    if(!id3v2WriteFrameEntry(f, &entries, outLen, (void *) usableString)){
         id3v2DestroyFrame(&f);
         free(usableString);
         return false;
     }
-    id3v2ReadFrameEntryAsU8(&entires);
+    id3v2ReadFrameEntryAsU8(&entries);
 
 
     listInsertBack(tag->frames, (void *) f);
@@ -1267,7 +1269,7 @@ static int _id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *lyrics, Id
  * @brief Writes new lyrics to the first Unsynchronised Lyric/Text Transcription (ULT or USLT) 
  * frame of a tag. If this function fails false is returned otherwise, true.
  * 
- * @param composer 
+ * @param lyrics
  * @param tag 
  * @return int 
  */
@@ -1355,7 +1357,7 @@ int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
 
     bytePrependBOM(encoding, &usableString, &outLen);
 
-    // reenable utf16 len support
+    // re enable utf16 len support
     if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
         usableString = realloc(usableString, outLen + BYTE_PADDING);
         memset(usableString + outLen, 0, BYTE_PADDING);
@@ -1430,7 +1432,7 @@ static int _id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3], const 
 
         bytePrependBOM(encoding, &usableString, &outLen);
 
-        // reenable utf16 len support
+        // re enable utf16 len support
         if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
             usableString = realloc(usableString, outLen + BYTE_PADDING);
             memset(usableString + outLen, 0, BYTE_PADDING);
@@ -1455,7 +1457,7 @@ static int _id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3], const 
     
     bytePrependBOM(encoding, &usableString, &outLen);
 
-    // reenable utf16 len support
+    // re enable utf16 len support
     if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
         usableString = realloc(usableString, outLen + BYTE_PADDING);
         memset(usableString + outLen, 0, BYTE_PADDING);
@@ -1561,7 +1563,7 @@ int id3v2WriteComment(const char *comment, Id3v2Tag *tag){
 
     bytePrependBOM(encoding, &usableString, &outLen);
 
-    // reenable utf16 len support
+    // re enable utf16 len support
     if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
         usableString = realloc(usableString, outLen + BYTE_PADDING);
         memset(usableString + outLen, 0, BYTE_PADDING);
@@ -1886,7 +1888,8 @@ int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t ty
  * @brief Converts an ID3v2.x tag data structure back to its binary representation. If this function fails
  * NULL is returned otherwise, an uint8_t pointer.
  * 
- * @param tag 
+ * @param tag
+ * @param outl
  * @return ByteStream* 
  */
 uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl){
@@ -2182,7 +2185,7 @@ char *id3v2TagToJSON(Id3v2Tag *tag){
  * If the file does not exist it will be created if it does and there is no tag it will be prepended. If the update
  * flag is set in the tag header it will be prepended to the file without overwriting any existing tags. 
  * 
- * @param filename 
+ * @param filePath
  * @param tag 
  * @return int 
  */

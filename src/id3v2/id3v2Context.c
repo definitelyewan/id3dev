@@ -170,7 +170,7 @@ char *id3v2PrintContentContextList(const void *toBePrinted){
 }
 
 /**
- * @brief copys a context list
+ * @brief copy a context list
  * @details used for the hashtable library
  * @param toBeCopied 
  * @return void* 
@@ -412,7 +412,7 @@ List *id3v2CreateCommercialFrameContext(void){
     toAdd = (void *) id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("url"), UINT_MAX, 1);
     listInsertBack(l, toAdd);
 
-    // recived as (type)
+    // received as (type)
     toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("type"), 1, 1);
     listInsertBack(l, toAdd);
 
@@ -518,12 +518,12 @@ List *id3v2CreatePlayCounterFrameContext(void){
 }
 
 /**
- * @brief Generates the required context for a equlization frame given a version
+ * @brief Generates the required context for an equalization frame given a version
  * 
  * @param version 
  * @return List* 
  */
-List *id3v2CreateEqulizationFrameContext(unsigned int version){
+List *id3v2CreateEqualizationFrameContext(unsigned int version){
 
     List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
     void *toAdd = NULL;
@@ -549,7 +549,7 @@ List *id3v2CreateEqulizationFrameContext(unsigned int version){
             toAdd = (void *) id3v2CreateContentContext(adjustment_context, id3v2djb2("volume"), UINT_MAX, 1);
             listInsertBack(l, toAdd);
 
-            // iter through the last 3 limt is int max but a frames data will 100% run out before this
+            // iter through the last 3 limit is int max but a frames data will 100% run out before this
             toAdd = (void *) id3v2CreateContentContext(iter_context, id3v2djb2("iter"), UINT_MAX, 1);
             listInsertBack(l, toAdd);
             break;
@@ -569,13 +569,13 @@ List *id3v2CreateEqulizationFrameContext(unsigned int version){
             toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("volume"), 2, 2);
             listInsertBack(l, toAdd);
 
-            // iter through the last 2 limt is int max but a frames data will 100% run out before this
+            // iter through the last 2 limit is int max but a frames data will 100% run out before this
             toAdd = (void *) id3v2CreateContentContext(iter_context, id3v2djb2("iter"), UINT_MAX, 2);
             listInsertBack(l, toAdd);
             break;
 
         default:
-            toAdd = (void *) id3v2CreateContentContext(unknown_context, id3v2djb2("unkown"), 1, 1);
+            toAdd = (void *) id3v2CreateContentContext(unknown_context, id3v2djb2("unknown"), 1, 1);
             listInsertBack(l, toAdd);
             break;
     }
@@ -692,7 +692,7 @@ List *id3v2CreateLinkedInformationFrameContext(void){
 }
 
 /**
- * @brief Generates the required context for a MPEG lookup table frame
+ * @brief Generates the required context for an MPEG lookup table frame
  * @details This frame does not have full support but its use is probably so rare that nobody will care
  * @return List* 
  */
@@ -708,7 +708,7 @@ List *id3v2CreateMPEGLocationLookupTableFrameContext(void){
 }
 
 /**
- * @brief generates the required context for an ownersip frame
+ * @brief generates the required context for an ownership frame
  * 
  * @return List* 
  */
@@ -826,8 +826,8 @@ List *id3v2CreateRecommendedBufferSizeFrameContext(void){
 
 /**
  * @brief Generates the required context for a volume adjustment frame
- * @details at the time being i do not have a good way of implementing this so the entire frame is one block.
- * maybe post processing functions or more contexts?
+ * @details at the time being I do not have a good way of implementing this so the entire frame is one block.
+ * maybe post-processing functions or more contexts?
  * @param version 
  * @return List* 
  */
@@ -977,8 +977,8 @@ List *id3v2CreateSynchronisedLyricFrameContext(void){
 
 /**
  * @brief Generates the required context for a synced tempo codes frame
- * @details this frame is not fully supported as i do not have a good way of dealing
- * with varibale tempo data as of right now. maybe postprocessing or more contexts?
+ * @details this frame is not fully supported as I do not have a good way of dealing
+ * with variable tempo data as of right now. maybe postprocessing or more contexts?
  * @return List* 
  */
 List *id3v2CreateSynchronisedTempoCodesFrameContext(void){
@@ -997,7 +997,7 @@ List *id3v2CreateSynchronisedTempoCodesFrameContext(void){
 }
 
 /**
- * @brief Generates the required contexts for a unique file identifer frame
+ * @brief Generates the required contexts for a unique file identifier frame
  * 
  * @return List* 
  */
@@ -1037,7 +1037,7 @@ List *id3v2CreateTermsOfUseFrameContext(void){
 
 
 /**
- * @brief Generates the required contexts for a unsynced lyrics frame
+ * @brief Generates the required contexts for an unsynced lyrics frame
  * 
  * @return List* 
  */
@@ -1088,7 +1088,7 @@ List *id3v2CreateGenericFrameContext(void){
  * @param version 
  * @return HashTable* 
  */
-HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version){
+HashTable *id3v2CreateDefaultIdentifierContextPairings(unsigned int version){
 
     size_t minFrameContexts = 66;
     HashTable *table = hashTableCreate(minFrameContexts, id3v2DeleteContentContextList, id3v2PrintContentContextList, id3v2CopyContentContextList);
@@ -1113,7 +1113,7 @@ HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version){
 
             hashTableInsert(table, "ETC", (l = id3v2CreateEventTimingCodesFrameContext()));
             listFree(l);
-            hashTableInsert(table, "EQU", (l = id3v2CreateEqulizationFrameContext(version)));
+            hashTableInsert(table, "EQU", (l = id3v2CreateEqualizationFrameContext(version)));
             listFree(l);
 
             hashTableInsert(table, "GEO", (l = id3v2CreateGeneralEncapsulatedObjectFrameContext()));
@@ -1253,7 +1253,7 @@ HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version){
 
             hashTableInsert(table, "ENCR", (l = id3v2CreateRegistrationFrameContext()));
             listFree(l);
-            hashTableInsert(table, "EQUA", (l = id3v2CreateEqulizationFrameContext(version)));
+            hashTableInsert(table, "EQUA", (l = id3v2CreateEqualizationFrameContext(version)));
             listFree(l);
             hashTableInsert(table, "ETCO", (l = id3v2CreateEventTimingCodesFrameContext()));
             listFree(l);
@@ -1420,7 +1420,7 @@ HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version){
 
             hashTableInsert(table, "ENCR", (l = id3v2CreateRegistrationFrameContext()));
             listFree(l);
-            hashTableInsert(table, "EQU2", (l = id3v2CreateEqulizationFrameContext(version)));
+            hashTableInsert(table, "EQU2", (l = id3v2CreateEqualizationFrameContext(version)));
             listFree(l);
             hashTableInsert(table, "ETCO", (l = id3v2CreateEventTimingCodesFrameContext()));
             listFree(l);
@@ -1623,7 +1623,8 @@ bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char ke
 /**
  * @brief Creates a binary representation of a context structure.
  * 
- * @param cc 
+ * @param cc
+ * @param outl
  * @return uint8_t * 
  */
 uint8_t *id3v2ContextSerialize(Id3v2ContentContext *cc, size_t *outl){

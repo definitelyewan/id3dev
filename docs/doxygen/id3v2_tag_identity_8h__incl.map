@@ -1,0 +1,19 @@
+<map id="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2TagIdentity.h" name="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2TagIdentity.h">
+<area shape="rect" id="Node000001" title="Declarations for id3v2 tag headers and extended headers." alt="" coords="183,5,382,61"/>
+<area shape="rect" id="Node000002" href="$id3v2_types_8h.html" title="Definitions and types for id3v2 types." alt="" coords="233,109,332,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="285,61,285,93,280,93,280,61"/>
+<area shape="rect" id="Node000003" href="$id3v1_types_8h.html" title="Definitions and types for id3v1 types." alt="" coords="74,190,208,216"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="262,137,177,185,175,180,260,133"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,271,80,297"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="233,125,192,129,146,138,102,156,82,169,65,184,54,200,47,219,43,256,38,256,42,218,49,198,60,181,79,165,99,151,145,133,191,123,233,120"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="161,271,225,297"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="278,136,210,259,205,256,273,134"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="282,190,360,216"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="291,134,311,175,306,177,286,136"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="384,183,565,223"/>
+<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="313,133,414,174,412,179,311,138"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="589,183,773,223"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="333,130,574,178,573,183,332,136"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="128,218,71,264,68,259,125,214"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="151,215,179,257,175,260,147,218"/>
+</map>

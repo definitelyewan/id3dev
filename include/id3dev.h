@@ -39,8 +39,8 @@ void id3Destroy(ID3 **toDelete);
 
 // util functions
 
-bool id3SetPreferedStandard(uint8_t standard);
-uint8_t id3GetPreferedStandard(void);
+bool id3SetPreferredStandard(uint8_t standard);
+uint8_t id3GetPreferredStandard(void);
 
 ID3 *id3FromFile(const char *filePath);
 ID3 *id3Copy(ID3 *toCopy);

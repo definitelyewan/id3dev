@@ -1,5 +1,0 @@
-<map id="_Id3v2Tag" name="_Id3v2Tag">
-<area shape="rect" id="node1" title="A representation of an ID3 tag." alt="" coords="59,184,146,211"/>
-<area shape="rect" id="node2" href="$struct__Id3v2TagHeader.html" title="Vital information used to parse and define an ID3 tag." alt="" coords="35,95,170,121"/>
-<area shape="rect" id="node3" href="$struct__Id3v2ExtendedTagHeader.html" title="The extended header contains information that can provide further insight in the structure of the tag..." alt="" coords="5,5,200,32"/>
-</map>

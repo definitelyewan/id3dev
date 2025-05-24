@@ -1,11 +1,20 @@
-<map id="/mnt/d/code/id3dev/include/id3dev.h" name="/mnt/d/code/id3dev/include/id3dev.h">
-<area shape="rect" id="node1" title="decleations of main library functions" alt="" coords="732,5,879,47"/>
-<area shape="rect" id="node2" href="$id3v1Types_8h.html" title="Defintions and types for id3v1 types." alt="" coords="908,177,1055,203"/>
-<area shape="rect" id="node5" href="$id3v2Types_8h.html" title="Defintions and types for id3v2 types." alt="" coords="677,95,824,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="924,259,1007,285"/>
-<area shape="rect" id="node4" title=" " alt="" coords="814,259,885,285"/>
-<area shape="rect" id="node6" title=" " alt="" coords="5,169,219,211"/>
-<area shape="rect" id="node7" title=" " alt="" coords="243,177,330,203"/>
-<area shape="rect" id="node8" title=" " alt="" coords="354,169,555,211"/>
-<area shape="rect" id="node9" title=" " alt="" coords="580,169,783,211"/>
+<map id="/Users/ewanjones/projects/id3dev/include/id3dev.h" name="/Users/ewanjones/projects/id3dev/include/id3dev.h">
+<area shape="rect" id="Node000001" title="decleations of main library functions" alt="" coords="498,5,674,46"/>
+<area shape="rect" id="Node000002" href="$id3v1_types_8h.html" title="Definitions and types for id3v1 types." alt="" coords="622,175,755,201"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="601,45,675,160,670,163,596,48"/>
+<area shape="rect" id="Node000005" href="$id3v2_types_8h.html" title="Definitions and types for id3v2 types." alt="" coords="467,94,600,120"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="575,48,553,82,548,79,571,45"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="635,256,710,282"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="689,202,681,241,675,240,683,201"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="532,256,597,282"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="671,204,598,250,595,246,668,199"/>
+<area shape="poly" id="edge5_Node000005_Node000002" title=" " alt="" coords="559,118,653,166,650,170,556,123"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="544,118,573,158,612,207,649,244,645,247,608,210,568,162,540,121"/>
+<area shape="poly" id="edge7_Node000005_Node000004" title=" " alt="" coords="539,120,562,240,557,241,534,121"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="5,175,84,201"/>
+<area shape="poly" id="edge8_Node000005_Node000006" title=" " alt="" coords="467,115,297,133,196,149,96,170,88,172,87,167,95,165,195,144,297,128,467,110"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="107,168,288,208"/>
+<area shape="poly" id="edge9_Node000005_Node000007" title=" " alt="" coords="483,123,297,166,296,161,481,118"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="312,168,497,208"/>
+<area shape="poly" id="edge10_Node000005_Node000008" title=" " alt="" coords="516,122,450,162,448,157,513,118"/>
 </map>

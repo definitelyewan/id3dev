@@ -98,8 +98,8 @@ int id3v1WriteTitle(const char *title, Id3v1Tag *tag){
 }
 
 /**
- * @brief Writes a artist to tag.
- * @param title 
+ * @brief Writes an artist to tag.
+ * @param artist
  * @param tag 
  * @return int 
  */
@@ -109,7 +109,7 @@ int id3v1WriteArtist(const char *artist, Id3v1Tag *tag){
 
 /**
  * @brief Writes an album to tag.
- * @param title 
+ * @param album
  * @param tag 
  * @return int 
  */
@@ -119,7 +119,7 @@ int id3v1WriteAlbum(const char *album, Id3v1Tag *tag){
 
 /**
  * @brief Writes a year to tag.
- * @param title 
+ * @param year
  * @param tag 
  * @return int 
  */
@@ -135,7 +135,7 @@ int id3v1WriteYear(int year, Id3v1Tag *tag){
 
 /**
  * @brief Writes a comment to tag.
- * @param title 
+ * @param comment
  * @param tag 
  * @return int 
  */
@@ -145,7 +145,7 @@ int id3v1WriteComment(const char *comment, Id3v1Tag *tag){
 
 /**
  * @brief Writes a genere to tag.
- * @param title 
+ * @param genre
  * @param tag 
  * @return int 
  */
@@ -161,7 +161,7 @@ int id3v1WriteGenre(Genre genre, Id3v1Tag *tag){
 
 /**
  * @brief Writes a track to tag.
- * @param title 
+ * @param track
  * @param tag 
  * @return int 
  */
@@ -177,7 +177,7 @@ int id3v1WriteTrack(int track, Id3v1Tag *tag){
 }
 
 /**
- * @brief Compares two differnt tags.
+ * @brief Compares two different tags.
  * @details Returns true if the provided tags are equal otherwise, false. 
  * @param tag1 
  * @param tag2 
@@ -298,7 +298,7 @@ char *id3v1GenreFromTable(Genre val){
         case CLASSICAL_GENRE:
             return "Classical\0";
         case INSTRUMENTAL_GENRE:
-            return "Instrumrntal\0";
+            return "Instrumental\0";
         case ACID_GENRE:
             return "Acid\0";
         case HOUSE_GENRE:
@@ -633,7 +633,7 @@ char *id3v1ReadTitle(Id3v1Tag *tag){
 }
 
 /**
- * @brief Reads a artist from a tag.
+ * @brief Reads an artist from a tag.
  * @details Mainly for compatibility and use in ffi.
  * @param tag 
  * @return char* 
@@ -805,7 +805,7 @@ int id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag){
         unsigned char *buffer[ID3V1_MAX_SIZE];
 
         //seek to tag start
-        //if the file is less then 128 bytes then we can catch that here.
+        //if the file is less than 128 bytes then we can catch that here.
         //there will be no tag due to size or if there is its corrupt and
         //will be treated as regular file data and skipped over.
         if((fseek(fp, index - ID3V1_MAX_SIZE, SEEK_SET)) != 0){
@@ -829,7 +829,7 @@ int id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag){
             return 0;
         }
 
-        //coupld not find 'TAG'
+        //coupled not find 'TAG'
         if(!id3v1HasTag((uint8_t *)buffer)){
             if(fseek(fp, 0, SEEK_END) != 0){
                 byteStreamDestroy(stream);

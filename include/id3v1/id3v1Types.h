@@ -1,7 +1,7 @@
 /**
  * @file id3v1Types.h
  * @author Ewan Jones
- * @brief Defintions and types for id3v1 types
+ * @brief Definitions and types for id3v1 types
  * @version 2.0
  * @date 2023-10-02
  *
@@ -21,10 +21,10 @@ extern "C" {
 //! The size of the id3v1 and id3v1.1 tag identifier "TAG"
 #define ID3V1_TAG_ID_SIZE 3
 
-//! Number of bytes allocated to the year in a id3v1 and id3v1.1 tag
+//! Number of bytes allocated to the year in an id3v1 and id3v1.1 tag
 #define ID3V1_YEAR_SIZE 4
 
-//! Number of bytes allocated to all text fields in a id3v1 and id3v1.1 tag
+//! Number of bytes allocated to all text fields in an id3v1 and id3v1.1 tag
 #define ID3V1_FIELD_SIZE 30
 
 //! Max id3v1 and id3v1.1 tag size

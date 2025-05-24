@@ -46,7 +46,7 @@ static void copyNBits(unsigned char* src, unsigned char* dest, int startBit, int
 /**
  * @brief Parses an ID3v2.3, ID3v2.4, and unsupported versions. This function will return the number of bytes it read
  * to correctly parse an extended header and a heap stored structure through extendedTagHeader. There are no error
- * states for this function but if a size of 0 is returned or extendedTagHeader = NULL it likly failed but this could 
+ * states for this function but if a size of 0 is returned or extendedTagHeader = NULL it likely failed but this could
  * also mean an unsupported version was passed. 
  * 
  * @param in
@@ -211,10 +211,10 @@ uint32_t id3v2ParseExtendedTagHeader(uint8_t *in, size_t inl, uint8_t version, I
  * @brief Parses an ID3 header but, not its extended header. This function will return the number
  * of bytes it read in order to correctly parse a tag header. the size of tag itself and header 
  * are returned by referance. There are no error states but a tagSize of 0 and a NULL header 
- * means it likely failed to retrive anything useful.
+ * means it likely failed to retrieve anything useful.
  * 
- * @param out
- * @param outl 
+ * @param in
+ * @param inl
  * @param tagHeader 
  * @param tagSize 
  * @return uint32_t 
@@ -490,8 +490,8 @@ uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2Fr
  * the meat of the parser and requires 'hints' in the form of a context list to prase a frame successfully. There is
  * no error state for this function but a returned size of 0 or an incomplete frame such as a missing entry list may
  * indicate one.
- * @details The bit context implmentation in this function is not correct and doesnt work as expected. I completly missed
- * this when I made it at the start of this project :(. I dont know how I can fix it so if legit anyone ever looks at this
+ * @details The bit context implementation in this function is not correct and doesn't work as expected. I completely missed
+ * this when I made it at the start of this project :(. I don't know how I can fix it so if legit anyone ever looks at this
  * code and wants to fix it, please do.
  * @param in
  * @param inl
@@ -525,7 +525,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
     size_t concurrentBitCount = 0;
     uint32_t expectedHeaderSize = 0;
     uint32_t expectedContentSize = 0;
-    ByteStream *innerSream = NULL;
+    ByteStream *innerStream = NULL;
     ListIter iter;
     ListIter iterStorage;
     void *contextData = NULL;
@@ -553,12 +553,12 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
 
     byteStreamSeek(stream, expectedHeaderSize, SEEK_CUR);
 
-    innerSream = byteStreamCreate(byteStreamCursor(stream), expectedContentSize);
+    innerStream = byteStreamCreate(byteStreamCursor(stream), expectedContentSize);
     entries = listCreate(id3v2PrintContentEntry, id3v2DeleteContentEntry, id3v2CompareContentEntry, id3v2CopyContentEntry);
 
 
-    // is a frame compressed or encryped?
-    // if so a generic context will be used meaning its not up to me to decompress or unecrypt + if its a text frame none
+    // is a frame compressed or encrypted?
+    // if so a generic context will be used meaning it's not up to me to decompress or unencrypted + if it's a text frame none
     // of the reads or writes will work until someone reparses the data after its changed.
     if(header->encryptionSymbol > 0 || header->decompressionSize > 0){
         
@@ -581,16 +581,16 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
 
         data = malloc(dataSize);
 
-        if(!byteStreamRead(innerSream, (uint8_t *)data, dataSize)){
+        if(!byteStreamRead(innerStream, (uint8_t *)data, dataSize)){
             memset(data, 0, dataSize);
         }
 
         listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
         free(data);
 
-        walk += innerSream->cursor;
+        walk += innerStream->cursor;
         *frame = id3v2CreateFrame(header, gContext, entries);
-        byteStreamDestroy(innerSream);
+        byteStreamDestroy(innerStream);
         byteStreamDestroy(stream);
         return walk;
     }
@@ -642,10 +642,10 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                     case BYTE_ISO_8859_1:
                     case BYTE_ASCII:
                     case BYTE_UTF8:
-                        data = byteStreamReturnUtf8(innerSream, &dataSize);
+                        data = byteStreamReturnUtf8(innerStream, &dataSize);
 
                         if(data == NULL && dataSize == 0){
-                            byteStreamSeek(innerSream, 1, SEEK_CUR);
+                            byteStreamSeek(innerStream, 1, SEEK_CUR);
                             data = calloc(sizeof(unsigned char), 1);
                             memset(data, 0, 1);
                             dataSize = 1;
@@ -653,10 +653,10 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                         break;
                     case BYTE_UTF16BE:
                     case BYTE_UTF16LE:
-                        data = byteStreamReturnUtf16(innerSream, &dataSize);
+                        data = byteStreamReturnUtf16(innerStream, &dataSize);
 
                         if(data == NULL && dataSize == 0){
-                            byteStreamSeek(innerSream, 2, SEEK_CUR);
+                            byteStreamSeek(innerStream, 2, SEEK_CUR);
                             data = calloc(sizeof(unsigned char), 2);
                             memset(data, 0, 2);
                             dataSize = 2;
@@ -683,13 +683,13 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                 expectedContentSize = ((expectedContentSize < dataSize) ? 0 : expectedContentSize - dataSize);
             }
                 break;
-            // only characters found within the latain1 character set      
+            // only characters found within the latin1 character set
             case latin1Encoding_context:{
 
                 void *data = NULL;
                 size_t dataSize = 0;
 
-                data = byteStreamReturnLatin1(innerSream, &dataSize);
+                data = byteStreamReturnLatin1(innerStream, &dataSize);
                 
                 if(dataSize > cc->max){
                     dataSize = cc->max;
@@ -730,7 +730,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
 
                 data = malloc(dataSize);
 
-                if(!byteStreamRead(innerSream, (uint8_t *)data, dataSize)){
+                if(!byteStreamRead(innerStream, (uint8_t *)data, dataSize)){
                     memset(data, 0, dataSize);
                 }
 
@@ -759,7 +759,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                 
                 data = malloc(dataSize);
                 memset(data, 0, dataSize);
-                copyNBits(byteStreamCursor(innerSream), data, concurrentBitCount, nBits);
+                copyNBits(byteStreamCursor(innerStream), data, concurrentBitCount, nBits);
                 
                 if(iter.current->data != NULL){
                     Id3v2ContentContext *nextContext = (Id3v2ContentContext *) iter.current->data;
@@ -771,7 +771,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                 if(isBitContext != bit_context){
 
                     if(concurrentBitCount / CHAR_BIT){
-                        byteStreamSeek(innerSream, concurrentBitCount / CHAR_BIT, SEEK_CUR);
+                        byteStreamSeek(innerStream, concurrentBitCount / CHAR_BIT, SEEK_CUR);
                         expectedContentSize = ((expectedContentSize < dataSize) ? 0 : expectedContentSize - dataSize);
                     }
 
@@ -861,7 +861,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
 
                 data = malloc(dataSize);
                 memset(data, 0, dataSize); //ensure data exists
-                byteStreamRead(innerSream, data, dataSize); // no need to check error code do to above memset
+                byteStreamRead(innerStream, data, dataSize); // no need to check error code do to above memset
 
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
                 free(data);
@@ -874,11 +874,11 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
             // no support
             case unknown_context:
             default:
-                byteStreamSeek(innerSream, 0, SEEK_END);
+                byteStreamSeek(innerStream, 0, SEEK_END);
                 break;
         }
 
-        if(expectedContentSize == 0 || byteStreamGetCh(innerSream) == EOF){
+        if(expectedContentSize == 0 || byteStreamGetCh(innerStream) == EOF){
             break;
         }
 
@@ -886,10 +886,10 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
 
 
     // enforce frame size from header parsing
-    walk += innerSream->bufferSize;
+    walk += innerStream->bufferSize;
     
     *frame = id3v2CreateFrame(header, listDeepCopy(context), entries);
-    byteStreamDestroy(innerSream);
+    byteStreamDestroy(innerStream);
     byteStreamDestroy(stream);
     return walk;
 }
@@ -898,9 +898,9 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
  * @brief Parses an ID3 version 2, 3, or 4 tag from a buffer. This function will load the default frame
  * ID, context pairings and any user supplied ones to extract frames within a tag. If this function fails
  * it will return NULL to the caller otherwise, some form of parsed tag will be returned based on the
- * completness of the buffer.
+ * completeness of the buffer.
  * @details unsynchronisation will take a long time to parse as 0s are stripped before
- * frame parsing begins, which is increadibly expensive to do. A fast system is recommended for this 
+ * frame parsing begins, which is incredibly expensive to do. A fast system is recommended for this
  * feature.
  * @param in
  * @param inl 
@@ -988,7 +988,7 @@ Id3v2Tag *id3v2ParseTagFromBuffer(uint8_t *in, size_t inl, HashTable *userPairs)
             byteStreamSeek(stream, read, SEEK_CUR);
         }
 
-        pairs = id3v2CreateDefaultIdentiferContextPairings(header->majorVersion);
+        pairs = id3v2CreateDefaultIdentifierContextPairings(header->majorVersion);
 
         while(tagSize){
             

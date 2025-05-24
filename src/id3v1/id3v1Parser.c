@@ -72,7 +72,7 @@ Id3v1Tag *id3v1CreateTag(uint8_t *title, uint8_t *artist, uint8_t *albumTitle, i
 
 /**
  * @brief Resets all structure members to empty.
- * @details OTHER_GENRE(12) is used as clear due to its unkown designation. 
+ * @details OTHER_GENRE(12) is used as clear due to its unknown designation.
  * @param tag 
  */
 void id3v1ClearTag(Id3v1Tag *tag){
@@ -113,7 +113,7 @@ void id3v1DestroyTag(Id3v1Tag **toDelete){
  */
 Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
 
-    //lots of error checking because i cannot 100% know what im given
+    //lots of error checking because I cannot 100% know what im given
 
     int trackno = 0;
     int nYear = 0;
@@ -121,7 +121,7 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
     uint8_t holdArtist[ID3V1_FIELD_SIZE + 1] = {0};
     uint8_t holdAlbum[ID3V1_FIELD_SIZE + 1] = {0};
     uint8_t holdComment[ID3V1_FIELD_SIZE + 1] = {0};
-    uint8_t year[ID3V1_YEAR_SIZE + 1]; //must be +1. without it holdtitle gets overwritten somehow
+    uint8_t year[ID3V1_YEAR_SIZE + 1]; //must be +1. without it holdTitle gets overwritten somehow
     Genre genre;
     ByteStream *stream = NULL;
 

@@ -22,7 +22,7 @@
  * @brief default standard for reading ID3 tags from a data structure representation.
  * 
  */
-static uint8_t id3PreferedStandard = ID3V2_TAG_VERSION_3;
+static uint8_t id3PreferredStandard = ID3V2_TAG_VERSION_3;
 
 /**
  * @brief Creates a new ID3 structure with the given ID3v2 and ID3v1 tags.
@@ -60,22 +60,22 @@ void id3Destroy(ID3 **toDelete){
 }
 
 /**
- * @brief Sets the prefered standard for reading ID3 tags from a data structure representation. If no standard is 
- * set the default will be set to ID3v2.3 as this is the most wide spread version with the most features. If
- * sucessful this function returns true otherwise, it will return false.
+ * @brief Sets the preferred standard for reading ID3 tags from a data structure representation. If no standard is
+ * set the default will be set to ID3v2.3 as this is the widest spread version with the most features. If
+ * successful this function returns true otherwise, it will return false.
  * 
  * @param standard 
  * @return true 
  * @return false 
  */
-bool id3SetPreferedStandard(uint8_t standard){
+bool id3SetPreferredStandard(uint8_t standard){
 
     switch(standard){
         case ID3V1_TAG_VERSION:
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
-            id3PreferedStandard = standard;
+            id3PreferredStandard = standard;
             break;
         
         default:
@@ -86,18 +86,18 @@ bool id3SetPreferedStandard(uint8_t standard){
 }
 
 /**
- * @brief Returns the current prefered standard
+ * @brief Returns the current preferred standard
  * 
  * @return uint8_t 
  */
-uint8_t id3GetPreferedStandard(void){
-    return id3PreferedStandard;
+uint8_t id3GetPreferredStandard(void){
+    return id3PreferredStandard;
 }
 
 
 /**
  * @brief Reads both ID3v1 and ID3v2 tags located in a provided file. If this function fails an
- * ID3 strcuture will be returned but one or both versions will be set to NULL.
+ * ID3 structure will be returned but one or both versions will be set to NULL.
  * 
  * @param filePath 
  * @return ID3* 
@@ -160,7 +160,7 @@ bool id3Compare(ID3 *metadata1, ID3 *metadata2){
 
 
 /**
- * @brief Converts the stored ID3v1 tag to an ID3v2 tag to be held in the ID3 structre. The prefered standard will
+ * @brief Converts the stored ID3v1 tag to an ID3v2 tag to be held in the ID3 structure. The preferred standard will
  * be used to infer what version of ID3v2 is to be used but, if the standard is ID3V1 this function will fail. However, 
  * if there is a stored ID3v2 tag it will be removed and replaced. On success this function will return true, otherwise 
  * it will return false. 
@@ -186,7 +186,7 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata){
     int size = 0;
     int input = 0;
 
-    input = id3GetPreferedStandard() > ID3V1_TAG_VERSION ? id3GetPreferedStandard() : ID3V2_TAG_VERSION_3;
+    input = id3GetPreferredStandard() > ID3V1_TAG_VERSION ? id3GetPreferredStandard() : ID3V2_TAG_VERSION_3;
 
     switch(input){
         case ID3V2_TAG_VERSION_2:
@@ -294,8 +294,8 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata){
 
 
 /**
- * @brief Converts the stored ID3v2 tag to an ID3v1 tag to be held in the ID3 structre. However, if there
- * there is a stored ID3v1 tag it will be removed and replaced. On success this function will return true,
+ * @brief Converts the stored ID3v2 tag to an ID3v1 tag to be held in the ID3 structure. However, if there
+ * is a stored ID3v1 tag it will be removed and replaced. On success this function will return true,
  * otherwise it will return false. 
  * 
  * @param metadata 
@@ -400,11 +400,11 @@ bool id3ConvertId3v2ToId3v1(ID3 *metadata){
 }
 
 // internal -----------------------------------------------------------------
-// corrects the standard preferance if the prefered standard is not available
+// corrects the standard preference if the preferred standard is not available
 static int _getSafePrefStd(ID3 *metadata){
 
     int input = 0;
-    int pref = id3GetPreferedStandard();
+    int pref = id3GetPreferredStandard();
 
     if(pref > ID3V1_TAG_VERSION && metadata->id3v2 == NULL){
         input = ID3V1_TAG_VERSION;
@@ -420,7 +420,7 @@ static int _getSafePrefStd(ID3 *metadata){
 }
 
 /**
- * @brief Reads the title from the given ID3 structure using the prefered standard. If the title is not found
+ * @brief Reads the title from the given ID3 structure using the preferred standard. If the title is not found
  * NULL is returned.
  * 
  * @param metadata 
@@ -452,7 +452,7 @@ char *id3ReadTitle(ID3 *metadata){
 }
 
 /**
- * @brief Reads the artist from the given ID3 structure using the prefered standard. If the artist is not found
+ * @brief Reads the artist from the given ID3 structure using the preferred standard. If the artist is not found
  * NULL is returned.
  * 
  * @param metadata 
@@ -484,7 +484,7 @@ char *id3ReadArtist(ID3 *metadata){
 }
 
 /**
- * @brief Reads the album artist from the given ID3 structure using the prefered standard. If the album artist is not found
+ * @brief Reads the album artist from the given ID3 structure using the preferred standard. If the album artist is not found
  * NULL is returned.
  * @details This function is only available in ID3v2 tags and will always return NULL for ID3v1.
  * @param metadata 
@@ -515,7 +515,7 @@ char *id3ReadAlbumArtist(ID3 *metadata){
 }
 
 /**
- * @brief Reads the album from the given ID3 structure using the prefered standard. If the album is not found
+ * @brief Reads the album from the given ID3 structure using the preferred standard. If the album is not found
  * NULL is returned.
  * 
  * @param metadata 
@@ -547,7 +547,7 @@ char *id3ReadAlbum(ID3 *metadata){
 }
 
 /**
- * @brief Reads the year from the given ID3 structure using the prefered standard. If the year is not found
+ * @brief Reads the year from the given ID3 structure using the preferred standard. If the year is not found
  * NULL is returned.
  * 
  * @param metadata 
@@ -587,7 +587,7 @@ char *id3ReadYear(ID3 *metadata){
 }
 
 /**
- * @brief Reads the genre from the given ID3 structure using the prefered standard. If the genre is not found
+ * @brief Reads the genre from the given ID3 structure using the preferred standard. If the genre is not found
  * NULL is returned.
  * 
  * @param metadata 
@@ -626,7 +626,7 @@ char *id3ReadGenre(ID3 *metadata){
 }
 
 /**
- * @brief Reads the track from the given ID3 structure using the prefered standard. If the track is not found
+ * @brief Reads the track from the given ID3 structure using the preferred standard. If the track is not found
  * NULL is returned.
  * 
  * @param metadata 
@@ -666,7 +666,7 @@ char *id3ReadTrack(ID3 *metadata){
 }
 
 /**
- * @brief Reads the composer from the given ID3 structure using the prefered standard. If the composer is not found
+ * @brief Reads the composer from the given ID3 structure using the preferred standard. If the composer is not found
  * NULL is returned.
  * @details This function is only available in ID3v2 tags and will always return NULL for ID3v1.
  * @param metadata 
@@ -697,7 +697,7 @@ char *id3ReadComposer(ID3 *metadata){
 }
 
 /**
- * @brief Reads the disc from the given ID3 structure using the prefered standard. If the disc is not found
+ * @brief Reads the disc from the given ID3 structure using the preferred standard. If the disc is not found
  * NULL is returned.
  * @details This function is only available in ID3v2 tags and will always return NULL for ID3v1.
  * @param metadata 
@@ -728,7 +728,7 @@ char *id3ReadDisc(ID3 *metadata){
 }
 
 /**
- * @brief Reads the lyrics from the given ID3 structure using the prefered standard. If the lyrics are not found
+ * @brief Reads the lyrics from the given ID3 structure using the preferred standard. If the lyrics are not found
  * NULL is returned.
  * @details This function is only available in ID3v2 tags and will always return NULL for ID3v1.
  * @param metadata 
@@ -759,7 +759,7 @@ char *id3ReadLyrics(ID3 *metadata){
 }
 
 /**
- * @brief Reads the comment from the given ID3 structure using the prefered standard. If the comment is not found
+ * @brief Reads the comment from the given ID3 structure using the preferred standard. If the comment is not found
  * NULL is returned.
  * 
  * @param metadata 
@@ -791,7 +791,7 @@ char *id3ReadComment(ID3 *metadata){
 }
 
 /**
- * @brief Reads the picture from the given ID3 structure using the prefered standard. If the picture is not found
+ * @brief Reads the picture from the given ID3 structure using the preferred standard. If the picture is not found
  * NULL is returned.
  * @details This function is only available in ID3v2 tags and will always return NULL for ID3v1.
  * @param type 
@@ -831,7 +831,7 @@ uint8_t *id3ReadPicture(uint8_t type, ID3 *metadata, size_t *dataSize){
 }
 
 /**
- * @brief Writes a title to the given ID3 structure using the prefered standard. If the title is not written
+ * @brief Writes a title to the given ID3 structure using the preferred standard. If the title is not written
  * this function will return false otherwise it will return true.
  * 
  * @param title 
@@ -864,7 +864,7 @@ int id3WriteTitle(const char *title, ID3 *metadata){
 }
 
 /**
- * @brief Writes an artist to the given ID3 structure using the prefered standard. If the artist is not written
+ * @brief Writes an artist to the given ID3 structure using the preferred standard. If the artist is not written
  * this function will return false otherwise it will return true.
  * 
  * @param artist 
@@ -897,7 +897,7 @@ int id3WriteArtist(const char *artist, ID3 *metadata){
 }
 
 /**
- * @brief Writes an album artist to the given ID3 structure using the prefered standard. If the album artist is not written
+ * @brief Writes an album artist to the given ID3 structure using the preferred standard. If the album artist is not written
  * this function will return false otherwise it will return true.
  * @details This function is only available in ID3v2 tags and will always return false for ID3v1.
  * @param albumArtist 
@@ -929,7 +929,7 @@ int id3WriteAlbumArtist(const char *albumArtist, ID3 *metadata){
 }
 
 /**
- * @brief Writes an album to the given ID3 structure using the prefered standard. If the album is not written
+ * @brief Writes an album to the given ID3 structure using the preferred standard. If the album is not written
  * this function will return false otherwise it will return true.
  * 
  * @param album 
@@ -962,7 +962,7 @@ int id3WriteAlbum(const char *album, ID3 *metadata){
 }
 
 /**
- * @brief Writes a year to the given ID3 structure using the prefered standard. If the year is not written
+ * @brief Writes a year to the given ID3 structure using the preferred standard. If the year is not written
  * this function will return false otherwise it will return true.
  * 
  * @param year 
@@ -999,8 +999,8 @@ int id3WriteYear(const char *year, ID3 *metadata){
 }
 
 /**
- * @brief Writes a genre to the given ID3 structure using the prefered standard. If the genre is not written
- * this function will return false otherwise it will return true. If the prefered standard is ID3V1 the genre
+ * @brief Writes a genre to the given ID3 structure using the preferred standard. If the genre is not written
+ * this function will return false otherwise it will return true. If the preferred standard is ID3V1 the genre
  * will consist of a single byte from 0 to 192 (check id3v1Types.h for the genre table).
  * 
  * @param genre 
@@ -1035,7 +1035,7 @@ int id3WriteGenre(const char *genre, ID3 *metadata){
 }
 
 /**
- * @brief Writes a track to the given ID3 structure using the prefered standard. If the track is not written
+ * @brief Writes a track to the given ID3 structure using the preferred standard. If the track is not written
  * this function will return false otherwise it will return true.
  * 
  * @param track 
@@ -1079,7 +1079,7 @@ int id3WriteTrack(const char *track, ID3 *metadata){
 }
 
 /**
- * @brief writes a disc number to the given ID3 structure using the prefered standard. If the disc number is not written
+ * @brief writes a disc number to the given ID3 structure using the preferred standard. If the disc number is not written
  * this function will return false otherwise it will return true.
  * @details This function is only available in ID3v2 tags and will always return false for ID3v1.
  * @param disc 
@@ -1111,7 +1111,7 @@ int id3WriteDisc(const char *disc, ID3 *metadata){
 }
 
 /**
- * @brief Writes composers to the given ID3 structure using the prefered standard. If a composer are not written
+ * @brief Writes composers to the given ID3 structure using the preferred standard. If a composer are not written
  * this function will return false otherwise it will return true.
  * @details This function is only available in ID3v2 tags and will always return false for ID3v1.
  * @param composer 
@@ -1143,7 +1143,7 @@ int id3WriteComposer(const char *composer, ID3 *metadata){
 }
 
 /**
- * @brief Writes lyrics to the given ID3 structure using the prefered standard. If the lyrics are not written
+ * @brief Writes lyrics to the given ID3 structure using the preferred standard. If the lyrics are not written
  * this function will return false otherwise it will return true.
  * @details This function is only available in ID3v2 tags and will always return false for ID3v1.
  * @param lyrics 
@@ -1175,7 +1175,7 @@ int id3WriteLyrics(const char *lyrics, ID3 *metadata){
 }
 
 /**
- * @brief Writes a comment to the given ID3 structure using the prefered standard. If the comment is not written
+ * @brief Writes a comment to the given ID3 structure using the preferred standard. If the comment is not written
  * this function will return false otherwise it will return true.
  * 
  * @param comment 
@@ -1208,7 +1208,7 @@ int id3WriteComment(const char *comment, ID3 *metadata){
 }
 
 /**
- * @brief Writes a picture to the given ID3 structure using the prefered standard. If the picture is not written
+ * @brief Writes a picture to the given ID3 structure using the preferred standard. If the picture is not written
  * this function will return false otherwise it will return true.
  * @details This function is only available in ID3v2 tags and will always return false for ID3v1.
  * 
@@ -1244,7 +1244,7 @@ int id3WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_t 
 }
 
 /**
- * @brief Writes a picture from a file to the given ID3 structure using the prefered standard. If the picture is not written
+ * @brief Writes a picture from a file to the given ID3 structure using the preferred standard. If the picture is not written
  * this function will return false otherwise it will return true.
  * @details This function is only available in ID3v2 tags and will always return false for ID3v1.
  * 
