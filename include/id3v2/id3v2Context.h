@@ -17,7 +17,7 @@ extern "C"{
 
 #include "id3v2Types.h"
 
-unsigned long id3v2djb2(char *str);
+unsigned long id3v2djb2(const char *str);
 
 //mem
 
@@ -83,7 +83,7 @@ bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char ke
 // convi
 
 uint8_t *id3v2ContextSerialize(Id3v2ContentContext *cc, size_t *outl);
-char *id3v2ContextToJSON(Id3v2ContentContext *cc);
+char *id3v2ContextToJSON(const Id3v2ContentContext *cc);
 
 #ifdef __cplusplus
 } //extern c end

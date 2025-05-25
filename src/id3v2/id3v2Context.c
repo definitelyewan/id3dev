@@ -19,12 +19,12 @@
 #include "id3dependencies/ByteStream/include/byteInt.h"
 
 //djb2 algorithm for stings
-unsigned long id3v2djb2(char *str){
+unsigned long id3v2djb2(const char *str){
     
     unsigned long hash = 5381;
     int c;
 
-    while ((c = *str++))
+    while ((c = (unsigned char)*str++))
         hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
     return hash;
@@ -98,12 +98,21 @@ int id3v2CompareContentContext(const void *first, const void *second){
     c2 = (Id3v2ContentContext *) second;
 
     diff = c1->type - c2->type;
-    if(diff != 0)
+    if(diff != 0){
         return diff;
+    }
 
-    diff = c1->key - c2->key;
-    if(diff != 0)
+    /**
+     * unsigned subtraction but on a 64 bit machine size_t can be 8 bytes leading to a hard clap
+     * to 4 bytes when converted to a signed int. Should be ok as 2 numbers that large will probably
+     * produce a small number that will fit in 4 bytes. If the numbers will produce a negative
+     * anyway just return -1.
+    */
+    diff =  (c1->key >= c2->key) ? (int) (c1->key - c2->key): -1;
+    if(diff != 0){
         return diff;
+    }
+
 
     diff = (int)c1->min - (int)c2->min;
     if(diff != 0)
@@ -1672,7 +1681,7 @@ uint8_t *id3v2ContextSerialize(Id3v2ContentContext *cc, size_t *outl){
  * @param cc 
  * @return char* 
  */
-char *id3v2ContextToJSON(Id3v2ContentContext *cc){
+char *id3v2ContextToJSON(const Id3v2ContentContext *cc){
     
     char *json = NULL;
     size_t memCount = 3;
