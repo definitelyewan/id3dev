@@ -23,7 +23,7 @@
  * @return true 
  * @return false 
  */
-bool id3v1HasTag(uint8_t *buffer){
+bool id3v1HasTag(const uint8_t *buffer){
     return (memcmp(buffer,"TAG",ID3V1_TAG_ID_SIZE) == 0) ? true : false;
 }
 
@@ -43,10 +43,10 @@ Id3v1Tag *id3v1CreateTag(uint8_t *title, uint8_t *artist, uint8_t *albumTitle, i
 
     Id3v1Tag *tag = malloc(sizeof(Id3v1Tag));
     
-    //inits all members
+    // inits all members
     memset(tag, 0, sizeof(Id3v1Tag));
     
-    //set values
+    // set values
     if(title != NULL){
         memcpy(tag->title, title, ((strlen((char *)title) >= ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : strlen((char *)title)));  
     }
@@ -113,7 +113,7 @@ void id3v1DestroyTag(Id3v1Tag **toDelete){
  */
 Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
 
-    //lots of error checking because I cannot 100% know what im given
+    // lots of error checking because I cannot 100% know what im given
 
     int trackno = 0;
     int nYear = 0;
@@ -127,7 +127,7 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
 
     stream = byteStreamCreate((unsigned char *)buffer, ID3V1_MAX_SIZE);
     
-    //check for tag
+    // check for tag
     if(!id3v1HasTag(byteStreamCursor(stream))){
         byteStreamDestroy(stream);
         return NULL;
@@ -137,26 +137,26 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
         byteStreamDestroy(stream);
         return id3v1CreateTag(NULL, NULL, NULL, 0, 0, NULL, OTHER_GENRE);
     }
-    //get song title and set index for next tag
+    // get song title and set index for next tag
     memset(holdTitle, 0, ID3V1_FIELD_SIZE);    
     if(!byteStreamRead(stream, holdTitle, ID3V1_FIELD_SIZE)){
         byteStreamDestroy(stream);
         return id3v1CreateTag(NULL, NULL, NULL, 0, 0, NULL, OTHER_GENRE);
     }
 
-    //get artist and set index for next tag
+    // get artist and set index for next tag
     memset(holdArtist, 0, ID3V1_FIELD_SIZE);
     if(!byteStreamRead(stream, holdArtist, ID3V1_FIELD_SIZE)){
         byteStreamDestroy(stream);
         return id3v1CreateTag(holdTitle, NULL, NULL, 0, 0, NULL, OTHER_GENRE);
     }
-    //get album title and set index for next tag
+    // get album title and set index for next tag
     memset(holdAlbum, 0, ID3V1_FIELD_SIZE); 
     if(!byteStreamRead(stream, holdAlbum, ID3V1_FIELD_SIZE)){
         byteStreamDestroy(stream);
         return id3v1CreateTag(holdTitle, holdArtist, NULL, 0, 0, NULL, OTHER_GENRE);
     }
-    //get year and set index for next tag
+    // get year and set index for next tag
     memset(year, 0, ID3V1_YEAR_SIZE);
     if(!byteStreamRead(stream, year, ID3V1_YEAR_SIZE)){
         byteStreamDestroy(stream);
@@ -165,13 +165,13 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
         if(memcmp(year,"\x00\x00\x00\x00\x00",ID3V1_YEAR_SIZE) != 0){
  
             int i = 0;
-            for(i = 0; year[i] == 0 && i < ID3V1_YEAR_SIZE; i++);
+            for(i = 0; year[i] == 0 && i < ID3V1_YEAR_SIZE; i++){};
             year[ID3V1_YEAR_SIZE] = '\0';
-            nYear = atoi((char *) (year + i));
+            nYear = (int) strtol((char *) year + i, NULL, 10);
         }
     }
 
-    //check for a track number, ID3V1.1 has the 28th bit nulled so that the 29th can be a track number
+    // check for a track number, ID3V1.1 has the 28th bit nulled so that the 29th can be a track number
     if(!byteStreamSeek(stream, ID3V1_FIELD_SIZE - 2, SEEK_CUR)){
         byteStreamDestroy(stream);
         return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, 0, NULL, OTHER_GENRE);
@@ -180,10 +180,10 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
         trackno = 1;
     }
 
-    //no need to check bytes are confirmed to exist
+    // no need to check bytes are confirmed to exist
     byteStreamSeek(stream, -(ID3V1_FIELD_SIZE - 2), SEEK_CUR);
 
-    //get comment and set index for next tag
+    // get comment and set index for next tag
     memset(holdComment, 0, ID3V1_FIELD_SIZE);
     if(!byteStreamRead(stream, holdComment, ID3V1_FIELD_SIZE - trackno)){
         byteStreamDestroy(stream);
@@ -191,7 +191,7 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
     }
 
 
-    //read and set track number + move index
+    // read and set track number + move index
     if(trackno){
         if((trackno = byteStreamGetCh(stream)) == EOF){
             byteStreamDestroy(stream);
@@ -207,7 +207,7 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
         trackno = 0;
     }
 
-    //read genre or last byte
+    // read genre or last byte
     if((genre = byteStreamGetCh(stream)) == EOF){
         byteStreamDestroy(stream);
         return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, trackno, holdComment, 0);

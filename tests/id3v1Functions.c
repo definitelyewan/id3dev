@@ -19,7 +19,7 @@
 #include "id3v1/id3v1.h"
 #include "id3v1/id3v1Parser.h"
 
-void Id3v1TagPrintf(Id3v1Tag *tag){
+void Id3v1TagPrintf(const Id3v1Tag *tag){
 
     printf("title: %s\n",(char *)tag->title);
     printf("artist: %s\n",(char *)tag->artist);
