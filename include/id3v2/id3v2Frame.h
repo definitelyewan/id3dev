@@ -21,11 +21,10 @@ extern "C"{
 /*
     Frame header
 */
-
-Id3v2FrameHeader *id3v2CreateFrameHeader(uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], bool tagAlter, bool fileAlter, bool readOnly, bool unsync, uint32_t decompressionSize, uint8_t encryptionSymbol, uint8_t groupSymbol);
+Id3v2FrameHeader *id3v2CreateFrameHeader(const uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], const bool tagAlter, const bool fileAlter, const bool readOnly, const bool unsync, const uint32_t decompressionSize, const uint8_t encryptionSymbol, const uint8_t groupSymbol);
 void id3v2DestroyFrameHeader(Id3v2FrameHeader **toDelete);
 
-Id3v2ContentEntry *id3v2CreateContentEntry(void *entry, size_t size);
+Id3v2ContentEntry *id3v2CreateContentEntry(const void *entry, size_t size);
 
 // List/Hash API required functions
 
@@ -45,13 +44,13 @@ void *id3v2CopyFrame(const void *toBeCopied);
 
 Id3v2Frame *id3v2CreateFrame(Id3v2FrameHeader *header, List *context, List *entries);
 void id3v2DestroyFrame(Id3v2Frame **toDelete);
-Id3v2Frame *id3v2CreateEmptyFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], uint8_t version, HashTable *userPairs);
+Id3v2Frame *id3v2CreateEmptyFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t version, HashTable *userPairs);
 
 /*
     Frame access
 */
 
-bool id3v2CompareFrameId(Id3v2Frame *frame, const char id[ID3V2_FRAME_ID_MAX_SIZE]);
+bool id3v2CompareFrameId(const Id3v2Frame *frame, const char id[ID3V2_FRAME_ID_MAX_SIZE]);
 
 ListIter id3v2CreateFrameTraverser(Id3v2Tag *tag);
 Id3v2Frame *id3v2FrameTraverse(ListIter *traverser);
@@ -75,7 +74,7 @@ Id3v2Frame *id3v2DetachFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame);
 */
 
 uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, uint32_t frameSize, size_t *outl);
-char *id3v2FrameHeaderToJSON(Id3v2FrameHeader *header, uint8_t version);
+char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, const uint8_t version);
 
 uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl);
 char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version);

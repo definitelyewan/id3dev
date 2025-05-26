@@ -19,9 +19,15 @@
 #include "id3dependencies/ByteStream/include/byteUnicode.h"
 #include "id3dependencies/ByteStream/include/byteStream.h"
 
-static char *base64Encode(const unsigned char *input, size_t inputLength){
+/**
+ * @brief Encodes a byte array into a base64 string
+ * @param input
+ * @param inputLength
+ * @return char *
+ */
+static char *base64Encode(const unsigned char *input, const size_t inputLength){
     const char *base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-    size_t outputLength = 4 * ((inputLength + 2) / 3);
+    const size_t outputLength = 4 * ((inputLength + 2) / 3);
     char *output = malloc(outputLength + 1);
     if(output == NULL){
         return NULL;
@@ -30,14 +36,14 @@ static char *base64Encode(const unsigned char *input, size_t inputLength){
     size_t i = 0;
     size_t j = 0;
     for(i = 0, j = 0; i < inputLength; i += 3, j += 4){
-        unsigned char byte1 = input[i];
-        unsigned char byte2 = (i + 1 < inputLength) ? input[i + 1] : 0;
-        unsigned char byte3 = (i + 2 < inputLength) ? input[i + 2] : 0;
+        const unsigned char byte1 = input[i];
+        const unsigned char byte2 = (i + 1 < inputLength) ? input[i + 1] : 0;
+        const unsigned char byte3 = (i + 2 < inputLength) ? input[i + 2] : 0;
 
-        output[j] = base64Chars[byte1 >> 2];
-        output[j + 1] = base64Chars[((byte1 & 0x03) << 4) | (byte2 >> 4)];
-        output[j + 2] = (i + 1 < inputLength) ? base64Chars[((byte2 & 0x0F) << 2) | (byte3 >> 6)] : '=';
-        output[j + 3] = (i + 2 < inputLength) ? base64Chars[byte3 & 0x3F] : '=';
+        output[j] = (char) base64Chars[byte1 >> 2];
+        output[j + 1] = (char) base64Chars[((byte1 & 0x03) << 4) | (byte2 >> 4)];
+        output[j + 2] = (char) ((i + 1 < inputLength) ? base64Chars[((byte2 & 0x0F) << 2) | (byte3 >> 6)] : '=');
+        output[j + 3] = (char) ((i + 2 < inputLength) ? base64Chars[byte3 & 0x3F] : '=');
     }
 
     output[outputLength] = '\0';
@@ -58,7 +64,7 @@ static char *base64Encode(const unsigned char *input, size_t inputLength){
  * @param groupSymbol 
  * @return Id3v2FrameHeader* 
  */
-Id3v2FrameHeader *id3v2CreateFrameHeader(uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], bool tagAlter, bool fileAlter, bool readOnly, bool unsync, uint32_t decompressionSize, uint8_t encryptionSymbol, uint8_t groupSymbol){
+Id3v2FrameHeader *id3v2CreateFrameHeader(const uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], const bool tagAlter, const bool fileAlter, const bool readOnly, const bool unsync, const uint32_t decompressionSize, const uint8_t encryptionSymbol, const uint8_t groupSymbol){
 
     Id3v2FrameHeader *h = malloc(sizeof(Id3v2FrameHeader));
 
@@ -98,7 +104,7 @@ void id3v2DestroyFrameHeader(Id3v2FrameHeader **toDelete){
  * @param size 
  * @return Id3v2ContentEntry* 
  */
-Id3v2ContentEntry *id3v2CreateContentEntry(void *entry, size_t size){
+Id3v2ContentEntry *id3v2CreateContentEntry(const void *entry, size_t size){
 
     Id3v2ContentEntry *ce = malloc(sizeof(Id3v2ContentEntry));
 
@@ -223,8 +229,8 @@ void id3v2DeleteFrame(void *toBeDeleted){
  */
 int id3v2CompareFrame(const void *first, const void *second){
 
-    Id3v2Frame *f = (Id3v2Frame *)first;
-    Id3v2Frame *s = (Id3v2Frame *)second;
+    const Id3v2Frame *f = (Id3v2Frame *)first;
+    const Id3v2Frame *s = (Id3v2Frame *)second;
     ListIter i1, i2;
     void *tmp1 = NULL;
     void *tmp2 = NULL;
@@ -243,9 +249,12 @@ int id3v2CompareFrame(const void *first, const void *second){
         return diff;
     }
 
-    diff = f->header->decompressionSize - s->header->decompressionSize;
-    if(diff != 0){
-        return diff;
+    if(f->header->decompressionSize > s->header->decompressionSize){
+        return 1;
+    }
+
+    if(f->header->decompressionSize < s->header->decompressionSize){
+        return -1;
     }
 
     diff = f->header->encryptionSymbol - s->header->encryptionSymbol;
@@ -274,9 +283,12 @@ int id3v2CompareFrame(const void *first, const void *second){
         return 1;
     }
 
-    diff = f->entries->length - s->entries->length;
-    if(diff != 0){
-        return diff;
+    if(f->entries->length > s->entries->length){
+        return 1;
+    }
+
+    if(f->entries->length < s->entries->length){
+        return -1;
     }
 
     i1 = listCreateIterator(f->entries);
@@ -294,9 +306,12 @@ int id3v2CompareFrame(const void *first, const void *second){
         
     }
 
-    diff = f->contexts->length - s->contexts->length;
-    if(diff != 0){
-        return diff;
+    if(f->contexts->length > s->contexts->length){
+        return 1;
+    }
+
+    if(f->contexts->length < s->contexts->length){
+        return -1;
     }
 
     i1 = listCreateIterator(f->contexts);
@@ -398,10 +413,12 @@ void id3v2DestroyFrame(Id3v2Frame **toDelete){
  * scanned first and then userPairs will be scanned. If no pairings are found this function will use a
  * generic pairing. If this function fails it will return NULL.
  * 
- * @param id 
+ * @param id
+ * @param version
+ * @param userPairs
  * @return Id3v2Frame* 
  */
-Id3v2Frame *id3v2CreateEmptyFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], uint8_t version, HashTable *userPairs){
+Id3v2Frame *id3v2CreateEmptyFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t version, HashTable *userPairs){
 
     if(id == NULL){
         return NULL;
@@ -467,7 +484,7 @@ Id3v2Frame *id3v2CreateEmptyFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], uint8_
  * @return true 
  * @return false 
  */
-bool id3v2CompareFrameId(Id3v2Frame *frame, const char id[ID3V2_FRAME_ID_MAX_SIZE]){
+bool id3v2CompareFrameId(const Id3v2Frame *frame, const char id[ID3V2_FRAME_ID_MAX_SIZE]){
     if(frame == NULL){
         return false;
     }
@@ -587,6 +604,7 @@ void *id3v2ReadFrameEntry(ListIter *traverser, size_t *dataSize){
  */
 char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
     unsigned char *tmp = NULL;
+    unsigned char *frameEntryData = NULL;
     unsigned char *outString = NULL;
     unsigned char encoding = 0;
     char *escapedStr = NULL;
@@ -595,17 +613,17 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
     size_t outLen = 0;
     size_t j = 0;
 
-    tmp = (unsigned char *) id3v2ReadFrameEntry(traverser, dataSize);
+    frameEntryData = (unsigned char *) id3v2ReadFrameEntry(traverser, dataSize);
 
     // Failed
-    if(!tmp){
+    if(!frameEntryData){
         return NULL;
     }
 
     // detect utf16
     if(*dataSize > BYTE_BOM_SIZE){
-        if(byteHasBOM(tmp)){
-            if(tmp[0] == 0xff && tmp[1] == 0xfe){
+        if(byteHasBOM(frameEntryData)){
+            if(frameEntryData[0] == 0xff && frameEntryData[1] == 0xfe){
                 encoding = BYTE_UTF16LE;
             }else{
                 encoding = BYTE_UTF16BE;
@@ -613,36 +631,43 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
         }
     }
 
-    // add some padding to tmp
-    tmp = realloc(tmp, *dataSize + (BYTE_PADDING * 2));
-    memset(tmp + *dataSize, 0, (BYTE_PADDING * 2));
+    // add some padding to frameEntryData
+    tmp = realloc(frameEntryData, *dataSize + (BYTE_PADDING * 2));
+    if(tmp == NULL){
+        free(frameEntryData);
+        *dataSize = 0;
+        return NULL;
+    }
+
+    frameEntryData = tmp;
+    memset(frameEntryData + *dataSize, 0, (BYTE_PADDING * 2));
     outLen = *dataSize + (BYTE_PADDING * 2);
 
     // detect utf8/ascii
-    if(byteIsUtf8(tmp)){
+    if(byteIsUtf8(frameEntryData)){
         encoding = BYTE_UTF8;
     }
 
     // detect latin1
-    if(byteIsUtf8(tmp) && encoding == 0){
+    if(byteIsUtf8(frameEntryData) && encoding == 0){
         encoding = BYTE_ISO_8859_1;
     }
 
     // convert to UTF8
-    convi = byteConvertTextFormat(tmp, encoding, *dataSize + (BYTE_PADDING * 2), &outString, BYTE_UTF8, &outLen);
+    convi = byteConvertTextFormat(frameEntryData, encoding, *dataSize + (BYTE_PADDING * 2), &outString, BYTE_UTF8, &outLen);
 
     if(!convi && outLen == 0){
-        free(tmp);
+        free(frameEntryData);
         *dataSize = 0;
         return NULL;
     }
 
     // data is already in utf8
     if(convi && outLen == 0){
-        outString = tmp;
+        outString = frameEntryData;
     }else{
         *dataSize = outLen;
-        free(tmp);
+        free(frameEntryData);
     }
 
     // check for UTF8 BOM
@@ -658,9 +683,9 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
         
         if(outString[i + utf8BomOffset] == '"' || outString[i + utf8BomOffset] == '\\'){
             escapedStr[j++] = '\\';
-            escapedStr[j++] = outString[i + utf8BomOffset];
+            escapedStr[j++] = (char) outString[i + utf8BomOffset];
         }else{
-            escapedStr[j++] = outString[i + utf8BomOffset];
+            escapedStr[j++] = (char) outString[i + utf8BomOffset];
         }
     }
 
@@ -675,7 +700,7 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
     *dataSize = nullPos;
     escapedStr[nullPos] = '\0';
 
-    if(escapedStr != NULL && *dataSize == 0){
+    if(strlen(escapedStr) > 0 && *dataSize == 0){ // old condition -> escapedStr != NULL && *dataSize == 0
         *dataSize = 1;
     }
 
@@ -1056,7 +1081,7 @@ uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, ui
  * @param version 
  * @return char* 
  */
-char *id3v2FrameHeaderToJSON(Id3v2FrameHeader *header, uint8_t version){
+char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, const uint8_t version){
 
     char *json = NULL;
     size_t memCount = 3;
@@ -1189,6 +1214,7 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
     uint8_t *header = NULL;
     uint8_t *out = NULL;
     unsigned char *tmp = NULL;
+    unsigned char *reallocTmp = NULL;
     bool exit = false;
     bool bitFlag = false;
 
@@ -1214,7 +1240,6 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
                 size_t utf8Len = 0;
                 uint8_t encoding = 0;
                 void *iterNext = NULL;
-                bool convi = false; 
                 
 
                 // hunt down "encoding" key
@@ -1255,7 +1280,8 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
 
                 // non-empty strings
                 if(utf8Len >= 1 && tmp[0] != 0){
-                    convi = byteConvertTextFormat(tmp, BYTE_UTF8, utf8Len, &outStr, encoding, &outLen);
+
+                    bool convi = byteConvertTextFormat(tmp, BYTE_UTF8, utf8Len, &outStr, encoding, &outLen);
 
                     if(convi == false && outLen == 0){
                         free(tmp);
@@ -1588,7 +1614,7 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
                 // read a single and only bit context
                 }else{
                     
-                    int totalBytesNeeded = (cc->max / CHAR_BIT) + 1;
+                    int totalBytesNeeded = (int) (cc->max / CHAR_BIT) + 1;
                     int nBit = CHAR_BIT - 1;
 
                     tmp = id3v2ReadFrameEntry(&trav, &readSize);
@@ -1646,7 +1672,7 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
                 while((iterNext = listIteratorNext(&contentEntryIter)) != NULL){
 
                     if(poscc == posce){
-                        rSize = btou32((uint8_t *)((Id3v2ContentEntry *)iterNext)->entry, (size_t)((Id3v2ContentEntry *)iterNext)->size);
+                        rSize = btou32((uint8_t *)((Id3v2ContentEntry *)iterNext)->entry, (int) ((Id3v2ContentEntry *)iterNext)->size);
                         break;
                     }
 
@@ -1668,7 +1694,6 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
                 free(tmp);
                 break;
             }
-                break;
             case unknown_context:
             default:
                 exit = true;

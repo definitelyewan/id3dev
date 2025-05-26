@@ -13,4 +13,6 @@ build/
 .fleet/
 scripts/common/__pycache__
 cmake-build-debug
+cmake-build-debug-cmake-401
+cmake-build-debug-gcc-14
 .idea

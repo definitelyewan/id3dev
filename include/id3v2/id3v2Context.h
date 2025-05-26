@@ -19,7 +19,7 @@ extern "C"{
 
 unsigned long id3v2djb2(const char *str);
 
-//mem
+// mem
 
 Id3v2ContentContext *id3v2CreateContentContext(Id3v2ContextType type, size_t key, size_t max, size_t min);
 void id3v2DestroyContentContext(Id3v2ContentContext **toDelete);
