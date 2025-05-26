@@ -19,6 +19,8 @@
 
 /**
  * @brief Creates an Id3v1Tag from a provided file path.
+ * @details This function will read the last 128 bytes of the file and parse them into an Id3v1Tag structure. On success
+ * this function returns a pointer to the Id3v1Tag structure, otherwise it returns NULL.
  * @param filePath 
  * @return Id3v1Tag* 
  */
@@ -53,6 +55,7 @@ Id3v1Tag *id3v1TagFromFile(const char *filePath){
 
 /**
  * @brief Deep copies an Id3v1Tag structure.
+ * On success this function returns a pointer to the new heap allocated Id3v1Tag structure, otherwise it returns NULL.
  * @param toCopy 
  * @return Id3v1Tag* 
  */
@@ -62,7 +65,8 @@ Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy){
         return NULL;
     }
 
-    return id3v1CreateTag(toCopy->title, toCopy->artist, toCopy->albumTitle, toCopy->year, toCopy->track, toCopy->comment, toCopy->genre);
+    return id3v1CreateTag(toCopy->title, toCopy->artist, toCopy->albumTitle, toCopy->year, toCopy->track,
+        toCopy->comment, toCopy->genre);
 }
 
 /**
@@ -89,36 +93,44 @@ static int internal_id3v1CharsToStructUint8(const char *src, uint8_t *dest){
 
 /**
  * @brief Writes a title to tag.
+ * @details Writes a title to the tag structure. This function will write up to ID3V1_FIELD_SIZE bytes to the title
+ * field of the tag. On success this function returns 1, otherwise it returns 0.
  * @param title 
  * @param tag 
  * @return int 
  */
 int id3v1WriteTitle(const char *title, Id3v1Tag *tag){
-    return (tag == NULL) ? 0: internal_id3v1CharsToStructUint8(title, tag->title);
+    return (tag == NULL) ? 0 : internal_id3v1CharsToStructUint8(title, tag->title);
 }
 
 /**
  * @brief Writes an artist to tag.
+ * @details Writes an artist to the tag structure. This function will write up to ID3V1_FIELD_SIZE bytes to the artist
+ * field of the tag. On success this function returns 1, otherwise it returns 0.
  * @param artist
  * @param tag 
  * @return int 
  */
 int id3v1WriteArtist(const char *artist, Id3v1Tag *tag){
-    return (tag == NULL) ? 0: internal_id3v1CharsToStructUint8(artist, tag->artist);
+    return (tag == NULL) ? 0 : internal_id3v1CharsToStructUint8(artist, tag->artist);
 }
 
 /**
  * @brief Writes an album to tag.
+ * @details Writes an album to the tag structure. This function will write up to ID3V1_FIELD_SIZE bytes to the album
+ * field of the tag. On success this function returns 1, otherwise it returns 0.
  * @param album
  * @param tag 
  * @return int 
  */
 int id3v1WriteAlbum(const char *album, Id3v1Tag *tag){
-    return (tag == NULL) ? 0: internal_id3v1CharsToStructUint8(album, tag->albumTitle);
+    return (tag == NULL) ? 0 : internal_id3v1CharsToStructUint8(album, tag->albumTitle);
 }
 
 /**
  * @brief Writes a year to tag.
+ * @details Writes a year to the tag structure. This function will write an integer to the year field of the tag. On
+ * success this function returns 1, otherwise it returns 0.
  * @param year
  * @param tag 
  * @return int 
@@ -135,6 +147,8 @@ int id3v1WriteYear(int year, Id3v1Tag *tag){
 
 /**
  * @brief Writes a comment to tag.
+ * @details Writes a comment to the tag structure. This function will write up to ID3V1_FIELD_SIZE bytes to the comment
+ * filed of the tag. On success this function returns 1, otherwise it returns 0.
  * @param comment
  * @param tag 
  * @return int 
@@ -145,11 +159,13 @@ int id3v1WriteComment(const char *comment, Id3v1Tag *tag){
 
 /**
  * @brief Writes a genere to tag.
+ * @details Writes a genre to the tag structure. This function will write an integer (from 0 to 255) to the genre field
+ * of the tag. On success this function returns 1, otherwise it returns 0.
  * @param genre
  * @param tag 
  * @return int 
  */
-int id3v1WriteGenre(Genre genre, Id3v1Tag *tag){
+int id3v1WriteGenre(const Genre genre, Id3v1Tag *tag){
     
     if(tag == NULL){
         return 0;
@@ -161,11 +177,13 @@ int id3v1WriteGenre(Genre genre, Id3v1Tag *tag){
 
 /**
  * @brief Writes a track to tag.
+ * @details Writes a track number to the tag structure. This function will write an integer (from 0 to 255) to the
+ * track field of the tag. On success this function returns 1, otherwise it returns 0.
  * @param track
  * @param tag 
  * @return int 
  */
-int id3v1WriteTrack(int track, Id3v1Tag *tag){
+int id3v1WriteTrack(const int track, Id3v1Tag *tag){
     
     if(tag == NULL){
         return 0;
@@ -227,7 +245,7 @@ bool id3v1CompareTag(const Id3v1Tag *tag1, const Id3v1Tag *tag2){
  * @param val 
  * @return char* 
  */
-char *id3v1GenreFromTable(Genre val){
+char *id3v1GenreFromTable(const Genre val){
 
     // int to string
     switch (val){

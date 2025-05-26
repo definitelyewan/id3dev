@@ -29,12 +29,12 @@ int id3v1WriteArtist(const char *artist, Id3v1Tag *tag);
 int id3v1WriteAlbum(const char *album, Id3v1Tag *tag);
 int id3v1WriteYear(int year, Id3v1Tag *tag);
 int id3v1WriteComment(const char *comment, Id3v1Tag *tag);
-int id3v1WriteGenre(Genre genre, Id3v1Tag *tag);
-int id3v1WriteTrack(int track, Id3v1Tag *tag);
+int id3v1WriteGenre(const Genre genre, Id3v1Tag *tag);
+int id3v1WriteTrack(const int track, Id3v1Tag *tag);
 
 // Util functions
 bool id3v1CompareTag(const Id3v1Tag *tag1, const Id3v1Tag *tag2);
-char *id3v1GenreFromTable(Genre val);
+char *id3v1GenreFromTable(const Genre val);
 
 // Compatability functions a.k.a getters
 
