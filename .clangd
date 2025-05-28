@@ -1,0 +1,6 @@
+InlayHints:
+  ParameterNames: No
+  DeducedTypes: No
+
+Diagnostics:
+  UnusedIncludes: Strict

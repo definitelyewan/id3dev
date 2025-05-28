@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.22.1)
 
+# Enable shared lib
+if(BUILD_ID3_SHARED_LIBS)
+    option(BUILD_SHARED_LIBS ON)
+endif()
+
 # Configure libid3dev
 
 set(ID3V1_HEADER_FILES

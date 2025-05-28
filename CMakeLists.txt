@@ -10,6 +10,7 @@ option(DEBUG_ID3_SYMBOLS "enables debugging" OFF)
 option(BUILD_ID3_C_EXAMPLES "builds examples" OFF)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Enable debugging
 if(DEBUG_ID3_SYMBOLS)
@@ -17,10 +18,6 @@ if(DEBUG_ID3_SYMBOLS)
     add_compile_options("-g")
 endif()
 
-# Enable shared lib
-if(BUILD_ID3_SHARED_LIBS)
-    option(BUILD_SHARED_LIBS ON)
-endif()
 
 # Build dependencies
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/id3dependencies")

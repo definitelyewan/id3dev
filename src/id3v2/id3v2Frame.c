@@ -53,8 +53,7 @@ static char *base64Encode(const unsigned char *input, const size_t inputLength){
 
 /**
  * @brief Creates an ID3v2 frame header structure
- * 
- * @param id 
+ * @param id
  * @param tagAlter 
  * @param fileAlter 
  * @param readOnly
@@ -64,7 +63,9 @@ static char *base64Encode(const unsigned char *input, const size_t inputLength){
  * @param groupSymbol 
  * @return Id3v2FrameHeader* 
  */
-Id3v2FrameHeader *id3v2CreateFrameHeader(const uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], const bool tagAlter, const bool fileAlter, const bool readOnly, const bool unsync, const uint32_t decompressionSize, const uint8_t encryptionSymbol, const uint8_t groupSymbol){
+Id3v2FrameHeader *id3v2CreateFrameHeader(const uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], const bool tagAlter,
+    const bool fileAlter, const bool readOnly, const bool unsync, const uint32_t decompressionSize,
+    const uint8_t encryptionSymbol, const uint8_t groupSymbol){
 
     Id3v2FrameHeader *h = malloc(sizeof(Id3v2FrameHeader));
 
@@ -85,7 +86,6 @@ Id3v2FrameHeader *id3v2CreateFrameHeader(const uint8_t id[ID3V2_FRAME_ID_MAX_SIZ
 
 /**
  * @brief Frees all the memory allocated for a frame header
- * 
  * @param toDelete 
  */
 void id3v2DestroyFrameHeader(Id3v2FrameHeader **toDelete){
@@ -99,7 +99,6 @@ void id3v2DestroyFrameHeader(Id3v2FrameHeader **toDelete){
 
 /**
  * @brief Allocates memory for a contextEntry and performs a deep copy of the provided entry
- * 
  * @param entry 
  * @param size 
  * @return Id3v2ContentEntry* 
@@ -144,15 +143,15 @@ Id3v2ContentEntry *id3v2CreateContentEntry(const void *entry, size_t size){
  */
 int id3v2CompareContentEntry(const void *first, const void *second){
 
-    Id3v2ContentEntry *one = (Id3v2ContentEntry *)first;
-    Id3v2ContentEntry *two = (Id3v2ContentEntry *)second;
+    const Id3v2ContentEntry *one = (Id3v2ContentEntry *)first;
+    const Id3v2ContentEntry *two = (Id3v2ContentEntry *)second;
 
     if(one == NULL || two == NULL){
         return 1;
     }
     
     int diff = 0;
-    size_t usableSize = (one->size <= two->size) ? one->size : two->size;
+    const size_t usableSize = (one->size <= two->size) ? one->size : two->size;
     
     for(size_t i = 0; i < usableSize; i++){
         if(((unsigned char *)one->entry)[i] != ((unsigned char *)two->entry)[i]){
@@ -166,13 +165,13 @@ int id3v2CompareContentEntry(const void *first, const void *second){
 
 /**
  * @brief Generates a string that represents a context
- * 
+ * @details The generated string is heap allocated due to varying pointer and integer sizes
  * @param toBePrinted 
  * @return char* 
  */
 char *id3v2PrintContentEntry(const void *toBePrinted){
 
-    Id3v2ContentEntry *e = (Id3v2ContentEntry *)toBePrinted; 
+    const Id3v2ContentEntry *e = (Id3v2ContentEntry *)toBePrinted;
 
     char *str = malloc((sizeof(char) * 16) + sizeof(long) + 8);
 
@@ -183,13 +182,12 @@ char *id3v2PrintContentEntry(const void *toBePrinted){
 
 /**
  * @brief Performs a deep copy of an entry
- * 
  * @param toBeCopied 
  * @return void* 
  */
 void *id3v2CopyContentEntry(const void *toBeCopied){
 
-    Id3v2ContentEntry *e = (Id3v2ContentEntry *)toBeCopied;
+    const Id3v2ContentEntry *e = (Id3v2ContentEntry *)toBeCopied;
     
     return id3v2CreateContentEntry(e->entry, e->size);
 
@@ -197,7 +195,6 @@ void *id3v2CopyContentEntry(const void *toBeCopied){
 
 /**
  * @brief Frees an entry
- * 
  * @param toBeDeleted 
  */
 void id3v2DeleteContentEntry(void *toBeDeleted){
@@ -212,7 +209,8 @@ void id3v2DeleteContentEntry(void *toBeDeleted){
 
 /**
  * @brief Frees a frame in a linked list
- * 
+ * @details This is a LinkedListLib required function and should only be used by it. Use id3v2DestroyFrame instead as
+ * it can be used without a cast to (void *).
  * @param toBeDeleted 
  */
 void id3v2DeleteFrame(void *toBeDeleted){
@@ -521,7 +519,7 @@ ListIter id3v2CreateFrameTraverser(Id3v2Tag *tag){
 
 /**
  * @brief traverse through a list of frames with the use of a list iter
- * and returns a referance to frame content while doing so. If null is 
+ * and returns a reference to frame content while doing so. If null is
  * returned, the end of the list has been reached.
  * 
  * @param traverser 
@@ -632,7 +630,7 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
     }
 
     // add some padding to frameEntryData
-    tmp = realloc(frameEntryData, *dataSize + (BYTE_PADDING * 2));
+    tmp = realloc(frameEntryData, *dataSize + ((size_t) BYTE_PADDING * 2));
     if(tmp == NULL){
         free(frameEntryData);
         *dataSize = 0;
@@ -640,8 +638,8 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
     }
 
     frameEntryData = tmp;
-    memset(frameEntryData + *dataSize, 0, (BYTE_PADDING * 2));
-    outLen = *dataSize + (BYTE_PADDING * 2);
+    memset(frameEntryData + *dataSize, 0, ((size_t) BYTE_PADDING * 2));
+    outLen = *dataSize + ((size_t) BYTE_PADDING * 2);
 
     // detect utf8/ascii
     if(byteIsUtf8(frameEntryData)){
@@ -654,7 +652,7 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
     }
 
     // convert to UTF8
-    convi = byteConvertTextFormat(frameEntryData, encoding, *dataSize + (BYTE_PADDING * 2), &outString, BYTE_UTF8, &outLen);
+    convi = byteConvertTextFormat(frameEntryData, encoding, *dataSize + ((size_t) BYTE_PADDING * 2), &outString, BYTE_UTF8, &outLen);
 
     if(!convi && outLen == 0){
         free(frameEntryData);
@@ -676,7 +674,7 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
     }
 
     // escape quotes and backslashes
-    escapedStr = malloc(2 * (*dataSize - utf8BomOffset) + 1);
+    escapedStr = malloc((2 * (*dataSize - utf8BomOffset)) + 1);
     j = 0;
 
     for(size_t i = 0; i < *dataSize - utf8BomOffset; i++){
@@ -1214,7 +1212,6 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
     uint8_t *header = NULL;
     uint8_t *out = NULL;
     unsigned char *tmp = NULL;
-    unsigned char *reallocTmp = NULL;
     bool exit = false;
     bool bitFlag = false;
 

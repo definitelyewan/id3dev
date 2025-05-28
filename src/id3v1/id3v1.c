@@ -34,7 +34,8 @@ Id3v1Tag *id3v1TagFromFile(const char *filePath){
     uint8_t id3Bytes[ID3V1_MAX_SIZE];
     
     // make sure the file can really be read
-    if((fp = fopen(filePath, "rb")) == NULL){
+    fp = fopen(filePath, "rb");
+    if(fp == NULL){
         return NULL;
     }
 
@@ -55,7 +56,8 @@ Id3v1Tag *id3v1TagFromFile(const char *filePath){
 
 /**
  * @brief Deep copies an Id3v1Tag structure.
- * On success this function returns a pointer to the new heap allocated Id3v1Tag structure, otherwise it returns NULL.
+ * @details On success this function returns a pointer to the new heap allocated Id3v1Tag structure, otherwise it
+ * returns NULL.
  * @param toCopy 
  * @return Id3v1Tag* 
  */
@@ -158,7 +160,7 @@ int id3v1WriteComment(const char *comment, Id3v1Tag *tag){
 }
 
 /**
- * @brief Writes a genere to tag.
+ * @brief Writes a genre to tag.
  * @details Writes a genre to the tag structure. This function will write an integer (from 0 to 255) to the genre field
  * of the tag. On success this function returns 1, otherwise it returns 0.
  * @param genre
@@ -240,7 +242,7 @@ bool id3v1CompareTag(const Id3v1Tag *tag1, const Id3v1Tag *tag2){
 }
 
 /**
- * @brief Provides a string equivalent to the genere enum.
+ * @brief Provides a string equivalent to the genre enum.
  * @details Values outside the genre enum will be reported as other and return "Other".
  * @param val 
  * @return char* 
@@ -697,7 +699,7 @@ char *id3v1ReadComment(const Id3v1Tag *tag){
 }
 
 /**
- * @brief Reads a genere from a tag
+ * @brief Reads a genre from a tag
  * @details Mainly for compatibility and use in ffi
  * @param tag 
  * @return char* 
@@ -750,7 +752,8 @@ char *id3v1ToJSON(const Id3v1Tag *tag){
 
 /**
  * @brief Writes a Id3v1Tag structure to a file located at file path.
- * @details If the file does not exist it will be created. otherwise, if a tag is found it will be overwritten and if not it will be appended.
+ * @details If the file does not exist it will be created. otherwise, if a tag is found it will be overwritten and
+ * if not it will be appended.
  * @param filePath 
  * @param tag 
  * @return int 
@@ -795,16 +798,18 @@ int id3v1WriteTagToFile(const char *filePath, const Id3v1Tag *tag){
         byteStreamWrite(stream, &byte, 1);
     }
 
-    // genere is one byte as well
+    // genre is one byte as well
     byte = (unsigned char) tag->genre & 0xFF;
     byteStreamWrite(stream, &byte, 1);
 
     byteStreamRewind(stream);
 
-    if((fp = fopen(filePath, "r+b")) == NULL){
+    fp = fopen(filePath, "r+b");
+    if(fp == NULL){
         
         // create a new file and write the bytes to it
-        if((fp = fopen(filePath, "wb")) == NULL){
+        fp = fopen(filePath, "wb");
+        if(fp == NULL){
             byteStreamDestroy(stream);
             return 0;
         }
@@ -843,7 +848,7 @@ int id3v1WriteTagToFile(const char *filePath, const Id3v1Tag *tag){
         }
 
         // check to see if the file has ID3 metadata
-        if(fread(buffer, 1, ID3V1_TAG_ID_SIZE, fp) == 0){
+        if(fread((void *)buffer, 1, ID3V1_TAG_ID_SIZE, fp) == 0){
             byteStreamDestroy(stream);
             fclose(fp);
             return 0;

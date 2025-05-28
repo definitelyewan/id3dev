@@ -257,7 +257,7 @@ typedef struct _Id3v1Tag {
   //! Comment buffer for a tag
   uint8_t comment[ID3V1_FIELD_SIZE];
 
-  //! Genere value
+  //! Genre value
   Genre genre;
 
 } Id3v1Tag;

@@ -115,14 +115,13 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
 
     // lots of error checking because I cannot 100% know what im given
 
-    int trackno = 0;
+    int trackNumber = 0;
     int nYear = 0;
     uint8_t holdTitle[ID3V1_FIELD_SIZE + 1] = {0};
     uint8_t holdArtist[ID3V1_FIELD_SIZE + 1] = {0};
     uint8_t holdAlbum[ID3V1_FIELD_SIZE + 1] = {0};
     uint8_t holdComment[ID3V1_FIELD_SIZE + 1] = {0};
     uint8_t year[ID3V1_YEAR_SIZE + 1]; //must be +1. without it holdTitle gets overwritten somehow
-    Genre genre;
     ByteStream *stream = NULL;
 
     stream = byteStreamCreate((unsigned char *)buffer, ID3V1_MAX_SIZE);
@@ -177,7 +176,7 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
         return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, 0, NULL, OTHER_GENRE);
     }
     if(!byteStreamCursor(stream)[0] && byteStreamCursor(stream)[1]){
-        trackno = 1;
+        trackNumber = 1;
     }
 
     // no need to check bytes are confirmed to exist
@@ -185,34 +184,36 @@ Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer){
 
     // get comment and set index for next tag
     memset(holdComment, 0, ID3V1_FIELD_SIZE);
-    if(!byteStreamRead(stream, holdComment, ID3V1_FIELD_SIZE - trackno)){
+    if(!byteStreamRead(stream, holdComment, ID3V1_FIELD_SIZE - trackNumber)){
         byteStreamDestroy(stream);
         return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, 0, NULL, 0);
     }
 
 
     // read and set track number + move index
-    if(trackno){
-        if((trackno = byteStreamGetCh(stream)) == EOF){
+    if(trackNumber){
+        trackNumber = byteStreamGetCh(stream);
+        if(trackNumber == EOF){
             byteStreamDestroy(stream);
             return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, 0, holdAlbum, 0);
         }
 
         if(!byteStreamSeek(stream, 1, SEEK_CUR)){
             byteStreamDestroy(stream);
-            return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, trackno, holdComment, 0);
+            return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, trackNumber, holdComment, 0);
         }
         
     }else{
-        trackno = 0;
+        trackNumber = 0;
     }
 
     // read genre or last byte
-    if((genre = byteStreamGetCh(stream)) == EOF){
+    const Genre genre = byteStreamGetCh(stream);
+    if(genre == EOF){
         byteStreamDestroy(stream);
-        return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, trackno, holdComment, 0);
+        return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, trackNumber, holdComment, 0);
     }
 
     byteStreamDestroy(stream);
-    return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, trackno, holdComment, genre);
+    return id3v1CreateTag(holdTitle, holdArtist, holdAlbum, nYear, trackNumber, holdComment, genre);
 }

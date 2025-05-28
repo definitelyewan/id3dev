@@ -1,15 +1,24 @@
 from common.buildHelpers import *
 from common.InformUser import *
+import sys
+
+args = sys.argv
+argv1 = ''
+
+if len(args) > 0:
+    argv1 = args[0]
 
 update = Inform(1)
 
 # mk build
-update.message("Creating build dir ..")
-replace_folder("build")
+if (argv1 == "clean"):
+    update.message("Creating build dir ..")
+    replace_folder("build")
+
 
 # build with cmake
 update.message("Running Cmake")
-cmake_build(".", "build", ["-DBUILD_ID3_TESTS=ON", "-DBUILD_SHARED_LIBS=ON","-DDEBUG_ID3_SYMBOLS=ON"])
+cmake_build(".", "build", ["-DBUILD_ID3_TESTS=ON", "-DBUILD_ID3_SHARED_LIBS=ON","-DDEBUG_ID3_SYMBOLS=ON"])
 
 # move to build
 update.message("Moving to build dir")
