@@ -51,7 +51,8 @@ static void testEntry(Id3v2ContentEntry *ce, size_t size, const uint8_t *data){
 
 
 static void id3v2ParseExtendedTagHeader_nullData(void **state){
-    
+    (void) state;
+
     Id3v2ExtendedTagHeader *h;
     
     uint32_t v = id3v2ParseExtendedTagHeader(NULL, 0, ID3V2_TAG_VERSION_2, &h);
@@ -61,7 +62,8 @@ static void id3v2ParseExtendedTagHeader_nullData(void **state){
 }
 
 static void id3v2ParseExtendedTagHeader_v2(void **state){
-    
+    (void) state;
+
     ByteStream *stream = byteStreamCreate(NULL, 1);
     
     Id3v2ExtendedTagHeader *h;
@@ -74,7 +76,8 @@ static void id3v2ParseExtendedTagHeader_v2(void **state){
 }
 
 static void id3v2ParseExtendedTagHeader_v3(void **state){
-    
+    (void) state;
+
     uint8_t ext[14] = {0,0,0,0x0A,      // size
                        0x80,0,          // flags
                        0,0,0xff,0xff,   // padding
@@ -96,7 +99,8 @@ static void id3v2ParseExtendedTagHeader_v3(void **state){
 }
 
 static void id3v2ParseExtendedTagHeader_v3NoCrc(void **state){
-    
+    (void) state;
+
     uint8_t ext[10] = {0,0,0,0x06,      // size
                        0x80,0,          // flags
                        0,0,0xff,0xff};  // padding
@@ -119,7 +123,8 @@ static void id3v2ParseExtendedTagHeader_v3NoCrc(void **state){
 }
 
 static void id3v2ParseExtendedTagHeader_v3NoPadding(void **state){
-    
+    (void) state;
+
     uint8_t ext[6] = {0,0,0,0x02,      // size
                        0x80,0};        // flags
                        
@@ -141,7 +146,8 @@ static void id3v2ParseExtendedTagHeader_v3NoPadding(void **state){
 }
 
 static void id3v2ParseExtendedTagHeader_v3UnsupportedSize(void **state){
-    
+    (void) state;
+
     uint8_t ext[14] = {0,0,0,0x90,      // size
                        0x80,0,          // flags
                        0,0,0xff,0xff,   // padding
@@ -164,7 +170,8 @@ static void id3v2ParseExtendedTagHeader_v3UnsupportedSize(void **state){
 }
 
 static void id3v2ParseExtendedTagHeader_v3SmallSizeWithData(void **state){
-    
+    (void) state;
+
     uint8_t ext[6] = {0,0,0,0x90,      // size
                        0x80,0};        // flags
 
@@ -186,7 +193,8 @@ static void id3v2ParseExtendedTagHeader_v3SmallSizeWithData(void **state){
 
 
 static void id3v2ParseExtendedTagHeader_v4(void **state){
-    
+    (void) state;
+
     uint8_t ext[12] = {0,0,0,8,
                        6,
                        0x70,
@@ -211,7 +219,8 @@ static void id3v2ParseExtendedTagHeader_v4(void **state){
 }
 
 static void id3v2ParseExtendedTagHeader_v4NoRestrictions(void **state){
-    
+    (void) state;
+
     uint8_t ext[11] = {0,0,0,7,
                        5,
                        0x70,
@@ -234,7 +243,8 @@ static void id3v2ParseExtendedTagHeader_v4NoRestrictions(void **state){
 }
 
 static void id3v2ParseExtendedTagHeader_v4NoCRC(void **state){
-    
+    (void) state;
+
     uint8_t ext[6] = {0,0,0,6,
                       0,
                       0x40};
@@ -256,7 +266,8 @@ static void id3v2ParseExtendedTagHeader_v4NoCRC(void **state){
 }
 
 static void id3v2ParseTagHeader_happyPath(void **state){
-    
+    (void) state;
+
     uint8_t ext[10] = {'I','D','3',
                       2, 
                       0,
@@ -284,7 +295,8 @@ static void id3v2ParseTagHeader_happyPath(void **state){
 }
 
 static void id3v2ParseTagHeader_noTagSize(void **state){
-    
+    (void) state;
+
     uint8_t ext[6] = {'I','D','3',
                       2, 
                       0,
@@ -311,7 +323,8 @@ static void id3v2ParseTagHeader_noTagSize(void **state){
 }
 
 static void id3v2ParseTagHeader_noFlags(void **state){
-    
+    (void) state;
+
     uint8_t ext[5] = {'I','D','3',
                       2, 
                       0};
@@ -337,6 +350,7 @@ static void id3v2ParseTagHeader_noFlags(void **state){
 }
 
 static void id3v2ParseTagHeader_noVersions(void **state){
+    (void) state;
     
     uint8_t ext[3] = {'I','D','3'};
                        
@@ -360,6 +374,7 @@ static void id3v2ParseTagHeader_noVersions(void **state){
 }
 
 static void id3v2ParseFrameHeader_noSupport(void **state){
+    (void) state;
 
     uint8_t ext[6] = {'T','A','L',
                       0x00,0x01,0x00,
@@ -381,6 +396,7 @@ static void id3v2ParseFrameHeader_noSupport(void **state){
 
 
 static void id3v2ParseFrameHeader_v2(void **state){
+    (void) state;
 
     uint8_t ext[6] = {'T','A','L',
                       0x00,0x01,0x00,
@@ -403,6 +419,7 @@ static void id3v2ParseFrameHeader_v2(void **state){
 }
 
 static void id3v2ParseFrameHeader_v2MissingSize(void **state){
+    (void) state;
 
     uint8_t ext[3] = {'T','A','L'};
 
@@ -420,6 +437,7 @@ static void id3v2ParseFrameHeader_v2MissingSize(void **state){
 }
 
 static void id3v2ParseFrameHeader_v3(void **state){
+    (void) state;
 
     uint8_t ext[16] = {'T','A','L','B',
                       0x00,0x00,0x00,0x64,
@@ -453,6 +471,7 @@ static void id3v2ParseFrameHeader_v3(void **state){
 }
 
 static void id3v2ParseFrameHeader_v3FlagsButNoSymbols(void **state){
+    (void) state;
 
     uint8_t ext[14] = {'T','A','L','B',
                       0x00,0x00,0x00,0x64,
@@ -484,6 +503,7 @@ static void id3v2ParseFrameHeader_v3FlagsButNoSymbols(void **state){
 }
 
 static void id3v2ParseFrameHeader_v3noFlags(void **state){
+    (void) state;
 
     uint8_t ext[10] = {'T','A','L','B',
                       0x00,0x00,0x00,0x64,
@@ -514,6 +534,7 @@ static void id3v2ParseFrameHeader_v3noFlags(void **state){
 }
 
 static void id3v2ParseFrameHeader_v3noFlagBytes(void **state){
+    (void) state;
 
     uint8_t ext[8] = {'T','A','L','B',
                       0x00,0x00,0x00,0x64
@@ -535,6 +556,7 @@ static void id3v2ParseFrameHeader_v3noFlagBytes(void **state){
 }
 
 static void id3v2ParseFrameHeader_v4(void **state){
+    (void) state;
 
     uint8_t ext[16] = {'T','I','T','2',
                       0x00,0x00,0x02,0x00,
@@ -571,6 +593,7 @@ static void id3v2ParseFrameHeader_v4(void **state){
 }
 
 static void id3v2ParseFrameHeader_v4SetFlagButNoContent(void **state){
+    (void) state;
 
     uint8_t ext[12] = {'T','I','T','2',
                       0x00,0x00,0x02,0x00,
@@ -606,6 +629,7 @@ static void id3v2ParseFrameHeader_v4SetFlagButNoContent(void **state){
 }
 
 static void id3v2ParseFrameHeader_v4NoSetFlagsButContent(void **state){
+    (void) state;
 
     uint8_t ext[16] = {'T','I','T','2',
                       0x00,0x00,0x02,0x00,
@@ -642,6 +666,7 @@ static void id3v2ParseFrameHeader_v4NoSetFlagsButContent(void **state){
 }
 
 static void id3v2ParseFrame_parseTALBUTF8(void **state){
+    (void) state;
 
     uint8_t talb[77] = {0x54, 0x41, 0x4c, 0x42, 0x00, 0x00, 0x00, 0x43, 0x00, 0x00, 
                         0x03, 0x54, 0x68, 0x65, 0x20, 0x50, 0x6f, 0x77, 0x65, 0x72, 
@@ -690,6 +715,7 @@ static void id3v2ParseFrame_parseTALBUTF8(void **state){
 }
 
 static void id3v2ParseFrame_parseTIT2UTF16(void **state){
+    (void) state;
 
     // TIT2
     uint8_t tit2[37] = {0x54, 0x49, 0x54, 0x32, 0x00, 0x00, 0x00, 0x1b, 0x00, 0x00,
@@ -737,6 +763,7 @@ static void id3v2ParseFrame_parseTIT2UTF16(void **state){
 }
 
 static void id3v2ParseFrame_parseTXXXUTF16(void **state){
+    (void) state;
 
     // TXXX 
     uint8_t txxx[71] = {'T', 'X', 'X', 'X', 0x00, 0x00, 0x00, 0x3d, 0x00, 0x00,
@@ -789,7 +816,9 @@ static void id3v2ParseFrame_parseTXXXUTF16(void **state){
 }
 
 static void id3v2ParseFrame_parseTXXXLatin1(void **state){
-    // TXXX 
+    (void) state;
+
+    // TXXX
     uint8_t txxx[25] = {'T', 'X', 'X', 'X', 0x00, 0x00, 0x00, 0x0f, 0x00, 0x00,
                     0x00,
                     'l','a','b','e','l',0x00,
@@ -840,6 +869,7 @@ static void id3v2ParseFrame_parseTXXXLatin1(void **state){
 }
 
 static void id3v2ParseFrame_parseWCOM(void **state){
+    (void) state;
 
     uint8_t txxx[31] = {'W', 'C', 'O', 'M', 0x00, 0x00, 0x00, 0x15, 0x00, 0x00,
                     'h','t','t','p','s',':','/','/','b','a','n','d','c','a','m','p','.','c','o','m','/'
@@ -879,6 +909,7 @@ static void id3v2ParseFrame_parseWCOM(void **state){
 }
 
 static void id3v2ParseFrame_parseWXXUTF16(void **state){
+    (void) state;
 
     // WXX 
     uint8_t wxx[31] = {'W', 'X', 'X', 0x00, 0x00, 0x19,
@@ -931,6 +962,7 @@ static void id3v2ParseFrame_parseWXXUTF16(void **state){
 }
 
 static void id3v2ParseFrame_parseCOMLatin1(void **state){
+    (void) state;
 
     // COM 
     uint8_t com[25] = {'C', 'O', 'M', 0x00, 0x00, 0x13,
@@ -989,6 +1021,7 @@ static void id3v2ParseFrame_parseCOMLatin1(void **state){
 }
 
 static void id3v2ParseFrame_parseIPLLatin1(void **state){
+    (void) state;
 
     // ipl 
     uint8_t ipl[51] = {'I', 'P', 'L', 0x00, 0x00, 0x2D,
@@ -1055,6 +1088,7 @@ static void id3v2ParseFrame_parseIPLLatin1(void **state){
 }
 
 static void id3v2ParseFrame_parseSYLTUTF16(void **state){
+    (void) state;
 
     // SYLT 
     uint8_t sylt[116] = {'S', 'Y', 'L', 'T', 0x00, 0x00, 0x00, 0x6A, 0x00, 0x00,
@@ -1125,6 +1159,8 @@ static void id3v2ParseFrame_parseSYLTUTF16(void **state){
 }
 
 static void id3v2ParseFrame_parseEQU(void **state){
+    (void) state;
+
     // EQU 
     uint8_t equ[15] = {'E', 'Q', 'U', 0x00, 0x00, 0x09,
                         2U,
@@ -1196,6 +1232,7 @@ static void id3v2ParseFrame_parseEQU(void **state){
 }
 
 static void id3v2ParseFrame_parseEncrypted(void **state){
+    (void) state;
 
     uint8_t txxx[30] = {'T', 'X', 'X', 'X', 0x00, 0x00, 0x00, 0x0f, 0x00, 0x05,
                         0xff, 0x00, 0x1A, 0xE8, 0x5D, // 1763421 data length indicator before decode
@@ -1227,6 +1264,7 @@ static void id3v2ParseFrame_parseEncrypted(void **state){
 
 
 static void id3v2ParseTagFromStream_v3(void **state){
+    (void) state;
 
     ByteStream *stream = byteStreamFromFile("assets/sorry4dying.mp3");
     Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
@@ -1535,6 +1573,7 @@ static void id3v2ParseTagFromStream_v3(void **state){
 }
 
 static void id3v2ParseTagFromStream_v4(void **state){
+    (void) state;
 
     ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
     Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
@@ -1752,6 +1791,7 @@ static void id3v2ParseTagFromStream_v4(void **state){
 }
 
 static void id3v2ParseTagFromStream_v2unsync(void **state){
+    (void) state;
 
     uint8_t data[43] = {'I', 'D', '3', 0x02, 0x01, 0x80, 0x00, 0x00, 0x00, 0x21,
                         'T', 0x00, 'A', 0x00, 'L', 0x00, 0x00, 0x00, 0x00, 0x00, 0x0b, 0x00, 
@@ -1784,6 +1824,7 @@ static void id3v2ParseTagFromStream_v2unsync(void **state){
 }
 
 static void id3v2ParseTagFromStream_v3ext(void **state){
+    (void) state;
 
     uint8_t data[45] = {'I', 'D', '3', 0x03, 0x01, 0x40, 0x00, 0x00, 0x00, 0x23, // header
                         0x00, 0x00, 0x00, 0x0a, 0x80, 0x00, 0xfe, 0xfe, 0xfe, 0xfe, 0xff, 0xff, 0xff, 0xff, // ext
@@ -1820,6 +1861,7 @@ static void id3v2ParseTagFromStream_v3ext(void **state){
 
 
 static void id3v2ParseTagFromStream_v2ULTWithMissingDesc(void **state){
+    (void) state;
 
     ByteStream *stream = byteStreamFromFile("assets/danybrown2.mp3");
     Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);

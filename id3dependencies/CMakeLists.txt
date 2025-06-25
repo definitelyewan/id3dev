@@ -41,7 +41,7 @@ target_include_directories(LinkedListLib PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/Li
 # Configure HashTableLib
 
 set(HASH_TABLE_LIB_SOURCE_FILES
-        "${CMAKE_CURRENT_SOURCE_DIR}/HashTableLib/src/HashTable.c"
+        "${CMAKE_CURRENT_SOURCE_DIR}/HashTableLib/src/hashTable.c"
 )
 
 set(HASH_TABLE_LIB_HEADER_FILES
@@ -56,4 +56,3 @@ if(BUILD_ID3_TESTS)
     option(WITH_EXAMPLES OFF)
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/cmocka")
 endif()
-

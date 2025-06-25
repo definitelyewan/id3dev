@@ -1,3 +1,14 @@
+/**
+* @file id3v2TagIdentityFunctions.c
+ * @author Ewan Jones
+ * @brief unit tests for id3v2TagIdentity.c
+ * @version 0.1
+ * @date 2025-05-31
+ *
+ * @copyright Copyright (c) 2025
+ *
+ */
+
 #include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -335,7 +346,8 @@ static void id3v2ReadFooterIndicator_WrongVersion(void **state){
 }
 
 static void id3v2NewExtendedTagHeader_validStruct(void **state){
-    
+    (void) state;
+
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(150,909,1,1,255);
 
     assert_int_equal(ext->padding,150);
@@ -348,6 +360,7 @@ static void id3v2NewExtendedTagHeader_validStruct(void **state){
 }
 
 static void id3v2DestroyExtendedTagHeader_DestroyStruct(void **state){
+    (void) state;
     
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(150,909,1,1,255);
     id3v2DestroyExtendedTagHeader(&ext);
@@ -355,13 +368,16 @@ static void id3v2DestroyExtendedTagHeader_DestroyStruct(void **state){
 }
 
 static void id3v2DestroyExtendedTagHeader_tryFreeNULL(void **state){
-    //fails on segfault
+    (void) state;
+
+    // fails on segfault
     Id3v2ExtendedTagHeader *ext = NULL;
     id3v2DestroyExtendedTagHeader(&ext);
 }
 
 static void id3v2WriteTagSizeRestriction_noExtAlready(void **state){
-    
+    (void) state;
+
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, NULL);
 
     assert_true(id3v2WriteTagSizeRestriction(header, 3));
@@ -375,7 +391,7 @@ static void id3v2WriteTagSizeRestriction_noExtAlready(void **state){
 }
 
 static void id3v2WriteTagSizeRestriction_changeCurrentValue(void **state){
-    
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,192);
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
@@ -391,7 +407,7 @@ static void id3v2WriteTagSizeRestriction_changeCurrentValue(void **state){
 }
 
 static void id3v2WriteTagSizeRestriction_wrongVersion(void **state){
-    
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,192);
     Id3v2TagHeader *header = id3v2CreateTagHeader(2, 0, 64, ext);
@@ -403,7 +419,7 @@ static void id3v2WriteTagSizeRestriction_wrongVersion(void **state){
 }
 
 static void id3v2WriteTagSizeRestriction_notAOption(void **state){
-    
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,192);
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
@@ -415,7 +431,8 @@ static void id3v2WriteTagSizeRestriction_notAOption(void **state){
 }
 
 static void id3v2WriteTextEncodingRestriction_noExtAlready(void **state){
-    
+    (void) state;
+
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, NULL);
 
     assert_true(id3v2WriteTextEncodingRestriction(header, 1));
@@ -428,7 +445,7 @@ static void id3v2WriteTextEncodingRestriction_noExtAlready(void **state){
 }
 
 static void id3v2WriteTextEncodingRestriction_changeCurrentValue(void **state){
-    
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,32);
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
@@ -443,7 +460,7 @@ static void id3v2WriteTextEncodingRestriction_changeCurrentValue(void **state){
 }
 
 static void id3v2WriteTextEncodingRestriction_wrongVersion(void **state){
-    
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,32);
     Id3v2TagHeader *header = id3v2CreateTagHeader(2, 0, 64, ext);
@@ -454,7 +471,7 @@ static void id3v2WriteTextEncodingRestriction_wrongVersion(void **state){
 }
 
 static void id3v2WriteTextEncodingRestriction_notAOption(void **state){
-    
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,32);
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
@@ -466,7 +483,8 @@ static void id3v2WriteTextEncodingRestriction_notAOption(void **state){
 
 
 static void id3v2WriteTextFieldsSizeRestriction_noExtAlready(void **state){
-    
+    (void) state;
+
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, NULL);
 
     assert_true(id3v2WriteTextFieldsSizeRestriction(header, 2));
@@ -479,7 +497,7 @@ static void id3v2WriteTextFieldsSizeRestriction_noExtAlready(void **state){
 }
 
 static void id3v2WriteTextFieldsSizeRestriction_changeCurrentValue(void **state){
-    
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,16);
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
@@ -494,7 +512,7 @@ static void id3v2WriteTextFieldsSizeRestriction_changeCurrentValue(void **state)
 }
 
 static void id3v2WriteTextFieldsSizeRestriction_wrongVersion(void **state){
-    
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,16);
     Id3v2TagHeader *header = id3v2CreateTagHeader(2, 0, 64, ext);
@@ -505,7 +523,7 @@ static void id3v2WriteTextFieldsSizeRestriction_wrongVersion(void **state){
 }
 
 static void id3v2WriteTextFieldsSizeRestriction_notAOption(void **state){
-    
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,24);
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
@@ -517,7 +535,8 @@ static void id3v2WriteTextFieldsSizeRestriction_notAOption(void **state){
 
 
 static void id3v2WriteImageEncodingRestriction_noExtAlready(void **state){
-    
+    (void) state;
+
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, NULL);
 
     assert_true(id3v2WriteImageEncodingRestriction(header, 1));
@@ -530,7 +549,7 @@ static void id3v2WriteImageEncodingRestriction_noExtAlready(void **state){
 }
 
 static void id3v2WriteImageEncodingRestriction_changeCurrentValue(void **state){
-    
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,4);
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
@@ -545,7 +564,7 @@ static void id3v2WriteImageEncodingRestriction_changeCurrentValue(void **state){
 }
 
 static void id3v2WriteImageEncodingRestriction_wrongVersion(void **state){
-    
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,4);
     Id3v2TagHeader *header = id3v2CreateTagHeader(2, 0, 64, ext);
@@ -556,7 +575,8 @@ static void id3v2WriteImageEncodingRestriction_wrongVersion(void **state){
 }
 
 static void id3v2WriteImageSizeRestriction_noExtAlready(void **state){
-    
+    (void) state;
+
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, NULL);
 
     assert_true(id3v2WriteImageSizeRestriction(header, 2));
@@ -569,7 +589,7 @@ static void id3v2WriteImageSizeRestriction_noExtAlready(void **state){
 }
 
 static void id3v2WriteImageSizeRestriction_changeCurrentValue(void **state){
-    
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,2);
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
@@ -584,7 +604,7 @@ static void id3v2WriteImageSizeRestriction_changeCurrentValue(void **state){
 }
 
 static void id3v2WriteImageSizeRestriction_wrongVersion(void **state){
-    
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,3);
     Id3v2TagHeader *header = id3v2CreateTagHeader(2, 0, 64, ext);
@@ -595,7 +615,7 @@ static void id3v2WriteImageSizeRestriction_wrongVersion(void **state){
 }
 
 static void id3v2WriteImageSizeRestriction_notAOption(void **state){
-    
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0,0,1,3);
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 64, ext);
@@ -606,7 +626,8 @@ static void id3v2WriteImageSizeRestriction_notAOption(void **state){
 }
 
 static void id3v2ReadTagSizeRestriction_readBits(void **state){
-    
+    (void) state;
+
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 192);
     //11000000
 
@@ -618,7 +639,8 @@ static void id3v2ReadTagSizeRestriction_readBits(void **state){
 }
 
 static void id3v2ReadTagSizeRestriction_readBits2(void **state){
-    
+    (void) state;
+
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 128);
     //11000000
 
@@ -630,6 +652,7 @@ static void id3v2ReadTagSizeRestriction_readBits2(void **state){
 }
 
 static void id3v2ReadTextEncodingRestriction_readBit(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 32);
     //00100000
@@ -642,6 +665,7 @@ static void id3v2ReadTextEncodingRestriction_readBit(void **state){
 }
 
 static void id3v2ReadTextEncodingRestriction_readBit2(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 0);
     //00000000
@@ -654,6 +678,7 @@ static void id3v2ReadTextEncodingRestriction_readBit2(void **state){
 }
 
 static void id3v2ReadTextFieldsSizeRestriction_readBit(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 24);
     //00011000
@@ -666,6 +691,7 @@ static void id3v2ReadTextFieldsSizeRestriction_readBit(void **state){
 }
 
 static void id3v2ReadTextFieldsSizeRestriction_readBit2(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 8);
     //00001000
@@ -678,6 +704,7 @@ static void id3v2ReadTextFieldsSizeRestriction_readBit2(void **state){
 }
 
 static void id3v2ReadImageEncodingRestriction_readBit(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 4);
     //00000100
@@ -690,6 +717,7 @@ static void id3v2ReadImageEncodingRestriction_readBit(void **state){
 }
 
 static void id3v2ReadImageEncodingRestriction_readBit2(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 0);
     //00000000
@@ -702,6 +730,7 @@ static void id3v2ReadImageEncodingRestriction_readBit2(void **state){
 }
 
 static void id3v2ReadImageSizeRestriction_readBit(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 3);
     //00000011
@@ -714,6 +743,7 @@ static void id3v2ReadImageSizeRestriction_readBit(void **state){
 }
 
 static void id3v2ReadImageSizeRestriction_readBit2(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 1);
     //00000001
@@ -726,6 +756,7 @@ static void id3v2ReadImageSizeRestriction_readBit2(void **state){
 }
 
 static void id3v2ClearTagRestrictions_clear(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 1);
     //00000001
@@ -738,6 +769,7 @@ static void id3v2ClearTagRestrictions_clear(void **state){
 
 
 static void id3v2TagCreateAndDestroy_AllInOne(void **state){
+    (void) state;
 
     Id3v2Tag *tag = id3v2CreateTag(id3v2CreateTagHeader(1,2,10,id3v2CreateExtendedTagHeader(15,50,1,1,10)), listCreate(id3v2PrintFrame, id3v2DeleteFrame, id3v2CompareFrame, id3v2CopyFrame));
 
@@ -752,11 +784,12 @@ static void id3v2TagCreateAndDestroy_AllInOne(void **state){
 }
 
 static void id3v2ExtendedTagHeaderSerialize_v3noCRC(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(100, 0, 0, 0, 0);
-    size_t outl = 0;
-    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_3, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
+    size_t outLength = 0;
+    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_3, &outLength);
+    ByteStream *stream = byteStreamCreate(out, outLength);
 
 
     assert_int_equal(byteStreamReturnInt(stream), 10);
@@ -774,11 +807,12 @@ static void id3v2ExtendedTagHeaderSerialize_v3noCRC(void **state){
 }
 
 static void id3v2ExtendedTagHeaderSerialize_v3CRC(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(UINT32_MAX, UINT32_MAX, 1,1,1);
-    size_t outl = 0;
-    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_3, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
+    size_t outLength = 0;
+    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_3, &outLength);
+    ByteStream *stream = byteStreamCreate(out, outLength);
 
     assert_int_equal(byteStreamReturnInt(stream), 14);
 
@@ -797,20 +831,22 @@ static void id3v2ExtendedTagHeaderSerialize_v3CRC(void **state){
 }
 
 static void id3v2ExtendedTagHeaderSerialize_null(void **state){
+    (void) state;
 
-    size_t outl = 0;
-    uint8_t *out = id3v2ExtendedTagHeaderSerialize(NULL, ID3V2_TAG_VERSION_3, &outl);
+    size_t outLength = 0;
+    uint8_t *out = id3v2ExtendedTagHeaderSerialize(NULL, ID3V2_TAG_VERSION_3, &outLength);
 
     assert_null(out);
 
 }
 
 static void id3v2ExtendedTagHeaderSerialize_v4WithEverything(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(UINT32_MAX, UINT32_MAX, 1,1,0xfe);
-    size_t outl = 0;
-    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
+    size_t outLength = 0;
+    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outLength);
+    ByteStream *stream = byteStreamCreate(out, outLength);
 
     assert_int_equal(byteStreamReturnInt(stream), 12);
 
@@ -838,11 +874,12 @@ static void id3v2ExtendedTagHeaderSerialize_v4WithEverything(void **state){
 }
 
 static void id3v2ExtendedTagHeaderSerialize_v4(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, 0, 0, 0);
-    size_t outl = 0;
-    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
+    size_t outLength = 0;
+    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outLength);
+    ByteStream *stream = byteStreamCreate(out, outLength);
     
     assert_int_equal(byteStreamReturnInt(stream), 6);
 
@@ -860,11 +897,12 @@ static void id3v2ExtendedTagHeaderSerialize_v4(void **state){
 }
 
 static void id3v2ExtendedTagHeaderSerialize_v4crc(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 9000, 0, 0, 0);
-    size_t outl = 0;
-    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
+    size_t outLength = 0;
+    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outLength);
+    ByteStream *stream = byteStreamCreate(out, outLength);
 
     assert_int_equal(byteStreamReturnInt(stream), 11);
 
@@ -887,11 +925,12 @@ static void id3v2ExtendedTagHeaderSerialize_v4crc(void **state){
 }
 
 static void id3v2ExtendedTagHeaderSerialize_v4restrictions(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, 0, 1, 0xff);
-    size_t outl = 0;
-    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
+    size_t outLength = 0;
+    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outLength);
+    ByteStream *stream = byteStreamCreate(out, outLength);
 
     assert_int_equal(byteStreamReturnInt(stream), 7);
 
@@ -912,7 +951,8 @@ static void id3v2ExtendedTagHeaderSerialize_v4restrictions(void **state){
 }
 
 static void id3v2ExtendedTagHeaderToJSON_v3CRC(void **state){
-    
+    (void) state;
+
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(UINT32_MAX, UINT32_MAX, 1,1,0xfe);
     char *json = id3v2ExtendedTagHeaderToJSON(ext, ID3V2_TAG_VERSION_3);
 
@@ -926,6 +966,7 @@ static void id3v2ExtendedTagHeaderToJSON_v3CRC(void **state){
 
 
 static void id3v2ExtendedTagHeaderToJSON_v3noCRC(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(100, 0, 0, 0, 0);
     char *json = id3v2ExtendedTagHeaderToJSON(ext, ID3V2_TAG_VERSION_3);
@@ -939,6 +980,7 @@ static void id3v2ExtendedTagHeaderToJSON_v3noCRC(void **state){
 }
 
 static void id3v2ExtendedTagHeaderToJSON_null(void **state){
+    (void) state;
 
     char *json = id3v2ExtendedTagHeaderToJSON(NULL, ID3V2_TAG_VERSION_2);
 
@@ -950,6 +992,7 @@ static void id3v2ExtendedTagHeaderToJSON_null(void **state){
 }
 
 static void id3v2ExtendedTagHeaderToJSON_v4WithEverything(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(UINT32_MAX, UINT32_MAX, 1,1,0xfe);
     char *json = id3v2ExtendedTagHeaderToJSON(ext, ID3V2_TAG_VERSION_4);
@@ -964,6 +1007,7 @@ static void id3v2ExtendedTagHeaderToJSON_v4WithEverything(void **state){
 
 
 static void id3v2ExtendedTagHeaderToJSON_v4crc(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 9000, 0, 0, 0);
     char *json = id3v2ExtendedTagHeaderToJSON(ext, ID3V2_TAG_VERSION_4);
@@ -977,6 +1021,7 @@ static void id3v2ExtendedTagHeaderToJSON_v4crc(void **state){
 }
 
 static void id3v2ExtendedTagHeaderToJSON_v4restrictions(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, 0, 1, 0xff);
     char *json = id3v2ExtendedTagHeaderToJSON(ext, ID3V2_TAG_VERSION_4);
@@ -989,13 +1034,14 @@ static void id3v2ExtendedTagHeaderToJSON_v4restrictions(void **state){
 }
 
 static void id3v2TagHeaderSerialize_v2(void **state){
+    (void) state;
 
     Id3v2TagHeader *h = id3v2CreateTagHeader(2, 0, 0, NULL);
-    size_t outl = 0;
-    uint8_t *out = id3v2TagHeaderSerialize(h, 1000, &outl);
+    size_t outLength = 0;
+    uint8_t *out = id3v2TagHeaderSerialize(h, 1000, &outLength);
     unsigned char *tmp = NULL;
 
-    ByteStream *stream = byteStreamCreate(out, outl);
+    ByteStream *stream = byteStreamCreate(out, outLength);
     
     assert_non_null(stream);
     
@@ -1022,35 +1068,38 @@ static void id3v2TagHeaderSerialize_v2(void **state){
 }
 
 static void id3v2TagHeaderSerialize_unsupportedVersion(void **state){
+    (void) state;
 
     Id3v2TagHeader *h = id3v2CreateTagHeader(10, 0, 0, NULL);
-    size_t outl = 0;
-    uint8_t *out = id3v2TagHeaderSerialize(h, 1000, &outl);
+    size_t outLength = 0;
+    uint8_t *out = id3v2TagHeaderSerialize(h, 1000, &outLength);
 
     assert_null(out);
-    assert_int_equal(outl, 0);
+    assert_int_equal(outLength, 0);
 
     id3v2DestroyTagHeader(&h);
 
 }
 
 static void id3v2TagHeaderSerialize_null(void **state){
+    (void) state;
 
-    size_t outl = 0;
-    uint8_t *out = id3v2TagHeaderSerialize(NULL, 1000, &outl);
+    size_t outLength = 0;
+    uint8_t *out = id3v2TagHeaderSerialize(NULL, 1000, &outLength);
 
     assert_null(out);
-    assert_int_equal(outl, 0);
+    assert_int_equal(outLength, 0);
 
 }
 
 
 static void id3v2TagHeaderSerialize_v3(void **state){
+    (void) state;
 
     Id3v2TagHeader *h = id3v2CreateTagHeader(3, 1, 0x20, NULL);
-    size_t outl = 0;
-    uint8_t *out = id3v2TagHeaderSerialize(h, 1000, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
+    size_t outLength = 0;
+    uint8_t *out = id3v2TagHeaderSerialize(h, 1000, &outLength);
+    ByteStream *stream = byteStreamCreate(out, outLength);
     unsigned char *tmp = NULL;
 
 
@@ -1079,12 +1128,13 @@ static void id3v2TagHeaderSerialize_v3(void **state){
 }
 
 static void id3v2TagHeaderSerialize_v3WithExt(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(100, 0, 0, 0, 0);
     Id3v2TagHeader *h = id3v2CreateTagHeader(3, 1, 0x60, ext);
-    size_t outl = 0;
-    uint8_t *out = id3v2TagHeaderSerialize(h, 1000, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
+    size_t outLength = 0;
+    uint8_t *out = id3v2TagHeaderSerialize(h, 1000, &outLength);
+    ByteStream *stream = byteStreamCreate(out, outLength);
     unsigned char *tmp = NULL;
 
 
@@ -1123,11 +1173,12 @@ static void id3v2TagHeaderSerialize_v3WithExt(void **state){
 
 
 static void id3v2TagHeaderSerialize_v4(void **state){
+    (void) state;
 
     Id3v2TagHeader *h = id3v2CreateTagHeader(4, 0, 0, NULL);
-    size_t outl = 0;
-    uint8_t *out = id3v2TagHeaderSerialize(h, 900, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
+    size_t outLength = 0;
+    uint8_t *out = id3v2TagHeaderSerialize(h, 900, &outLength);
+    ByteStream *stream = byteStreamCreate(out, outLength);
     unsigned char *tmp = NULL;
 
 
@@ -1157,12 +1208,13 @@ static void id3v2TagHeaderSerialize_v4(void **state){
 }
 
 static void id3v2TagHeaderSerialize_v4WithExt(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(80, 870, 1, 1, 0xff);
     Id3v2TagHeader *h = id3v2CreateTagHeader(4, 0, 0xF0, ext);
-    size_t outl = 0;
-    uint8_t *out = id3v2TagHeaderSerialize(h, 900, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
+    size_t outLength = 0;
+    uint8_t *out = id3v2TagHeaderSerialize(h, 900, &outLength);
+    ByteStream *stream = byteStreamCreate(out, outLength);
     unsigned char *tmp = NULL;
 
     assert_non_null(stream);
@@ -1207,6 +1259,7 @@ static void id3v2TagHeaderSerialize_v4WithExt(void **state){
 }
 
 static void id3v2TagHeaderToJSON_null(void **state){
+    (void) state;
 
     char *json = id3v2TagHeaderToJSON(NULL);
 
@@ -1216,6 +1269,7 @@ static void id3v2TagHeaderToJSON_null(void **state){
 }
 
 static void id3v2TagHeaderToJSON_v2(void **state){
+    (void) state;
 
     Id3v2TagHeader *header = id3v2CreateTagHeader(2, 99, 0, NULL);
 
@@ -1228,6 +1282,7 @@ static void id3v2TagHeaderToJSON_v2(void **state){
 }
 
 static void id3v2TagHeaderToJSON_v3(void **state){
+    (void) state;
 
     Id3v2TagHeader *header = id3v2CreateTagHeader(3, 0, 0, NULL);
 
@@ -1240,6 +1295,7 @@ static void id3v2TagHeaderToJSON_v3(void **state){
 }
 
 static void id3v2TagHeaderToJSON_v3ext(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(255, 0, 0, 0, 0);
     Id3v2TagHeader *header = id3v2CreateTagHeader(3, 0, 0, ext);
@@ -1254,6 +1310,7 @@ static void id3v2TagHeaderToJSON_v3ext(void **state){
 
 
 static void id3v2TagHeaderToJSON_v4(void **state){
+    (void) state;
 
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 0x40, NULL);
 
@@ -1266,6 +1323,7 @@ static void id3v2TagHeaderToJSON_v4(void **state){
 }
 
 static void id3v2TagHeaderToJSON_v4ext(void **state){
+    (void) state;
 
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(100, 3232, 1, 1, 0x1F);
     Id3v2TagHeader *header = id3v2CreateTagHeader(4, 0, 0xF0, ext);

@@ -172,10 +172,10 @@ int id3v2CompareContentEntry(const void *first, const void *second){
 char *id3v2PrintContentEntry(const void *toBePrinted){
 
     const Id3v2ContentEntry *e = (Id3v2ContentEntry *)toBePrinted;
-
-    char *str = malloc((sizeof(char) * 16) + sizeof(long) + 8);
-
-    sprintf(str, "Size: %ld, data: %p\n",e->size, e->entry);
+    const int memCount = (sizeof(char) * 16) + sizeof(long) + 8;
+    char *str = malloc(memCount);
+;
+    (void) snprintf(str, memCount, "Size: %ld, data: %p\n",e->size, e->entry);
 
     return str;
 }
@@ -337,11 +337,12 @@ int id3v2CompareFrame(const void *first, const void *second){
  */
 char *id3v2PrintFrame(const void *toBePrinted){
 
-    Id3v2Frame *f = (Id3v2Frame *)toBePrinted;    
-    char *s = malloc(64); // 8 byte pointers
-    memset(s, 0, 64);
+    const Id3v2Frame *f = (Id3v2Frame *)toBePrinted;
+    const int memCount = 64; // 8 byte pointers
+    char *s = malloc(memCount);
 
-    sprintf(s, "header : %p, context : %p, entries : %p", f->header, f->contexts, f->entries);
+    memset(s, 0, memCount);
+    (void) snprintf(s, memCount, "header : %p, context : %p, entries : %p", f->header, f->contexts, f->entries);
 
     return s;
 }
@@ -825,7 +826,7 @@ uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser){
  * @return true 
  * @return false 
  */
-bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize, void *entry){
+bool id3v2WriteFrameEntry(const Id3v2Frame *frame, const ListIter *entries, const size_t entrySize, const void *entry){
 
     if(frame == NULL || entries == NULL || entrySize == 0 || entry == NULL){
         return false;
@@ -848,7 +849,7 @@ bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize
     // locate the entries position in the frame
     while((ce = (Id3v2ContentEntry *) listIteratorNext(&entriesIter)) != NULL){
 
-        int comp = frame->entries->compareData((void *) ce, (void *) entries->current->data);
+        const int comp = frame->entries->compareData((void *) ce, entries->current->data);
 
         if(comp == 0){
             break;
@@ -951,17 +952,17 @@ Id3v2Frame *id3v2DetachFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame){
  * @param header 
  * @param version 
  * @param frameSize
- * @param outl
+ * @param outLength
  * @return ByteStream* 
  */
-uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, uint32_t frameSize, size_t *outl){
+uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, uint32_t frameSize, size_t *outLength){
 
     unsigned char *tmp = NULL;
     ByteStream *stream = NULL;
     uint8_t *out = NULL;
 
     if(header == NULL || version > ID3V2_TAG_VERSION_4){
-        *outl = 0;
+        *outLength = 0;
         return NULL;
     }
 
@@ -1059,14 +1060,14 @@ uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, ui
 
             break;
         default:
-            *outl = 0;
+            *outLength = 0;
             return NULL;
     }
 
 
     byteStreamRewind(stream);
     out = calloc(stream->bufferSize, sizeof(uint8_t));
-    *outl = stream->bufferSize;
+    *outLength = stream->bufferSize;
     byteStreamRead(stream, out, stream->bufferSize);
     byteStreamDestroy(stream);
     return out;
@@ -1101,11 +1102,11 @@ char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, const uint8_t versi
 
             json = calloc(memCount + 1, sizeof(char)); 
 
-            snprintf(json, memCount,
-                    "{\"id\":\"%c%c%c\"}",
-                    header->id[0],
-                    header->id[1],
-                    header->id[2]);
+            (void) snprintf(json, memCount,
+                            "{\"id\":\"%c%c%c\"}",
+                            header->id[0],
+                            header->id[1],
+                            header->id[2]);
 
             break;
         case ID3V2_TAG_VERSION_3:
@@ -1125,18 +1126,18 @@ char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, const uint8_t versi
             
             json = calloc(memCount + 1, sizeof(char));
 
-            snprintf(json, memCount,
-                    "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"decompressionSize\":%"PRId32",\"encryptionSymbol\":%d,\"groupSymbol\":%d}",
-                    header->id[0],
-                    header->id[1],
-                    header->id[2],
-                    header->id[3],
-                    ((header->tagAlterPreservation == true) ? "true" : "false"),
-                    ((header->fileAlterPreservation == true) ? "true" : "false"),
-                    ((header->readOnly == true) ? "true" : "false"),
-                    header->decompressionSize,
-                    header->encryptionSymbol,
-                    header->groupSymbol);
+            (void) snprintf(json, memCount,
+                            "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"decompressionSize\":%"PRId32",\"encryptionSymbol\":%d,\"groupSymbol\":%d}",
+                            header->id[0],
+                            header->id[1],
+                            header->id[2],
+                            header->id[3],
+                            ((header->tagAlterPreservation == true) ? "true" : "false"),
+                            ((header->fileAlterPreservation == true) ? "true" : "false"),
+                            ((header->readOnly == true) ? "true" : "false"),
+                            header->decompressionSize,
+                            header->encryptionSymbol,
+                            header->groupSymbol);
 
             break;
         case ID3V2_TAG_VERSION_4:
@@ -1157,19 +1158,19 @@ char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, const uint8_t versi
 
             json = calloc(memCount + 1, sizeof(char));
 
-            snprintf(json, memCount,
-                    "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"unsynchronisation\":%s,\"decompressionSize\":%"PRId32",\"encryptionSymbol\":%d,\"groupSymbol\":%d}",
-                    header->id[0],
-                    header->id[1],
-                    header->id[2],
-                    header->id[3],
-                    ((header->tagAlterPreservation == true) ? "true" : "false"),
-                    ((header->fileAlterPreservation == true) ? "true" : "false"),
-                    ((header->readOnly == true) ? "true" : "false"),
-                    ((header->unsynchronisation == true) ? "true" : "false"),
-                    header->decompressionSize,
-                    header->encryptionSymbol,
-                    header->groupSymbol);
+            (void) snprintf(json, memCount,
+                            "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"unsynchronisation\":%s,\"decompressionSize\":%"PRId32",\"encryptionSymbol\":%d,\"groupSymbol\":%d}",
+                            header->id[0],
+                            header->id[1],
+                            header->id[2],
+                            header->id[3],
+                            ((header->tagAlterPreservation == true) ? "true" : "false"),
+                            ((header->fileAlterPreservation == true) ? "true" : "false"),
+                            ((header->readOnly == true) ? "true" : "false"),
+                            ((header->unsynchronisation == true) ? "true" : "false"),
+                            header->decompressionSize,
+                            header->encryptionSymbol,
+                            header->groupSymbol);
 
             break;
         
@@ -1189,16 +1190,16 @@ char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, const uint8_t versi
  * 
  * @param frame 
  * @param version
- * @param outl
+ * @param outLength
  * @return ByteStream* 
  */
-uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
+uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outLength){
     
     ByteStream *stream = NULL;
     Id3v2ContentContext *cc = NULL;
 
     if(frame == NULL || version > ID3V2_TAG_VERSION_4){
-        *outl = 0;
+        *outLength = 0;
         return NULL;        
     }
 
@@ -1305,23 +1306,31 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
 
                 // append null spacer if there are more entries in the list
                 if(trav.current != NULL){
-                    switch(encoding){
-                        case BYTE_ISO_8859_1:
-                        case BYTE_ASCII:
-                        case BYTE_UTF8:
-                            outStr = realloc(outStr, outLen + 1);
-                            memset(outStr + outLen, 0, 1);
-                            outLen++;
-                            break;
-                        case BYTE_UTF16BE:
-                        case BYTE_UTF16LE:
-                            outStr = realloc(outStr, outLen + 2);
-                            memset(outStr + outLen, 0, 2);
-                            outLen += 2;
-                            break;
-                        default:
-                            break;
+                    if (encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE) {
+                        void *reallocPtr = realloc(outStr, outLen + 2);
 
+                        if (reallocPtr == NULL) {
+                            free(outStr);
+                            exit = true;
+                            break;
+                        }
+
+                        outStr = reallocPtr;
+                        memset(outStr + outLen, 0, 2);
+                        outLen += 2;
+                    } else {
+
+                        void *reallocPtr  = realloc(outStr, outLen + 1);
+
+                        if (reallocPtr == NULL) {
+                            free(outStr);
+                            exit = true;
+                            break;
+                        }
+
+                        outStr = reallocPtr;
+                        memset(outStr + outLen, 0, 1);
+                        outLen++;
                     }
                 }
 
@@ -1337,9 +1346,9 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
             case numeric_context:
             case noEncoding_context:
             case binary_context:
-            case precision_context:
+            case precision_context:{
                 tmp = id3v2ReadFrameEntry(&trav, &readSize);
-                
+
                 if(tmp == NULL){
                     exit = true;
                     break;
@@ -1350,6 +1359,7 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
                 free(tmp);
                 contentSize += readSize;
                 break;
+            }
 
             // latin1 will be enforced
             case latin1Encoding_context:{
@@ -1376,7 +1386,16 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
 
                 // add spacer
                 if(trav.current != NULL){
-                    outStr = realloc(outStr, outLen + 1);
+                    void *reallocPtr = realloc(outStr, outLen + 1);
+
+                    if (reallocPtr == NULL) {
+                        free(outStr);
+                        free(tmp);
+                        exit = true;
+                        break;
+                    }
+
+                    outStr = reallocPtr;
                     memset(outStr + outLen, 0, 1);
                     outLen++;
                 }
@@ -1450,20 +1469,20 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
 
                 // at least 1 or more bit contexts in a row
                 if(bitFlag == true){
-                    
+
                     unsigned char *bitBuff = NULL;
                     unsigned char **byteDataArr = NULL;
                     size_t *byteDataSizeArr = NULL;
                     size_t *nbits = NULL;
-                    
+
                     size_t arrSize = 0;
                     size_t totalBits = 0;
                     size_t totalBytes = 0;
                     size_t bitBuffSize = 0;
-                    
+
                     // copy values
                     while(true){
-                        
+
                         tmp = id3v2ReadFrameEntry(&trav, &readSize);
 
                         if(tmp == NULL){
@@ -1472,15 +1491,17 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
 
                         }
 
+                        // allocate memory for the first and only bit context more will be made
+                        // later for following indexes
                         if(byteDataSizeArr == NULL){
-                            
+
                             byteDataSizeArr = malloc(sizeof(size_t));
                             byteDataSizeArr[0] = readSize;
 
                             nbits = malloc(sizeof(size_t));
                             nbits[0] = cc->max;
 
-                            byteDataArr = malloc(sizeof(unsigned char *));
+                            byteDataArr = (unsigned char **) malloc(sizeof(unsigned char *));
                             byteDataArr[0] = malloc(readSize);
 
                             for(size_t i = 0; i < readSize; i++){
@@ -1490,14 +1511,52 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
                             arrSize++;
 
                         }else{
+
+                            void * reallocPtr = NULL;
                             arrSize++;
-                            byteDataSizeArr = realloc(byteDataSizeArr, arrSize * sizeof(size_t));
+
+                            reallocPtr = realloc(byteDataSizeArr, arrSize * sizeof(size_t));
+
+                            if (reallocPtr == NULL) {
+                                // above if statement is 100% run first all these will be allocated
+                                free(byteDataSizeArr);
+                                free(nbits);
+                                free((void *) byteDataArr);
+                                free(tmp);
+                                exit  = true;
+                                break;
+
+                            }
+                            byteDataSizeArr = reallocPtr;
+
                             byteDataSizeArr[arrSize - 1] = readSize;
 
-                            nbits = realloc(nbits, arrSize * sizeof(size_t));
+                            reallocPtr = realloc(nbits, arrSize * sizeof(size_t));
+                            if (reallocPtr == NULL) {
+                                // above if statement is 100% run first all these will be allocated
+                                free(byteDataSizeArr);
+                                free(nbits);
+                                free((void *) byteDataArr);
+                                free(tmp);
+                                exit  = true;
+                                break;
+                            }
+
+                            nbits = reallocPtr;
                             nbits[arrSize - 1] = cc->max;
 
-                            byteDataArr = realloc(byteDataArr, arrSize * sizeof(unsigned char *));
+                            reallocPtr = realloc((void *) byteDataArr, arrSize * sizeof(unsigned char *));
+                            if (reallocPtr == NULL) {
+                                // above if statement is 100% run first all these will be allocated
+                                free(byteDataSizeArr);
+                                free(nbits);
+                                free((void *) byteDataArr);
+                                free(tmp);
+                                exit  = true;
+                                break;
+                            }
+
+                            byteDataArr = (unsigned char **) reallocPtr;
                             byteDataArr[arrSize - 1] = malloc(readSize);
 
                             for(size_t i = 0; i < readSize; i++){
@@ -1512,11 +1571,11 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
 
 
                         if(listIteratorHasNext(context)){
-                            
+
                             if(((Id3v2ContentContext *)context.current->data)->type != bit_context){
                                 break;
-                            
-                            // seek to the next context 
+
+                            // seek to the next context
                             }else{
                                 cc = listIteratorNext(&context);
                             }
@@ -1546,18 +1605,18 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
                     int offset = 0;
                     int bitIndex = 0;
                     for(size_t i = totalBytes; i > 0; i--){
-                        
+
                         if(step >= arrSize || totalBytes == 0){
                             break;
                         }
-                        
+
                         size_t nBit = nbits[step];
                         size_t nBytes = byteDataSizeArr[step];
                         unsigned char *data = byteDataArr[step];
                         int counter = 0;
 
                         while(nBit > 0){
-                            
+
                             if(counter == nBytes){
                                 break;
                             }
@@ -1567,7 +1626,7 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
                                 if(nBit == 0){
                                     break;
                                 }
-                                
+
                                 // switch to the next byte
                                 if(j + offset >= CHAR_BIT){
                                     offset = 0;
@@ -1587,7 +1646,7 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
                                 offset = 0;
                             }
                             counter++;
-                            
+
                         }
 
                         step++;
@@ -1599,18 +1658,19 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
 
                     for(size_t i = 0; i < arrSize; i++){
                         free(byteDataArr[i]);
+
                     }
 
                     free(bitBuff);
                     free(nbits);
-                    free(byteDataArr);
+                    free((void *)byteDataArr);
                     free(byteDataSizeArr);
 
                     bitFlag = false;
 
                 // read a single and only bit context
                 }else{
-                    
+
                     int totalBytesNeeded = (int) (cc->max / CHAR_BIT) + 1;
                     int nBit = CHAR_BIT - 1;
 
@@ -1622,7 +1682,7 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
                     }
 
                     while(totalBytesNeeded > 0){
-                        
+
                         byteStreamResize(stream, stream->bufferSize + 1);
 
                         while(nBit >= 0){
@@ -1733,7 +1793,7 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
     }
 
     byteStreamRewind(stream);
-    *outl = stream->bufferSize;
+    *outLength = stream->bufferSize;
     out = calloc(stream->bufferSize, sizeof(uint8_t));
     byteStreamRead(stream, out, stream->bufferSize);
     byteStreamDestroy(stream);

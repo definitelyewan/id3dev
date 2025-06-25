@@ -1,7 +1,8 @@
 /**
  * @file id3v2Context.h
  * @author Ewan Jones
- * @brief provides the ability to generate a context and a list of contexts that represent the ruleset of a frame
+ * @brief provides the ability to generate a context and a list of contexts that represent the
+ * ruleset of a frame
  * @version 0.1
  * @date 2024-01-19
  * 
@@ -21,7 +22,7 @@ unsigned long id3v2djb2(const char *str);
 
 // mem
 
-Id3v2ContentContext *id3v2CreateContentContext(Id3v2ContextType type, size_t key, size_t max, size_t min);
+Id3v2ContentContext *id3v2CreateContentContext(const Id3v2ContextType type, const size_t key, const size_t max, const size_t min);
 void id3v2DestroyContentContext(Id3v2ContentContext **toDelete);
 
 
@@ -47,7 +48,7 @@ List *id3v2CreateAttachedPictureFrameContext(unsigned int version);
 List *id3v2CreateAudioEncryptionFrameContext(void);
 List *id3v2CreateAudioSeekPointIndexFrameContext(void);
 List *id3v2CreateCommentFrameContext(void);
-List *id3v2CreateCommercialFrameContext(void); 
+List *id3v2CreateCommercialFrameContext(void);
 List *id3v2CreateEncryptedMetaFrameContext(void);
 List *id3v2CreateRegistrationFrameContext(void); //ENCR GRID
 List *id3v2CreateMusicCDIdentifierFrameContext(void);
@@ -63,7 +64,7 @@ List *id3v2CreatePopularimeterFrameContext(void);
 List *id3v2CreatePositionSynchronisationFrameContext(void);
 List *id3v2CreatePrivateFrameContext(void);
 List *id3v2CreateRecommendedBufferSizeFrameContext(void);
-List *id3v2CreateRelativeVolumeAdjustmentFrameContext(unsigned int version);
+List *id3v2CreateRelativeVolumeAdjustmentFrameContext(void);
 List *id3v2CreateReverbFrameContext(void);
 List *id3v2CreateSeekFrameContext(void);
 List *id3v2CreateSignatureFrameContext(void);
@@ -77,12 +78,13 @@ List *id3v2CreateGenericFrameContext(void);
 // pairings
 
 HashTable *id3v2CreateDefaultIdentifierContextPairings(unsigned int version);
-bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char key[ID3V2_FRAME_ID_MAX_SIZE], List *context);
+bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs,
+                                      char key[ID3V2_FRAME_ID_MAX_SIZE], List *context);
 
 
 // convi
 
-uint8_t *id3v2ContextSerialize(Id3v2ContentContext *cc, size_t *outl);
+uint8_t *id3v2ContextSerialize(Id3v2ContentContext *cc, size_t *outLength);
 char *id3v2ContextToJSON(const Id3v2ContentContext *cc);
 
 #ifdef __cplusplus

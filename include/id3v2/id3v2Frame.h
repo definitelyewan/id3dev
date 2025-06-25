@@ -63,7 +63,7 @@ uint8_t id3v2ReadFrameEntryAsU8(ListIter *traverser);
 uint16_t id3v2ReadFrameEntryAsU16(ListIter *traverser);
 uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser);
 
-bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize, void *entry);
+bool id3v2WriteFrameEntry(const Id3v2Frame *frame, const ListIter *entries, const size_t entrySize, const void *entry);
 
 bool id3v2AttachFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame);
 Id3v2Frame *id3v2DetachFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame);
@@ -73,10 +73,10 @@ Id3v2Frame *id3v2DetachFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame);
     output
 */
 
-uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, uint32_t frameSize, size_t *outl);
+uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, uint32_t frameSize, size_t *outLength);
 char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, const uint8_t version);
 
-uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl);
+    uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outLength);
 char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version);
 
 

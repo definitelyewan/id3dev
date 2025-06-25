@@ -47,8 +47,8 @@ if(DOXYGEN_FOUND)
     configure_file("${_doxyfile_template}" "${_target_doxyfile}")
 
     doxygen_add_docs(docsfiles
-                    ${CMAKE_CURRENT_SOURCE_DIR} 
-                    ${ID3DEV_DOC_FILES})
+            ${CMAKE_CURRENT_SOURCE_DIR}
+            ${ID3DEV_DOC_FILES})
 
 
 endif()

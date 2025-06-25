@@ -220,4 +220,6 @@ There are well over 100 test cases located in the test folder for proof of funct
 
 ### Known Bugs
 - id3v2ParseFrame has a bit_context implementation that can result in incorrect return values when the number of bits is more then 8. Tests will need to be updated to match whatever fix is made across the board.
+- some id3dev/id3v2functions test files fail due to code that was changed in dev branch. use main to replace the code later
+- possible memmory errors in id3v2Frame.cs
 
