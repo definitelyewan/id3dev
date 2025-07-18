@@ -1184,6 +1184,170 @@ char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, const uint8_t versi
     return json;
 }
 
+
+/**
+ * @brief Serializes an encoded string from a frame entry.
+ * @param frame
+ * @param trav
+ * @param outStr
+ * @return
+ */
+size_t id3v2SerializeEncodedStringEntry(const Id3v2Frame *frame, ListIter *trav,  unsigned char **outStr) {
+
+    if (frame == NULL) {
+        *outStr = NULL;
+        return 0;
+    }
+
+    ListIter contentContextIter = listCreateIterator(frame->contexts);
+    ListIter contentEntryIter = listCreateIterator(frame->entries);
+    size_t poscc = 0;
+    size_t posce = 0;
+    size_t utf8Len = 0;
+    size_t outLen = 0;
+    uint8_t encoding = 0;
+    void *iterNext = NULL;
+    unsigned char *tmp = NULL;
+
+
+    // hunt down "encoding" key
+    while((iterNext = listIteratorNext(&contentContextIter)) != NULL){
+
+        if(((Id3v2ContentContext *)iterNext)->type == iter_context){
+            poscc--;
+        }
+
+        if(((Id3v2ContentContext *)iterNext)->key == id3v2djb2("encoding")){
+            break;
+        }
+
+        poscc++;
+    }
+
+    // hunt down encoding value
+    while((iterNext = listIteratorNext(&contentEntryIter)) != NULL){
+
+        if(poscc == posce){
+            encoding = ((uint8_t *)((Id3v2ContentEntry *)iterNext)->entry)[0];
+            break;
+        }
+
+        posce++;
+    }
+
+    // enforce encoding as utf8
+    tmp = (unsigned char *)id3v2ReadFrameEntryAsChar(trav, &utf8Len);
+
+    if(tmp == NULL || utf8Len == 0){
+        free(tmp);
+        *outStr = NULL;
+        return 0;
+    }
+
+    // non-empty strings
+    if(utf8Len >= 1 && tmp[0] != 0){
+
+        const bool convi = byteConvertTextFormat(tmp, BYTE_UTF8, utf8Len, outStr, encoding, &outLen);
+
+        if(convi == false && outLen == 0){
+            free(tmp);
+            *outStr = NULL;
+            return 0;
+        }
+
+
+        // data is already in utf8
+        if(convi && outLen == 0){
+            *outStr = tmp;
+            outLen = utf8Len;
+        }else{
+            free(tmp);
+        }
+
+        // prepend BOM
+        if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
+            bytePrependBOM(encoding, outStr, &outLen);
+        }
+    }else{
+        free(tmp);
+    }
+
+    // append null spacer if there are more entries in the list
+    if(trav->current != NULL){
+        if (encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE) {
+            void *reallocPtr = realloc(*outStr, outLen + 2);
+
+            if (reallocPtr == NULL) {
+                return outLen;
+            }
+
+            *outStr = reallocPtr;
+            memset((*outStr) + outLen, 0, 2);
+            outLen += 2;
+        } else {
+
+            void *reallocPtr  = realloc(*outStr, outLen + 1);
+
+            if (reallocPtr == NULL) {
+                return outLen;
+            }
+
+            *outStr = reallocPtr;
+            memset((*outStr) + outLen, 0, 1);
+            outLen++;
+        }
+    }
+
+    return outLen;
+}
+
+/**
+ * @brief Serializes a Latin1 encoded string.
+ * @param trav
+ * @param outStr
+ * @return
+ */
+size_t id3v2SerializeLatin1StringEntry(ListIter *trav,  unsigned char **outStr) {
+
+    bool convi = false;
+    size_t outLen = 0;
+    size_t utf8len = 0;
+    unsigned char *tmp = NULL;
+
+    tmp = (unsigned char *)id3v2ReadFrameEntryAsChar(trav, &utf8len);
+
+    if(tmp == NULL){
+        *outStr = NULL;
+        return 0;
+    }
+
+    // ensure latin1
+    convi = byteConvertTextFormat(tmp, BYTE_UTF8, utf8len, outStr, BYTE_ISO_8859_1, &outLen);
+
+    if(convi == false && outLen == 0){
+        free(tmp);
+        *outStr = NULL;
+        return 0;
+    }
+
+    // add spacer
+    if(trav->current != NULL){
+        void *reallocPtr = realloc(*outStr, outLen + 1);
+
+        if (reallocPtr == NULL) {
+            free(tmp);
+            return outLen;
+        }
+
+        *outStr = reallocPtr;
+        memset((*outStr) + outLen, 0, 1);
+        outLen++;
+    }
+
+    free(tmp);
+    return outLen;
+}
+
 /**
  * @brief Converts a frame structure into its binary representation. If this
  * function fails it will return NULL otherwise, an uint8_t structure.
@@ -1230,115 +1394,19 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outLeng
 
             // encoding will always be enforced
             case encodedString_context:{
-                
-                ListIter contentContextIter = listCreateIterator(frame->contexts);
-                ListIter contentEntryIter = listCreateIterator(frame->entries);
-                size_t poscc = 0;
-                size_t posce = 0;
-                size_t utf8Len = 0;
-                uint8_t encoding = 0;
-                void *iterNext = NULL;
-                
-
-                // hunt down "encoding" key
-                while((iterNext = listIteratorNext(&contentContextIter)) != NULL){
-
-                    if(((Id3v2ContentContext *)iterNext)->type == iter_context){
-                        poscc--;
-                    }
-
-                    if(((Id3v2ContentContext *)iterNext)->key == id3v2djb2("encoding")){
-                        break;
-                    }
-
-                    poscc++;
-                }
-                
-                // hunt down encoding value
-                while((iterNext = listIteratorNext(&contentEntryIter)) != NULL){
-
-                    if(poscc == posce){
-                        encoding = ((uint8_t *)((Id3v2ContentEntry *)iterNext)->entry)[0];
-                        break;
-                    }
-
-                    posce++;
-                }
-
-                // enforce encoding as utf8
-                tmp = (unsigned char *)id3v2ReadFrameEntryAsChar(&trav, &utf8Len);
-
-                if(tmp == NULL || utf8Len == 0){
-                    exit = true;
-                    break;
-                }
 
                 unsigned char *outStr = NULL;
-                size_t outLen = 0;
+                size_t outLen = id3v2SerializeEncodedStringEntry(frame, &trav, &outStr);
 
-                // non-empty strings
-                if(utf8Len >= 1 && tmp[0] != 0){
-
-                    bool convi = byteConvertTextFormat(tmp, BYTE_UTF8, utf8Len, &outStr, encoding, &outLen);
-
-                    if(convi == false && outLen == 0){
-                        free(tmp);
-                        exit = true;
-                        break;
-                    }
-
-
-                    // data is already in utf8
-                    if(convi && outLen == 0){
-                        outStr = tmp;
-                        outLen = utf8Len;
-                    }else{
-                        free(tmp);
-                    }
-
-                    // prepend BOM
-                    if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
-                        bytePrependBOM(encoding, &outStr, &outLen);
-                    }
-                }else{
-                    free(tmp);
-                }
-
-                // append null spacer if there are more entries in the list
-                if(trav.current != NULL){
-                    if (encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE) {
-                        void *reallocPtr = realloc(outStr, outLen + 2);
-
-                        if (reallocPtr == NULL) {
-                            free(outStr);
-                            exit = true;
-                            break;
-                        }
-
-                        outStr = reallocPtr;
-                        memset(outStr + outLen, 0, 2);
-                        outLen += 2;
-                    } else {
-
-                        void *reallocPtr  = realloc(outStr, outLen + 1);
-
-                        if (reallocPtr == NULL) {
-                            free(outStr);
-                            exit = true;
-                            break;
-                        }
-
-                        outStr = reallocPtr;
-                        memset(outStr + outLen, 0, 1);
-                        outLen++;
-                    }
+                if (outLen == 0 || outStr == NULL) {
+                    exit = true;
+                    break;
                 }
 
                 byteStreamResize(stream, stream->bufferSize + outLen);
                 byteStreamWrite(stream, outStr, outLen);
                 contentSize += outLen;
                 free(outStr);
-                
                 break;
             }
 
@@ -1363,47 +1431,18 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outLeng
 
             // latin1 will be enforced
             case latin1Encoding_context:{
-                
-                bool convi = false;
-                unsigned char *outStr = NULL;
                 size_t outLen = 0;
-                size_t utf8len = 0;
+                unsigned char *outStr = NULL;
 
-                tmp = (unsigned char *)id3v2ReadFrameEntryAsChar(&trav, &utf8len);
+                outLen = id3v2SerializeLatin1StringEntry(&trav, &outStr);
 
-                if(tmp == NULL){
+                if (outLen == 0 || outStr == NULL) {
                     exit = true;
                     break;
                 }
 
-                // ensure latin1
-                convi = byteConvertTextFormat(tmp, BYTE_UTF8, utf8len, &outStr, BYTE_ISO_8859_1, &outLen);
-
-                if(convi == false && outLen == 0){
-                    free(tmp);
-                    break;
-                }
-
-                // add spacer
-                if(trav.current != NULL){
-                    void *reallocPtr = realloc(outStr, outLen + 1);
-
-                    if (reallocPtr == NULL) {
-                        free(outStr);
-                        free(tmp);
-                        exit = true;
-                        break;
-                    }
-
-                    outStr = reallocPtr;
-                    memset(outStr + outLen, 0, 1);
-                    outLen++;
-                }
-
                 byteStreamResize(stream, stream->bufferSize + outLen);
                 byteStreamWrite(stream, outStr, outLen);
-
-                free(tmp);
                 free(outStr);
                 contentSize += outLen;
                 break;
