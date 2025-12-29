@@ -48,7 +48,9 @@ add_library(id3dev ${ID3DEV_HEADER_FILES} ${ID3DEV_SOURCE_FILES}
 )
 
 target_link_libraries(id3dev PRIVATE ByteStreamInternal)
-target_link_libraries(id3dev PRIVATE m)
+IF (NOT WIN32)
+    target_link_libraries(id3dev PRIVATE m)
+endif()
 target_include_directories(id3dev PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/../include"
         "${CMAKE_CURRENT_SOURCE_DIR}/../"
