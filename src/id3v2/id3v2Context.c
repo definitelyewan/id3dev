@@ -126,7 +126,7 @@ char *id3v2PrintContentContext(const void *toBePrinted){
     // 40 chars for the below string
     char *str = malloc(sizeof(long) + sizeof(long) + sizeof(int) + sizeof(Id3v2ContextType) + 40);
 
-    sprintf(str,"Type: %d, Key: %ld, min: %ld, max: %ld\n", c->type, c->key, c->min, c->max);
+    sprintf(str,"Type: %d, Key: %zu, min: %zu, max: %zu\n", c->type, c->key, c->min, c->max);
 
     return str;
 }
@@ -1682,20 +1682,20 @@ char *id3v2ContextToJSON(Id3v2ContentContext *cc){
         return json;
     }
 
-    memCount += snprintf(NULL, 0, 
-                        "{\"type\":%d,\"key\":%ld,\"max\":%ld,\"min\":%ld}", 
-                        cc->type, 
-                        cc->key, 
-                        cc->max, 
+    memCount += snprintf(NULL, 0,
+                        "{\"type\":%d,\"key\":%zu,\"max\":%zu,\"min\":%zu}",
+                        cc->type,
+                        cc->key,
+                        cc->max,
                         cc->min);
 
     json = calloc(memCount + 1, sizeof(char));
 
-    snprintf(json, memCount, 
-            "{\"type\":%d,\"key\":%ld,\"max\":%ld,\"min\":%ld}", 
-            cc->type, 
-            cc->key, 
-            cc->max, 
+    snprintf(json, memCount,
+            "{\"type\":%d,\"key\":%zu,\"max\":%zu,\"min\":%zu}",
+            cc->type,
+            cc->key,
+            cc->max,
             cc->min);
 
     return json;
