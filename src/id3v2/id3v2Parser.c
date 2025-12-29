@@ -562,7 +562,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
     // of the reads or writes will work until someone reparses the data after its changed.
     if(header->encryptionSymbol > 0 || header->decompressionSize > 0){
         
-        void * data = NULL;
+        uint8_t * data = NULL;
         size_t dataSize = 0;
         List *gContext = id3v2CreateGenericFrameContext();
         Id3v2ContentContext *cc = (Id3v2ContentContext *) gContext->head->data;
@@ -606,7 +606,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
             // encoded strings
             case encodedString_context:{
                 
-                void *data = NULL;
+                uint8_t *data = NULL;
                 size_t dataSize = 0;
 
                 size_t posce = 0;
@@ -686,11 +686,11 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
             // only characters found within the latin1 character set
             case latin1Encoding_context:{
 
-                void *data = NULL;
+                uint8_t *data = NULL;
                 size_t dataSize = 0;
 
                 data = byteStreamReturnLatin1(innerStream, &dataSize);
-                
+
                 if(dataSize > cc->max){
                     dataSize = cc->max;
                     data = realloc(data, dataSize);
@@ -713,7 +713,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
             case precision_context:
             case numeric_context:{
                 
-                void * data = NULL;
+                uint8_t * data = NULL;
                 size_t dataSize = 0;
 
                 if(cc->min == cc->max){
@@ -742,7 +742,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                 break;
             case bit_context:{
 
-                void *data = NULL;
+                uint8_t *data = NULL;
                 size_t nBits = 0;
                 size_t dataSize = 0;
                 Id3v2ContextType isBitContext = 0;
@@ -824,7 +824,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                 break;
             case adjustment_context:{
 
-                void *data = NULL;
+                uint8_t *data = NULL;
                 size_t dataSize = 0;
 
                 size_t posce = 0;

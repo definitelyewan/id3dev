@@ -170,7 +170,7 @@ char *id3v2PrintContentEntry(const void *toBePrinted){
 
     char *str = malloc((sizeof(char) * 16) + sizeof(long) + 8);
 
-    sprintf(str, "Size: %ld, data: %p\n",e->size, e->entry);
+    sprintf(str, "Size: %zu, data: %p\n",e->size, e->entry);
 
     return str;
 }
@@ -1776,7 +1776,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                 b64 = base64Encode(tmp, readSize);
 
                 contentMemCount += snprintf(NULL, 0,
-                                           "{\"value\":\"%s\",\"size\":%ld}",
+                                           "{\"value\":\"%s\",\"size\":%zu}",
                                            b64,
                                            strlen(b64));
                 
@@ -1786,7 +1786,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
 
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%s\",\"size\":%ld}",
+                             "{\"value\":\"%s\",\"size\":%zu}",
                              b64,
                              readSize);                    
 
@@ -1794,7 +1794,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%s\",\"size\":%ld}",
+                             "{\"value\":\"%s\",\"size\":%zu}",
                              b64,
                              readSize);   
                 }
@@ -1820,7 +1820,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
 
 
                 contentMemCount += snprintf(NULL, 0,
-                                           "{\"value\":\"%s\",\"size\":%ld}",
+                                           "{\"value\":\"%s\",\"size\":%zu}",
                                            tmp,
                                            readSize);
 
@@ -1830,7 +1830,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
 
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%s\",\"size\":%ld}",
+                             "{\"value\":\"%s\",\"size\":%zu}",
                              tmp,
                              readSize);                    
 
@@ -1838,7 +1838,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%s\",\"size\":%ld}",
+                             "{\"value\":\"%s\",\"size\":%zu}",
                              tmp,
                              readSize);   
                 }
@@ -1864,7 +1864,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                 free(tmp);
 
                 contentMemCount += snprintf(NULL, 0,
-                                           "{\"value\":\"%ld\",\"size\":%ld}",
+                                           "{\"value\":\"%zu\",\"size\":%zu}",
                                            num,
                                            readSize);
 
@@ -1874,7 +1874,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
 
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%ld\",\"size\":%ld}",
+                             "{\"value\":\"%zu\",\"size\":%zu}",
                              num,
                              readSize);                    
 
@@ -1882,7 +1882,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%ld\",\"size\":%ld}",
+                             "{\"value\":\"%zu\",\"size\":%zu}",
                              num,
                              readSize);   
                 }
@@ -1906,7 +1906,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                 free(tmp);
 
                 contentMemCount = snprintf(NULL, 0,
-                                           "{\"value\":\"%f\",\"size\":%ld}",
+                                           "{\"value\":\"%f\",\"size\":%zu}",
                                            value,
                                            readSize);
 
@@ -1916,7 +1916,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
 
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%f\",\"size\":%ld}",
+                             "{\"value\":\"%f\",\"size\":%zu}",
                              value,
                              readSize);                    
 
@@ -1924,7 +1924,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%f\",\"size\":%ld}",
+                             "{\"value\":\"%f\",\"size\":%zu}",
                              value,
                              readSize);   
                 }
@@ -2029,7 +2029,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
 
 
                 contentMemCount = snprintf(NULL, 0,
-                                           "{\"value\":\"%s\",\"size\":%ld}",
+                                           "{\"value\":\"%s\",\"size\":%zu}",
                                            b64,
                                            strlen(b64));
 
@@ -2039,7 +2039,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
 
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%s\",\"size\":%ld}",
+                             "{\"value\":\"%s\",\"size\":%zu}",
                              b64,
                              readSize);                    
 
@@ -2047,7 +2047,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%s\",\"size\":%ld}",
+                             "{\"value\":\"%s\",\"size\":%zu}",
                              b64,
                              readSize);   
                 }

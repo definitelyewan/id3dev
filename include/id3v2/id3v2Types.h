@@ -25,6 +25,7 @@ extern "C" {
 
 #include "id3dependencies/LinkedListLib/include/LinkedList.h"
 #include "id3dependencies/HashTableLib/include/hashTable.h"
+#include "id3dependencies/ByteStream/include/byteDefines.h"
 
 //! Size of ID3v2 tag identifier "ID3" or "3DI"
 #define ID3V2_TAG_ID_SIZE 3
@@ -43,6 +44,24 @@ extern "C" {
 
 //! Major version for ID3v2.4
 #define ID3V2_TAG_VERSION_4 4
+
+//! Latin1(ISO_8859_1) encoding
+#define ID3V2_ENCODING_ISO_8859_1 BYTE_ISO_8859_1
+
+//! Utf16le encoding
+#define ID3V2_ENCODING_UTF16LE BYTE_UTF16LE
+
+//! Utf16be encoding
+#define ID3V2_ENCODING_UTF16BE BYTE_UTF16BE
+
+//! Utf8 encoding
+#define ID3V2_ENCODING_UTF8 BYTE_UTF8
+
+//! Ascii encoding
+#define ID3V2_ENCODING_ASCII BYTE_ASCII
+
+//! Unkown encoding
+#define ID3V2_ENCODING_OTHER BYTE_OTHER_ENCODING
 
 /**
  * @brief The max size a frame id or size can be in bytes.
