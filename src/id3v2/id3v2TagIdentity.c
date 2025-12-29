@@ -1,7 +1,7 @@
 /**
  * @file id3v2TagIdentity.c
  * @author Ewan Jones
- * @brief Functions realted to identifying an id3v2 tag
+ * @brief Functions related to identifying an id3v2 tag
  * @version 0.1
  * @date 2024-04-11
  * 
@@ -185,7 +185,7 @@ int id3v2ReadUnsynchronisationIndicator(Id3v2TagHeader *header){
 
 /**
  * @brief Reads the compression indicator found in a version 2 tag header.
- * @details Returns the indicator value if successfull and -1 otherwise.
+ * @details Returns the indicator value if successful and -1 otherwise.
  * @param header 
  * @return int 
  */
@@ -268,7 +268,7 @@ int id3v2ReadFooterIndicator(Id3v2TagHeader *header){
 }
 
 /**
- * @brief Creates an extended header strcuture.
+ * @brief Creates an extended header structure.
  * @details You should never need to use this structure, it will be handled by a header.
  * @param padding 
  * @param crc 
@@ -328,7 +328,7 @@ bool id3v2WriteTagSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
         header->extendedHeader = extendedHeader;
     }
 
-    //i dont care it will get set every time
+    // I don't care it will get set every time
     header->extendedHeader->tagRestrictions = true;
 
     header->extendedHeader->restrictions = setBit(header->extendedHeader->restrictions, 6, readBit(bits, 0));
@@ -338,7 +338,7 @@ bool id3v2WriteTagSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
 }
 
 /**
- * @brief Writes the value of bit to the correct possition in the restrictions.
+ * @brief Writes the value of bit to the correct position in the restrictions.
  * @details If this function fails it will return 0 otherwise, 1.
  * @param header 
  * @param bit 
@@ -391,7 +391,7 @@ bool id3v2WriteTextFieldsSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
         header->extendedHeader = extendedHeader;
     }
 
-    //i dont care it will get set every time
+    // I don't care it will get set every time
     header->extendedHeader->tagRestrictions = true;
 
     header->extendedHeader->restrictions = setBit(header->extendedHeader->restrictions, 4, readBit(bits, 1));
@@ -454,7 +454,7 @@ bool id3v2WriteImageSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
         header->extendedHeader = extendedHeader;
     }
 
-    //i dont care it will get set every time
+    // I don't care it will get set every time
     header->extendedHeader->tagRestrictions = true;
 
     header->extendedHeader->restrictions = setBit(header->extendedHeader->restrictions, 1, readBit(bits, 1));
@@ -619,7 +619,7 @@ Id3v2Tag *id3v2CreateTag(Id3v2TagHeader *header, List *frames){
 }
 
 /**
- * @brief Destroys the a tag and its content
+ * @brief Destroys a tag and its content
  * 
  * @param toDelete 
  */
@@ -641,7 +641,8 @@ void id3v2DestroyTag(Id3v2Tag **toDelete){
  * return NULL otherwise, an uint8_t pointer.
  * 
  * @param ext 
- * @param version 
+ * @param version
+ * @param outl
  * @return uint8_t* 
  */
 uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t version, size_t *outl){
@@ -827,7 +828,8 @@ char *id3v2ExtendedTagHeaderToJSON(Id3v2ExtendedTagHeader *ext, uint8_t version)
  * return NULL otherwise, an uint8_t pointer.
  * 
  * @param header 
- * @param uintSize 
+ * @param uintSize
+ * @param outl
  * @return uint8_t* 
  */
 uint8_t *id3v2TagHeaderSerialize(Id3v2TagHeader *header, uint32_t uintSize, size_t *outl){    

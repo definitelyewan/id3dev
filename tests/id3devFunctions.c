@@ -1,12 +1,10 @@
 #include <stdio.h>
-#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
 #include "id3dev.h"
 #include "id3v2/id3v2.h"
 #include "id3v1/id3v1.h"
@@ -36,11 +34,11 @@ static void id3CreateAndDestroy_allInOneNoV1(void **state){
 }
 
 
-static void id3SetPreferedStandard_changeVersion(void **state){
+static void id3SetPreferredStandard_changeVersion(void **state){
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_4);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_4);
 
-    assert_int_equal(id3GetPreferedStandard(), ID3V2_TAG_VERSION_4);
+    assert_int_equal(id3GetPreferredStandard(), ID3V2_TAG_VERSION_4);
 }
 
 static void id3FromFile_badPath(void **state){
@@ -354,12 +352,12 @@ static void id3ReadTitle_v1v2(void **state){
     ID3 *metadata = id3FromFile("assets/sorry4dying.mp3");
     char *str = NULL;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
     str = id3ReadTitle(metadata);
     assert_string_equal(str, "sorry4dying");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     str = id3ReadTitle(metadata);
     assert_string_equal(str, "sorry4dying");
     free(str);
@@ -373,12 +371,12 @@ static void id3ReadArtist_v1v2(void **state){
     ID3 *metadata = id3FromFile("assets/OnGP.mp3");
     char *str = NULL;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3); // incorrect on purpose because it should work anyway
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3); // incorrect on purpose because it should work anyway
     str = id3ReadArtist(metadata);
     assert_string_equal(str, "Death Grips");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     str = id3ReadArtist(metadata);
     assert_string_equal(str, "Death Grips");
     free(str);
@@ -392,12 +390,12 @@ static void id3ReadAlbumArtist_v1v2(void **state){
     ID3 *metadata = id3FromFile("assets/sorry4dying.mp3");
     char *str = NULL;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3); // incorrect on purpose because it should work anyway
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3); // incorrect on purpose because it should work anyway
     str = id3ReadAlbumArtist(metadata);
     assert_string_equal(str, "Quadeca");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     str = id3ReadAlbumArtist(metadata);
     assert_null(str);
 
@@ -410,12 +408,12 @@ static void id3ReadAlbum_v1v2(void **state){
     ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *str = NULL;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
     str = id3ReadAlbum(metadata); // should read ID3v1 tag because ID3v2 is NULL
     assert_string_equal(str, "Blur");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     str = id3ReadAlbum(metadata);
     assert_string_equal(str, "Blur");
     free(str);
@@ -429,14 +427,14 @@ static void id3ReadYear_v1v2(void **state){
     ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *str = NULL;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_4);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_4);
     id3ConvertId3v1ToId3v2(metadata);
 
     str = id3ReadYear(metadata);
     assert_string_equal(str, "1997");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     str = id3ReadYear(metadata);
     assert_string_equal(str, "1997");
     free(str);
@@ -450,12 +448,12 @@ static void id3ReadGenre_v1v2(void **state){
     ID3 *metadata = id3FromFile("assets/boniver.mp3");
     char *str = NULL;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_2);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_2);
     str = id3ReadGenre(metadata);
     assert_string_equal(str, "Alternative");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     str = id3ReadGenre(metadata);
     assert_string_equal(str, "Alternative");
     free(str);
@@ -468,12 +466,12 @@ static void id3ReadTrack_v1v2(void **state){
     ID3 *metadata = id3FromFile("assets/danybrown2.mp3");
     char *str = NULL;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_2);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_2);
     str = id3ReadTrack(metadata);
     assert_string_equal(str, "06/15");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     str = id3ReadTrack(metadata);
     assert_string_equal(str, "6");
     free(str);
@@ -486,12 +484,12 @@ static void id3ReadComposer_v1v2(void **state){
     ID3 *metadata = id3FromFile("assets/boniver.mp3");
     char *str = NULL;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_2);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_2);
     str = id3ReadComposer(metadata);
     assert_string_equal(str, "Bon Iver");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     str = id3ReadComposer(metadata);
     assert_null(str);
 
@@ -503,12 +501,12 @@ static void id3ReadDisc_v1v2(void **state){
     ID3 *metadata = id3FromFile("assets/boniver.mp3");
     char *str = NULL;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_2);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_2);
     str = id3ReadDisc(metadata);
     assert_string_equal(str, "01/01");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     str = id3ReadDisc(metadata);
     assert_null(str);
 
@@ -520,12 +518,12 @@ static void id3ReadLyrics_v1v2(void **state){
     ID3 *metadata = id3FromFile("assets/danybrown2.mp3");
     char *str = NULL;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_2);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_2);
     str = id3ReadLyrics(metadata);
     assert_string_equal(str, "haBDJHAsbdjkHASBDJahbsdkAHBSDHAbsdHBDUAHSBDUBAUIBFOASIUBDFOIAUBFOIAUWBFOAWBFAOUWEBFUOYBOUBUOBUOboubouboubouboubouboigndoignoisnjgsdfjnglksjdfngslkjfngskdjfnglskdnfgiserugisugnvfkdxjnvxlkjnijxdngixjdhfgoiserhgiusdng spoerijgsoergjnposeirhgposergn reigjosperijgsodfkgkldfmvxc.,vbm");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     str = id3ReadLyrics(metadata);
     assert_null(str);
 
@@ -537,14 +535,14 @@ static void id3ReadComment_v1v2(void **state){
     ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     char *str = NULL;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_2);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_2);
     id3ConvertId3v1ToId3v2(metadata);
 
     str = id3ReadComment(metadata);
     assert_string_equal(str, "test");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     str = id3ReadComment(metadata);
     assert_string_equal(str, "test");
     free(str);
@@ -558,14 +556,14 @@ static void id3ReadPicture_v1v2(void **state){
     uint8_t *data = NULL;
     size_t size = 0;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_2);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_2);
 
 
     data = id3ReadPicture(0, metadata, &size);
     assert_non_null(data);
     free(data);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     data = id3ReadPicture(0, metadata, &size);
     assert_null(data);
     assert_int_equal(size, 0);
@@ -579,14 +577,14 @@ static void id3WriteTitle_v1v2(void **state){
     char *str = NULL;
     bool v = false;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
     v = id3WriteTitle("test", metadata);
     assert_true(v);
     str = id3ReadTitle(metadata);
     assert_string_equal(str, "test");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     v = id3WriteTitle("test", metadata);
     assert_true(v);
     str = id3ReadTitle(metadata);
@@ -603,7 +601,7 @@ static void id3WriteTitle_flipStd(void **state){
     bool v = false;
 
     id3v2DestroyTag(&metadata->id3v2);
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
 
     v = id3WriteTitle("test", metadata);
     assert_true(v);
@@ -620,14 +618,14 @@ static void id3WriteArtist_v1v2(void **state){
     char *str = NULL;
     bool v = false;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
     v = id3WriteArtist("ben lasky", metadata);
     assert_true(v);
     str = id3ReadArtist(metadata);
     assert_string_equal(str, "ben lasky");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     v = id3WriteArtist("ben lasky", metadata);
     assert_true(v);
     str = id3ReadArtist(metadata);
@@ -643,7 +641,7 @@ static void id3WriteAlbumArtist_v1v2(void **state){
     char *str = NULL;
     bool v = false;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
     id3ConvertId3v1ToId3v2(metadata);
 
 
@@ -653,7 +651,7 @@ static void id3WriteAlbumArtist_v1v2(void **state){
     assert_string_equal(str, "blur");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     v = id3WriteAlbumArtist("damon albarn", metadata);
     assert_false(v);
 
@@ -666,7 +664,7 @@ static void id3WriteYear_v1v2(void **state){
     char *str = NULL;
     bool v = false;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
     id3ConvertId3v1ToId3v2(metadata);
 
 
@@ -676,7 +674,7 @@ static void id3WriteYear_v1v2(void **state){
     assert_string_equal(str, "1999");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     v = id3WriteYear("2", metadata);
     assert_true(v);
     str = id3ReadYear(metadata);
@@ -692,7 +690,7 @@ static void id3WriteGenre_v1v2(void **state){
     char *str = NULL;
     bool v = false;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
     id3ConvertId3v1ToId3v2(metadata);
 
 
@@ -702,7 +700,7 @@ static void id3WriteGenre_v1v2(void **state){
     assert_string_equal(str, "Rock");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     v = id3WriteGenre("\x01", metadata);
     assert_true(v);
     str = id3ReadGenre(metadata);
@@ -718,7 +716,7 @@ static void id3WriteTrack_v1v2(void **state){
     char *str = NULL;
     bool v = false;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
     id3v1WriteTrack(0xff, metadata->id3v1);
     id3ConvertId3v1ToId3v2(metadata);
 
@@ -729,7 +727,7 @@ static void id3WriteTrack_v1v2(void **state){
     assert_string_equal(str, "1");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     v = id3WriteTrack("1", metadata);
     assert_true(v);
     str = id3ReadTrack(metadata);
@@ -745,7 +743,7 @@ static void id3WriteDisc_v1v2(void **state){
     char *str = NULL;
     bool v = false;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
     id3ConvertId3v1ToId3v2(metadata);
 
 
@@ -755,7 +753,7 @@ static void id3WriteDisc_v1v2(void **state){
     assert_string_equal(str, "1/10");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     v = id3WriteAlbumArtist("1/1", metadata);
     assert_false(v);
 
@@ -768,7 +766,7 @@ static void id3WriteComposer_v1v2(void **state){
     char *str = NULL;
     bool v = false;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
     id3ConvertId3v1ToId3v2(metadata);
 
 
@@ -778,7 +776,7 @@ static void id3WriteComposer_v1v2(void **state){
     assert_string_equal(str, "Damon Albarn");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     v = id3WriteComposer("Damon Albarn", metadata);
     assert_false(v);
 
@@ -791,7 +789,7 @@ static void id3WriteLyrics_v1v2(void **state){
     char *str = NULL;
     bool v = false;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
     id3ConvertId3v1ToId3v2(metadata);
 
 
@@ -801,7 +799,7 @@ static void id3WriteLyrics_v1v2(void **state){
     assert_string_equal(str, "Beetlebum\nWhat you've done\nShe's a gun\nNow what you've done\nBeetlebum\nGet nothing done\nYou beetlebum\nJust get numb\nNow what you've done\nBeetlebum");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     v = id3WriteLyrics("Beetlebum\nWhat you've done\nShe's a gun\nNow what you've done\nBeetlebum\nGet nothing done\nYou beetlebum\nJust get numb\nNow what you've done\nBeetlebum", metadata);
     assert_false(v);
 
@@ -814,7 +812,7 @@ static void id3WriteComment_v1v2(void **state){
     char *str = NULL;
     bool v = false;
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
     id3ConvertId3v1ToId3v2(metadata);
 
 
@@ -824,7 +822,7 @@ static void id3WriteComment_v1v2(void **state){
     assert_string_equal(str, "comment");
     free(str);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     v = id3WriteComment("comment", metadata);
     assert_true(v);
     str = id3ReadComment(metadata);
@@ -854,7 +852,7 @@ static void id3WritePicture_v1v2(void **state){
     fclose(fp);
 
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
     id3ConvertId3v1ToId3v2(metadata);
 
 
@@ -864,7 +862,7 @@ static void id3WritePicture_v1v2(void **state){
     assert_memory_equal(data, picture, dataSize);
     free(data);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     v = id3WritePicture(picture, picSize, "png", 0, metadata);
     assert_false(v);
 
@@ -872,7 +870,7 @@ static void id3WritePicture_v1v2(void **state){
     id3Destroy(&metadata);
 }
 
-static void id3WritePrictureFromFile_v1v2(void **state){
+static void id3WritePictureFromFile_v1v2(void **state){
     
     ID3 *metadata = id3FromFile("assets/Beetlebum.mp3");
     uint8_t *data = NULL;
@@ -891,7 +889,7 @@ static void id3WritePrictureFromFile_v1v2(void **state){
     fread(picture, 1, picSize, fp);
     fclose(fp);
 
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
     id3ConvertId3v1ToId3v2(metadata);
 
     v = id3WritePictureFromFile("assets/cat.png", "png", 0, metadata);
@@ -900,7 +898,7 @@ static void id3WritePrictureFromFile_v1v2(void **state){
     assert_memory_equal(data, picture, dataSize);
     free(data);
 
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
     v = id3WritePictureFromFile("assets/cat.png", "png", 0, metadata);
     assert_false(v);
 
@@ -1179,8 +1177,8 @@ int main(){
         cmocka_unit_test(id3CreateAndDestroy_allInOne),
         cmocka_unit_test(id3CreateAndDestroy_allInOneNoV1),
 
-        // id3SetPreferedStandard & id3GetPreferedStandard
-        cmocka_unit_test(id3SetPreferedStandard_changeVersion),
+        // id3SetPreferredStandard & id3GetPreferredStandard
+        cmocka_unit_test(id3SetPreferredStandard_changeVersion),
 
         // id3TagFromFile
         cmocka_unit_test(id3FromFile_badPath),
@@ -1234,7 +1232,7 @@ int main(){
         cmocka_unit_test(id3WriteLyrics_v1v2),
         cmocka_unit_test(id3WriteComment_v1v2),
         cmocka_unit_test(id3WritePicture_v1v2),
-        cmocka_unit_test(id3WritePrictureFromFile_v1v2),
+        cmocka_unit_test(id3WritePictureFromFile_v1v2),
 
         // id3ToJSON
         cmocka_unit_test(id3ToJSON_v1Only),

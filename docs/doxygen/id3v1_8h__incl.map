@@ -1,6 +1,9 @@
-<map id="/mnt/d/code/id3dev/include/id3v1/id3v1.h" name="/mnt/d/code/id3dev/include/id3v1/id3v1.h">
-<area shape="rect" id="node1" title="Declarations used by utility functions." alt="" coords="15,5,180,47"/>
-<area shape="rect" id="node2" href="$id3v1Types_8h.html" title="Defintions and types for id3v1 types." alt="" coords="44,95,151,121"/>
-<area shape="rect" id="node3" title=" " alt="" coords="5,169,88,196"/>
-<area shape="rect" id="node4" title=" " alt="" coords="113,169,183,196"/>
+<map id="/Users/ewanjones/projects/id3dev/include/id3v1/id3v1.h" name="/Users/ewanjones/projects/id3dev/include/id3v1/id3v1.h">
+<area shape="rect" id="Node000001" title="Declarations used by utility functions." alt="" coords="5,5,195,46"/>
+<area shape="rect" id="Node000002" href="$id3v1_types_8h.html" title="Definitions and types for id3v1 types." alt="" coords="51,94,149,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,46,103,78,97,78,97,46"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="16,168,90,193"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="95,121,72,156,67,153,90,118"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="114,168,179,193"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="110,118,133,153,128,156,105,121"/>
 </map>

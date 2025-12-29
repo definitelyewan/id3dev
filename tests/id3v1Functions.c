@@ -9,7 +9,6 @@
  * 
  */
 #include <stdio.h>
-#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <setjmp.h>
@@ -19,7 +18,6 @@
 #include <limits.h>
 #include "id3v1/id3v1.h"
 #include "id3v1/id3v1Parser.h"
-#include "byteInt.h"
 
 void Id3v1TagPrintf(Id3v1Tag *tag){
 
@@ -956,7 +954,7 @@ static void id3v1WriteTagToFile_CreateFile(void **state){
 static void id3v1WriteTagToFile_editExistingFile(void **state){
     (void) state; /* unused */
 
-    Id3v1Tag *pretag = id3v1CreateTag((uint8_t *)"1999",
+    Id3v1Tag *preTag = id3v1CreateTag((uint8_t *)"1999",
                             (uint8_t *)"charli xcx",
                             (uint8_t *)"charli",
                             2019,
@@ -975,7 +973,7 @@ static void id3v1WriteTagToFile_editExistingFile(void **state){
                             RAP_GENRE);
     Id3v1Tag *readTag = NULL;
 
-    assert_true(id3v1WriteTagToFile("test.mp3", pretag));
+    assert_true(id3v1WriteTagToFile("test.mp3", preTag));
     assert_true(id3v1WriteTagToFile("test.mp3", tag2));
 
     readTag = id3v1TagFromFile("test.mp3");
@@ -991,7 +989,7 @@ static void id3v1WriteTagToFile_editExistingFile(void **state){
     assert_int_equal(readTag->track, 3);
     assert_int_equal(readTag->genre, RAP_GENRE);
     
-    id3v1DestroyTag(&pretag);
+    id3v1DestroyTag(&preTag);
     id3v1DestroyTag(&tag2);
     id3v1DestroyTag(&readTag);
     
@@ -1137,7 +1135,7 @@ int main(){
         cmocka_unit_test(id3v1CompareTag_same),
 
         //no tests for any read functions
-        //these just do tag->xxxxx 
+        //these just do tag->member
 
         //id3v1GenreFromTable tests
         cmocka_unit_test(id3v1GenreFromTable_checkNoNull),

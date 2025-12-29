@@ -132,7 +132,7 @@ build options:
 - `BUILD_SHARED_LIBS` can be toggled on for a shared library and off for a static one
 - `BUILD_ID3_DOCS` can be toggled to generate documentation
 - `BUILD_ID3_TESTS` can be toggled to generate unit tests
-- `DEDUB_ID3_SYMBOLS` can be toggled to include or not include debug symbols
+- `DEBUG_ID3_SYMBOLS` can be toggled to include or not include debug symbols
 - `BUILD_ID3_C_EXAMPLES` can  be toggled to create example C programs
 
 To build ID3dev with these options you will need to use CMake along with the below commands (OS dependant).

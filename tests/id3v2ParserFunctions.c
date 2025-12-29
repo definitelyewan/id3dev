@@ -9,14 +9,12 @@
  * 
  */
 #include <stdio.h>
-#include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
 #include "id3v2/id3v2Parser.h"
 #include "id3v2/id3v2TagIdentity.h"
 #include "id3v2/id3v2Frame.h"
@@ -41,7 +39,7 @@ static void testFrameHeader(Id3v2Frame *f, char id[ID3V2_FRAME_ID_MAX_SIZE], uin
 
 }
 
-static void testEntry(Id3v2ContentEntry *ce, size_t size, uint8_t *data){
+static void testEntry(Id3v2ContentEntry *ce, size_t size, const uint8_t *data){
 
     assert_non_null(ce);
     assert_int_equal(ce->size, size);
@@ -932,7 +930,7 @@ static void id3v2ParseFrame_parseWXXUTF16(void **state){
 
 }
 
-static void id3v2ParseFrame_parseCOMLatain1(void **state){
+static void id3v2ParseFrame_parseCOMLatin1(void **state){
 
     // COM 
     uint8_t com[25] = {'C', 'O', 'M', 0x00, 0x00, 0x13,
@@ -1140,7 +1138,7 @@ static void id3v2ParseFrame_parseEQU(void **state){
 
     ByteStream *stream = byteStreamCreate(equ, 15);
     Id3v2Frame *f;
-    List *context = id3v2CreateEqulizationFrameContext(ID3V2_TAG_VERSION_2);
+    List *context = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_2);
     uint32_t frameSize = 0;
 
     frameSize = id3v2ParseFrame(stream->buffer, stream->bufferSize, context, ID3V2_TAG_VERSION_2, &f);
@@ -1904,7 +1902,7 @@ int main(){
         cmocka_unit_test(id3v2ParseFrame_parseTXXXLatin1),
         cmocka_unit_test(id3v2ParseFrame_parseWCOM),
         cmocka_unit_test(id3v2ParseFrame_parseWXXUTF16),
-        cmocka_unit_test(id3v2ParseFrame_parseCOMLatain1),
+        cmocka_unit_test(id3v2ParseFrame_parseCOMLatin1),
         cmocka_unit_test(id3v2ParseFrame_parseIPLLatin1),
         cmocka_unit_test(id3v2ParseFrame_parseSYLTUTF16),
         cmocka_unit_test(id3v2ParseFrame_parseEQU),

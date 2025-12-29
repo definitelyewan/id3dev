@@ -1,7 +1,7 @@
 /**
  * @file id3v2Frame.h
  * @author Ewan Jones
- * @brief function declerations for frame operations
+ * @brief function declarations for frame operations
  * @version 0.1
  * @date 2024-02-26
  * 
@@ -67,7 +67,7 @@ uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser);
 bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize, void *entry);
 
 bool id3v2AttachFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame);
-Id3v2Frame *id3v2DetatchFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame);
+Id3v2Frame *id3v2DetachFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame);
 
 
 /*

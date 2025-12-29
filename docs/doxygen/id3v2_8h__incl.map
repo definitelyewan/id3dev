@@ -1,12 +1,22 @@
-<map id="/mnt/d/code/id3dev/include/id3v2/id3v2.h" name="/mnt/d/code/id3dev/include/id3v2/id3v2.h">
-<area shape="rect" id="node1" title="Declarations used by utility functions." alt="" coords="272,5,437,47"/>
-<area shape="rect" id="node2" href="$id3v2Types_8h.html" title="Defintions and types for id3v2 types." alt="" coords="301,169,408,196"/>
-<area shape="rect" id="node10" href="$id3v2TagIdentity_8h.html" title="Declarations for id3v2 tag headers and extended headers." alt="" coords="339,95,479,121"/>
-<area shape="rect" id="node3" href="$id3v1Types_8h.html" title="Defintions and types for id3v1 types." alt="" coords="27,251,173,278"/>
-<area shape="rect" id="node4" title=" " alt="" coords="5,333,88,360"/>
-<area shape="rect" id="node5" title=" " alt="" coords="117,333,187,360"/>
-<area shape="rect" id="node6" title=" " alt="" coords="248,244,461,285"/>
-<area shape="rect" id="node7" title=" " alt="" coords="486,251,573,278"/>
-<area shape="rect" id="node8" title=" " alt="" coords="597,244,798,285"/>
-<area shape="rect" id="node9" title=" " alt="" coords="823,244,1025,285"/>
+<map id="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2.h" name="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2.h">
+<area shape="rect" id="Node000001" title="Declarations used by utility functions." alt="" coords="139,5,328,46"/>
+<area shape="rect" id="Node000002" href="$id3v2_types_8h.html" title="Definitions and types for id3v2 types." alt="" coords="184,168,283,193"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="226,47,214,81,211,100,212,119,223,153,218,154,207,120,206,100,209,80,221,45"/>
+<area shape="rect" id="Node000009" href="$id3v2_tag_identity_8h.html" title="Declarations for id3v2 tag headers and extended headers." alt="" coords="222,94,347,120"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="248,45,270,79,266,82,244,48"/>
+<area shape="rect" id="Node000003" href="$id3v1_types_8h.html" title="Definitions and types for id3v1 types." alt="" coords="26,249,159,274"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="213,196,129,243,126,239,211,191"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="6,330,80,356"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="185,191,85,210,42,225,26,234,16,243,9,260,10,279,17,299,27,316,23,319,12,301,5,280,4,259,11,240,23,229,40,220,84,205,184,186"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="109,330,174,356"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="229,195,158,318,154,315,224,193"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="233,249,311,274"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="242,193,262,234,257,236,237,195"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="335,241,516,282"/>
+<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="264,191,365,233,363,237,262,196"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="540,241,724,282"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="284,189,525,237,524,242,283,194"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="87,276,61,318,56,315,82,274"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="102,274,128,315,124,318,97,276"/>
+<area shape="poly" id="edge11_Node000009_Node000002" title=" " alt="" coords="278,121,253,156,249,153,274,118"/>
 </map>

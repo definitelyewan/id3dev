@@ -1,0 +1,9 @@
+<map id="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2Frame.h" name="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2Frame.h">
+<area shape="rect" id="Node000001" title="function declarations for frame operations" alt="" coords="194,5,420,46"/>
+<area shape="rect" id="Node000002" href="$id3v2_8c.html" title="Contains all main functions for the id3v2 library." alt="" coords="5,94,182,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="245,55,143,96,141,91,243,50"/>
+<area shape="rect" id="Node000003" href="$id3v2_frame_8c.html" title="Functions for creating, destroying, and manipulating ID3v2 frames." alt="" coords="205,94,408,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="310,62,310,94,304,94,304,62"/>
+<area shape="rect" id="Node000004" href="$id3v2_parser_8c.html" title="Functions related to parsing content." alt="" coords="433,94,636,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="374,49,484,91,482,96,372,54"/>
+</map>

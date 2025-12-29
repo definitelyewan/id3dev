@@ -22,7 +22,7 @@ Id3v1Tag *id3v1TagFromFile(const char *filePath);
 Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy);
 
 
-//functions to change values within a id3v1 structure
+//functions to change values within an id3v1 structure
 
 int id3v1WriteTitle(const char *title, Id3v1Tag *tag);
 int id3v1WriteArtist(const char *artist, Id3v1Tag *tag);

@@ -52,7 +52,7 @@ List *id3v2CreateEncryptedMetaFrameContext(void);
 List *id3v2CreateRegistrationFrameContext(void); //ENCR GRID
 List *id3v2CreateMusicCDIdentifierFrameContext(void);
 List *id3v2CreatePlayCounterFrameContext(void);
-List *id3v2CreateEqulizationFrameContext(unsigned int version);
+List *id3v2CreateEqualizationFrameContext(unsigned int version);
 List *id3v2CreateEventTimingCodesFrameContext(void);
 List *id3v2CreateGeneralEncapsulatedObjectFrameContext(void);
 List *id3v2CreateInvolvedPeopleListFrameContext(void);
@@ -76,7 +76,7 @@ List *id3v2CreateGenericFrameContext(void);
 
 // pairings
 
-HashTable *id3v2CreateDefaultIdentiferContextPairings(unsigned int version);
+HashTable *id3v2CreateDefaultIdentifierContextPairings(unsigned int version);
 bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char key[ID3V2_FRAME_ID_MAX_SIZE], List *context);
 
 

@@ -51,7 +51,8 @@ static char *base64Encode(const unsigned char *input, size_t inputLength){
  * @param id 
  * @param tagAlter 
  * @param fileAlter 
- * @param readOnly 
+ * @param readOnly
+ * @param unsync
  * @param decompressionSize 
  * @param encryptionSymbol 
  * @param groupSymbol 
@@ -77,7 +78,7 @@ Id3v2FrameHeader *id3v2CreateFrameHeader(uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], bo
 }
 
 /**
- * @brief Frees all of the memory allocated for a frame header
+ * @brief Frees all the memory allocated for a frame header
  * 
  * @param toDelete 
  */
@@ -125,10 +126,10 @@ Id3v2ContentEntry *id3v2CreateContentEntry(void *entry, size_t size){
 
 
 /**
- * @brief Comparse two entries and returns the difference. Note, only the
+ * @brief Compare two entries and returns the difference. Note, only the
  * data itself is compared and not its size. The lower of the two sizes
  * will be used to compare the held data.
- * @details This is not ideal but it needs to be done as ive found different
+ * @details This is not ideal, but it needs to be done as ive found different
  * writers Jaikoz, itunes, Mp3tag, Mp3diag, and kid3 all write strings 
  * differently. This is a compatability decision when id3v2 is parsed.  
  * @param first 
@@ -169,7 +170,7 @@ char *id3v2PrintContentEntry(const void *toBePrinted){
 
     char *str = malloc((sizeof(char) * 16) + sizeof(long) + 8);
 
-    sprintf(str, "Size: %ld, data: %p\n",e->size, e->entry);
+    sprintf(str, "Size: %zu, data: %p\n",e->size, e->entry);
 
     return str;
 }
@@ -333,7 +334,7 @@ char *id3v2PrintFrame(const void *toBePrinted){
 }
 
 /**
- * @brief Deep copys a frame
+ * @brief Deep copy a frame
  * 
  * @param toBeCopied 
  * @return void* 
@@ -413,7 +414,7 @@ Id3v2Frame *id3v2CreateEmptyFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], uint8_
     Id3v2FrameHeader *header = NULL;
     Id3v2Frame *f = NULL;
 
-    pairs = id3v2CreateDefaultIdentiferContextPairings(version);
+    pairs = id3v2CreateDefaultIdentifierContextPairings(version);
 
     // first pass
     context = hashTableRetrieve(pairs, id);
@@ -502,7 +503,7 @@ ListIter id3v2CreateFrameTraverser(Id3v2Tag *tag){
 }
 
 /**
- * @brief treverses through a list of frames with the use of a list iter
+ * @brief traverse through a list of frames with the use of a list iter
  * and returns a referance to frame content while doing so. If null is 
  * returned, the end of the list has been reached.
  * 
@@ -682,7 +683,7 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize){
 }
 
 /**
- * @brief Returns a 8-bit integer representation of the data held at the traversers 
+ * @brief Returns an 8-bit integer representation of the data held at the traversers
  * current position. If this function fails it will return 0.
  * 
  * @param traverser 
@@ -788,10 +789,10 @@ uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser){
 
 /**
  * @brief Writes entrySize bytes of entry at the current position of the traverser.
- * However, the data provided will be truncated as to not violate the entries context.
- * Its recommneded to not change the context to make your data fit but instread create a
+ * However, the data provided will be truncated as to not violate the entries' context.
+ * It's recommended to not change the context to make your data fit but instead create a
  * new pairing with a new frame ID. This is to best ensure compatability with other 
- * ID3v2 readers. You wouldnt want to break your cars metadata reader because it can no
+ * ID3v2 readers. You wouldn't want to break your cars metadata reader because it can no
  * longer read a songs title. If this function fails it will return false otherwise, true.
  * 
  * @param frame 
@@ -837,7 +838,7 @@ bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize
         return false;
     }
 
-    // loacte the context for the entry
+    // locate the context for the entry
     while((cc = (Id3v2ContentContext *) listIteratorNext(&contextIter)) != NULL){
 
         if(cc->type == iter_context){
@@ -910,7 +911,7 @@ bool id3v2AttachFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame){
  * @param frame 
  * @return Id3v2Frame* 
  */
-Id3v2Frame *id3v2DetatchFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame){
+Id3v2Frame *id3v2DetachFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame){
 
     if(tag == NULL || frame == NULL){
         return NULL;
@@ -926,7 +927,8 @@ Id3v2Frame *id3v2DetatchFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame){
  * 
  * @param header 
  * @param version 
- * @param frameSize 
+ * @param frameSize
+ * @param outl
  * @return ByteStream* 
  */
 uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, uint32_t frameSize, size_t *outl){
@@ -1163,7 +1165,8 @@ char *id3v2FrameHeaderToJSON(Id3v2FrameHeader *header, uint8_t version){
  * function fails it will return NULL otherwise, an uint8_t structure.
  * 
  * @param frame 
- * @param version 
+ * @param version
+ * @param outl
  * @return ByteStream* 
  */
 uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
@@ -1307,7 +1310,7 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
                 break;
             }
 
-            // written the same way with no spacer *coms cut out* i repeat no spacer over
+            // written the same way with no spacer I repeat no spacer over
             case numeric_context:
             case noEncoding_context:
             case binary_context:
@@ -1409,7 +1412,7 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
                 
             }
                 break;
-            // wildly long and probably inefficient but it works for now and is the best i can do with my current knowledge
+            // wildly long and probably inefficient, but it works for now and is the best I can do with my current knowledge
             case bit_context:{
 
                 // there is another bit context next
@@ -1773,7 +1776,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                 b64 = base64Encode(tmp, readSize);
 
                 contentMemCount += snprintf(NULL, 0,
-                                           "{\"value\":\"%s\",\"size\":%ld}",
+                                           "{\"value\":\"%s\",\"size\":%zu}",
                                            b64,
                                            strlen(b64));
                 
@@ -1783,7 +1786,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
 
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%s\",\"size\":%ld}",
+                             "{\"value\":\"%s\",\"size\":%zu}",
                              b64,
                              readSize);                    
 
@@ -1791,7 +1794,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%s\",\"size\":%ld}",
+                             "{\"value\":\"%s\",\"size\":%zu}",
                              b64,
                              readSize);   
                 }
@@ -1817,7 +1820,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
 
 
                 contentMemCount += snprintf(NULL, 0,
-                                           "{\"value\":\"%s\",\"size\":%ld}",
+                                           "{\"value\":\"%s\",\"size\":%zu}",
                                            tmp,
                                            readSize);
 
@@ -1827,7 +1830,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
 
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%s\",\"size\":%ld}",
+                             "{\"value\":\"%s\",\"size\":%zu}",
                              tmp,
                              readSize);                    
 
@@ -1835,7 +1838,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%s\",\"size\":%ld}",
+                             "{\"value\":\"%s\",\"size\":%zu}",
                              tmp,
                              readSize);   
                 }
@@ -1861,7 +1864,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                 free(tmp);
 
                 contentMemCount += snprintf(NULL, 0,
-                                           "{\"value\":\"%ld\",\"size\":%ld}",
+                                           "{\"value\":\"%zu\",\"size\":%zu}",
                                            num,
                                            readSize);
 
@@ -1871,7 +1874,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
 
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%ld\",\"size\":%ld}",
+                             "{\"value\":\"%zu\",\"size\":%zu}",
                              num,
                              readSize);                    
 
@@ -1879,7 +1882,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%ld\",\"size\":%ld}",
+                             "{\"value\":\"%zu\",\"size\":%zu}",
                              num,
                              readSize);   
                 }
@@ -1903,7 +1906,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                 free(tmp);
 
                 contentMemCount = snprintf(NULL, 0,
-                                           "{\"value\":\"%f\",\"size\":%ld}",
+                                           "{\"value\":\"%f\",\"size\":%zu}",
                                            value,
                                            readSize);
 
@@ -1913,7 +1916,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
 
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%f\",\"size\":%ld}",
+                             "{\"value\":\"%f\",\"size\":%zu}",
                              value,
                              readSize);                    
 
@@ -1921,7 +1924,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%f\",\"size\":%ld}",
+                             "{\"value\":\"%f\",\"size\":%zu}",
                              value,
                              readSize);   
                 }
@@ -1969,7 +1972,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
 
                 
                 // This will go on forever until a failure condition is met by a previous context
-                // i.e latin1_context detects null
+                // for example, latin1_context detects null
                  
             }
                 break;
@@ -2026,7 +2029,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
 
 
                 contentMemCount = snprintf(NULL, 0,
-                                           "{\"value\":\"%s\",\"size\":%ld}",
+                                           "{\"value\":\"%s\",\"size\":%zu}",
                                            b64,
                                            strlen(b64));
 
@@ -2036,7 +2039,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
 
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%s\",\"size\":%ld}",
+                             "{\"value\":\"%s\",\"size\":%zu}",
                              b64,
                              readSize);                    
 
@@ -2044,7 +2047,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version){
                     contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
                     contentJson[contentJsonSize - 1] = calloc(contentMemCount + 1, sizeof(char));
                     snprintf(contentJson[contentJsonSize - 1], contentMemCount,
-                             "{\"value\":\"%s\",\"size\":%ld}",
+                             "{\"value\":\"%s\",\"size\":%zu}",
                              b64,
                              readSize);   
                 }

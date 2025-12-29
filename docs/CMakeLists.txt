@@ -4,6 +4,34 @@ find_package(Doxygen)
 
 if(DOXYGEN_FOUND)
 
+
+    set(ID3DEV_DOC_FILES
+            "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3dev.h"
+
+            "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3v1/id3v1.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3v1/id3v1Parser.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3v1/id3v1Types.h"
+
+            "${CMAKE_CURRENT_SOURCE_DIR}/../src/id3v1/id3v1.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../src/id3v1/id3v1Parser.c"
+
+            "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3v2/id3v2.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3v2/id3v2Context.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3v2/id3v2Frame.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3v2/id3v2Parser.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3v2/id3v2TagIdentity.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3v2/id3v2Types.h"
+
+            "${CMAKE_CURRENT_SOURCE_DIR}/../src/id3v2/id3v2.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../src/id3v2/id3v2Context.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../src/id3v2/id3v2Frame.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../src/id3v2/id3v2Parser.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../src/id3v2/id3v2TagIdentity.c"
+
+
+    )
+
+
     set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
     set(DOXYGEN_PROJECT_NUMBER ${PROJECT_VERSION})
     set(DOXYGEN_PROJECT_BRIEF "An ID3 metadata library")
@@ -18,10 +46,9 @@ if(DOXYGEN_FOUND)
     set(_target_doxyfile "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.docs")
     configure_file("${_doxyfile_template}" "${_target_doxyfile}")
 
-    doxygen_add_docs(docs
+    doxygen_add_docs(docsfiles
                     ${CMAKE_CURRENT_SOURCE_DIR} 
-                    ${ID3DEV_HEADERS}
-                    ${ID3DEV_SRC})
+                    ${ID3DEV_DOC_FILES})
 
 
 endif()

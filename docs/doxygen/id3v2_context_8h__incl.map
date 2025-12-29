@@ -1,0 +1,19 @@
+<map id="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2Context.h" name="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2Context.h">
+<area shape="rect" id="Node000001" title="provides the ability to generate a context and a list of contexts that represent the ruleset of a fra..." alt="" coords="165,5,400,46"/>
+<area shape="rect" id="Node000002" href="$id3v2_types_8h.html" title="Definitions and types for id3v2 types." alt="" coords="233,94,332,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="285,46,285,78,280,78,280,46"/>
+<area shape="rect" id="Node000003" href="$id3v1_types_8h.html" title="Definitions and types for id3v1 types." alt="" coords="74,175,208,201"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="262,122,177,170,175,165,260,118"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,256,80,282"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="233,110,192,114,146,123,102,141,82,154,65,169,54,185,47,204,43,241,38,241,42,203,49,183,60,166,79,150,99,136,145,118,191,108,233,105"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="161,256,225,282"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="278,121,210,244,205,241,273,119"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="282,175,360,201"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="291,119,311,160,306,162,286,121"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="384,168,565,208"/>
+<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="313,118,414,159,412,164,311,123"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="589,168,773,208"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="333,115,574,163,573,168,332,121"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="128,203,71,249,68,244,125,199"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="151,200,179,242,175,245,147,203"/>
+</map>
