@@ -13,4 +13,5 @@ build/
 .fleet/
 scripts/common/__pycache__
 cmake-build-debug
+Debug*
 .idea
