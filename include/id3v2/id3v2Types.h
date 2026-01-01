@@ -84,28 +84,26 @@ extern "C" {
  * will be created, accessed, and deleted automatically
  */
 typedef struct _Id3v2ExtendedTagHeader {
+    //! Size of the extended header as a 32bit int or a sync safe int depending on
+    //! version
+    uint32_t padding;
 
-  //! Size of the extended header as a 32bit int or a sync safe int depending on
-  //! version
-  uint32_t padding;
+    //! Crc of the audio data
+    uint32_t crc;
 
-  //! Crc of the audio data
-  uint32_t crc;
+    //! Marks a tag as an update
+    bool update;
 
-  //! Marks a tag as an update
-  bool update;
+    //! Tag restriction mark, if set restrictions are used
+    bool tagRestrictions;
 
-  //! Tag restriction mark, if set restrictions are used
-  bool tagRestrictions;
-
-  /**
-   * @brief Designates restrictions used by this tag in format: %ppqrrstt.
-   * pp is a Tag Size Restriction, q is an Encoding restriction, rr is a
-   * Text Fields Size Restriction, s is an Image Encoding Restriction, and
-   * tt is an Image size restriction.
-   */
-  uint8_t restrictions;
-
+    /**
+     * @brief Designates restrictions used by this tag in format: %ppqrrstt.
+     * pp is a Tag Size Restriction, q is an Encoding restriction, rr is a
+     * Text Fields Size Restriction, s is an Image Encoding Restriction, and
+     * tt is an Image size restriction.
+     */
+    uint8_t restrictions;
 } Id3v2ExtendedTagHeader;
 
 /**
@@ -113,19 +111,17 @@ typedef struct _Id3v2ExtendedTagHeader {
  *
  */
 typedef struct _Id3v2TagHeader {
+    //! Major version number
+    uint8_t majorVersion;
 
-  //! Major version number
-  uint8_t majorVersion;
+    //! Minor version number (patch number)
+    uint8_t minorVersion;
 
-  //! Minor version number (patch number)
-  uint8_t minorVersion;
+    //! Tag flags %abcd0000
+    uint8_t flags;
 
-  //! Tag flags %abcd0000
-  uint8_t flags;
-
-  //! Extended header
-  Id3v2ExtendedTagHeader *extendedHeader;
-
+    //! Extended header
+    Id3v2ExtendedTagHeader *extendedHeader;
 } Id3v2TagHeader;
 
 /**
@@ -133,31 +129,29 @@ typedef struct _Id3v2TagHeader {
  *
  */
 typedef struct _Id3v2FrameHeader {
+    //! The ID used to identify a frame for example, TIT2
+    uint8_t id[ID3V2_FRAME_ID_MAX_SIZE];
 
-  //! The ID used to identify a frame for example, TIT2
-  uint8_t id[ID3V2_FRAME_ID_MAX_SIZE];
+    //! Marks the frame as unknown if the tag is altered
+    bool tagAlterPreservation;
 
-  //! Marks the frame as unknown if the tag is altered
-  bool tagAlterPreservation;
+    //! Marks the frame as unknown if the file is altered
+    bool fileAlterPreservation;
 
-  //! Marks the frame as unknown if the file is altered
-  bool fileAlterPreservation;
+    //! Marks the frame as read only
+    bool readOnly;
 
-  //! Marks the frame as read only
-  bool readOnly;
+    //! Marks a tag as unsynchronised
+    bool unsynchronisation;
 
-  //! Marks a tag as unsynchronised
-  bool unsynchronisation;
+    //! zlib decompression size
+    uint32_t decompressionSize;
 
-  //! zlib decompression size
-  uint32_t decompressionSize;
+    //! Encryption symbol used to define how the frame is encrypted
+    uint8_t encryptionSymbol;
 
-  //! Encryption symbol used to define how the frame is encrypted
-  uint8_t encryptionSymbol;
-
-  //! Group symbol used to relate a frame to another
-  uint8_t groupSymbol;
-
+    //! Group symbol used to relate a frame to another
+    uint8_t groupSymbol;
 } Id3v2FrameHeader;
 
 /**
@@ -165,72 +159,70 @@ typedef struct _Id3v2FrameHeader {
  *
  */
 typedef enum _Id3v2ContextType {
+    /**
+     * @brief Error state for the frame parser/writer. If this is context is encountered
+     * parsing of the current frame will stop.
+     */
+    unknown_context = -1,
 
-  /**
-   * @brief Error state for the frame parser/writer. If this is context is encountered
-   * parsing of the current frame will stop.
-   */
-  unknown_context = -1,
+    /**
+     * @brief Identifies characters with no end characters within a frame.
+     */
+    noEncoding_context,
 
-  /**
-   * @brief Identifies characters with no end characters within a frame.
-   */
-  noEncoding_context,
+    /**
+     * @brief Identifies binary data with no defined ending character. If encountered
+     * this state will cause the parser to read until the defined upper bound of the
+     * context or the end of the frame.
+     */
+    binary_context,
 
-  /**
-   * @brief Identifies binary data with no defined ending character. If encountered
-   * this state will cause the parser to read until the defined upper bound of the
-   * context or the end of the frame.
-   */
-  binary_context,
+    /**
+     * @brief Identifies a string encoded in latin1, UTF8, or UTF16. If encountered
+     * a context with the label 'encoding' must exist prior in the context list.
+     */
+    encodedString_context,
 
-  /**
-   * @brief Identifies a string encoded in latin1, UTF8, or UTF16. If encountered
-   * a context with the label 'encoding' must exist prior in the context list.
-   */
-  encodedString_context,
+    /**
+     * @brief Identifies a string using the latin1 character set with the ending '\0'
+     */
+    latin1Encoding_context,
 
-  /**
-   * @brief Identifies a string using the latin1 character set with the ending '\0'
-   */
-  latin1Encoding_context,
+    /**
+     * @brief Identifies integers of different sizes such as 8, 16, 32, or 64.
+     */
+    numeric_context,
 
-  /**
-   * @brief Identifies integers of different sizes such as 8, 16, 32, or 64.
-   */
-  numeric_context,
+    /**
+     * @brief Identifies precision values such as floats or doubles.
+     */
+    precision_context,
 
-  /**
-   * @brief Identifies precision values such as floats or doubles.
-   */
-  precision_context,
+    /**
+     * @brief Identifies 1 to n bits. With this context the current byte being read
+     * will not be incremented until 8 sequential bits are read. for example, this
+     * means if the following context is a binary_context it will read the same byte
+     * twice. If this context is followed by more then one bit_context it will continue
+     * reading from the position in which the proceeding context left off. Do note
+     * that max and min within the context structure now represent max and min bits
+     * instead of bytes.
+     */
+    bit_context,
 
-  /**
-   * @brief Identifies 1 to n bits. With this context the current byte being read
-   * will not be incremented until 8 sequential bits are read. for example, this 
-   * means if the following context is a binary_context it will read the same byte 
-   * twice. If this context is followed by more then one bit_context it will continue
-   * reading from the position in which the proceeding context left off. Do note
-   * that max and min within the context structure now represent max and min bits 
-   * instead of bytes.
-   */
-  bit_context,
+    /**
+     * @brief Iterates context n context to then last context m times. With this context
+     * min is redefined as a starting node and max is redefined as the number of
+     * iterations.
+     *
+     */
+    iter_context,
 
-  /**
-   * @brief Iterates context n context to then last context m times. With this context 
-   * min is redefined as a starting node and max is redefined as the number of 
-   * iterations.
-   * 
-   */
-  iter_context,
-
-  /**
-   * @brief Allows for a redefinition of a contexts upper bound if a prior context
-   * is defined with the label 'adjustment'. 
-   * 
-   */
-  adjustment_context
-
+    /**
+     * @brief Allows for a redefinition of a contexts upper bound if a prior context
+     * is defined with the label 'adjustment'.
+     *
+     */
+    adjustment_context
 } Id3v2ContextType;
 
 /**
@@ -238,27 +230,25 @@ typedef enum _Id3v2ContextType {
  *
  */
 typedef struct _Id3v2ContentContext {
+    //! The type of value the parser will extract
+    Id3v2ContextType type;
 
-  //! The type of value the parser will extract
-  Id3v2ContextType type;
+    //! Hashed string
+    size_t key;
 
-  //! Hashed string
-  size_t key;
+    /**
+     * @brief Smallest number of bytes that can represent this block of data.
+     * If the block is an iter context this will be the min node when the iter
+     * will start
+     */
+    size_t min;
 
-  /**
-   * @brief Smallest number of bytes that can represent this block of data.
-   * If the block is an iter context this will be the min node when the iter
-   * will start
-   */
-  size_t min;
-
-  /**
-   * @brief Largest number of bytes that can represent this block of data.
-   * If this block is an iter context this will be max times this context
-   * will execute.
-   */
-  size_t max;
-
+    /**
+     * @brief Largest number of bytes that can represent this block of data.
+     * If this block is an iter context this will be max times this context
+     * will execute.
+     */
+    size_t max;
 } Id3v2ContentContext;
 
 /**
@@ -268,13 +258,11 @@ typedef struct _Id3v2ContentContext {
  * their own frames into the parser.
  */
 typedef struct _Id3v2ContentEntry {
+    //! The entry held within this frame
+    void *entry;
 
-  //! The entry held within this frame
-  void *entry;
-
-  //! The size of the entry in this frame
-  size_t size;
-
+    //! The size of the entry in this frame
+    size_t size;
 } Id3v2ContentEntry;
 
 /**
@@ -282,16 +270,14 @@ typedef struct _Id3v2ContentEntry {
  *
  */
 typedef struct _Id3v2Frame {
+    //! A Frame header
+    Id3v2FrameHeader *header;
 
-  //! A Frame header
-  Id3v2FrameHeader *header;
+    //! Instructions used to define content entries
+    List *contexts;
 
-  //! Instructions used to define content entries
-  List *contexts;
-
-  //! List of data representing the frame
-  List *entries;
-
+    //! List of data representing the frame
+    List *entries;
 } Id3v2Frame;
 
 /**
@@ -299,14 +285,11 @@ typedef struct _Id3v2Frame {
  * @details There is no footer structure as it is a copy of the header with a reversed ID
  */
 typedef struct _Id3v2Tag {
-  
-  //! A tag header used to identify key information about the tag
-  Id3v2TagHeader *header;
-  
-  //! A list of frames contained with in the tag
-  List *frames;
+    //! A tag header used to identify key information about the tag
+    Id3v2TagHeader *header;
 
-
+    //! A list of frames contained with in the tag
+    List *frames;
 } Id3v2Tag;
 
 #ifdef __cplusplus

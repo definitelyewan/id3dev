@@ -20,11 +20,13 @@ extern "C"{
 #include "id3v2Types.h"
 
 
+uint32_t id3v2ParseExtendedTagHeader(uint8_t *in, size_t inl, uint8_t version,
+                                     Id3v2ExtendedTagHeader **extendedTagHeader);
 
-uint32_t id3v2ParseExtendedTagHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2ExtendedTagHeader **extendedTagHeader);
 uint32_t id3v2ParseTagHeader(uint8_t *in, size_t inl, Id3v2TagHeader **tagHeader, uint32_t *tagSize);
 
-uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2FrameHeader **frameHeader, uint32_t *frameSize);
+uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2FrameHeader **frameHeader,
+                               uint32_t *frameSize);
 
 uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version, Id3v2Frame **frame);
 
