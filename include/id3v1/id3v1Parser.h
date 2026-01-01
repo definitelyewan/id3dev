@@ -19,7 +19,7 @@ extern "C"{
 
 //mem
 
-bool id3v1HasTag(uint8_t *buffer);
+bool id3v1HasTag(const uint8_t *buffer);
 
 Id3v1Tag *id3v1CreateTag(uint8_t *title, uint8_t *artist, uint8_t *albumTitle, int year, int track, uint8_t *comment,
                          Genre genre);
