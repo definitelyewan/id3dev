@@ -39,8 +39,8 @@ Id3v2TagHeader *id3v2CreateTagHeader(uint8_t majorVersion, uint8_t minorVersion,
 
 /**
  * @brief Frees a tag header structure.
- * 
- * @param toDelete 
+ *
+ * @param toDelete
  */
 void id3v2DestroyTagHeader(Id3v2TagHeader **toDelete){
 
@@ -56,9 +56,9 @@ void id3v2DestroyTagHeader(Id3v2TagHeader **toDelete){
 /**
  * @brief Sets the unsynchronisation indicator found in the header of a tag.
  * @details If this function is successful it will return 1 otherwise, 0.
- * @param header 
- * @param bit 
- * @return int 
+ * @param header
+ * @param bit
+ * @return int
  */
 bool id3v2WriteUnsynchronisationIndicator(Id3v2TagHeader *header, bool bit){
 
@@ -74,9 +74,9 @@ bool id3v2WriteUnsynchronisationIndicator(Id3v2TagHeader *header, bool bit){
 /**
  * @brief Sets the compression indicator in the header of a tag.
  * @details If this function is successful it will return 1 otherwise, 0.
- * @param header 
- * @param bit 
- * @return int 
+ * @param header
+ * @param bit
+ * @return int
  */
 bool id3v2WriteCompressionIndicator(Id3v2TagHeader *header, bool bit){
 
@@ -95,12 +95,12 @@ bool id3v2WriteCompressionIndicator(Id3v2TagHeader *header, bool bit){
 /**
  * @brief Sets the extended header indicator in the tag header.
  * @details If this function fails it returns 0 otherwise, it returns 1.
- * @param header 
- * @param bit 
- * @return int 
+ * @param header
+ * @param bit
+ * @return int
  */
 bool id3v2WriteExtendedHeaderIndicator(Id3v2TagHeader *header, bool bit){
-    
+
     if(!header){
         return 0;
     }
@@ -112,7 +112,7 @@ bool id3v2WriteExtendedHeaderIndicator(Id3v2TagHeader *header, bool bit){
             header->flags = setBit(header->flags, 6, bit);
             return 1;
         default:
-            return 0;
+            break;
     }
 
     return 0;
@@ -121,9 +121,9 @@ bool id3v2WriteExtendedHeaderIndicator(Id3v2TagHeader *header, bool bit){
 /**
  * @brief Sets the experimental indicator in the tag header.
  * @details If this function fails it returns 0 otherwise, 1.
- * @param header 
- * @param bit 
- * @return int 
+ * @param header
+ * @param bit
+ * @return int
  */
 bool id3v2WriteExperimentalIndicator(Id3v2TagHeader *header, bool bit){
 
@@ -138,7 +138,7 @@ bool id3v2WriteExperimentalIndicator(Id3v2TagHeader *header, bool bit){
             header->flags = setBit(header->flags, 5, bit);
             return 1;
         default:
-            return 0;
+            break;
     }
 
     return 0;
@@ -147,12 +147,12 @@ bool id3v2WriteExperimentalIndicator(Id3v2TagHeader *header, bool bit){
 /**
  * @brief Sets the footer indicator in the tag header.
  * @details If this function fails it returns 0 otherwise, 1.
- * @param header 
- * @param bit 
- * @return int 
+ * @param header
+ * @param bit
+ * @return int
  */
 bool id3v2WriteFooterIndicator(Id3v2TagHeader *header, bool bit){
-    
+
     if(!header){
         return 0;
     }
@@ -162,7 +162,7 @@ bool id3v2WriteFooterIndicator(Id3v2TagHeader *header, bool bit){
             header->flags = setBit(header->flags, 4, bit);
             return 1;
         default:
-            return 0;
+            break;
     }
 
     return 0;
@@ -171,11 +171,11 @@ bool id3v2WriteFooterIndicator(Id3v2TagHeader *header, bool bit){
 /**
  * @brief Reads the unsynchronisation indicator from a tag header.
  * @details Returns the indicator value if successful and -1 otherwise.
- * @param header 
- * @return int 
+ * @param header
+ * @return int
  */
 int id3v2ReadUnsynchronisationIndicator(Id3v2TagHeader *header){
-    
+
     if(!header){
         return -1;
     }
@@ -186,8 +186,8 @@ int id3v2ReadUnsynchronisationIndicator(Id3v2TagHeader *header){
 /**
  * @brief Reads the compression indicator found in a version 2 tag header.
  * @details Returns the indicator value if successful and -1 otherwise.
- * @param header 
- * @return int 
+ * @param header
+ * @return int
  */
 int id3v2ReadCompressionIndicator(Id3v2TagHeader *header){
 
@@ -205,8 +205,8 @@ int id3v2ReadCompressionIndicator(Id3v2TagHeader *header){
 /**
  * @brief Reads the extended header indicator found in the tag header.
  * @details Returns the indicator value on success and -1 otherwise.
- * @param header 
- * @return int 
+ * @param header
+ * @return int
  */
 int id3v2ReadExtendedHeaderIndicator(Id3v2TagHeader *header){
 
@@ -219,7 +219,7 @@ int id3v2ReadExtendedHeaderIndicator(Id3v2TagHeader *header){
         case ID3V2_TAG_VERSION_4:
             return readBit(header->flags, 6);
         default:
-            return -1;
+            break;
     }
 
     return -1;
@@ -228,8 +228,8 @@ int id3v2ReadExtendedHeaderIndicator(Id3v2TagHeader *header){
 /**
  * @brief Reads the experimental indicator found in the tag header.
  * @details Returns the indicator value on success and -1 otherwise.
- * @param header 
- * @return int 
+ * @param header
+ * @return int
  */
 int id3v2ReadExperimentalIndicator(Id3v2TagHeader *header){
 
@@ -242,7 +242,7 @@ int id3v2ReadExperimentalIndicator(Id3v2TagHeader *header){
         case ID3V2_TAG_VERSION_4:
             return readBit(header->flags, 5);
         default:
-            return -1;
+            break;
     }
 
     return -1;
@@ -251,8 +251,8 @@ int id3v2ReadExperimentalIndicator(Id3v2TagHeader *header){
 /**
  * @brief Reads the footer indicator found in the tag header.
  * @details Returns the indicator value on success and -1 otherwise.
- * @param header 
- * @return int 
+ * @param header
+ * @return int
  */
 int id3v2ReadFooterIndicator(Id3v2TagHeader *header){
 
@@ -270,12 +270,12 @@ int id3v2ReadFooterIndicator(Id3v2TagHeader *header){
 /**
  * @brief Creates an extended header structure.
  * @details You should never need to use this structure, it will be handled by a header.
- * @param padding 
- * @param crc 
- * @param update 
- * @param tagRestrictions 
- * @param restrictions 
- * @return Id3v2ExtendedTagHeader* 
+ * @param padding
+ * @param crc
+ * @param update
+ * @param tagRestrictions
+ * @param restrictions
+ * @return Id3v2ExtendedTagHeader*
  */
 Id3v2ExtendedTagHeader *id3v2CreateExtendedTagHeader(uint32_t padding, uint32_t crc, bool update, bool tagRestrictions, uint8_t restrictions){
 
@@ -294,7 +294,7 @@ Id3v2ExtendedTagHeader *id3v2CreateExtendedTagHeader(uint32_t padding, uint32_t 
 
 /**
  * @brief Frees an extended header structure.
- * @param toDelete 
+ * @param toDelete
  */
 void id3v2DestroyExtendedTagHeader(Id3v2ExtendedTagHeader **toDelete){
     //error address free
@@ -308,10 +308,10 @@ void id3v2DestroyExtendedTagHeader(Id3v2ExtendedTagHeader **toDelete){
 /**
  * @brief Writes bits to an extended headers restrictions.
  * @details Returns 1 on success and 0 otherwise.
- * @param header 
- * @param bits 
- * @return true 
- * @return false 
+ * @param header
+ * @param bits
+ * @return true
+ * @return false
  */
 bool id3v2WriteTagSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
     //0b00, 0b01, 0b10, 0b11 making the max option 0x03
@@ -340,10 +340,10 @@ bool id3v2WriteTagSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
 /**
  * @brief Writes the value of bit to the correct position in the restrictions.
  * @details If this function fails it will return 0 otherwise, 1.
- * @param header 
- * @param bit 
- * @return true 
- * @return false 
+ * @param header
+ * @param bit
+ * @return true
+ * @return false
  */
 bool id3v2WriteTextEncodingRestriction(Id3v2TagHeader *header, bool bit){
 
@@ -371,10 +371,10 @@ bool id3v2WriteTextEncodingRestriction(Id3v2TagHeader *header, bool bit){
 /**
  * @brief Sets the text fields size restriction within an extended headers bits.
  * @details This function returns 0 if it fails and 1 otherwise.
- * @param header 
- * @param bits 
- * @return true 
- * @return false 
+ * @param header
+ * @param bits
+ * @return true
+ * @return false
  */
 bool id3v2WriteTextFieldsSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
     //0b00, 0b01, 0b10, 0b11 making the max option 0x03
@@ -403,10 +403,10 @@ bool id3v2WriteTextFieldsSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
 /**
  * @brief Sets the image encoding restriction to the value of bit within an extended headers restrictions.
  * @details This function returns 0 if it fails and 1 otherwise.
- * @param header 
- * @param bit 
- * @return true 
- * @return false 
+ * @param header
+ * @param bit
+ * @return true
+ * @return false
  */
 bool id3v2WriteImageEncodingRestriction(Id3v2TagHeader *header, bool bit){
 
@@ -434,10 +434,10 @@ bool id3v2WriteImageEncodingRestriction(Id3v2TagHeader *header, bool bit){
 /**
  * @brief Sets the imagesize restriction to the value of bits within an extended tag headers restrictions.
  * @details This function returns 0 if it fails and 1 otherwise.
- * @param header 
- * @param bits 
- * @return true 
- * @return false 
+ * @param header
+ * @param bits
+ * @return true
+ * @return false
  */
 bool id3v2WriteImageSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
     //0b00, 0b01, 0b10, 0b11 making the max option 0x03
@@ -466,8 +466,8 @@ bool id3v2WriteImageSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
 /**
  * @brief Reads the tag size restriction from the restriction byte held within the extended header.
  * @details If this function fails it will return -1 otherwise it will return the value of the tag size restriction.
- * @param header 
- * @return int 
+ * @param header
+ * @return int
  */
 int id3v2ReadTagSizeRestriction(Id3v2TagHeader *header){
 
@@ -478,7 +478,7 @@ int id3v2ReadTagSizeRestriction(Id3v2TagHeader *header){
     if(!header->extendedHeader){
         return -1;
     }
-    
+
     //build an int from bits
     int lsb = 0;
     int msb = 0;
@@ -493,8 +493,8 @@ int id3v2ReadTagSizeRestriction(Id3v2TagHeader *header){
 /**
  * @brief Reads the text encoding restriction from the restriction byte held by the extended header.
  * @details If this function fails it will return -1 otherwise, it will return the value of the indicator.
- * @param header 
- * @return int 
+ * @param header
+ * @return int
  */
 int id3v2ReadTextEncodingRestriction(Id3v2TagHeader *header){
 
@@ -511,9 +511,9 @@ int id3v2ReadTextEncodingRestriction(Id3v2TagHeader *header){
 
 /**
  * @brief Reads the text field size restriction from the restriction byte held by the extended header.
- * @details If this function fails it will return -1 otherwise, it will return the value of the indicator. 
- * @param header 
- * @return int 
+ * @details If this function fails it will return -1 otherwise, it will return the value of the indicator.
+ * @param header
+ * @return int
  */
 int id3v2ReadTextFieldsSizeRestriction(Id3v2TagHeader *header){
 
@@ -538,9 +538,9 @@ int id3v2ReadTextFieldsSizeRestriction(Id3v2TagHeader *header){
 
 /**
  * @brief Reads the Image Encoding restriction from the restriction byte held by the extended header.
- * @details If this function fails it will return -1 otherwise, it will return the value of the indicator. 
- * @param header 
- * @return int 
+ * @details If this function fails it will return -1 otherwise, it will return the value of the indicator.
+ * @param header
+ * @return int
  */
 int id3v2ReadImageEncodingRestriction(Id3v2TagHeader *header){
     if(!header){
@@ -551,14 +551,14 @@ int id3v2ReadImageEncodingRestriction(Id3v2TagHeader *header){
         return -1;
     }
 
-    return (int)readBit(header->extendedHeader->restrictions, 2);
-} 
+    return readBit(header->extendedHeader->restrictions, 2);
+}
 
 /**
  * @brief Reads the Image Size restriction from the restriction byte held by the extended header.
  * @details If this function fails it will return -1 otherwise, it will return the value of the indicator.
- * @param header 
- * @return int 
+ * @param header
+ * @return int
  */
 int id3v2ReadImageSizeRestriction(Id3v2TagHeader *header){
     if(!header){
@@ -582,9 +582,9 @@ int id3v2ReadImageSizeRestriction(Id3v2TagHeader *header){
 /**
  * @brief Clears all restrictions along with the flag in the tag header.
  * @details if this function fails it returns 0 and 1 otherwise.
- * @param header 
- * @return true 
- * @return false 
+ * @param header
+ * @return true
+ * @return false
  */
 bool id3v2ClearTagRestrictions(Id3v2TagHeader *header){
     if(!header){
@@ -597,16 +597,16 @@ bool id3v2ClearTagRestrictions(Id3v2TagHeader *header){
 
     header->extendedHeader->tagRestrictions = false;
     header->extendedHeader->restrictions = 0;
-    
+
     return 1;
 }
 
 /**
  * @brief Creates a tag
- * 
- * @param header 
- * @param frames 
- * @return Id3v2Tag* 
+ *
+ * @param header
+ * @param frames
+ * @return Id3v2Tag*
  */
 Id3v2Tag *id3v2CreateTag(Id3v2TagHeader *header, List *frames){
 
@@ -620,13 +620,13 @@ Id3v2Tag *id3v2CreateTag(Id3v2TagHeader *header, List *frames){
 
 /**
  * @brief Destroys a tag and its content
- * 
- * @param toDelete 
+ *
+ * @param toDelete
  */
 void id3v2DestroyTag(Id3v2Tag **toDelete){
 
     if(*toDelete){
-        
+
         id3v2DestroyTagHeader(&(*toDelete)->header);
         listFree((*toDelete)->frames);
         free(*toDelete);
@@ -639,29 +639,27 @@ void id3v2DestroyTag(Id3v2Tag **toDelete){
 /**
  * @brief Converts an extended tag header into a stream. if this function fails it will
  * return NULL otherwise, an uint8_t pointer.
- * 
- * @param ext 
+ *
+ * @param ext
  * @param version
  * @param outl
- * @return uint8_t* 
+ * @return uint8_t*
  */
 uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t version, size_t *outl){
-    
+
     ByteStream *stream = NULL;
     uint8_t *out = NULL;
-    int offset = 0;
-    int toWrite = 0;
     int buildSize = 0;
     unsigned char *tmp = NULL;
     unsigned char crcb[5] = {0,0,0,0,0};
-    
+
     if(ext == NULL){
         *outl = 0;
         return NULL;
     }
-    
+
     switch(version){
-        
+
         case ID3V2_TAG_VERSION_3:
 
             // size
@@ -676,7 +674,7 @@ uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t ve
             // flag
             byteStreamWriteBit(stream, (ext->crc > 0) ? 1 : 0, 7);
             byteStreamSeek(stream, 2, SEEK_CUR);
-            
+
             // crc
             tmp = u32tob(ext->padding);
             byteStreamWrite(stream, tmp, 4);
@@ -687,7 +685,7 @@ uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t ve
                 byteStreamWrite(stream, tmp, 4);
                 free(tmp);
             }
-            
+
             break;
 
         case ID3V2_TAG_VERSION_4:
@@ -715,6 +713,8 @@ uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t ve
 
             // crc
             if(ext->crc){
+                int offset = 0;
+                int toWrite = 0;
                 tmp = sttob(byteSyncintEncode(ext->crc));
 
                 while(offset < sizeof(size_t) && tmp[offset] == 0){
@@ -726,7 +726,7 @@ uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t ve
                     offset = 3;
                 }
 
-                toWrite = sizeof(size_t) - offset > 5 ? 5 : sizeof(size_t) - offset;
+                toWrite = ((int)(sizeof(size_t) - offset) > 5) ? 5 : (int)(sizeof(size_t) - offset);
                 memcpy(crcb, tmp + offset, toWrite);
 
                 byteStreamSeek(stream, 6, SEEK_SET);
@@ -743,7 +743,8 @@ uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t ve
         // no support or it does not exist
         case ID3V2_TAG_VERSION_2:
         default:
-            break;
+            *outl = 0;
+            return NULL;
     }
 
     byteStreamRewind(stream);
@@ -757,13 +758,13 @@ uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t ve
 
 /**
  * @brief Converts an extended tag header into its structures representation as JSON.
- * 
- * @param ext 
- * @param version 
- * @return char* 
+ *
+ * @param ext
+ * @param version
+ * @return char*
  */
-char *id3v2ExtendedTagHeaderToJSON(Id3v2ExtendedTagHeader *ext, uint8_t version){
-    
+char *id3v2ExtendedTagHeaderToJSON(const Id3v2ExtendedTagHeader *ext, uint8_t version){
+
     char *json = NULL;
     size_t memCount = 3;
 
@@ -781,31 +782,31 @@ char *id3v2ExtendedTagHeaderToJSON(Id3v2ExtendedTagHeader *ext, uint8_t version)
                                 ext->padding,
                                 ext->crc);
 
-            json = calloc(memCount + 1, sizeof(char));
+            json = calloc(memCount + 1, sizeof(char)); // NOLINT(clang-analyzer-unix.Malloc)
 
-            snprintf(json, memCount,
+            (void) snprintf(json, memCount,
                      "{\"padding\":%"PRIu32",\"crc\":%"PRIu32"}",
                      ext->padding,
                      ext->crc);
 
             break;
         case ID3V2_TAG_VERSION_4:
-            
+
             memCount += snprintf(NULL, 0,
                                 "{\"padding\":%"PRIu32",\"crc\":%"PRIu32",\"update\":%s,\"tagRestrictions\":%s,\"restrictions\":%d}",
                                 ext->padding,
-                                ext->crc, 
-                                ext->update ? "true" : "false", 
+                                ext->crc,
+                                ext->update ? "true" : "false",
                                 ext->tagRestrictions ? "true" : "false",
                                 ext->restrictions);
 
-            json = calloc(memCount + 1, sizeof(char));
+            json = calloc(memCount + 1, sizeof(char)); // NOLINT(clang-analyzer-unix.Malloc)
 
-            snprintf(json, memCount,
+            (void) snprintf(json, memCount,
                      "{\"padding\":%"PRIu32",\"crc\":%"PRIu32",\"update\":%s,\"tagRestrictions\":%s,\"restrictions\":%d}",
                      ext->padding,
-                     ext->crc, 
-                     ext->update ? "true" : "false", 
+                     ext->crc,
+                     ext->update ? "true" : "false",
                      ext->tagRestrictions ? "true" : "false",
                      ext->restrictions);
 
@@ -814,26 +815,26 @@ char *id3v2ExtendedTagHeaderToJSON(Id3v2ExtendedTagHeader *ext, uint8_t version)
         // no support
         case ID3V2_TAG_VERSION_2:
         default:
-            json = malloc(sizeof(char) * memCount);
+            json = malloc(sizeof(char) * memCount); // NOLINT(clang-analyzer-unix.Malloc)
             memcpy(json, "{}\0", memCount);
             break;
     }
-    
-    
+
+
     return json;
 }
 
 /**
  * @brief Converts a tag header and tag size into an uint8_t pointer. if this function fails it will
  * return NULL otherwise, an uint8_t pointer.
- * 
- * @param header 
+ *
+ * @param header
  * @param uintSize
  * @param outl
- * @return uint8_t* 
+ * @return uint8_t*
  */
-uint8_t *id3v2TagHeaderSerialize(Id3v2TagHeader *header, uint32_t uintSize, size_t *outl){    
-    
+uint8_t *id3v2TagHeaderSerialize(Id3v2TagHeader *header, uint32_t uintSize, size_t *outl){
+
     ByteStream *stream = NULL;
     uint8_t *out = NULL;
     unsigned char *tmp = NULL;
@@ -857,10 +858,10 @@ uint8_t *id3v2TagHeaderSerialize(Id3v2TagHeader *header, uint32_t uintSize, size
     byteStreamWrite(stream, &header->minorVersion, 1);
 
 
-    switch(header->majorVersion){
+    switch((int) header->majorVersion){
 
         case ID3V2_TAG_VERSION_2:
-            
+
             byteStreamWriteBit(stream, (bool)id3v2ReadUnsynchronisationIndicator(header), 7);
             byteStreamWriteBit(stream, (bool)id3v2ReadCompressionIndicator(header), 6);
 
@@ -880,8 +881,11 @@ uint8_t *id3v2TagHeaderSerialize(Id3v2TagHeader *header, uint32_t uintSize, size
             byteStreamWriteBit(stream, (bool)id3v2ReadFooterIndicator(header), 4);
 
             break;
+        // dummy break as header version is already checked to be less than 4
+        default:
+            break;
     }
-    
+
     byteStreamSeek(stream, 1, SEEK_CUR);
 
     tmp = u32tob(byteSyncintEncode(uintSize));
@@ -895,9 +899,9 @@ uint8_t *id3v2TagHeaderSerialize(Id3v2TagHeader *header, uint32_t uintSize, size
         if(ext != NULL){
             byteStreamResize(stream, stream->bufferSize + extSize);
             byteStreamWrite(stream, ext, extSize);
-            free(ext);   
+            free(ext);
         }
-        
+
     }
 
     byteStreamRewind(stream);
@@ -908,8 +912,8 @@ uint8_t *id3v2TagHeaderSerialize(Id3v2TagHeader *header, uint32_t uintSize, size
     return out;
 }
 
-char *id3v2TagHeaderToJSON(Id3v2TagHeader *header){
-    
+char *id3v2TagHeaderToJSON(const Id3v2TagHeader *header){
+
     char *json = NULL;
     size_t memCount = 3;
     char *extJson = NULL;
@@ -921,7 +925,7 @@ char *id3v2TagHeaderToJSON(Id3v2TagHeader *header){
     }
 
     switch(header->majorVersion){
-        
+
         case ID3V2_TAG_VERSION_2:
 
             memCount += snprintf(NULL, 0,
@@ -930,9 +934,9 @@ char *id3v2TagHeaderToJSON(Id3v2TagHeader *header){
                                 header->minorVersion,
                                 header->flags);
 
-            json = calloc(memCount + 1, sizeof(char));            
-            
-            snprintf(json, memCount,
+            json = calloc(memCount + 1, sizeof(char));
+
+            (void) snprintf(json, memCount,
                     "{\"major\":%d,\"minor\":%d,\"flags\":%d}",
                     header->majorVersion,
                     header->minorVersion,
@@ -942,7 +946,7 @@ char *id3v2TagHeaderToJSON(Id3v2TagHeader *header){
         case ID3V2_TAG_VERSION_3:
 
             extJson = id3v2ExtendedTagHeaderToJSON(header->extendedHeader, ID3V2_TAG_VERSION_3);
-            
+
             memCount += snprintf(NULL, 0,
                                 "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
                                 header->majorVersion,
@@ -950,10 +954,10 @@ char *id3v2TagHeaderToJSON(Id3v2TagHeader *header){
                                 header->flags,
                                 extJson);
 
-            json = calloc(memCount + 1, sizeof(char)); 
-            
+            json = calloc(memCount + 1, sizeof(char));
 
-            snprintf(json, memCount,
+
+            (void) snprintf(json, memCount,
                     "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
                     header->majorVersion,
                     header->minorVersion,
@@ -965,7 +969,7 @@ char *id3v2TagHeaderToJSON(Id3v2TagHeader *header){
             break;
         case ID3V2_TAG_VERSION_4:
             extJson = id3v2ExtendedTagHeaderToJSON(header->extendedHeader, ID3V2_TAG_VERSION_4);
-            
+
             memCount += snprintf(NULL, 0,
                                 "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
                                 header->majorVersion,
@@ -973,10 +977,10 @@ char *id3v2TagHeaderToJSON(Id3v2TagHeader *header){
                                 header->flags,
                                 extJson);
 
-            json = calloc(memCount + 1, sizeof(char)); 
-            
+            json = calloc(memCount + 1, sizeof(char));
 
-            snprintf(json, memCount,
+
+            (void) snprintf(json, memCount,
                     "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
                     header->majorVersion,
                     header->minorVersion,
@@ -993,6 +997,6 @@ char *id3v2TagHeaderToJSON(Id3v2TagHeader *header){
             memcpy(json, "{}\0", memCount);
             break;
     }
-    
+
     return json;
 }
