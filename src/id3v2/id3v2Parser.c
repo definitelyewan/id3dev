@@ -21,10 +21,14 @@
 #include "id3dependencies/ByteStream/include/byteInt.h"
 #include "id3dependencies/ByteStream/include/byteUnicode.h"
 
-static void copyNBits(unsigned char* src, unsigned char* dest, int startBit, int nBits) {
+static void copyNBits(const unsigned char* src, unsigned char* dest, int startBit, int nBits) {
     int byteIndex = startBit /  CHAR_BIT;
     int bitIndex = startBit %  CHAR_BIT;
     int remainingBits = nBits;
+
+    if (dest == NULL){
+        return;
+    }
 
     while(remainingBits >  0){
         unsigned char mask =  0xFF >> (CHAR_BIT - remainingBits);
@@ -90,7 +94,8 @@ uint32_t id3v2ParseExtendedTagHeader(uint8_t *in, size_t inl, uint8_t version, I
 
     if(version == ID3V2_TAG_VERSION_3 || version == ID3V2_TAG_VERSION_4){
 
-        if(!(hSize = byteStreamReturnInt(stream))){  
+        hSize = byteStreamReturnInt(stream);
+        if(!hSize){
             *extendedTagHeader = NULL;
             byteStreamDestroy(stream);
             return 0;
@@ -100,14 +105,16 @@ uint32_t id3v2ParseExtendedTagHeader(uint8_t *in, size_t inl, uint8_t version, I
             offset = hSize - (stream->bufferSize - stream->cursor);
         }
 
-        innerStream = byteStreamCreate(byteStreamCursor(stream), hSize - offset);
     }
+
+    innerStream = byteStreamCreate(byteStreamCursor(stream), hSize - offset);
 
     switch(version){
         case ID3V2_TAG_VERSION_3:
+            flags = (int8_t) byteStreamReadBit(innerStream, 7);
 
             // read flags
-            if((flags = byteStreamReadBit(innerStream, 7)) == -1){
+            if(flags == -1){
                 break;
             }
 
@@ -117,7 +124,9 @@ uint32_t id3v2ParseExtendedTagHeader(uint8_t *in, size_t inl, uint8_t version, I
             }
 
             // read padding
-            if(!(padding = byteStreamReturnInt(innerStream))){
+            padding = byteStreamReturnInt(innerStream);
+
+            if(!padding){
                 if(flags == 0){
                     break;
                 }   
@@ -125,7 +134,8 @@ uint32_t id3v2ParseExtendedTagHeader(uint8_t *in, size_t inl, uint8_t version, I
 
             // check to see if a crc is there
             if(flags){
-                if(!(crc = byteStreamReturnInt(innerStream))){
+                crc = byteStreamReturnInt(innerStream);
+                if(!crc){
                     break;
                 }
             }
@@ -191,6 +201,7 @@ uint32_t id3v2ParseExtendedTagHeader(uint8_t *in, size_t inl, uint8_t version, I
 
         // no support
         default:
+            byteStreamDestroy(innerStream);
             *extendedTagHeader = NULL;
             return 0;
     }
@@ -278,7 +289,8 @@ uint32_t id3v2ParseTagHeader(uint8_t *in, size_t inl, Id3v2TagHeader **tagHeader
         }
 
         // size
-        if(!(hSize = byteStreamReturnSyncInt(stream))){
+        hSize = byteStreamReturnSyncInt(stream);
+        if(!hSize){
             break;
         }
 
@@ -353,7 +365,8 @@ uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2Fr
                 return ID3V2_FRAME_ID_MAX_SIZE - 1;
             }
 
-            if(!(tSize = btoi(sizeBytes, ID3V2_FRAME_ID_MAX_SIZE - 1))){
+            tSize = btoi(sizeBytes, ID3V2_FRAME_ID_MAX_SIZE - 1);
+            if(!tSize){
                 break;
             }
 
@@ -366,7 +379,8 @@ uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2Fr
                 return 0;
             }
 
-            if(!(tSize = byteStreamReturnU32(stream))){
+            tSize = byteStreamReturnU32(stream);
+            if(!tSize){
                 *frameHeader = NULL;
                 *frameSize = 0;
                 byteStreamDestroy(stream);
@@ -393,7 +407,8 @@ uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2Fr
             }
 
             if(readBit(flagBytes[1], 7)){
-                if(!(decompressionSize = byteStreamReturnInt(stream))){
+                decompressionSize = byteStreamReturnInt(stream);
+                if(!decompressionSize){
                     break;
                 }
             }
@@ -420,7 +435,8 @@ uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2Fr
                 return 0;
             }
 
-            if(!(tSize = byteStreamReturnSyncInt(stream))){
+            tSize = byteStreamReturnSyncInt(stream);
+            if(!tSize){
                 *frameHeader = NULL;
                 *frameSize = 0;
                 byteStreamDestroy(stream);
@@ -567,9 +583,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
         List *gContext = id3v2CreateGenericFrameContext();
         Id3v2ContentContext *cc = (Id3v2ContentContext *) gContext->head->data;
 
-        if(cc->min == cc->max){
-            dataSize = cc->min;
-        }else if(cc->min > cc->max){// no trust
+        if(cc->min >= cc->max){ // no trust
             dataSize = cc->min;
         }else{
             dataSize = cc->max;
@@ -581,7 +595,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
 
         data = malloc(dataSize);
 
-        if(!byteStreamRead(innerStream, (uint8_t *)data, dataSize)){
+        if(!byteStreamRead(innerStream, data, dataSize)){
             memset(data, 0, dataSize);
         }
 
@@ -716,9 +730,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                 uint8_t * data = NULL;
                 size_t dataSize = 0;
 
-                if(cc->min == cc->max){
-                    dataSize = cc->min;
-                }else if(cc->min > cc->max){// no trust
+                if(cc->min >= cc->max){// no trust
                     dataSize = cc->min;
                 }else{
                     dataSize = cc->max;
@@ -747,9 +759,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                 size_t dataSize = 0;
                 Id3v2ContextType isBitContext = 0;
 
-                if(cc->min == cc->max){
-                    nBits = cc->min;
-                }else if(cc->min > cc->max){// no trust
+                if(cc->min >= cc->max){// no trust
                     nBits = cc->min;
                 }else{
                     nBits = cc->max;
@@ -759,7 +769,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                 
                 data = malloc(dataSize);
                 memset(data, 0, dataSize);
-                copyNBits(byteStreamCursor(innerStream), data, concurrentBitCount, nBits);
+                copyNBits(byteStreamCursor(innerStream), data, (int) concurrentBitCount, (int) nBits);
                 
                 if(iter.current->data != NULL){
                     Id3v2ContentContext *nextContext = (Id3v2ContentContext *) iter.current->data;
@@ -994,9 +1004,7 @@ Id3v2Tag *id3v2ParseTagFromBuffer(uint8_t *in, size_t inl, HashTable *userPairs)
             
             Id3v2Frame *frame = NULL;
             List *context = NULL;
-            uint8_t frameId[ID3V2_FRAME_ID_MAX_SIZE];
-
-            memset(frameId, 0, ID3V2_FRAME_ID_MAX_SIZE);
+            uint8_t frameId[ID3V2_FRAME_ID_MAX_SIZE] = {0};
 
             if(header->majorVersion == ID3V2_TAG_VERSION_3 || header->majorVersion == ID3V2_TAG_VERSION_4){
 
