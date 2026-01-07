@@ -256,16 +256,14 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
 
     //add text
     convi = byteConvertTextFormat((unsigned char *)string, BYTE_UTF8, strlen(string), &usableString, encoding, &outLen);
-    
-    if(convi == false || outLen == 0 || usableString == NULL){
+
+    // already in target encoding - use original string
+    if(convi == true && outLen == 0){
+        usableString = (uint8_t *) strdup(string);
+        outLen = strlen(string);
+    }else if(convi == false || outLen == 0 || usableString == NULL){
         id3v2DestroyFrame(&f);
         return false;
-    }
-
-    // already converted
-    if(convi == true && outLen == 0){
-        usableString = (uint8_t *) string;
-        outLen = strlen(string);
     }
 
     // re enable utf16 len support
