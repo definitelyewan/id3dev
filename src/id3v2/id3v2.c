@@ -901,7 +901,7 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
 
     // data is already in utf8
     if(convi && outLen == 0){
-        usableString = (uint8_t *) string;
+        usableString = (uint8_t *) strdup(string);
         outLen = strlen(string);
     }
 
@@ -1350,7 +1350,8 @@ int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
 
     // data is already in utf8
     if(convi && outLen == 0){
-        usableString = (uint8_t *) lyrics;
+        usableString = (uint8_t *) strdup(lyrics);
+        outLen = strlen(lyrics);
     }
 
     bytePrependBOM(encoding, &usableString, &outLen);
@@ -1555,7 +1556,7 @@ int id3v2WriteComment(const char *comment, Id3v2Tag *tag){
 
     // data is already in utf8
     if(convi && outLen == 0){
-        usableString = (uint8_t *) comment;
+        usableString = (uint8_t *) strdup(comment);
         outLen = strlen(comment);
     }
 
