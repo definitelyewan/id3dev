@@ -1429,6 +1429,12 @@ static int _id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3], const 
             return false;
         }
 
+        // data is already in target encoding
+        if(convi && outLen == 0){
+            usableString = (uint8_t *) strdup(desc);
+            outLen = strlen(desc);
+        }
+
         bytePrependBOM(encoding, &usableString, &outLen);
 
         // re enable utf16 len support
@@ -1453,7 +1459,13 @@ static int _id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3], const 
         id3v2DestroyFrame(&f);
         return false;
     }
-    
+
+    // data is already in target encoding
+    if(convi && outLen == 0){
+        usableString = (uint8_t *) strdup(comment);
+        outLen = strlen(comment);
+    }
+
     bytePrependBOM(encoding, &usableString, &outLen);
 
     // re enable utf16 len support
