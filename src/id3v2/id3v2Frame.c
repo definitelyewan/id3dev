@@ -1330,7 +1330,7 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
 
             // latin1 will be enforced
             case latin1Encoding_context:{
-                
+
                 bool convi = false;
                 unsigned char *outStr = NULL;
                 size_t outLen = 0;
@@ -1351,6 +1351,14 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
                     break;
                 }
 
+                // data is already in latin1
+                if(convi && outLen == 0){
+                    outStr = tmp;
+                    outLen = utf8len;
+                }else{
+                    free(tmp);
+                }
+
                 // add spacer
                 if(trav.current != NULL){
                     outStr = realloc(outStr, outLen + 1);
@@ -1361,7 +1369,6 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl){
                 byteStreamResize(stream, stream->bufferSize + outLen);
                 byteStreamWrite(stream, outStr, outLen);
 
-                free(tmp);
                 free(outStr);
                 contentSize += outLen;
                 break;
