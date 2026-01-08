@@ -256,16 +256,14 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
 
     //add text
     convi = byteConvertTextFormat((unsigned char *)string, BYTE_UTF8, strlen(string), &usableString, encoding, &outLen);
-    
-    if(convi == false || outLen == 0 || usableString == NULL){
+
+    // already in target encoding - use original string
+    if(convi == true && outLen == 0){
+        usableString = (uint8_t *) strdup(string);
+        outLen = strlen(string);
+    }else if(convi == false || outLen == 0 || usableString == NULL){
         id3v2DestroyFrame(&f);
         return false;
-    }
-
-    // already converted
-    if(convi == true && outLen == 0){
-        usableString = (uint8_t *) string;
-        outLen = strlen(string);
     }
 
     // re enable utf16 len support
@@ -903,7 +901,7 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
 
     // data is already in utf8
     if(convi && outLen == 0){
-        usableString = (uint8_t *) string;
+        usableString = (uint8_t *) strdup(string);
         outLen = strlen(string);
     }
 
@@ -1352,7 +1350,8 @@ int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
 
     // data is already in utf8
     if(convi && outLen == 0){
-        usableString = (uint8_t *) lyrics;
+        usableString = (uint8_t *) strdup(lyrics);
+        outLen = strlen(lyrics);
     }
 
     bytePrependBOM(encoding, &usableString, &outLen);
@@ -1430,6 +1429,12 @@ static int _id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3], const 
             return false;
         }
 
+        // data is already in target encoding
+        if(convi && outLen == 0){
+            usableString = (uint8_t *) strdup(desc);
+            outLen = strlen(desc);
+        }
+
         bytePrependBOM(encoding, &usableString, &outLen);
 
         // re enable utf16 len support
@@ -1454,7 +1459,13 @@ static int _id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3], const 
         id3v2DestroyFrame(&f);
         return false;
     }
-    
+
+    // data is already in target encoding
+    if(convi && outLen == 0){
+        usableString = (uint8_t *) strdup(comment);
+        outLen = strlen(comment);
+    }
+
     bytePrependBOM(encoding, &usableString, &outLen);
 
     // re enable utf16 len support
@@ -1557,7 +1568,7 @@ int id3v2WriteComment(const char *comment, Id3v2Tag *tag){
 
     // data is already in utf8
     if(convi && outLen == 0){
-        usableString = (uint8_t *) comment;
+        usableString = (uint8_t *) strdup(comment);
         outLen = strlen(comment);
     }
 

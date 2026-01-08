@@ -12,5 +12,6 @@ build/
 .cache/
 .fleet/
 scripts/common/__pycache__
-cmake-build-debug
+cmake-build-*
+Debug*
 .idea

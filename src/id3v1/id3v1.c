@@ -22,110 +22,107 @@
  * @param filePath 
  * @return Id3v1Tag* 
  */
-Id3v1Tag *id3v1TagFromFile(const char *filePath){
-
-    if(filePath == NULL){
+Id3v1Tag *id3v1TagFromFile(const char *filePath) {
+    if (filePath == NULL) {
         return NULL;
     }
 
     FILE *fp = NULL;
     uint8_t id3Bytes[ID3V1_MAX_SIZE];
-    
-    //make sure the file can really be read
-    if((fp = fopen(filePath, "rb")) == NULL){
+
+    // make sure the file can really be read
+    fp = fopen(filePath, "rb");
+    if (fp == NULL) {
         return NULL;
     }
 
     //seek to the start of metadata
-    if((fseek(fp, -ID3V1_MAX_SIZE, SEEK_END)) != 0){
-        fclose(fp);
+    if ((fseek(fp, -ID3V1_MAX_SIZE, SEEK_END)) != 0) {
+        (void) fclose(fp);
         return NULL;
     }
 
-    if((fread(id3Bytes, ID3V1_MAX_SIZE, 1, fp)) != 1){
-        fclose(fp);
+    if ((fread(id3Bytes, ID3V1_MAX_SIZE, 1, fp)) != 1) {
+        (void) fclose(fp);
         return NULL;
     }
 
-    fclose(fp);    
+    (void) fclose(fp);
     return id3v1TagFromBuffer(id3Bytes);
 }
 
 /**
  * @brief Deep copies an Id3v1Tag structure.
- * @param toCopy 
- * @return Id3v1Tag* 
+ * @param toCopy
+ * @return Id3v1Tag*
  */
-Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy){
-    
-    if(toCopy == NULL){
+Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy) {
+    if (toCopy == NULL) {
         return NULL;
     }
 
-    return id3v1CreateTag(toCopy->title, toCopy->artist, toCopy->albumTitle, toCopy->year, toCopy->track, toCopy->comment, toCopy->genre);
+    return id3v1CreateTag(toCopy->title, toCopy->artist, toCopy->albumTitle, toCopy->year, toCopy->track,
+                          toCopy->comment, toCopy->genre);
 }
 
 /**
  * @brief Writes ID3V1_FIELD_SIZE bytes to a buffer.
  * @details This function is not in any header and is private to this library. It returns 1 on success and 0 otherwise.
- * @param src 
- * @param dest 
- * @return int 
+ * @param src
+ * @param dest
+ * @return int
  */
-static int _id3v1CharsToStructUint8(const char *src, uint8_t *dest){
-
+static int id3v1CharsToStructUint8(const char *src, uint8_t *dest) {
     memset(dest, 0, ID3V1_FIELD_SIZE);
-    
-    if(src != NULL){
-        int len = strlen(src);
-        int wLen = ((len > ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : len);
 
-        memcpy(dest, (uint8_t *)src, wLen);    
+    if (src != NULL) {
+        const int len = (int) strlen(src);
+        const int wLen = ((len > ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : len);
+
+        memcpy(dest, (uint8_t *) src, wLen);
     }
-    
-    return 1;
 
+    return 1;
 }
 
 /**
  * @brief Writes a title to tag.
- * @param title 
- * @param tag 
- * @return int 
+ * @param title
+ * @param tag
+ * @return int
  */
-int id3v1WriteTitle(const char *title, Id3v1Tag *tag){
-    return (tag == NULL) ? 0: _id3v1CharsToStructUint8(title, tag->title);
+int id3v1WriteTitle(const char *title, Id3v1Tag *tag) {
+    return (tag == NULL) ? 0 : id3v1CharsToStructUint8(title, tag->title);
 }
 
 /**
  * @brief Writes an artist to tag.
  * @param artist
- * @param tag 
- * @return int 
+ * @param tag
+ * @return int
  */
-int id3v1WriteArtist(const char *artist, Id3v1Tag *tag){
-    return (tag == NULL) ? 0: _id3v1CharsToStructUint8(artist, tag->artist);
+int id3v1WriteArtist(const char *artist, Id3v1Tag *tag) {
+    return (tag == NULL) ? 0 : id3v1CharsToStructUint8(artist, tag->artist);
 }
 
 /**
  * @brief Writes an album to tag.
  * @param album
- * @param tag 
- * @return int 
+ * @param tag
+ * @return int
  */
-int id3v1WriteAlbum(const char *album, Id3v1Tag *tag){
-    return (tag == NULL) ? 0: _id3v1CharsToStructUint8(album, tag->albumTitle);
+int id3v1WriteAlbum(const char *album, Id3v1Tag *tag) {
+    return (tag == NULL) ? 0 : id3v1CharsToStructUint8(album, tag->albumTitle);
 }
 
 /**
  * @brief Writes a year to tag.
  * @param year
- * @param tag 
- * @return int 
+ * @param tag
+ * @return int
  */
-int id3v1WriteYear(int year, Id3v1Tag *tag){
-    
-    if(tag == NULL){
+int id3v1WriteYear(int year, Id3v1Tag *tag) {
+    if (tag == NULL) {
         return 0;
     }
 
@@ -136,22 +133,21 @@ int id3v1WriteYear(int year, Id3v1Tag *tag){
 /**
  * @brief Writes a comment to tag.
  * @param comment
- * @param tag 
- * @return int 
+ * @param tag
+ * @return int
  */
-int id3v1WriteComment(const char *comment, Id3v1Tag *tag){
-    return (tag == NULL) ? 0: _id3v1CharsToStructUint8(comment, tag->comment);
+int id3v1WriteComment(const char *comment, Id3v1Tag *tag) {
+    return (tag == NULL) ? 0 : id3v1CharsToStructUint8(comment, tag->comment);
 }
 
 /**
  * @brief Writes a genere to tag.
  * @param genre
- * @param tag 
- * @return int 
+ * @param tag
+ * @return int
  */
-int id3v1WriteGenre(Genre genre, Id3v1Tag *tag){
-    
-    if(tag == NULL){
+int id3v1WriteGenre(Genre genre, Id3v1Tag *tag) {
+    if (tag == NULL) {
         return 0;
     }
 
@@ -162,59 +158,56 @@ int id3v1WriteGenre(Genre genre, Id3v1Tag *tag){
 /**
  * @brief Writes a track to tag.
  * @param track
- * @param tag 
- * @return int 
+ * @param tag
+ * @return int
  */
-int id3v1WriteTrack(int track, Id3v1Tag *tag){
-    
-    if(tag == NULL){
+int id3v1WriteTrack(int track, Id3v1Tag *tag) {
+    if (tag == NULL) {
         return 0;
     }
 
     tag->track = track;
     return 1;
-
 }
 
 /**
  * @brief Compares two different tags.
- * @details Returns true if the provided tags are equal otherwise, false. 
- * @param tag1 
- * @param tag2 
- * @return true 
- * @return false 
+ * @details Returns true if the provided tags are equal otherwise, false.
+ * @param tag1
+ * @param tag2
+ * @return true
+ * @return false
  */
-bool id3v1CompareTag(Id3v1Tag *tag1, Id3v1Tag *tag2){
-
-    if(tag1 == NULL || tag2 == NULL){
+bool id3v1CompareTag(const Id3v1Tag *tag1, const Id3v1Tag *tag2) {
+    if (tag1 == NULL || tag2 == NULL) {
         return false;
     }
 
-    if(tag1->genre != tag2->genre){
+    if (tag1->genre != tag2->genre) {
         return false;
     }
 
-    if(tag1->track != tag2->track){
+    if (tag1->track != tag2->track) {
         return false;
     }
 
-    if(tag1->year != tag2->year){
+    if (tag1->year != tag2->year) {
         return false;
     }
 
-    if(memcmp(tag1->albumTitle, tag2->albumTitle, ID3V1_FIELD_SIZE) != 0){
+    if (memcmp(tag1->albumTitle, tag2->albumTitle, ID3V1_FIELD_SIZE) != 0) {
         return false;
     }
 
-    if(memcmp(tag1->artist, tag2->artist, ID3V1_FIELD_SIZE) != 0){
+    if (memcmp(tag1->artist, tag2->artist, ID3V1_FIELD_SIZE) != 0) {
         return false;
     }
 
-    if(memcmp(tag1->comment, tag2->comment, ID3V1_FIELD_SIZE) != 0){
+    if (memcmp(tag1->comment, tag2->comment, ID3V1_FIELD_SIZE) != 0) {
         return false;
     }
 
-    if(memcmp(tag1->title, tag2->title, ID3V1_FIELD_SIZE) != 0){
+    if (memcmp(tag1->title, tag2->title, ID3V1_FIELD_SIZE) != 0) {
         return false;
     }
 
@@ -224,13 +217,12 @@ bool id3v1CompareTag(Id3v1Tag *tag1, Id3v1Tag *tag2){
 /**
  * @brief Provides a string equivalent to the genere enum.
  * @details Values outside the genre enum will be reported as other and return "Other".
- * @param val 
- * @return char* 
+ * @param val
+ * @return char*
  */
-char *id3v1GenreFromTable(Genre val){
-
+char *id3v1GenreFromTable(Genre val) {
     //int to string
-    switch (val){
+    switch (val) {
         case BLUES_GENRE:
             return "Blues\0";
         case CLASSIC_ROCK_GENRE:
@@ -519,7 +511,7 @@ char *id3v1GenreFromTable(Genre val){
             return "Merengue\0";
         case SALSA_GENRE:
             return "Salsa\0";
-        case  THRASH_METAL_GENRE:
+        case THRASH_METAL_GENRE:
             return "Thrash Metal\0";
         case ANIME_GENRE:
             return "Anime\0";
@@ -614,7 +606,7 @@ char *id3v1GenreFromTable(Genre val){
         case PSYBIENT_GENRE:
             return "Psybient\0";
         default:
-            return "Other\0";
+            break;
     }
     //191 supported genres god this enum is huge
     return "Other\0";
@@ -623,10 +615,10 @@ char *id3v1GenreFromTable(Genre val){
 /**
  * @brief Reads a title from a tag.
  * @details Mainly for compatibility and use in ffi.
- * @param tag 
- * @return char* 
+ * @param tag
+ * @return char*
  */
-char *id3v1ReadTitle(Id3v1Tag *tag){
+char *id3v1ReadTitle(const Id3v1Tag *tag) {
     char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
     memcpy(r, tag->title, ID3V1_FIELD_SIZE);
     return r;
@@ -635,10 +627,10 @@ char *id3v1ReadTitle(Id3v1Tag *tag){
 /**
  * @brief Reads an artist from a tag.
  * @details Mainly for compatibility and use in ffi.
- * @param tag 
- * @return char* 
+ * @param tag
+ * @return char*
  */
-char *id3v1ReadArtist(Id3v1Tag *tag){
+char *id3v1ReadArtist(const Id3v1Tag *tag) {
     char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
     memcpy(r, tag->artist, ID3V1_FIELD_SIZE);
     return r;
@@ -647,10 +639,10 @@ char *id3v1ReadArtist(Id3v1Tag *tag){
 /**
  * @brief Reads an album from a tag.
  * @details Mainly for compatibility and use in ffi.
- * @param tag 
- * @return char* 
+ * @param tag
+ * @return char*
  */
-char *id3v1ReadAlbum(Id3v1Tag *tag){
+char *id3v1ReadAlbum(const Id3v1Tag *tag) {
     char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
     memcpy(r, tag->albumTitle, ID3V1_FIELD_SIZE);
     return r;
@@ -659,20 +651,20 @@ char *id3v1ReadAlbum(Id3v1Tag *tag){
 /**
  * @brief Reads a year from a tag.
  * @details Mainly for compatibility and use in ffi.
- * @param tag 
- * @return char* 
+ * @param tag
+ * @return char*
  */
-int id3v1ReadYear(Id3v1Tag *tag){
+int id3v1ReadYear(const Id3v1Tag *tag) {
     return tag->year;
 }
 
 /**
  * @brief Reads a comment from a tag.
  * @details Mainly for compatibility and use in ffi.
- * @param tag 
- * @return char* 
+ * @param tag
+ * @return char*
  */
-char *id3v1ReadComment(Id3v1Tag *tag){
+char *id3v1ReadComment(const Id3v1Tag *tag) {
     char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
     memcpy(r, tag->comment, ID3V1_FIELD_SIZE);
     return r;
@@ -681,65 +673,75 @@ char *id3v1ReadComment(Id3v1Tag *tag){
 /**
  * @brief Reads a genere from a tag
  * @details Mainly for compatibility and use in ffi
- * @param tag 
- * @return char* 
+ * @param tag
+ * @return char*
  */
-Genre id3v1ReadGenre(Id3v1Tag *tag){
+Genre id3v1ReadGenre(const Id3v1Tag *tag) {
     return tag->genre;
 }
 
 /**
  * @brief Reads a track from a tag
  * @details Mainly for compatibility and use in ffi
- * @param tag 
- * @return char* 
+ * @param tag
+ * @return char*
  */
-int id3v1ReadTrack(Id3v1Tag *tag){
+int id3v1ReadTrack(const Id3v1Tag *tag) {
     return tag->track;
 }
 
 /**
  * @brief Converts an Id3v1Tag to a JSON string.
- * @param tag 
- * @return char* 
+ * @param tag
+ * @return char*
  */
-char *id3v1ToJSON(const Id3v1Tag *tag){
+char *id3v1ToJSON(const Id3v1Tag *tag) {
+    char *json = NULL;
+    int memCount = 3;
 
-    char *jsonStr = NULL;
-    int memCount = 0;
-
-    if(tag == NULL){
-        jsonStr = calloc(sizeof(char), 3);
-        strncpy(jsonStr,"{}",3);
-        return jsonStr;
+    if (tag == NULL) {
+        json = calloc(memCount, sizeof(char));
+        memcpy(json, "{}\0", memCount);
+        return json;
     }
 
-    //96 is for formating
-    memCount = 98 + ID3V1_MAX_SIZE + (sizeof(int) * 3) + strlen(id3v1GenreFromTable(tag->genre));    
-    jsonStr = calloc(sizeof(char), memCount);
+    memCount += snprintf(
+        NULL, 0,
+        "{\"title\":\"%s\",\"artist\":\"%s\",\"album\":\"%s\",\"year\":%d,\"track\":%d,\"comment\":\"%s\",\"genreNumber\":%d,\"genre\":\"%s\"}",
+        (char *) tag->title,
+        (char *) tag->artist,
+        (char *) tag->albumTitle,
+        tag->year,
+        tag->track,
+        (char *) tag->comment,
+        tag->genre,
+        id3v1GenreFromTable(tag->genre));
 
-    sprintf(jsonStr,"{\"title\":\"%s\",\"artist\":\"%s\",\"album\":\"%s\",\"year\":%d,\"track\":%d,\"comment\":\"%s\",\"genreNumber\":%d,\"genre\":\"%s\"}",
-    (char *) tag->title, 
-    (char *) tag->artist,
-    (char *) tag->albumTitle, 
-    tag->year,
-    tag->track, 
-    (char *) tag->comment,
-    tag->genre, 
-    id3v1GenreFromTable(tag->genre));
-    return jsonStr;
+    json = calloc(memCount + 1, sizeof(char));
+    (void) snprintf(json, memCount,
+                    "{\"title\":\"%s\",\"artist\":\"%s\",\"album\":\"%s\",\"year\":%d,\"track\":%d,\"comment\":\"%s\",\"genreNumber\":%d,\"genre\":\"%s\"}",
+                    (char *) tag->title,
+                    (char *) tag->artist,
+                    (char *) tag->albumTitle,
+                    tag->year,
+                    tag->track,
+                    (char *) tag->comment,
+                    tag->genre,
+                    id3v1GenreFromTable(tag->genre));
+
+
+    return json;
 }
 
 /**
  * @brief Writes a Id3v1Tag structure to a file located at file path.
  * @details If the file does not exist it will be created. otherwise, if a tag is found it will be overwritten and if not it will be appended.
- * @param filePath 
- * @param tag 
- * @return int 
+ * @param filePath
+ * @param tag
+ * @return int
  */
-int id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag){
-
-    if(filePath == NULL || tag == NULL){
+int id3v1WriteTagToFile(const char *filePath, const Id3v1Tag *tag) {
+    if (filePath == NULL || tag == NULL) {
         return 0;
     }
 
@@ -750,28 +752,28 @@ int id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag){
     FILE *fp = NULL;
     ByteStream *stream = byteStreamCreate(NULL, ID3V1_MAX_SIZE);
 
-    byteStreamWrite(stream, (unsigned char *)"TAG", ID3V1_TAG_ID_SIZE);
-    byteStreamWrite(stream, (unsigned char *)tag->title, ID3V1_FIELD_SIZE);
-    byteStreamWrite(stream, (unsigned char *)tag->artist, ID3V1_FIELD_SIZE);
-    byteStreamWrite(stream, (unsigned char *)tag->albumTitle, ID3V1_FIELD_SIZE);
-    
+    byteStreamWrite(stream, (unsigned char *) "TAG", ID3V1_TAG_ID_SIZE);
+    byteStreamWrite(stream, (unsigned char *) tag->title, ID3V1_FIELD_SIZE);
+    byteStreamWrite(stream, (unsigned char *) tag->artist, ID3V1_FIELD_SIZE);
+    byteStreamWrite(stream, (unsigned char *) tag->albumTitle, ID3V1_FIELD_SIZE);
+
     //int to string
-    n = log10(tag->year) + 1;
+    n = (int) log10(tag->year) + 1;
     yearW = tag->year;
     tmp = calloc(n, sizeof(char));
 
-    for(int i = n - 1; i >= 0; --i, yearW /= 10){
-        tmp[i] = (yearW % 10) + '0';
+    for (int i = n - 1; i >= 0; --i, yearW /= 10) {
+        tmp[i] = (char) ((yearW % 10) + '0');
     }
 
     //write convert
-    byteStreamWrite(stream, (unsigned char *)tmp, ID3V1_YEAR_SIZE);
+    byteStreamWrite(stream, (unsigned char *) tmp, ID3V1_YEAR_SIZE);
     free(tmp);
 
-    byteStreamWrite(stream, (unsigned char *)tag->comment, ID3V1_FIELD_SIZE);
-    
+    byteStreamWrite(stream, (unsigned char *) tag->comment, ID3V1_FIELD_SIZE);
+
     //track is one byte but an int can be more so clamp it
-    if(tag->track <= 0xFF && tag->track > 0x00){
+    if (tag->track <= 0xFF && tag->track > 0x00) {
         byteStreamSeek(stream, -1, SEEK_CUR);
         byte = (unsigned char) tag->track & 0xFF;
         byteStreamWrite(stream, &byte, 1);
@@ -783,77 +785,74 @@ int id3v1WriteTagToFile(const char *filePath, Id3v1Tag *tag){
 
     byteStreamRewind(stream);
 
-    if((fp = fopen(filePath, "r+b")) == NULL){
-        
-        //create a new file and write the bytes to it    
-        if((fp = fopen(filePath, "wb")) == NULL){
+    fp = fopen(filePath, "r+b");
+    if (fp == NULL) {
+        //create a new file and write the bytes to it
+        fp = fopen(filePath, "wb");
+        if (fp == NULL) {
             byteStreamDestroy(stream);
             return 0;
         }
 
-        if((fwrite(byteStreamCursor(stream), 1, ID3V1_MAX_SIZE, fp)) == 0){
+        if ((fwrite(byteStreamCursor(stream), 1, ID3V1_MAX_SIZE, fp)) == 0) {
             byteStreamDestroy(stream);
-            fclose(fp);
+            (void) fclose(fp);
             return 0;
         }
-        
-    }else{
-
+    } else {
         //get file size
-        fseek(fp, 0, SEEK_END);
-        size_t index = ftell(fp);
-        unsigned char *buffer[ID3V1_MAX_SIZE];
+        (void) fseek(fp, 0, SEEK_END);
+        const long index = ftell(fp);
+        unsigned char buffer[ID3V1_MAX_SIZE];
 
         //seek to tag start
         //if the file is less than 128 bytes then we can catch that here.
         //there will be no tag due to size or if there is its corrupt and
         //will be treated as regular file data and skipped over.
-        if((fseek(fp, index - ID3V1_MAX_SIZE, SEEK_SET)) != 0){
-            
-            fseek(fp, 0, SEEK_END);
-            if(fwrite(byteStreamCursor(stream), 1, ID3V1_MAX_SIZE, fp) != 0){
+        if ((fseek(fp, index - ID3V1_MAX_SIZE, SEEK_SET)) != 0) {
+            (void) fseek(fp, 0, SEEK_END);
+            if (fwrite(byteStreamCursor(stream), 1, ID3V1_MAX_SIZE, fp) != 0) {
                 byteStreamDestroy(stream);
-                fclose(fp);
+                (void) fclose(fp);
                 return 1;
             }
-            
+
             byteStreamDestroy(stream);
-            fclose(fp);
+            (void) fclose(fp);
             return 0;
         }
 
         //check to see if the file has ID3 metadata
-        if(fread(buffer, 1, ID3V1_TAG_ID_SIZE, fp) == 0){
+        if (fread(buffer, 1, ID3V1_TAG_ID_SIZE, fp) == 0) {
             byteStreamDestroy(stream);
-            fclose(fp);
+            (void) fclose(fp);
             return 0;
         }
 
         //coupled not find 'TAG'
-        if(!id3v1HasTag((uint8_t *)buffer)){
-            if(fseek(fp, 0, SEEK_END) != 0){
+        if (!id3v1HasTag((uint8_t *) buffer)) {
+            if (fseek(fp, 0, SEEK_END) != 0) {
                 byteStreamDestroy(stream);
-                fclose(fp);
+                (void) fclose(fp);
                 return 0;
             }
-
-        }else{
-            if(fseek(fp, index - ID3V1_MAX_SIZE, SEEK_SET) != 0){
+        } else {
+            if (fseek(fp, index - ID3V1_MAX_SIZE, SEEK_SET) != 0) {
                 byteStreamDestroy(stream);
-                fclose(fp);
+                (void) fclose(fp);
                 return 0;
             }
         }
 
         //write bytes to the file at the right position
-        if((fwrite(byteStreamCursor(stream), 1, ID3V1_MAX_SIZE, fp)) == 0){
+        if ((fwrite(byteStreamCursor(stream), 1, ID3V1_MAX_SIZE, fp)) == 0) {
             byteStreamDestroy(stream);
-            fclose(fp);
+            (void) fclose(fp);
             return 0;
         }
     }
 
     byteStreamDestroy(stream);
-    fclose(fp);
+    (void) fclose(fp);
     return 1;
 }

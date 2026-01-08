@@ -127,7 +127,7 @@ git clone --recurse-submodules https://github.com/definitelyewan/id3dev.git
 ```
 
 ## Building
-This project comes with a Python3 script intended to be used to build it. This script is located at `./scripts/build.py` and should be run from the root directory of this project. However, if you wish to build this project via standard cmake to gain access to extra build options you can. 
+This project comes with a Python3 script intended to be used to build it. This script is located at `./scripts/build.py` and should be run from the root directory of this project. However, if you wish to build this project via standard cmake to gain access to extra build options you can.
 build options:
 - `BUILD_SHARED_LIBS` can be toggled on for a shared library and off for a static one
 - `BUILD_ID3_DOCS` can be toggled to generate documentation
@@ -142,6 +142,7 @@ $ cmake -S . -B build
 $ cd build
 $ make
 ``` 
+Do note that this project and these scripts only work with GCC, Clang, MinGW, and MSVC and have not been tested with other compilers.
 
 ## Installing
 > Ensure all commands are run from the root of the cloned project directory.
@@ -169,7 +170,7 @@ rsync -avm --include='*.h' --include='*/' --exclude='cmocka/' --exclude='*' ./id
 ### Windows Systems
 Instead of installing ID3dev system wide on Windows its recommended that you just install it along side a single project. You can copy this script to a `.ps1` file and run it to install alongside a project.
 ```powershell
-Copy-Item -Path .\build\libid3dev.dylib -Destination "your project dir"
+Copy-Item -Path .\build\libid3dev.dll -Destination "your project dir"
 ```
 ```powershell
 Copy-Item -Path .\include\* -Destination "your project dir" -Recurse -Force
