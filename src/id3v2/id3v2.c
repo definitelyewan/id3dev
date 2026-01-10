@@ -37,7 +37,8 @@ Id3v2Tag *id3v2TagFromFile(const char *filename){
         return NULL;
     }
 
-    if((stream = byteStreamFromFile(filename)) == NULL){
+    stream = byteStreamFromFile(filename);
+    if(stream == NULL){
         return NULL;
     }
 
@@ -53,7 +54,7 @@ Id3v2Tag *id3v2TagFromFile(const char *filename){
  * @param toCopy 
  * @return Id3v2Tag* 
  */
-Id3v2Tag *id3v2CopyTag(Id3v2Tag *toCopy){
+Id3v2Tag *id3v2CopyTag(const Id3v2Tag *toCopy){
 
     Id3v2TagHeader *header = NULL;
 
@@ -150,7 +151,8 @@ bool id3v2CompareTag(Id3v2Tag *tag1, Id3v2Tag *tag2){
         }
     }
 
-    if((f2 = id3v2FrameTraverse(&frames2)) != NULL){
+    f2 = id3v2FrameTraverse(&frames2);
+    if(f2 != NULL){
         return false;
     }
     
@@ -260,6 +262,12 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
     // already in target encoding - use original string
     if(convi == true && outLen == 0){
         usableString = (uint8_t *) strdup(string);
+
+        if (usableString == NULL) {
+            id3v2DestroyFrame(&f);
+            return false;
+        }
+
         outLen = strlen(string);
     }else if(convi == false || outLen == 0 || usableString == NULL){
         id3v2DestroyFrame(&f);
@@ -270,7 +278,15 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
     bytePrependBOM(encoding, &usableString, &outLen);
 
     if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
-        usableString = realloc(usableString, outLen + BYTE_PADDING);
+        // false positive memory leak from realloc
+        // NOLINTNEXTLINE
+        uint8_t *reallocPtr = realloc(usableString, outLen + BYTE_PADDING);
+        if(reallocPtr == NULL){
+            free(usableString);
+            id3v2DestroyFrame(&f);
+            return false;
+        }
+        usableString = reallocPtr;
         memset(usableString + outLen, 0, BYTE_PADDING);
     }
 
@@ -280,8 +296,9 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
     free(usableString);
 
     listInsertBack(tag->frames, (void *)f);
-    
 
+    // false positive memory leak for usableString due to realloc
+    // NOLINTNEXTLINE
     return true;
 }
 
@@ -291,7 +308,7 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
  * @param tag 
  * @return int 
  */
-int id3v2ReadTagVersion(Id3v2Tag *tag){
+int id3v2ReadTagVersion(const Id3v2Tag *tag){
     
     if(tag == NULL){
         return -1;
@@ -785,7 +802,7 @@ char *id3v2ReadComment(Id3v2Tag *tag){
  * @param dataSize
  * @return char* 
  */
-uint8_t *id3v2ReadPicture(uint8_t type, Id3v2Tag *tag, size_t *dataSize){
+uint8_t *id3v2ReadPicture(uint8_t type, const Id3v2Tag *tag, size_t *dataSize){
     
     *dataSize = 0;
 
@@ -833,13 +850,11 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
     
     if(id == NULL || string == NULL || tag == NULL){
         return false;
-
     }
 
     // null is an invalid string
     if(strlen(string) == 0){
         return false;
-
     }
 
     Id3v2Frame *f = NULL;
@@ -880,11 +895,11 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
 
     context = listCreateIterator(f->contexts);
 
-    for(int i = 0; i < 2; i++){
+    for(int j = 0; j < 2; j++){
         cc = listIteratorNext(&context);
 
-        if(cc == NULL || (i == 0 && cc->type != numeric_context) ||
-            (i == 1 && cc->type != encodedString_context)){
+        if(cc == NULL || (j == 0 && cc->type != numeric_context) ||
+            (j == 1 && cc->type != encodedString_context)){
             return false;
         }
     }
@@ -909,19 +924,30 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
 
     // re enable utf16 len support
     if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
-        usableString = realloc(usableString, outLen + BYTE_PADDING);
+        // realloc false positive memory leak as usableString becomes the memory owner
+        // NOLINTNEXTLINE
+        uint8_t *reallocPtr = realloc(usableString, outLen + BYTE_PADDING);
+        if(reallocPtr == NULL){
+            free(usableString);
+            return false;
+        }
+        usableString = reallocPtr;
         memset(usableString + outLen, 0, BYTE_PADDING);
     }
 
     if(id3v2WriteFrameEntry(f, &entries, byteStrlen(encoding, usableString), (void *) usableString)){
         free(usableString);
+        // memory is now owned by frame
+        // NOLINTNEXTLINE
         return true;
     }
     
     if(usableString != NULL){
         free(usableString);
     }
-    
+
+    // memory is owned by frame
+    // NOLINTNEXTLINE
     return false;
 }
 
@@ -945,10 +971,9 @@ int id3v2WriteTitle(const char *title, Id3v2Tag *tag){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteTextFrameContent("TIT2", title, tag);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -973,10 +998,9 @@ int id3v2WriteArtist(const char *artist, Id3v2Tag *tag){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteTextFrameContent("TPE1", artist, tag);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1001,10 +1025,9 @@ int id3v2WriteAlbumArtist(const char *albumArtist, Id3v2Tag *tag){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteTextFrameContent("TPE2", albumArtist, tag);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1029,10 +1052,9 @@ int id3v2WriteAlbum(const char *album, Id3v2Tag *tag){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteTextFrameContent("TALB", album, tag);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1057,10 +1079,9 @@ int id3v2WriteYear(const char *year, Id3v2Tag *tag){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteTextFrameContent("TYER", year, tag);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1085,10 +1106,9 @@ int id3v2WriteGenre(const char *genre, Id3v2Tag *tag){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteTextFrameContent("TCON", genre, tag);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1113,10 +1133,9 @@ int id3v2WriteTrack(const char *track, Id3v2Tag *tag){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteTextFrameContent("TRCK", track, tag);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1141,10 +1160,9 @@ int id3v2WriteDisc(const char *disc, Id3v2Tag *tag){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteTextFrameContent("TPOS", disc, tag);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1169,18 +1187,19 @@ int id3v2WriteComposer(const char *composer, Id3v2Tag *tag){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteTextFrameContent("TCOM", composer, tag);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
 // internal function ------------------------------------------------------------------------
-static int _id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *lyrics, Id3v2Tag *tag){
+static int internal_id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *lyrics, Id3v2Tag *tag){
 
     // check for legal args
+    // NOLINTNEXTLINE
     if(lyrics == NULL){
+        // NOLINTNEXTLINE
         return false;
     }
 
@@ -1247,13 +1266,26 @@ static int _id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *lyrics, Id
 
     // re add bom and padding
     bytePrependBOM(encoding, &usableString, &outLen);
-    usableString = realloc(usableString, outLen + BYTE_PADDING);
+
+    // realloc false positive memory leak as usableString becomes the memory owner
+    // NOLINTNEXTLINE
+    uint8_t *reallocPtr = realloc(usableString, outLen + BYTE_PADDING);
+    if(reallocPtr == NULL){
+        free(usableString);
+        id3v2DestroyFrame(&f);
+        return false;
+    }
+    usableString = reallocPtr;
+
     memset(usableString + outLen, 0, BYTE_PADDING);
     
 
     if(!id3v2WriteFrameEntry(f, &entries, outLen, (void *) usableString)){
         id3v2DestroyFrame(&f);
         free(usableString);
+
+        // memory is owned by frame - false positive
+        // NOLINTNEXTLINE
         return false;
     }
     id3v2ReadFrameEntryAsU8(&entries);
@@ -1261,6 +1293,9 @@ static int _id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *lyrics, Id
 
     listInsertBack(tag->frames, (void *) f);
     free(usableString);
+
+    // memory is owned by frame - false positive
+    // NOLINTNEXTLINE
     return true;
 }
 /**
@@ -1317,7 +1352,7 @@ int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
     }
 
     if(f == NULL){
-        return _id3v2CreateLyricFrameUTF16LE(tag->header->majorVersion, lyrics, tag);
+        return internal_id3v2CreateLyricFrameUTF16LE(tag->header->majorVersion, lyrics, tag);
     }
 
     // verify frame via context
@@ -1327,13 +1362,13 @@ int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
 
     context = listCreateIterator(f->contexts);
 
-    for(int i = 0; i < 4; i++){
+    for(int j = 0; j < 4; j++){
         cc = listIteratorNext(&context);
 
-        if(cc == NULL || (i == 0 && cc->type != numeric_context) ||
-            (i == 1 && cc->type != noEncoding_context) ||
-            (i == 2 && cc->type != encodedString_context) ||
-            (i == 3 && cc->type != encodedString_context)){
+        if(cc == NULL || (j == 0 && cc->type != numeric_context) ||
+            (j == 1 && cc->type != noEncoding_context) ||
+            (j == 2 && cc->type != encodedString_context) ||
+            (j == 3 && cc->type != encodedString_context)){
             return false;
         }
     }
@@ -1358,7 +1393,14 @@ int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
 
     // re enable utf16 len support
     if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
-        usableString = realloc(usableString, outLen + BYTE_PADDING);
+        // realloc false positive memory leak as usableString becomes the memory owner
+        // NOLINTNEXTLINE
+        uint8_t *reallocPtr = realloc(usableString, outLen + BYTE_PADDING);
+        if(reallocPtr == NULL){
+            free(usableString);
+            return false;
+        }
+        usableString = reallocPtr;
         memset(usableString + outLen, 0, BYTE_PADDING);
     }
 
@@ -1367,6 +1409,8 @@ int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
 
     if(id3v2WriteFrameEntry(f, &entries, byteStrlen(encoding, usableString), (void *) usableString)){
         free(usableString);
+        // memory is now owned by frame
+        // NOLINTNEXTLINE
         return true;
     }
     
@@ -1374,15 +1418,20 @@ int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
         free(usableString);
     }
     
+    // memory is owned by frame
+    // NOLINTNEXTLINE
     return false;
 }
 
 
 // internal function -----------------------------------------------------------------------------------------------------------
-static int _id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3], const char *desc, const char *comment, Id3v2Tag *tag){
+// NOLINTNEXTLINE
+static int internal_id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3], const char *desc, const char *comment, Id3v2Tag *tag){
 
     // check for legal args
+    // NOLINTNEXTLINE
     if(lang == NULL || desc == NULL || comment == NULL){
+        // NOLINTNEXTLINE
         return false;
     }
 
@@ -1439,7 +1488,16 @@ static int _id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3], const 
 
         // re enable utf16 len support
         if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
-            usableString = realloc(usableString, outLen + BYTE_PADDING);
+            // realloc false positive memory leak as usableString becomes the memory owner
+            // NOLINTNEXTLINE
+            uint8_t *reallocPtr = realloc(usableString, outLen + BYTE_PADDING);
+            if(reallocPtr == NULL){
+                free(usableString);
+                id3v2DestroyFrame(&f);
+                return false;
+            }
+            usableString = reallocPtr;
+
             memset(usableString + outLen, 0, BYTE_PADDING);
         }
 
@@ -1447,6 +1505,7 @@ static int _id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3], const 
         listInsertBack(f->entries, (void *) ce);
 
         free(usableString);
+        usableString = NULL;
         outLen = 0;
     }else{
         ce = id3v2CreateContentEntry("\0", 1);
@@ -1457,6 +1516,8 @@ static int _id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3], const 
 
     if(!convi && outLen == 0 && usableString == NULL){
         id3v2DestroyFrame(&f);
+        // memory is owned by frame which gets freed - false positive
+        // NOLINTNEXTLINE
         return false;
     }
 
@@ -1470,7 +1531,17 @@ static int _id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3], const 
 
     // re enable utf16 len support
     if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
-        usableString = realloc(usableString, outLen + BYTE_PADDING);
+        // realloc false positive memory leak as usableString becomes the memory owner
+        // NOLINTNEXTLINE
+        uint8_t *reallocPtr = realloc(usableString, outLen + BYTE_PADDING);
+        if(reallocPtr == NULL){
+            free(usableString);
+            id3v2DestroyFrame(&f);
+            // memory is owned by frame which gets freed - false positive
+            // NOLINTNEXTLINE
+            return false;
+        }
+        usableString = reallocPtr;
         memset(usableString + outLen, 0, BYTE_PADDING);
     }
 
@@ -1480,6 +1551,8 @@ static int _id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3], const 
     free(usableString);
 
     listInsertBack(tag->frames, (void *) f);
+    // memory is owned by frame - false positive
+    // NOLINTNEXTLINE
     return true;
 }
 /**
@@ -1535,7 +1608,7 @@ int id3v2WriteComment(const char *comment, Id3v2Tag *tag){
     }
 
     if(f == NULL){
-        return _id3v2CreateCommentFrameUTF16LE(tag->header->majorVersion, "zxx", "", comment, tag); // zxx is no/unknown language
+        return internal_id3v2CreateCommentFrameUTF16LE(tag->header->majorVersion, "zxx", "", comment, tag); // zxx is no/unknown language
     }
 
     // verify frame via context
@@ -1545,13 +1618,13 @@ int id3v2WriteComment(const char *comment, Id3v2Tag *tag){
 
     context = listCreateIterator(f->contexts);
 
-    for(int i = 0; i < 4; i++){
+    for(int j = 0; j < 4; j++){
         cc = listIteratorNext(&context);
 
-        if(cc == NULL || (i == 0 && cc->type != numeric_context) ||
-            (i == 1 && cc->type != noEncoding_context) ||
-            (i == 2 && cc->type != encodedString_context) ||
-            (i == 3 && cc->type != encodedString_context)){
+        if(cc == NULL || (j == 0 && cc->type != numeric_context) ||
+            (j == 1 && cc->type != noEncoding_context) ||
+            (j == 2 && cc->type != encodedString_context) ||
+            (j == 3 && cc->type != encodedString_context)){
             return false;
         }
     }
@@ -1576,7 +1649,14 @@ int id3v2WriteComment(const char *comment, Id3v2Tag *tag){
 
     // re enable utf16 len support
     if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
-        usableString = realloc(usableString, outLen + BYTE_PADDING);
+        // realloc false positive memory leak as usableString becomes the memory owner
+        // NOLINTNEXTLINE
+        uint8_t *reallocPtr = realloc(usableString, outLen + BYTE_PADDING);
+        if(reallocPtr == NULL){
+            free(usableString);
+            return false;
+        }
+        usableString = reallocPtr;
         memset(usableString + outLen, 0, BYTE_PADDING);
     }
 
@@ -1585,20 +1665,27 @@ int id3v2WriteComment(const char *comment, Id3v2Tag *tag){
 
     if(id3v2WriteFrameEntry(f, &entries, byteStrlen(encoding, usableString), (void *) usableString)){
         free(usableString);
+        // memory is now owned by frame
+        // NOLINTNEXTLINE
         return true;
     }
     
     if(usableString != NULL){
         free(usableString);
     }
-    
+    // memory is owned by frame
+    // NOLINTNEXTLINE
     return false;
 }
 
 // internal function ---------------------------------------------------------------------------------------------------------
-static int _id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *image, size_t imageSize, const char *kind, Id3v2Tag *tag){
+// NOLINTNEXTLINE
+static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *image, size_t imageSize, const char *kind, Id3v2Tag *tag){
 
+    // check for legal args
+    // NOLINTNEXTLINE
     if(image == NULL || imageSize == 0 || kind == NULL || tag == NULL){
+        // NOLINTNEXTLINE
         return false;
     }
 
@@ -1659,6 +1746,8 @@ static int _id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *image, size_
             mime = calloc(sizeof(char), strlen("image/") + strlen(kind) + 1);
 
             memcpy(mime, "image/", strlen("image/"));
+            // extra + 1 in calloc ensures null termination - false positive below
+            // NOLINTNEXTLINE
             memcpy(mime + strlen("image/"), kind, strlen(kind));
 
             if(!id3v2WriteFrameEntry(f, &entries, strlen(mime), (void *) mime)){
@@ -1758,7 +1847,7 @@ int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_
         }
 
         if(f == NULL){
-            return _id3v2CreatePictureFrameUTF16LEtype0(tag->header->majorVersion, image, imageSize, kind, tag);
+            return internal_id3v2CreatePictureFrameUTF16LEtype0(tag->header->majorVersion, image, imageSize, kind, tag);
         }
 
         // verify frame via context
@@ -1768,18 +1857,20 @@ int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_
 
         context = listCreateIterator(f->contexts);
 
-        for(int i = 0; i < 4; i++){
+        for(int j = 0; j < 4; j++){
             cc = listIteratorNext(&context);
 
             if(cc == NULL){
                 return false;
             }
 
-            if((i == 0 && cc->type != numeric_context) || 
-            (i == 1 && (cc->type != noEncoding_context && cc->type != latin1Encoding_context)) ||
-            (i == 2 && cc->type != numeric_context) ||
-            (i == 3 && cc->type != encodedString_context) || 
-            (i == 4 && cc->type != binary_context)){
+            if((j == 0 && cc->type != numeric_context) ||
+            (j == 1 && (cc->type != noEncoding_context && cc->type != latin1Encoding_context)) ||
+            (j == 2 && cc->type != numeric_context) ||
+            (j == 3 && cc->type != encodedString_context) ||
+            // can always be binary context - false positive
+            // NOLINTNEXTLINE
+            (j == 4 && cc->type != binary_context)){
                 return false;
 
             }
@@ -1801,7 +1892,7 @@ int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_
     
     switch(tag->header->majorVersion){
         case ID3V2_TAG_VERSION_2:
-            kindLen = strlen(kind);
+            kindLen = (int) strlen(kind);
 
             if(kindLen > 3){
                 kindLen = 3;
@@ -1820,6 +1911,8 @@ int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_
             mime = calloc(sizeof(char), strlen("image/") + strlen(kind) + 1);
 
             memcpy(mime, "image/", strlen("image/"));
+            // extra + 1 in calloc ensures null termination - false positive below
+            // NOLINTNEXTLINE
             memcpy(mime + strlen("image/"), kind, strlen(kind));
 
             if(!id3v2WriteFrameEntry(f, &entries, strlen(mime), (void *) mime)){
@@ -1874,19 +1967,19 @@ int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t ty
         return false;
     }
 
-    fseek(f, 0, SEEK_END);
+    (void) fseek(f, 0, SEEK_END);
     size = ftell(f);
-    fseek(f, 0, SEEK_SET);
+    (void) fseek(f, 0, SEEK_SET);
 
     data = calloc(sizeof(uint8_t), size);
 
     if(fread(data, sizeof(uint8_t), size, f) != size){
-        fclose(f);
+        (void) fclose(f);
         free(data);
         return false;
     }
 
-    fclose(f);
+    (void) fclose(f);
 
     ret = id3v2WritePicture(data, size, kind, type, tag);
 
@@ -1957,6 +2050,12 @@ uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl){
             
         }
         byteStreamDestroy(tmp);
+    }
+
+    // check if above failed somehow
+    if (frameStream == NULL) {
+        *outl = 0;
+        return NULL;
     }
 
     byteStreamRewind(frameStream);
@@ -2093,7 +2192,6 @@ char *id3v2TagToJSON(Id3v2Tag *tag){
     char *concatenatedString = NULL;
     size_t contentJsonSize = 0;
     size_t memCount = 3;
-    size_t concatenatedStringLength = 0;
 
     if(tag == NULL){
         json = calloc(memCount, sizeof(char));
@@ -2127,11 +2225,26 @@ char *id3v2TagToJSON(Id3v2Tag *tag){
 
         contentJsonSize++;
         if(contentJson == NULL){
-            contentJson = calloc(contentJsonSize, sizeof(char *));
+            // first allocation and returned by the function - false positive
+            // NOLINTNEXTLINE
+            contentJson = (char **) calloc(contentJsonSize, sizeof(char *));
             contentJson[contentJsonSize - 1] = calloc(jsonSize + 1, sizeof(char));
                 
         }else{
-            contentJson = realloc(contentJson, (contentJsonSize) * sizeof(char *));
+            // realloc false positive memory leak - false positive below
+            // NOLINTNEXTLINE
+            char **reallocPtr = realloc(contentJson, (contentJsonSize) * sizeof(char *));
+            if(reallocPtr == NULL){
+                for(size_t i = 0; i < contentJsonSize - 1; i++){
+                    free(contentJson[i]);
+                }
+                free((void *)contentJson);
+                free(tmp);
+                // all memory freed above - false positive
+                // NOLINTNEXTLINE
+                return NULL;
+            }
+            contentJson = reallocPtr;
             contentJson[contentJsonSize - 1] = calloc(jsonSize + 1, sizeof(char)); 
         }
 
@@ -2144,33 +2257,41 @@ char *id3v2TagToJSON(Id3v2Tag *tag){
     // get header
     headerJson = id3v2TagHeaderToJSON(tag->header);
 
-
     // concatenate all JSON data stored in contentJson into a single string split by ","
-    for(size_t i = 0; i < contentJsonSize; i++){
-        concatenatedStringLength += strlen(contentJson[i]) + 1;
-    }
-    
-
-    concatenatedString = calloc(concatenatedStringLength + 1, sizeof(char));
-    for(size_t i = 0; i < contentJsonSize; i++){
-        strcat(concatenatedString, contentJson[i]);
-        if(i < contentJsonSize - 1){
-            strcat(concatenatedString, ",");
+    if (contentJson != NULL) {
+        size_t concatenatedStringLength = 0;
+        for(size_t i = 0; i < contentJsonSize; i++){
+            concatenatedStringLength += strlen(contentJson[i]) + 1;
         }
+
+        concatenatedString = calloc(concatenatedStringLength + 1, sizeof(char));
+
+        size_t offset = 0;
+        for (size_t i = 0; i < contentJsonSize; i++) {
+
+            if (i > 0) {
+                concatenatedString[offset++] = ',';
+            }
+
+            const size_t currentLen = strlen(contentJson[i]);
+            memcpy(concatenatedString + offset, contentJson[i], currentLen);
+            offset += currentLen;
+
+        }
+        concatenatedString[offset] = '\0';
+
     }
 
     memCount += snprintf(NULL, 0,
                         "{\"header\":%s,\"content\":[%s]}",
                         headerJson,
                         concatenatedString);
+    json = calloc(memCount + 1, sizeof(char));
+    (void) snprintf(json, memCount,
+                    "{\"header\":%s,\"content\":[%s]}",
+                    headerJson,
+                    concatenatedString);
 
-
-    json = malloc((memCount + 1) * sizeof(char));
-    strcpy(json, "{\"header\":");
-    strcat(json, headerJson);
-    strcat(json, ",\"content\":[");
-    strcat(json, concatenatedString);
-    strcat(json, "]}");
 
 
     free(headerJson);
@@ -2184,11 +2305,12 @@ char *id3v2TagToJSON(Id3v2Tag *tag){
             free(contentJson[i]);
 
         }
-        free(contentJson);
+        free((void *)contentJson);
     }
 
+    // all memory is freed of moved to contentJson - false positive
+    // NOLINTNEXTLINE
     return json;
-
 }
 
 /**
@@ -2200,20 +2322,22 @@ char *id3v2TagToJSON(Id3v2Tag *tag){
  * @param tag 
  * @return int 
  */
-int id3v2WriteTagToFile(const char *filePath, Id3v2Tag *tag){
-
-    if(filePath == NULL || tag == NULL){
+int id3v2WriteTagToFile(const char* filePath, Id3v2Tag* tag)
+{
+    if (filePath == NULL || tag == NULL)
+    {
         return false;
     }
 
-    FILE *fp = NULL;
-    uint8_t *out = NULL;
+    FILE* fp = NULL;
+    uint8_t* out = NULL;
     size_t outl = 0;
-    ByteStream *stream = NULL;
+    ByteStream* stream = NULL;
 
     out = id3v2TagSerialize(tag, &outl);
 
-    if(out == NULL && outl == 0){
+    if (out == NULL && outl == 0)
+    {
         return false;
     }
 
@@ -2221,7 +2345,7 @@ int id3v2WriteTagToFile(const char *filePath, Id3v2Tag *tag){
     free(out);
 
     fp = fopen(filePath, "r+b");
-    
+
     // write to a new file
     if(fp == NULL){
 
@@ -2235,7 +2359,7 @@ int id3v2WriteTagToFile(const char *filePath, Id3v2Tag *tag){
 
         if((fwrite(byteStreamCursor(stream), 1, stream->bufferSize, fp)) == 0){
             byteStreamDestroy(stream);
-            fclose(fp);
+            (void) fclose(fp);
             return false;
         }
 
@@ -2253,10 +2377,16 @@ int id3v2WriteTagToFile(const char *filePath, Id3v2Tag *tag){
 
         // does the tag exist?
         while(hasTag == false && feof(fp) == 0){
-            
-            upperBytes += fread(id, sizeof(char), ID3V2_TAG_ID_SIZE, fp);
-            hasTag = (memcmp(id, "ID3", ID3V2_TAG_ID_SIZE) != 0) ? false : true;
-            
+            const size_t bytesRead = fread(id, sizeof(char), ID3V2_TAG_ID_SIZE, fp);
+            upperBytes += bytesRead;
+            if(bytesRead != ID3V2_TAG_ID_SIZE){
+                if(ferror(fp)){
+                    break;
+                }
+                break;
+            }
+
+            hasTag = (memcmp(id, "ID3", ID3V2_TAG_ID_SIZE) == 0);
         }
 
         // 1. update flag is set
@@ -2273,9 +2403,9 @@ int id3v2WriteTagToFile(const char *filePath, Id3v2Tag *tag){
             prepend = false;
 
             // get the tag size
-            fseek(fp, 3, SEEK_CUR); // skips version and flag
+            (void) fseek(fp, 3, SEEK_CUR); // skips version and flag
             tmp = malloc(4);
-            fread(tmp, 1, 4, fp);
+            (void) fread(tmp, 1, 4, fp);
             oldTagSize = byteSyncintDecode(btou32(tmp, 4));
             free(tmp);
 
@@ -2288,27 +2418,27 @@ int id3v2WriteTagToFile(const char *filePath, Id3v2Tag *tag){
         upperBytes = (upperBytes > ID3V2_TAG_ID_SIZE) ? upperBytes - ID3V2_TAG_ID_SIZE : 0;
 
         // get file size
-        fseek(fp, 0, SEEK_END);
+        (void) fseek(fp, 0, SEEK_END);
         fileSize = ftell(fp);
-        fseek(fp, 0, SEEK_SET);
+        (void) fseek(fp, 0, SEEK_SET);
 
         // read the file
         tmp = malloc(fileSize);
         if(fread(tmp, 1, fileSize, fp) != fileSize){
             free(tmp);
-            fclose(fp);
+            (void) fclose(fp);
             byteStreamDestroy(stream);
             return 0;
         }
 
-        fseek(fp, 0, SEEK_SET);
+        (void) fseek(fp, 0, SEEK_SET);
 
         if(prepend){
 
             // write the stream to a file
             if(fwrite(byteStreamCursor(stream), 1, stream->bufferSize, fp) != stream->bufferSize){
                 free(tmp);
-                fclose(fp);
+                (void) fclose(fp);
                 byteStreamDestroy(stream);
                 return 0;
             }
@@ -2316,7 +2446,7 @@ int id3v2WriteTagToFile(const char *filePath, Id3v2Tag *tag){
             // write the existing file data back to the file
             if(fwrite(tmp, 1, fileSize, fp) != fileSize){
                 free(tmp);
-                fclose(fp);
+                (void) fclose(fp);
                 byteStreamDestroy(stream);
                 return 0;
             }
@@ -2339,34 +2469,34 @@ int id3v2WriteTagToFile(const char *filePath, Id3v2Tag *tag){
             // prepend data above the tag
             if(upperBytes > 0){
                 
-                upperTmp = calloc(sizeof(char), upperBytes);
+                upperTmp = calloc(sizeof(uint8_t), upperBytes);
                 
                 if(fread(upperTmp, sizeof(char), upperBytes, fp) != upperBytes){
                     free(upperTmp);
                     free(tmp);
-                    fclose(fp);
+                    (void) fclose(fp);
                     byteStreamDestroy(stream);
                     return false;
                 }
                 free(upperTmp);
 
-                fseek(fp, 0, SEEK_SET);
+                (void) fseek(fp, 0, SEEK_SET);
             }
 
             // write the stream to a file
             if(fwrite(byteStreamCursor(stream), 1, stream->bufferSize, fp) != stream->bufferSize){
                 free(tmp);
-                fclose(fp);
+                (void) fclose(fp);
                 byteStreamDestroy(stream);
                 return 0;
             }
 
             // no need to read the old tag
-            fileSize = fileSize - (oldTagSize + offset) - upperBytes;
+            fileSize = fileSize - ((long)(oldTagSize + offset)) - (long) upperBytes;
 
             if(fwrite(tmp + upperBytes + oldTagSize + offset, 1, fileSize, fp)){
                 free(tmp);
-                fclose(fp);
+                (void) fclose(fp);
                 byteStreamDestroy(stream);
                 return 0;
             }
@@ -2375,7 +2505,7 @@ int id3v2WriteTagToFile(const char *filePath, Id3v2Tag *tag){
         }
     }
 
-    fclose(fp);
+    (void) fclose(fp);
     byteStreamDestroy(stream);
     return true;
 }
