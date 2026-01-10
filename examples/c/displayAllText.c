@@ -11,7 +11,7 @@
 
 #include <stdio.h> // printf
 #include <stdlib.h> // EXIT_SUCCESS, EXIT_FAILURE
-#include <id3dev.h> // id3FromFile, id3SetPreferedStandard, id3ReadTitle, id3ReadArtist, id3ReadAlbum, id3ReadYear, id3ReadGenre, id3ReadTrack, id3ReadComment, id3Destroy
+#include <id3dev.h> // id3FromFile, id3SetPreferredStandard, id3ReadTitle, id3ReadArtist, id3ReadAlbum, id3ReadYear, id3ReadGenre, id3ReadTrack, id3ReadComment, id3Destroy
 #include <stdint.h> // uint8_t
 #include <id3v2/id3v2Frame.h> // Id3v2Frame, id3v2CreateFrameTraverser, id3v2FrameTraverse, id3v2CreateFrameEntryTraverser, id3v2ReadFrameEntryAsU8, id3v2ReadFrameEntryAsChar
 
@@ -89,8 +89,8 @@ int main(int argc, char *argv[]){
 
         printf("ID3v1 tag found in %s ----------\n", argv[1]);
         
-        // Set the prefered standard to ID3v1 as to force the library to read ID3v1 tags
-        id3SetPreferedStandard(ID3V1_TAG_VERSION);
+        // Set the preferred standard to ID3v1 as to force the library to read ID3v1 tags
+        id3SetPreferredStandard(ID3V1_TAG_VERSION);
 
         // Read ID3v1 tags title
         str = id3ReadTitle(id3);

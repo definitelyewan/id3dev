@@ -55,8 +55,8 @@ int main(int argc, char *argv[]){
         return EXIT_FAILURE;
     }
 
-    fwrite(picture, 1, pictureSize, fp);
-
+    (void) fwrite(picture, 1, pictureSize, fp);
+    (void) fclose(fp);
 
     return EXIT_SUCCESS;
 }

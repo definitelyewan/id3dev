@@ -17,7 +17,7 @@
 #include <id3v2/id3v2.h> // id3v2CreateTagHeader, id3v2CreateTag, id3v2WriteTitle, id3v2WriteArtist, id3v2WriteAlbum, id3v2WriteYear, id3v2WriteTrack, id3v2WriteGenre
 #include <id3v2/id3v2Frame.h> // id3v2CreateFrame, id3v2CreateFrameHeader, id3v2AttachFrameToTag, id3v2CreateFrameEntryTraverser, id3v2ReadFrameEntryAsU8, id3v2ReadFrameEntryAsChar
 #include <id3v2/id3v2Context.h> // id3v2CreateUserDefinedTextFrameContext
-#include <id3dev.h> // id3Create, id3SetPreferedStandard, id3ReadTitle, id3ReadArtist, id3ReadAlbum, id3ReadYear, id3ReadGenre, id3ReadTrack, id3Destroy
+#include <id3dev.h> // id3Create, id3SetPreferredStandard, id3ReadTitle, id3ReadArtist, id3ReadAlbum, id3ReadYear, id3ReadGenre, id3ReadTrack, id3Destroy
 
 int main(void){
 
@@ -33,6 +33,7 @@ int main(void){
     Id3v2ContentEntry *entry = NULL;
     List *context = NULL;
     List *entries = NULL;
+    int encoding = 0;
 
     // variables for ID3
     ID3 *id3 = NULL;
@@ -69,14 +70,21 @@ int main(void){
     id3v2WriteTrack("15", v2tag);
     id3v2WriteGenre("Pop", v2tag);
 
-    // Create a TXXX frame and attach it to ID3v2 tag
+    /**
+     * Create a TXXX frame (User defined text information frame) and add it to the ID3v2 tag.
+     * This frame contains 3 fields:
+     * - Text encoding (1 byte)
+     * - Description (string)
+     * - Value (string)
+     */
 
     // 1. Create context and entries lists
     context = id3v2CreateUserDefinedTextFrameContext();
     entries = listCreate(id3v2PrintContentEntry, id3v2DeleteContentEntry, id3v2CompareContentEntry, id3v2CopyContentEntry);
 
     // 2. Create entries
-    entry = id3v2CreateContentEntry((void *)"\0",1);
+    encoding = ID3V2_ENCODING_UTF8;
+    entry = id3v2CreateContentEntry(&encoding,1);
     listInsertBack(entries, entry);
 
     entry = id3v2CreateContentEntry((void *)"producer", strlen("producer"));
@@ -96,7 +104,7 @@ int main(void){
 
 
     // set standard to force reading from the ID3v1 tag
-    id3SetPreferedStandard(ID3V1_TAG_VERSION);
+    id3SetPreferredStandard(ID3V1_TAG_VERSION);
 
     // print the ID3v1 tag
     printf("ID3v1 tag:\n");
@@ -144,7 +152,7 @@ int main(void){
     }
 
     // set standard to force reading from the ID3v2.3 tag
-    id3SetPreferedStandard(ID3V2_TAG_VERSION_3);
+    id3SetPreferredStandard(ID3V2_TAG_VERSION_3);
 
     // print the ID3v1 tag
     printf("ID3v2 tag:\n");

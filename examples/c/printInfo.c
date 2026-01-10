@@ -1,7 +1,7 @@
 /**
  * @file printInfo.c
  * @author Ewan Jones
- * @brief print the basic information of an mp3 file to a console
+ * @brief print the basic information of a mp3 file to a console
  * @version 0.1
  * @date 2024-04-22
  * 
@@ -11,7 +11,6 @@
 
 #include <stdio.h> // printf
 #include <stdlib.h> // EXIT_SUCCESS, EXIT_FAILURE
-#include <stdint.h> // uint8_t
 #include <id3dev.h> // id3FromFile, id3ReadTitle, id3ReadArtist, id3ReadAlbumArtist, id3ReadAlbum, id3ReadYear, id3ReadGenre, id3ReadTrack, id3ReadComposer, id3ReadDisc, id3ReadLyrics, id3ReadComment, id3ReadPicture, id3Destroy
 
 
@@ -35,8 +34,6 @@ int main(int argc, char *argv[]){
     char *disc = NULL;
     char *lyrics = NULL;
     char *comment = NULL;
-    uint8_t *picture = NULL;
-    size_t pictureSize = 0;
 
 
     // Parse all versions of ID3 and store it in a structure

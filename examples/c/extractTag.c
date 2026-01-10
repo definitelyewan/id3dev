@@ -1,7 +1,7 @@
 /**
  * @file extractTag.c
  * @author Ewan Jones
- * @brief extracts a tag from a file, ptints it as JSON and writes it to another file.
+ * @brief extracts a tag from a file, prints it as JSON and writes it to another file.
  * @version 0.1
  * @date 2024-04-23
  * 
