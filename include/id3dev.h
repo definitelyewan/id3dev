@@ -44,9 +44,9 @@ uint8_t id3GetPreferredStandard(void);
 
 ID3 *id3FromFile(const char *filePath);
 
-ID3 *id3Copy(ID3 *toCopy);
+ID3 *id3Copy(const ID3 *toCopy);
 
-bool id3Compare(ID3 *metadata1, ID3 *metadata2);
+bool id3Compare(const ID3 *metadata1, const ID3 *metadata2);
 
 bool id3ConvertId3v1ToId3v2(ID3 *metadata);
 
@@ -55,29 +55,29 @@ bool id3ConvertId3v2ToId3v1(ID3 *metadata);
 
 // compatability functions a.k.a getters
 
-char *id3ReadTitle(ID3 *metadata);
+char *id3ReadTitle(const ID3 *metadata);
 
-char *id3ReadArtist(ID3 *metadata);
+char *id3ReadArtist(const ID3 *metadata);
 
-char *id3ReadAlbumArtist(ID3 *metadata);
+char *id3ReadAlbumArtist(const ID3 *metadata);
 
-char *id3ReadAlbum(ID3 *metadata);
+char *id3ReadAlbum(const ID3 *metadata);
 
-char *id3ReadYear(ID3 *metadata);
+char *id3ReadYear(const ID3 *metadata);
 
-char *id3ReadGenre(ID3 *metadata);
+char *id3ReadGenre(const ID3 *metadata);
 
-char *id3ReadTrack(ID3 *metadata);
+char *id3ReadTrack(const ID3 *metadata);
 
-char *id3ReadComposer(ID3 *metadata);
+char *id3ReadComposer(const ID3 *metadata);
 
-char *id3ReadDisc(ID3 *metadata);
+char *id3ReadDisc(const ID3 *metadata);
 
-char *id3ReadLyrics(ID3 *metadata);
+char *id3ReadLyrics(const ID3 *metadata);
 
-char *id3ReadComment(ID3 *metadata);
+char *id3ReadComment(const ID3 *metadata);
 
-uint8_t *id3ReadPicture(uint8_t type, ID3 *metadata, size_t *dataSize);
+uint8_t *id3ReadPicture(uint8_t type, const ID3 *metadata, size_t *dataSize);
 
 // change values within a id3v2 structure
 
@@ -109,9 +109,9 @@ int id3WritePictureFromFile(const char *filename, const char *kind, uint8_t type
 
 // writes
 
-char *id3ToJSON(ID3 *metadata);
+char *id3ToJSON(const ID3 *metadata);
 
-int id3WriteToFile(const char *filePath, ID3 *metadata);
+int id3WriteToFile(const char *filePath, const ID3 *metadata);
 
 #ifdef __cplusplus
 } //extern c end

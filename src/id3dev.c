@@ -112,7 +112,7 @@ ID3 *id3FromFile(const char *filePath){
  * @param toCopy 
  * @return ID3* 
  */
-ID3 *id3Copy(ID3 *toCopy){
+ID3 *id3Copy(const ID3 *toCopy){
 
     if(toCopy == NULL){
         return NULL;
@@ -129,7 +129,7 @@ ID3 *id3Copy(ID3 *toCopy){
  * @return true 
  * @return false 
  */
-bool id3Compare(ID3 *metadata1, ID3 *metadata2){
+bool id3Compare(const ID3 *metadata1, const ID3 *metadata2){
 
     if(metadata1 == NULL || metadata2 == NULL){
         return false;
@@ -239,8 +239,8 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata){
     if(metadata->id3v1->year != 0){
         size = snprintf(NULL, 0, "%d", metadata->id3v1->year);
         str = calloc(size + 1, sizeof(char));
-        snprintf(str, size + 1, "%d", metadata->id3v1->year);
-        if(!id3v2WriteYear((char *)str, newTag)){
+        (void) snprintf(str, size + 1, "%d", metadata->id3v1->year);
+        if(!id3v2WriteYear(str, newTag)){
             id3v2DestroyTag(&newTag);
             listFree(frames);
             free(str);
@@ -254,9 +254,9 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata){
     if(metadata->id3v1->track != 0){
         size = snprintf(NULL, 0, "%d", metadata->id3v1->track);
         str = calloc(size + 1, sizeof(char));
-        snprintf(str, size + 1, "%d", metadata->id3v1->track);
+        (void) snprintf(str, size + 1, "%d", metadata->id3v1->track);
 
-        if(!id3v2WriteTrack((char *)str, newTag)){
+        if(!id3v2WriteTrack(str, newTag)){
             id3v2DestroyTag(&newTag);
             listFree(frames);
             free(str);
@@ -346,7 +346,7 @@ bool id3ConvertId3v2ToId3v1(ID3 *metadata){
     }
 
     if(year != NULL){
-        id3v1WriteYear(atoi(year), newTag);
+        id3v1WriteYear((int) strtol(year, NULL, 10), newTag);
         free(year);
     }
 
@@ -374,7 +374,7 @@ bool id3ConvertId3v2ToId3v1(ID3 *metadata){
 
         dec = calloc(i - offset0 + 1, sizeof(char));
         memcpy(dec, track + offset0, i - offset0);
-        convi = strtol(dec, &end, 10);
+        convi = (int) strtol(dec, &end, 10);
         id3v1WriteTrack(convi, newTag);
 
         free(dec);
@@ -401,7 +401,7 @@ bool id3ConvertId3v2ToId3v1(ID3 *metadata){
 
 // internal -----------------------------------------------------------------
 // corrects the standard preference if the preferred standard is not available
-static int _getSafePrefStd(ID3 *metadata){
+static int internal_getSafePrefStd(const ID3 *metadata){
 
     int input = 0;
     int pref = id3GetPreferredStandard();
@@ -426,7 +426,7 @@ static int _getSafePrefStd(ID3 *metadata){
  * @param metadata 
  * @return char* 
  */
-char *id3ReadTitle(ID3 *metadata){
+char *id3ReadTitle(const ID3 *metadata){
 
     if(metadata == NULL){
         return NULL;
@@ -436,7 +436,7 @@ char *id3ReadTitle(ID3 *metadata){
         return NULL;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:
             return id3v1ReadTitle(metadata->id3v1);
         case ID3V2_TAG_VERSION_2:
@@ -444,10 +444,9 @@ char *id3ReadTitle(ID3 *metadata){
         case ID3V2_TAG_VERSION_4:
             return id3v2ReadTitle(metadata->id3v2);
         default:
-            return NULL;
+            break;
     }
 
-    // dummy
     return NULL;
 }
 
@@ -458,7 +457,7 @@ char *id3ReadTitle(ID3 *metadata){
  * @param metadata 
  * @return char* 
  */
-char *id3ReadArtist(ID3 *metadata){
+char *id3ReadArtist(const ID3 *metadata){
     
     if(metadata == NULL){
         return NULL;
@@ -468,7 +467,7 @@ char *id3ReadArtist(ID3 *metadata){
         return NULL;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:
             return id3v1ReadArtist(metadata->id3v1);
         case ID3V2_TAG_VERSION_2:
@@ -476,10 +475,9 @@ char *id3ReadArtist(ID3 *metadata){
         case ID3V2_TAG_VERSION_4:
             return id3v2ReadArtist(metadata->id3v2);
         default:
-            return NULL;
+            break;
     }
 
-    // dummy
     return NULL;
 }
 
@@ -490,7 +488,7 @@ char *id3ReadArtist(ID3 *metadata){
  * @param metadata 
  * @return char* 
  */
-char *id3ReadAlbumArtist(ID3 *metadata){
+char *id3ReadAlbumArtist(const ID3 *metadata){
 
     if(metadata == NULL){
         return NULL;
@@ -500,17 +498,16 @@ char *id3ReadAlbumArtist(ID3 *metadata){
         return NULL;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
             return id3v2ReadAlbumArtist(metadata->id3v2);
         case ID3V1_TAG_VERSION:
         default:
-            return NULL;
+            break;
     }
 
-    // dummy
     return NULL;
 }
 
@@ -521,7 +518,7 @@ char *id3ReadAlbumArtist(ID3 *metadata){
  * @param metadata 
  * @return char* 
  */
-char *id3ReadAlbum(ID3 *metadata){
+char *id3ReadAlbum(const ID3 *metadata){
 
     if(metadata == NULL){
         return NULL;
@@ -531,7 +528,7 @@ char *id3ReadAlbum(ID3 *metadata){
         return NULL;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:
             return id3v1ReadAlbum(metadata->id3v1);
         case ID3V2_TAG_VERSION_2:
@@ -539,10 +536,9 @@ char *id3ReadAlbum(ID3 *metadata){
         case ID3V2_TAG_VERSION_4:
             return id3v2ReadAlbum(metadata->id3v2);
         default:
-            return NULL;
+            break;
     }
 
-    // dummy
     return NULL;
 }
 
@@ -553,7 +549,7 @@ char *id3ReadAlbum(ID3 *metadata){
  * @param metadata 
  * @return char* 
  */
-char *id3ReadYear(ID3 *metadata){
+char *id3ReadYear(const ID3 *metadata){
 
     if(metadata == NULL){
         return NULL;
@@ -563,14 +559,18 @@ char *id3ReadYear(ID3 *metadata){
         return NULL;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:{
+            if (metadata->id3v1 == NULL) {
+                return NULL;
+            }
+
             char *year = NULL;
             int size = 0;
             
             size = snprintf(NULL, 0, "%d", metadata->id3v1->year);
             year = calloc(size + 1, sizeof(char));
-            snprintf(year, size + 1, "%d", metadata->id3v1->year);
+            (void) snprintf(year, size + 1, "%d", metadata->id3v1->year);
             
             return year;
         }
@@ -579,10 +579,9 @@ char *id3ReadYear(ID3 *metadata){
         case ID3V2_TAG_VERSION_4:
             return id3v2ReadYear(metadata->id3v2);
         default:
-            return NULL;
+            break;
     }
 
-    // dummy
     return NULL;
 }
 
@@ -593,7 +592,7 @@ char *id3ReadYear(ID3 *metadata){
  * @param metadata 
  * @return char* 
  */
-char *id3ReadGenre(ID3 *metadata){
+char *id3ReadGenre(const ID3 *metadata){
 
     if(metadata == NULL){
         return NULL;
@@ -603,12 +602,17 @@ char *id3ReadGenre(ID3 *metadata){
         return NULL;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:{
+
+            if (metadata->id3v1 == NULL) {
+                return NULL;
+            }
+
             char *genre = NULL;
             int size = 0;
 
-            size = strlen(id3v1GenreFromTable(metadata->id3v1->genre));
+            size = (int) strlen(id3v1GenreFromTable(metadata->id3v1->genre));
             genre = calloc(size + 1, sizeof(char));
             memcpy(genre, id3v1GenreFromTable(metadata->id3v1->genre), size);
             return genre;
@@ -618,10 +622,9 @@ char *id3ReadGenre(ID3 *metadata){
         case ID3V2_TAG_VERSION_4:
             return id3v2ReadGenre(metadata->id3v2);
         default:
-            return NULL;
+            break;
     }
 
-    // dummy
     return NULL;
 }
 
@@ -632,7 +635,7 @@ char *id3ReadGenre(ID3 *metadata){
  * @param metadata 
  * @return char* 
  */
-char *id3ReadTrack(ID3 *metadata){
+char *id3ReadTrack(const ID3 *metadata){
 
     if(metadata == NULL){
         return NULL;
@@ -642,14 +645,19 @@ char *id3ReadTrack(ID3 *metadata){
         return NULL;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:{
+
+            if (metadata->id3v1 == NULL) {
+                return NULL;
+            }
+
             char *track = NULL;
             int size = 0;
 
             size = snprintf(NULL, 0, "%d", metadata->id3v1->track);
             track = calloc(size + 1, sizeof(char));
-            snprintf(track, size + 1, "%d", metadata->id3v1->track);
+            (void) snprintf(track, size + 1, "%d", metadata->id3v1->track);
             return track;
         }
         case ID3V2_TAG_VERSION_2:
@@ -657,10 +665,9 @@ char *id3ReadTrack(ID3 *metadata){
         case ID3V2_TAG_VERSION_4:
             return id3v2ReadTrack(metadata->id3v2);
         default:
-            return NULL;
+            break;
     }
 
-    // dummy
     return NULL;
 
 }
@@ -672,7 +679,7 @@ char *id3ReadTrack(ID3 *metadata){
  * @param metadata 
  * @return char* 
  */
-char *id3ReadComposer(ID3 *metadata){
+char *id3ReadComposer(const ID3 *metadata){
     
     if(metadata == NULL){
         return NULL;
@@ -682,17 +689,16 @@ char *id3ReadComposer(ID3 *metadata){
         return NULL;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
             return id3v2ReadComposer(metadata->id3v2);
         case ID3V1_TAG_VERSION:
         default:
-            return NULL;
+            break;
     }
 
-    // dummy
     return NULL;
 }
 
@@ -703,7 +709,7 @@ char *id3ReadComposer(ID3 *metadata){
  * @param metadata 
  * @return char* 
  */
-char *id3ReadDisc(ID3 *metadata){
+char *id3ReadDisc(const ID3 *metadata){
     
     if(metadata == NULL){
         return NULL;
@@ -713,17 +719,16 @@ char *id3ReadDisc(ID3 *metadata){
         return NULL;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
             return id3v2ReadDisc(metadata->id3v2);
         case ID3V1_TAG_VERSION:
         default:
-            return NULL;
+            break;
     }
 
-    // dummy
     return NULL;
 }
 
@@ -734,7 +739,7 @@ char *id3ReadDisc(ID3 *metadata){
  * @param metadata 
  * @return char* 
  */
-char *id3ReadLyrics(ID3 *metadata){
+char *id3ReadLyrics(const ID3 *metadata){
         
     if(metadata == NULL){
         return NULL;
@@ -744,17 +749,16 @@ char *id3ReadLyrics(ID3 *metadata){
         return NULL;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
             return id3v2ReadLyrics(metadata->id3v2);
         case ID3V1_TAG_VERSION:
         default:
-            return NULL;
+            break;
     }
 
-    // dummy
     return NULL;
 }
 
@@ -765,7 +769,7 @@ char *id3ReadLyrics(ID3 *metadata){
  * @param metadata 
  * @return char* 
  */
-char *id3ReadComment(ID3 *metadata){
+char *id3ReadComment(const ID3 *metadata){
 
     if(metadata == NULL){
         return NULL;
@@ -775,7 +779,7 @@ char *id3ReadComment(ID3 *metadata){
         return NULL;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:
             return id3v1ReadComment(metadata->id3v1);
         case ID3V2_TAG_VERSION_2:
@@ -783,10 +787,9 @@ char *id3ReadComment(ID3 *metadata){
         case ID3V2_TAG_VERSION_4:
             return id3v2ReadComment(metadata->id3v2);
         default:
-            return NULL;
+            break;
     }
 
-    // dummy
     return NULL;
 }
 
@@ -799,7 +802,7 @@ char *id3ReadComment(ID3 *metadata){
  * @param dataSize 
  * @return uint8_t* 
  */
-uint8_t *id3ReadPicture(uint8_t type, ID3 *metadata, size_t *dataSize){
+uint8_t *id3ReadPicture(uint8_t type, const ID3 *metadata, size_t *dataSize){
 
     if(metadata == NULL){
         *dataSize = 0;
@@ -811,7 +814,7 @@ uint8_t *id3ReadPicture(uint8_t type, ID3 *metadata, size_t *dataSize){
         return NULL;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:
             *dataSize = 0;
             return NULL;
@@ -820,14 +823,11 @@ uint8_t *id3ReadPicture(uint8_t type, ID3 *metadata, size_t *dataSize){
         case ID3V2_TAG_VERSION_4:
             return id3v2ReadPicture(type, metadata->id3v2, dataSize);
         default:
-            *dataSize = 0;
-            return NULL;
+            break;
     }
 
-    // dummy
     *dataSize = 0;
     return NULL;
-
 }
 
 /**
@@ -848,7 +848,7 @@ int id3WriteTitle(const char *title, ID3 *metadata){
         return false;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:
             return id3v1WriteTitle(title, metadata->id3v1);
         case ID3V2_TAG_VERSION_2:
@@ -856,10 +856,9 @@ int id3WriteTitle(const char *title, ID3 *metadata){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteTitle(title, metadata->id3v2);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -881,7 +880,7 @@ int id3WriteArtist(const char *artist, ID3 *metadata){
         return false;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:
             return id3v1WriteArtist(artist, metadata->id3v1);
         case ID3V2_TAG_VERSION_2:
@@ -889,10 +888,9 @@ int id3WriteArtist(const char *artist, ID3 *metadata){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteArtist(artist, metadata->id3v2);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -914,17 +912,16 @@ int id3WriteAlbumArtist(const char *albumArtist, ID3 *metadata){
         return false;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteAlbumArtist(albumArtist, metadata->id3v2);
         case ID3V1_TAG_VERSION:
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -946,7 +943,7 @@ int id3WriteAlbum(const char *album, ID3 *metadata){
         return false;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:
             return id3v1WriteAlbum(album, metadata->id3v1);
         case ID3V2_TAG_VERSION_2:
@@ -954,10 +951,9 @@ int id3WriteAlbum(const char *album, ID3 *metadata){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteAlbum(album, metadata->id3v2);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -979,11 +975,11 @@ int id3WriteYear(const char *year, ID3 *metadata){
         return false;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:{
             int convi = 0;
             char *end = NULL;
-            convi = strtol(year, &end, 10);
+            convi = (int) strtol(year, &end, 10);
             return id3v1WriteYear(convi, metadata->id3v1);
         }
         case ID3V2_TAG_VERSION_2:
@@ -991,10 +987,9 @@ int id3WriteYear(const char *year, ID3 *metadata){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteYear(year, metadata->id3v2);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1017,7 +1012,7 @@ int id3WriteGenre(const char *genre, ID3 *metadata){
         return false;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:{    
             uint8_t usableGenre = (uint8_t) genre[0] > PSYBIENT_GENRE ? OTHER_GENRE : (uint8_t) genre[0];        
             return id3v1WriteGenre(usableGenre, metadata->id3v1);
@@ -1027,10 +1022,9 @@ int id3WriteGenre(const char *genre, ID3 *metadata){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteGenre(genre, metadata->id3v2);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1052,11 +1046,11 @@ int id3WriteTrack(const char *track, ID3 *metadata){
         return false;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:{
             int convi = 0;
             char *end = NULL;
-            convi = strtol(track, &end, 10);
+            convi = (int) strtol(track, &end, 10);
 
             if(convi > UINT8_MAX){
                 convi = UINT8_MAX;
@@ -1071,10 +1065,9 @@ int id3WriteTrack(const char *track, ID3 *metadata){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteTrack(track, metadata->id3v2);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1096,17 +1089,16 @@ int id3WriteDisc(const char *disc, ID3 *metadata){
         return false;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteDisc(disc, metadata->id3v2);
         case ID3V1_TAG_VERSION:
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1128,17 +1120,16 @@ int id3WriteComposer(const char *composer, ID3 *metadata){
         return false;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteComposer(composer, metadata->id3v2);
         case ID3V1_TAG_VERSION:
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1160,17 +1151,16 @@ int id3WriteLyrics(const char *lyrics, ID3 *metadata){
         return false;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteLyrics(lyrics, metadata->id3v2);
         case ID3V1_TAG_VERSION:
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1192,7 +1182,7 @@ int id3WriteComment(const char *comment, ID3 *metadata){
         return false;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V1_TAG_VERSION:
             return id3v1WriteComment(comment, metadata->id3v1);
         case ID3V2_TAG_VERSION_2:
@@ -1200,10 +1190,9 @@ int id3WriteComment(const char *comment, ID3 *metadata){
         case ID3V2_TAG_VERSION_4:
             return id3v2WriteComment(comment, metadata->id3v2);
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1229,17 +1218,16 @@ int id3WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_t 
         return false;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
             return id3v2WritePicture(image, imageSize, kind, type, metadata->id3v2);
         case ID3V1_TAG_VERSION:
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1264,17 +1252,16 @@ int id3WritePictureFromFile(const char *filename, const char *kind, uint8_t type
         return false;
     }
 
-    switch(_getSafePrefStd(metadata)){
+    switch(internal_getSafePrefStd(metadata)){
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
             return id3v2WritePictureFromFile(filename, kind, type, metadata->id3v2);
         case ID3V1_TAG_VERSION:
         default:
-            return false;
+            break;
     }
 
-    // dummy
     return false;
 }
 
@@ -1284,7 +1271,7 @@ int id3WritePictureFromFile(const char *filename, const char *kind, uint8_t type
  * @param metadata 
  * @return char* 
  */
-char *id3ToJSON(ID3 *metadata){
+char *id3ToJSON(const ID3 *metadata){
     
     char *json = NULL;
     char *id3v1 = NULL;
@@ -1302,7 +1289,7 @@ char *id3ToJSON(ID3 *metadata){
 
     memCount += snprintf(NULL, 0, "{\"id3v1\":%s,\"id3v2\":%s}", id3v1, id3v2);
     json = calloc(memCount, sizeof(char));
-    snprintf(json, memCount, "{\"ID3v1\":%s,\"ID3v2\":%s}", id3v1, id3v2);
+    (void) snprintf(json, memCount, "{\"ID3v1\":%s,\"ID3v2\":%s}", id3v1, id3v2);
 
     free(id3v1);
     free(id3v2);
@@ -1318,7 +1305,7 @@ char *id3ToJSON(ID3 *metadata){
  * @param metadata 
  * @return int 
  */
-int id3WriteToFile(const char *filePath, ID3 *metadata){
+int id3WriteToFile(const char *filePath, const ID3 *metadata){
 
     if(filePath == NULL || metadata == NULL){
         return false;
