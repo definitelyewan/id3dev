@@ -1382,9 +1382,8 @@ static void id3v2ContextToJSON_valid(void **state){
 
     Id3v2ContentContext *cc = id3v2CreateContentContext(iter_context, id3v2djb2("test"), INT16_MAX, 1);
     char *json = id3v2ContextToJSON(cc);
-
     assert_non_null(json);
-    assert_string_equal(json,"{\"type\":7,\"key\":2090756197,\"max\":32767,\"min\":1}");
+    assert_string_equal(json,"{\"type\":7,\"key\":6385723493,\"max\":32767,\"min\":1}");
 
     id3v2DestroyContentContext(&cc);
     free(json);

@@ -19,13 +19,16 @@
 #include "id3dependencies/ByteStream/include/byteInt.h"
 
 //djb2 algorithm for stings
-unsigned long id3v2djb2(char *str){
-    
-    unsigned long hash = 5381;
-    int c;
+unsigned long id3v2djb2(const char *str){
 
-    while ((c = *str++))
+    unsigned long hash = 5381;
+    int c = 0;
+
+    while (*str != '\0') {
+        c = (int) *str++;
         hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+    }
+
 
     return hash;
 }
@@ -90,26 +93,29 @@ void id3v2DeleteContentContext(void *toBeDeleted){
  */
 int id3v2CompareContentContext(const void *first, const void *second){
     
-    Id3v2ContentContext *c1 = NULL;
-    Id3v2ContentContext *c2 = NULL;
+    const Id3v2ContentContext *c1 = (Id3v2ContentContext *) first;
+    const Id3v2ContentContext *c2 = (Id3v2ContentContext *) second;
     int diff = 0;
 
-    c1 = (Id3v2ContentContext *) first;
-    c2 = (Id3v2ContentContext *) second;
+    diff = (c1->type < c2->type) ? 0 : c1->type - c2->type;
+    if(diff != 0) {
+        return diff;
+    }
 
-    diff = c1->type - c2->type;
-    if(diff != 0)
+
+    diff = (c1->key < c2->key) ? 0 : (int) (c1->key - c2->key);
+    if(diff != 0) {
+        return diff;
+    }
+
+
+    diff = (c1->min < c2->min) ? 0 : (int) (c1->min - c2->min);
+    if(diff != 0) {
         return diff;
 
-    diff = c1->key - c2->key;
-    if(diff != 0)
-        return diff;
+    }
 
-    diff = (int)c1->min - (int)c2->min;
-    if(diff != 0)
-        return diff;
-
-    diff = (int)c1->max - (int)c2->max;
+    diff = (c1->max < c2->max) ? 0 : (int) (c1->max - c2->max);
     return diff;
 }
 
@@ -121,12 +127,14 @@ int id3v2CompareContentContext(const void *first, const void *second){
  */
 char *id3v2PrintContentContext(const void *toBePrinted){
     
-    Id3v2ContentContext *c = (Id3v2ContentContext *) toBePrinted;
+    const Id3v2ContentContext *c = (Id3v2ContentContext *) toBePrinted;
+
+    size_t memCount = snprintf(NULL, 0, "Type: %d, Key: %zu, min: %zu, max: %zu\n", c->type, c->key, c->min, c->max);
 
     // 40 chars for the below string
     char *str = malloc(sizeof(long) + sizeof(long) + sizeof(int) + sizeof(Id3v2ContextType) + 40);
 
-    sprintf(str,"Type: %d, Key: %zu, min: %zu, max: %zu\n", c->type, c->key, c->min, c->max);
+    (void) snprintf(str, memCount + 1, "Type: %d, Key: %zu, min: %zu, max: %zu\n", c->type, c->key, c->min, c->max);
 
     return str;
 }
@@ -826,8 +834,9 @@ List *id3v2CreateRecommendedBufferSizeFrameContext(void){
 
 /**
  * @brief Generates the required context for a volume adjustment frame
- * @details at the time being I do not have a good way of implementing this so the entire frame is one block.
+ * @details at the time being I do not have a good way of implementing and version is a dummy so the entire frame is one block.
  * maybe post-processing functions or more contexts?
+ * @
  * @param version 
  * @return List* 
  */
@@ -1672,7 +1681,7 @@ uint8_t *id3v2ContextSerialize(Id3v2ContentContext *cc, size_t *outl){
  * @param cc 
  * @return char* 
  */
-char *id3v2ContextToJSON(Id3v2ContentContext *cc){
+char *id3v2ContextToJSON(const Id3v2ContentContext *cc){
     
     char *json = NULL;
     size_t memCount = 3;
@@ -1691,7 +1700,7 @@ char *id3v2ContextToJSON(Id3v2ContentContext *cc){
 
     json = calloc(memCount + 1, sizeof(char));
 
-    snprintf(json, memCount,
+    (void) snprintf(json, memCount,
             "{\"type\":%d,\"key\":%zu,\"max\":%zu,\"min\":%zu}",
             cc->type,
             cc->key,
