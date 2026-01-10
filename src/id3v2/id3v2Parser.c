@@ -766,7 +766,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                     dataSize = expectedContentSize;
                 }
 
-                data = malloc(dataSize);
+                data = calloc(sizeof(uint8_t), dataSize);
 
                 if (!byteStreamRead(innerStream, data, dataSize)) {
                     memset(data, 0, dataSize);

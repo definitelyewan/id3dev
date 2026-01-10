@@ -139,16 +139,15 @@ Id3v2ContentEntry *id3v2CreateContentEntry(void *entry, size_t size){
  */
 int id3v2CompareContentEntry(const void *first, const void *second){
 
-    Id3v2ContentEntry *one = (Id3v2ContentEntry *)first;
-    Id3v2ContentEntry *two = (Id3v2ContentEntry *)second;
+    const Id3v2ContentEntry *one = (Id3v2ContentEntry *)first;
+    const Id3v2ContentEntry *two = (Id3v2ContentEntry *)second;
 
     if(one == NULL || two == NULL){
         return 1;
     }
     
     int diff = 0;
-    size_t usableSize = (one->size <= two->size) ? one->size : two->size;
-    
+    const size_t usableSize = (one->size <= two->size) ? one->size : two->size;
     for(size_t i = 0; i < usableSize; i++){
         if(((unsigned char *)one->entry)[i] != ((unsigned char *)two->entry)[i]){
             diff = ((unsigned char*)one->entry)[i] - ((unsigned char*)two->entry)[i];
