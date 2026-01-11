@@ -9,7 +9,6 @@
  * 
  */
 #include <stdio.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <setjmp.h>
 #include <cmocka.h>
@@ -36,8 +35,8 @@ static void id3v1HasTag_foundTag(void **state){
 
     FILE *fp = fopen("assets/empty.mp3", "rb");
     unsigned char bytes[ID3V1_MAX_SIZE];
-    fseek(fp, -128, SEEK_END);
-    fread(bytes, 1, ID3V1_MAX_SIZE, fp);
+    (void) fseek(fp, -128, SEEK_END);
+    (void) fread(bytes, 1, ID3V1_MAX_SIZE, fp);
     assert_true(id3v1HasTag((uint8_t *)bytes));
     fclose(fp);
 }
@@ -47,10 +46,10 @@ static void id3v1HasTag_foundTag2(void **state){
 
     FILE *fp = fopen("assets/OnGP.mp3", "rb");
     unsigned char bytes[ID3V1_MAX_SIZE];
-    fseek(fp, -128, SEEK_END);
-    fread(bytes, 1, ID3V1_MAX_SIZE, fp);
+    (void) fseek(fp, -128, SEEK_END);
+    (void) fread(bytes, 1, ID3V1_MAX_SIZE, fp);
     assert_true(id3v1HasTag((uint8_t *)bytes));
-    fclose(fp);
+    (void) fclose(fp);
 }
 
 static void id3v1HasTag_noTag(void **state){
@@ -58,10 +57,10 @@ static void id3v1HasTag_noTag(void **state){
 
     FILE *fp = fopen("assets/null.mp3", "rb");
     unsigned char bytes[ID3V1_MAX_SIZE];
-    fseek(fp, -128, SEEK_END);
-    fread(bytes, 1, ID3V1_MAX_SIZE, fp);
+    (void) fseek(fp, -128, SEEK_END);
+    (void) fread(bytes, 1, ID3V1_MAX_SIZE, fp);
     assert_false(id3v1HasTag((uint8_t *)bytes));
-    fclose(fp);
+    (void) fclose(fp);
 }
 
 static void id3v1NewTag_validTag(void **state){
@@ -597,7 +596,7 @@ static void id3v1CompareTag_oneTag(void **state){
     id3v1DestroyTag(&tag);
 }
 
-static void id3v1CompareTag_diffGenere(void **state){
+static void  id3v1CompareTag_diffGenre(void **state){
     (void) state; /* unused */
 
     Id3v1Tag *tag1 = id3v1CreateTag(NULL,
@@ -842,7 +841,7 @@ static void id3v1ToJSON_fullTag(void **state){
         id3v1DestroyTag(&tag);
 }
 
-static void id3v1ToJSON_noGenere(void **state){
+static void id3v1ToJSON_noGenre(void **state){
     (void) state; /* unused */
 
         Id3v1Tag *tag = id3v1CreateTag((uint8_t *)"1999",
@@ -948,7 +947,7 @@ static void id3v1WriteTagToFile_CreateFile(void **state){
     id3v1DestroyTag(&tag);
     id3v1DestroyTag(&tag2);
 
-    remove("test.mp3");
+    (void) remove("test.mp3");
 }
 
 static void id3v1WriteTagToFile_editExistingFile(void **state){
@@ -993,7 +992,7 @@ static void id3v1WriteTagToFile_editExistingFile(void **state){
     id3v1DestroyTag(&tag2);
     id3v1DestroyTag(&readTag);
     
-    remove("test.mp3");
+    (void) remove("test.mp3");
 }
 
 static void id3v1WriteTagToFile_appendFile(void **state){
@@ -1001,8 +1000,8 @@ static void id3v1WriteTagToFile_appendFile(void **state){
 
     FILE *fp = fopen("test.mp3","w");
 
-    fwrite("do not overwrite me please",1,27,fp);
-    fclose(fp);
+    (void) fwrite("do not overwrite me please",1,27,fp);
+    (void) fclose(fp);
 
 
     Id3v1Tag *tag2 = id3v1CreateTag((uint8_t *)"Headlines",
@@ -1032,7 +1031,7 @@ static void id3v1WriteTagToFile_appendFile(void **state){
     id3v1DestroyTag(&tag2);
     id3v1DestroyTag(&readTag);
     
-    remove("test.mp3");
+    (void) remove("test.mp3");
 }
 
 static void id3v1WriteTagToFile_appendFileBig(void **state){
@@ -1040,8 +1039,8 @@ static void id3v1WriteTagToFile_appendFileBig(void **state){
 
     FILE *fp = fopen("test.mp3","w");
 
-    fwrite("oiejvpeinvpwiuevnpiwernvpiwernvpiweornvpoiwernvpoewinvoipwenvpoewinveiowvneowpnvewionveopwinvreoiwnrvoewmldakcmsdkfnvjkfenwviuerpieojvweirjv49fu980hv4tubvonufikldockc0924-9r934u8r234funeijdckdl",1,194,fp);
-    fclose(fp);
+    (void) fwrite("oiejvpeinvpwiuevnpiwernvpiwernvpiweornvpoiwernvpoewinvoipwenvpoewinveiowvneowpnvewionveopwinvreoiwnrvoewmldakcmsdkfnvjkfenwviuerpieojvweirjv49fu980hv4tubvonufikldockc0924-9r934u8r234funeijdckdl",1,194,fp);
+    (void) fclose(fp);
 
 
     Id3v1Tag *tag2 = id3v1CreateTag((uint8_t *)"Headlines",
@@ -1071,7 +1070,7 @@ static void id3v1WriteTagToFile_appendFileBig(void **state){
     id3v1DestroyTag(&tag2);
     id3v1DestroyTag(&readTag);
     
-    remove("test.mp3");
+    (void) remove("test.mp3");
 }
 
 int main(){
@@ -1118,14 +1117,14 @@ int main(){
         cmocka_unit_test(id3v1WriteTitle_WithSmallTitle),
 
         //id3v1WriteYear tests
-        //same logic for genere and track
+        //same logic for genre and track
         cmocka_unit_test(id3v1WriteYear_save0),
         cmocka_unit_test(id3v1WriteYear_saveBig),
 
         //id3v1CompareTag tests
         cmocka_unit_test(id3v1CompareTag_noTags),
         cmocka_unit_test(id3v1CompareTag_oneTag),
-        cmocka_unit_test(id3v1CompareTag_diffGenere),
+        cmocka_unit_test( id3v1CompareTag_diffGenre),
         cmocka_unit_test(id3v1CompareTag_diffTrack),
         cmocka_unit_test(id3v1CompareTag_diffYear),
         cmocka_unit_test(id3v1CompareTag_diffAlbum),
@@ -1143,7 +1142,7 @@ int main(){
 
         //id3v1ToJSON
         cmocka_unit_test(id3v1ToJSON_fullTag),
-        cmocka_unit_test(id3v1ToJSON_noGenere),
+        cmocka_unit_test(id3v1ToJSON_noGenre),
         cmocka_unit_test(id3v1ToJSON_noYear),
         cmocka_unit_test(id3v1ToJSON_noTitle),
 

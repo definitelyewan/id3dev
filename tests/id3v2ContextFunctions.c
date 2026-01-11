@@ -10,7 +10,6 @@
  */
 
 #include <stdio.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <setjmp.h>
 #include <cmocka.h>
@@ -103,7 +102,7 @@ static void id3v2CreateUserDefinedTextFrameContext_valid(void **state){
 }
 
 static void id3v2CreateURLFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateURLFrameContext();
 
     assert_non_null(l);
@@ -122,7 +121,7 @@ static void id3v2CreateURLFrameContext_valid(void **state){
 }
 
 static void id3v2CreateUserDefinedURLFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateUserDefinedURLFrameContext();
 
     assert_non_null(l);
@@ -155,7 +154,7 @@ static void id3v2CreateUserDefinedURLFrameContext_valid(void **state){
 }
 
 static void id3v2CreateAttachedPictureFrameContext_unknownVersion(void **state){
-
+    (void) state;
     List* l = id3v2CreateAttachedPictureFrameContext(12312);
 
     assert_non_null(l);
@@ -202,7 +201,7 @@ static void id3v2CreateAttachedPictureFrameContext_unknownVersion(void **state){
 }
 
 static void id3v2CreateAttachedPictureFrameContext_version2(void **state){
-
+    (void) state;
     List* l = id3v2CreateAttachedPictureFrameContext(ID3V2_TAG_VERSION_2);
 
     assert_non_null(l);
@@ -249,7 +248,7 @@ static void id3v2CreateAttachedPictureFrameContext_version2(void **state){
 }
 
 static void id3v2CreateAttachedPictureFrameContext_version3(void **state){
-
+    (void) state;
     List* l = id3v2CreateAttachedPictureFrameContext(ID3V2_TAG_VERSION_3);
 
     assert_non_null(l);
@@ -296,7 +295,7 @@ static void id3v2CreateAttachedPictureFrameContext_version3(void **state){
 }
 
 static void id3v2CreateAudioEncryptionContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateAudioEncryptionFrameContext();
 
     assert_non_null(l);
@@ -335,7 +334,7 @@ static void id3v2CreateAudioEncryptionContext_valid(void **state){
 }
 
 static void id3v2CreateAudioSeekPointIndexFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateAudioSeekPointIndexFrameContext();
 
     assert_non_null(l);
@@ -353,7 +352,7 @@ static void id3v2CreateAudioSeekPointIndexFrameContext_valid(void **state){
 }
 
 static void id3v2CreateCommentFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateCommentFrameContext();
 
     assert_non_null(l);
@@ -393,7 +392,7 @@ static void id3v2CreateCommentFrameContext_valid(void **state){
 }
 
 static void id3v2CreateCommercialFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateCommercialFrameContext();
 
     assert_non_null(l);
@@ -467,7 +466,7 @@ static void id3v2CreateCommercialFrameContext_valid(void **state){
 }
 
 static void id3v2CreateEncryptedMetaFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateEncryptedMetaFrameContext();
 
     assert_non_null(l);
@@ -499,7 +498,7 @@ static void id3v2CreateEncryptedMetaFrameContext_valid(void **state){
 }
 
 static void id3v2CreateMusicCDIdentifierFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateMusicCDIdentifierFrameContext();
 
     assert_non_null(l);
@@ -517,7 +516,7 @@ static void id3v2CreateMusicCDIdentifierFrameContext_valid(void **state){
 }
 
 static void id3v2CreatePlayCounterFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreatePlayCounterFrameContext();
 
     assert_non_null(l);
@@ -535,7 +534,7 @@ static void id3v2CreatePlayCounterFrameContext_valid(void **state){
 }
 
 static void id3v2CreateEqualizationFrameContext_validVersion2(void **state){
-
+    (void) state;
     List* l = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_2);
 
     assert_non_null(l);
@@ -581,7 +580,7 @@ static void id3v2CreateEqualizationFrameContext_validVersion2(void **state){
 }
 
 void id3v2CreateEqualizationFrameContext_wrongVersion(void **state){
-
+    (void) state;
     List* l = id3v2CreateEqualizationFrameContext(123);
 
     assert_non_null(l);
@@ -600,7 +599,7 @@ void id3v2CreateEqualizationFrameContext_wrongVersion(void **state){
 }
 
 void id3v2CreateEqualizationFrameContext_validVersion4(void **state){
-
+    (void) state;
     List* l = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_4);
 
     assert_non_null(l);
@@ -640,7 +639,7 @@ void id3v2CreateEqualizationFrameContext_validVersion4(void **state){
 }
 
 static void id3v2CreateEventTimingCodesFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateEventTimingCodesFrameContext();
 
     assert_non_null(l);
@@ -679,7 +678,7 @@ static void id3v2CreateEventTimingCodesFrameContext_valid(void **state){
 }
 
 static void id3v2CreateGeneralEncapsulatedObjectFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateGeneralEncapsulatedObjectFrameContext();
 
     assert_non_null(l);
@@ -726,7 +725,7 @@ static void id3v2CreateGeneralEncapsulatedObjectFrameContext_valid(void **state)
 }
 
 static void id3v2CreateInvolvedPeopleListFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateInvolvedPeopleListFrameContext();
 
     assert_non_null(l);
@@ -765,7 +764,7 @@ static void id3v2CreateInvolvedPeopleListFrameContext_valid(void **state){
 }
 
 static void id3v2CreateLinkedInformationFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateLinkedInformationFrameContext();
 
     assert_non_null(l);
@@ -791,7 +790,7 @@ static void id3v2CreateLinkedInformationFrameContext_valid(void **state){
 }
 
 static void id3v2CreateMPEGLocationLookupTableFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateMPEGLocationLookupTableFrameContext();
 
     assert_non_null(l);
@@ -810,7 +809,7 @@ static void id3v2CreateMPEGLocationLookupTableFrameContext_valid(void **state){
 }
 
 static void id3v2CreateOwnershipFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateOwnershipFrameContext();
 
     assert_non_null(l);
@@ -850,7 +849,7 @@ static void id3v2CreateOwnershipFrameContext_valid(void **state){
 }
 
 static void id3v2CreatePopularimeterFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreatePopularimeterFrameContext();
 
     assert_non_null(l);
@@ -883,7 +882,7 @@ static void id3v2CreatePopularimeterFrameContext_valid(void **state){
 }
 
 static void id3v2CreatePositionSynchronisationFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreatePositionSynchronisationFrameContext();
 
     assert_non_null(l);
@@ -909,7 +908,7 @@ static void id3v2CreatePositionSynchronisationFrameContext_valid(void **state){
 }
 
 static void id3v2CreatePrivateFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreatePrivateFrameContext();
 
     assert_non_null(l);
@@ -968,7 +967,7 @@ static void id3v2CreateRecommendedBufferSizeFrameContext_valid(){
 }
 
 static void id3v2CreateRelativeVolumeAdjustmentFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateRelativeVolumeAdjustmentFrameContext(1);
 
     assert_non_null(l);
@@ -987,7 +986,7 @@ static void id3v2CreateRelativeVolumeAdjustmentFrameContext_valid(void **state){
 }
 
 static void id3v2CreateReverbFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateReverbFrameContext();
 
     assert_non_null(l);
@@ -1076,7 +1075,7 @@ static void id3v2CreateReverbFrameContext_valid(void **state){
 }
 
 static void id3v2CreateSeekPointIndexFrameContext_valid(void **state){
-    
+    (void) state;
     List* l = id3v2CreateSeekFrameContext();
 
     assert_non_null(l);
@@ -1094,7 +1093,7 @@ static void id3v2CreateSeekPointIndexFrameContext_valid(void **state){
 }
 
 static void id3v2CreateSignatureFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateSignatureFrameContext();
 
     assert_non_null(l);
@@ -1120,7 +1119,7 @@ static void id3v2CreateSignatureFrameContext_valid(void **state){
 }
 
 static void id3v2CreateSynchronisedLyricFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateSynchronisedLyricFrameContext();
 
     assert_non_null(l);
@@ -1187,7 +1186,7 @@ static void id3v2CreateSynchronisedLyricFrameContext_valid(void **state){
 }
 
 static void id3v2CreateSynchronisedTempoCodesFrameContext_valid(void **state){
-    
+    (void) state;
     List* l = id3v2CreateSynchronisedTempoCodesFrameContext();
 
     assert_non_null(l);
@@ -1212,7 +1211,7 @@ static void id3v2CreateSynchronisedTempoCodesFrameContext_valid(void **state){
 }
 
 static void id3v2CreateUniqueFileIdentifierFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateUniqueFileIdentifierFrameContext();
 
     assert_non_null(l);
@@ -1238,7 +1237,7 @@ static void id3v2CreateUniqueFileIdentifierFrameContext_valid(void **state){
 }
 
 static void id3v2CreateTermsOfUseFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateTermsOfUseFrameContext();
 
     assert_non_null(l);
@@ -1271,7 +1270,7 @@ static void id3v2CreateTermsOfUseFrameContext_valid(void **state){
 }
 
 static void id3v2CreateUnsynchronisedLyricFrameContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateUnsynchronisedLyricFrameContext();
 
     assert_non_null(l);
@@ -1311,7 +1310,7 @@ static void id3v2CreateUnsynchronisedLyricFrameContext_valid(void **state){
 }
 
 static void id3v2CreateGenericContext_valid(void **state){
-
+    (void) state;
     List* l = id3v2CreateGenericFrameContext();
 
     assert_non_null(l);
@@ -1330,7 +1329,7 @@ static void id3v2CreateGenericContext_valid(void **state){
 }
 
 static void id3v2ContextSerialize_valid(void **state){
-
+    (void) state;
     Id3v2ContentContext *cc = id3v2CreateContentContext(iter_context, id3v2djb2("test"), INT16_MAX, 1);
     size_t outl = 0;
     uint8_t *out = id3v2ContextSerialize(cc, &outl);
@@ -1354,7 +1353,7 @@ static void id3v2ContextSerialize_valid(void **state){
 
 
 static void id3v2ContextSerialize_min(void **state){
-
+    (void) state;
 
     Id3v2ContentContext *cc = id3v2CreateContentContext(0, 0, 0, 0);
     size_t outl = 0;
