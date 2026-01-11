@@ -1,12 +1,11 @@
 /**
- * @file id3v1.h
+ * @file id3v1.c
  * @author Ewan Jones
- * @brief Declarations used by utility functions
- * @version 2.0
- * @date 2023-10-03
- * 
- * @copyright Copyright (c) 2023
- * 
+ * @brief Definitions of ID3v1 tag manipulation, file I/O, and utility functions
+ * @version 26.01
+ * @date 2023-10-03 - 2026-01-11
+ * @copyright Copyright (c) 2023 - 2026
+ *
  */
 
 #ifndef ID3V1

@@ -1,11 +1,11 @@
-/**
- * @file id3v1Parser.h
+ /**
+ * @file id3v1Parser.c
  * @author Ewan Jones
- * @brief Declarations for the id3v1 parser
- * @version 2.0
- * @date 2023-10-03
+ * @brief Declarations of ID3v1 tag parsing and memory management functions
+ * @version 26.01
+ * @date 2023-10-03 - 2026-01-11
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) 2023 - 2026
  * 
  */
 #ifndef ID3V1_PARSER

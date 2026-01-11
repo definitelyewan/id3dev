@@ -1,11 +1,11 @@
 /**
  * @file id3v1Parser.c
  * @author Ewan Jones
- * @brief Function definitions for the parser
- * @version 2.0
- * @date 2023-10-03
+ * @brief Implementation of ID3v1 tag parsing and memory management functions
+ * @version 26.01
+ * @date 2023-10-03 - 2026-01-11
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) 2023 - 2026
  * 
  */
 #include <stdio.h>
@@ -17,27 +17,26 @@
 #include "id3dependencies/ByteStream/include/byteInt.h"
 
 /**
- * @brief Detect a "TAG" magic number/ID to identify the use of id3v1.
- * @details This function returns true if successful and false otherwise.
- * @param buffer 
- * @return true 
- * @return false 
+ * @brief Checks if a buffer contains a valid ID3v1 tag identifier.
+ * @details Compares the first ID3V1_TAG_ID_SIZE bytes of the buffer against the "TAG" identifier.
+ * @param buffer - The buffer to check. Must contain at least ID3V1_TAG_ID_SIZE bytes.
+ * @return bool - true if the buffer starts with "TAG", false otherwise.
  */
 bool id3v1HasTag(const uint8_t *buffer) {
     return (memcmp(buffer, "TAG",ID3V1_TAG_ID_SIZE) == 0) ? true : false;
 }
 
 /**
- * @brief Creates an Id3v1Tag structure.
- *
- * @param title
- * @param artist
- * @param albumTitle
- * @param year
- * @param track
- * @param comment
- * @param genre
- * @return Id3v1Tag*
+ * @brief Creates and allocates a new Id3v1Tag structure.
+ * @details Allocates memory, initializes all fields to zero, then copies provided values. String fields are truncated to ID3V1_FIELD_SIZE if needed. Caller must free with id3v1DestroyTag.
+ * @param title - Song title.
+ * @param artist - Artist name.
+ * @param albumTitle - Album title.
+ * @param year - Release year
+ * @param track - Track number
+ * @param comment - Comment text.
+ * @param genre - Genre enum value
+ * @return Id3v1Tag* - Heap allocated tag structure.
  */
 Id3v1Tag *id3v1CreateTag(uint8_t *title, uint8_t *artist, uint8_t *albumTitle, int year, int track, uint8_t *comment,
                          Genre genre) {
@@ -76,9 +75,9 @@ Id3v1Tag *id3v1CreateTag(uint8_t *title, uint8_t *artist, uint8_t *albumTitle, i
 }
 
 /**
- * @brief Resets all structure members to empty.
- * @details OTHER_GENRE(12) is used as clear due to its unknown designation.
- * @param tag
+ * @brief Resets all tag fields to their default empty state.
+ * @details Zeros out all string fields and sets numeric fields to 0. Genre is set to OTHER_GENRE as the default unknown value.
+ * @param tag - The tag to clear.
  */
 void id3v1ClearTag(Id3v1Tag *tag) {
     if (tag == NULL) {
@@ -96,8 +95,9 @@ void id3v1ClearTag(Id3v1Tag *tag) {
 }
 
 /**
- * @brief Frees an Id3v1Tag structure and sets its address and pointer to null.
- * @param toDelete
+ * @brief Frees an Id3v1Tag and nullifies the pointer.
+ * @details Deallocates the tag memory and sets the pointer to NULL to prevent dangling pointer issues.
+ * @param toDelete - Pointer to the tag pointer to free. Safe to call with NULL.
  */
 void id3v1DestroyTag(Id3v1Tag **toDelete) {
     //error address free
@@ -109,10 +109,12 @@ void id3v1DestroyTag(Id3v1Tag **toDelete) {
 }
 
 /**
- * @brief Parses a buffer into an Id3V1Tag structure.
- *
- * @param buffer
- * @return Id3v1Tag*
+ * @brief Parses an ID3V1_MAX_SIZE buffer into an Id3v1Tag structure.
+ * @details Performs sequential field extraction with extensive error checking. Returns partial tags with default values if parsing fails partway through.
+ * Detects ID3v1.1 track numbers via null byte at position 28.
+ * @param buffer - Buffer containing ID3V1_MAX_SIZE (128) bytes to parse.
+ * @return Id3v1Tag* - Newly allocated tag on success, partial tag with defaults on read errors, NULL if "TAG" identifier missing. Caller must free with 
+ * id3v1DestroyTag.
  */
 Id3v1Tag *id3v1TagFromBuffer(uint8_t *buffer) {
     //lots of error checking because I cannot 100% know what im given
