@@ -15,12 +15,11 @@
 
 
 
-int main(int argc, char *argv[]){
-
-    if(argc < 2){
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
         printf("USAGE: <mp3 file>\n");
         return EXIT_FAILURE;
-    }    
+    }
 
     ID3 *id3 = NULL;
     char *title = NULL;
@@ -53,57 +52,57 @@ int main(int argc, char *argv[]){
     comment = id3ReadComment(id3);
 
 
-    if(title != NULL){
+    if (title != NULL) {
         printf("Title: %s\n", title);
         free(title);
     }
 
-    if(artist != NULL){
+    if (artist != NULL) {
         printf("Artist: %s\n", artist);
         free(artist);
     }
 
-    if(albumArtist != NULL){
+    if (albumArtist != NULL) {
         printf("Album Artist: %s\n", albumArtist);
         free(albumArtist);
     }
 
-    if(album != NULL){
+    if (album != NULL) {
         printf("Album: %s\n", album);
         free(album);
     }
 
-    if(year != NULL){
+    if (year != NULL) {
         printf("Year: %s\n", year);
         free(year);
     }
 
-    if(genre != NULL){
+    if (genre != NULL) {
         printf("Genre: %s\n", genre);
         free(genre);
     }
 
-    if(track != NULL){
+    if (track != NULL) {
         printf("Track: %s\n", track);
         free(track);
     }
 
-    if(composer != NULL){
+    if (composer != NULL) {
         printf("Composer: %s\n", composer);
         free(composer);
     }
 
-    if(disc != NULL){
+    if (disc != NULL) {
         printf("Disc: %s\n", disc);
         free(disc);
     }
 
-    if(lyrics != NULL){
+    if (lyrics != NULL) {
         printf("Lyrics: %s\n", lyrics);
         free(lyrics);
     }
 
-    if(comment != NULL){
+    if (comment != NULL) {
         printf("Comment: %s\n", comment);
         free(comment);
     }

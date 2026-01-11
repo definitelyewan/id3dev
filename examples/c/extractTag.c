@@ -14,10 +14,8 @@
 #include <stdlib.h> // EXIT_SUCCESS, EXIT_FAILURE
 #include <id3dev.h> // id3FromFile, id3ToJSON, id3WriteToFile, id3Destroy
 
-int main(int argc, char *argv[]){
-
-
-    if(argc < 3){
+int main(int argc, char *argv[]) {
+    if (argc < 3) {
         printf("USAGE: <mp3 file> <output file>\n");
         return EXIT_FAILURE;
     }
