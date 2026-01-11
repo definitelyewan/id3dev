@@ -19,8 +19,7 @@
 #include "id3dependencies/ByteStream/include/byteInt.h"
 
 //djb2 algorithm for stings
-unsigned long id3v2djb2(const char *str){
-
+unsigned long id3v2djb2(const char *str) {
     unsigned long hash = 5381;
     int c = 0;
 
@@ -35,15 +34,14 @@ unsigned long id3v2djb2(const char *str){
 
 /**
  * @brief Creates a context
- * 
- * @param type 
- * @param key 
- * @param max 
- * @param min 
- * @return Id3v2ContentContext* 
+ *
+ * @param type
+ * @param key
+ * @param max
+ * @param min
+ * @return Id3v2ContentContext*
  */
-Id3v2ContentContext *id3v2CreateContentContext(Id3v2ContextType type, size_t key, size_t max, size_t min){
-
+Id3v2ContentContext *id3v2CreateContentContext(Id3v2ContextType type, size_t key, size_t max, size_t min) {
     Id3v2ContentContext *context = malloc(sizeof(Id3v2ContentContext));
 
     context->type = type;
@@ -52,17 +50,15 @@ Id3v2ContentContext *id3v2CreateContentContext(Id3v2ContextType type, size_t key
     context->min = min;
 
     return context;
-
 }
 
 /**
  * @brief Destroys a content context
- * 
- * @param toDelete 
+ *
+ * @param toDelete
  */
-void id3v2DestroyContentContext(Id3v2ContentContext **toDelete){
-    
-    if(*toDelete){
+void id3v2DestroyContentContext(Id3v2ContentContext **toDelete) {
+    if (*toDelete) {
         free(*toDelete);
         *toDelete = NULL;
         toDelete = NULL;
@@ -70,49 +66,47 @@ void id3v2DestroyContentContext(Id3v2ContentContext **toDelete){
 }
 
 /**
- * 
+ *
  * List/Hash API required functions
- *  
+ *
  */
 
 /**
  * @brief Frees a context when it is in a List
- * 
- * @param toBeDeleted 
+ *
+ * @param toBeDeleted
  */
-void id3v2DeleteContentContext(void *toBeDeleted){
+void id3v2DeleteContentContext(void *toBeDeleted) {
     id3v2DestroyContentContext((Id3v2ContentContext **) &toBeDeleted);
 }
 
 /**
  * @brief Compares two contexts and returns the difference
- * 
- * @param first 
- * @param second 
- * @return int 
+ *
+ * @param first
+ * @param second
+ * @return int
  */
-int id3v2CompareContentContext(const void *first, const void *second){
-    
+int id3v2CompareContentContext(const void *first, const void *second) {
     const Id3v2ContentContext *c1 = (Id3v2ContentContext *) first;
     const Id3v2ContentContext *c2 = (Id3v2ContentContext *) second;
     int diff = 0;
 
     diff = (c1->type < c2->type) ? 0 : c1->type - c2->type;
-    if(diff != 0) {
+    if (diff != 0) {
         return diff;
     }
 
 
     diff = (c1->key < c2->key) ? 0 : (int) (c1->key - c2->key);
-    if(diff != 0) {
+    if (diff != 0) {
         return diff;
     }
 
 
     diff = (c1->min < c2->min) ? 0 : (int) (c1->min - c2->min);
-    if(diff != 0) {
+    if (diff != 0) {
         return diff;
-
     }
 
     diff = (c1->max < c2->max) ? 0 : (int) (c1->max - c2->max);
@@ -121,12 +115,11 @@ int id3v2CompareContentContext(const void *first, const void *second){
 
 /**
  * @brief Generates a sting that represents a context
- * 
- * @param toBePrinted 
- * @return char* 
+ *
+ * @param toBePrinted
+ * @return char*
  */
-char *id3v2PrintContentContext(const void *toBePrinted){
-    
+char *id3v2PrintContentContext(const void *toBePrinted) {
     const Id3v2ContentContext *c = (Id3v2ContentContext *) toBePrinted;
 
     size_t memCount = snprintf(NULL, 0, "Type: %d, Key: %zu, min: %zu, max: %zu\n", c->type, c->key, c->min, c->max);
@@ -141,12 +134,11 @@ char *id3v2PrintContentContext(const void *toBePrinted){
 
 /**
  * @brief Performs a deep copy of a context
- * 
- * @param toBeCopied 
- * @return void* 
+ *
+ * @param toBeCopied
+ * @return void*
  */
-void *id3v2CopyContentContext(const void *toBeCopied){
-
+void *id3v2CopyContentContext(const void *toBeCopied) {
     Id3v2ContentContext *copy = (Id3v2ContentContext *) toBeCopied;
     Id3v2ContentContext *ret = malloc(sizeof(Id3v2ContentContext));
 
@@ -154,54 +146,54 @@ void *id3v2CopyContentContext(const void *toBeCopied){
     ret->max = copy->max;
     ret->min = copy->min;
     ret->type = copy->type;
-    
-    return (void *)ret;
+
+    return (void *) ret;
 }
 
 /**
  * @brief deletes a list of contexts
  * @details used for the hashtable library
- * @param toBeDeleted 
+ * @param toBeDeleted
  */
-void id3v2DeleteContentContextList(void *toBeDeleted){
-    listFree((List *)toBeDeleted);
+void id3v2DeleteContentContextList(void *toBeDeleted) {
+    listFree((List *) toBeDeleted);
 }
 
 /**
  * @brief returns a char * representation of a context list
  * @details used for the hashtable library
- * @param toBePrinted 
- * @return int 
+ * @param toBePrinted
+ * @return int
  */
-char *id3v2PrintContentContextList(const void *toBePrinted){
-    return listToString((List *)toBePrinted);
+char *id3v2PrintContentContextList(const void *toBePrinted) {
+    return listToString((List *) toBePrinted);
 }
 
 /**
  * @brief copy a context list
  * @details used for the hashtable library
- * @param toBeCopied 
- * @return void* 
+ * @param toBeCopied
+ * @return void*
  */
-void *id3v2CopyContentContextList(const void *toBeCopied){
-    return listDeepCopy((List *)toBeCopied);
+void *id3v2CopyContentContextList(const void *toBeCopied) {
+    return listDeepCopy((List *) toBeCopied);
 }
 
 
 /**
- * 
+ *
  * Context list generation
- * 
+ *
  */
 
 /**
  * @brief Generates the required contexts for a text frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateTextFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateTextFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // encoding
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("encoding"), 1, 1);
@@ -215,13 +207,13 @@ List *id3v2CreateTextFrameContext(void){
 }
 
 /**
- * @brief Generates the required contexts for a user defined text frame 
- * 
- * @return List* 
+ * @brief Generates the required contexts for a user defined text frame
+ *
+ * @return List*
  */
-List *id3v2CreateUserDefinedTextFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateUserDefinedTextFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // desc
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("encoding"), 1, 1);
@@ -240,12 +232,12 @@ List *id3v2CreateUserDefinedTextFrameContext(void){
 
 /**
  * @brief Generates the required contexts for a URL frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateURLFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateURLFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // url
     void *toAdd = (void *) id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("url"), UINT_MAX, 1);
@@ -256,12 +248,12 @@ List *id3v2CreateURLFrameContext(void){
 
 /**
  * @brief Generates the required contexts for a user defined URL frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateUserDefinedURLFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateUserDefinedURLFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // encoding
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("encoding"), 1, 1);
@@ -276,24 +268,23 @@ List *id3v2CreateUserDefinedURLFrameContext(void){
     listInsertBack(l, toAdd);
 
     return l;
-
 }
 
 /**
  * @brief Generates the required contexts for an attached picture frame depending on the version on ID3v2
- * @param version 
- * @return List* 
+ * @param version
+ * @return List*
  */
-List *id3v2CreateAttachedPictureFrameContext(unsigned int version){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateAttachedPictureFrameContext(unsigned int version) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // encoding
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("encoding"), 1, 1);
     listInsertBack(l, toAdd);
 
     // image format
-    switch(version){
+    switch (version) {
         case ID3V2_TAG_VERSION_2:
             // format is $xx xx xx
             toAdd = (void *) id3v2CreateContentContext(noEncoding_context, id3v2djb2("format"), 3, 1);
@@ -301,7 +292,7 @@ List *id3v2CreateAttachedPictureFrameContext(unsigned int version){
 
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
-            // format is latin1 
+            // format is latin1
             toAdd = (void *) id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("format"), UINT_MAX, 1);
             break;
 
@@ -328,9 +319,9 @@ List *id3v2CreateAttachedPictureFrameContext(unsigned int version){
     return l;
 }
 
-List *id3v2CreateAudioSeekPointIndexFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateAudioSeekPointIndexFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // data
     void *toAdd = (void *) id3v2CreateContentContext(binary_context, id3v2djb2("data"), UINT_MAX, 1);
@@ -341,12 +332,12 @@ List *id3v2CreateAudioSeekPointIndexFrameContext(void){
 
 /**
  * @brief generates the required context for an audio encryption frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateAudioEncryptionFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateAudioEncryptionFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // identifier
     void *toAdd = (void *) id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("identifier"), UINT_MAX, 1);
@@ -369,12 +360,12 @@ List *id3v2CreateAudioEncryptionFrameContext(void){
 
 /**
  * @brief Generates the required contexts for a comment frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateCommentFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateCommentFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // encoding
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("encoding"), 1, 1);
@@ -397,12 +388,12 @@ List *id3v2CreateCommentFrameContext(void){
 
 /**
  * @brief Generates the required context for a commercial frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateCommercialFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateCommercialFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // encoding
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("encoding"), 1, 1);
@@ -445,12 +436,12 @@ List *id3v2CreateCommercialFrameContext(void){
 
 /**
  * @brief Generates the required context for an encrypted meta frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateEncryptedMetaFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateEncryptedMetaFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // identifier
     void *toAdd = (void *) id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("identifier"), UINT_MAX, 1);
@@ -469,12 +460,12 @@ List *id3v2CreateEncryptedMetaFrameContext(void){
 
 /**
  * @brief Generates the required context for an encryption method (ENCR) or group identification (GRID) frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateRegistrationFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateRegistrationFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // identifier
     void *toAdd = (void *) id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("identifier"), UINT_MAX, 1);
@@ -489,17 +480,16 @@ List *id3v2CreateRegistrationFrameContext(void){
     listInsertBack(l, toAdd);
 
     return l;
-
 }
 
 /**
  * @brief Generates the required context for a music CD identifier frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateMusicCDIdentifierFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateMusicCDIdentifierFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // data
     void *toAdd = (void *) id3v2CreateContentContext(binary_context, id3v2djb2("data"), 804, 1);
@@ -510,12 +500,12 @@ List *id3v2CreateMusicCDIdentifierFrameContext(void){
 
 /**
  * @brief Generates the required context for a play counter frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreatePlayCounterFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreatePlayCounterFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // data
     void *toAdd = (void *) id3v2CreateContentContext(binary_context, id3v2djb2("data"), UINT_MAX, 1);
@@ -527,20 +517,20 @@ List *id3v2CreatePlayCounterFrameContext(void){
 
 /**
  * @brief Generates the required context for an equalization frame given a version
- * 
- * @param version 
- * @return List* 
+ *
+ * @param version
+ * @return List*
  */
-List *id3v2CreateEqualizationFrameContext(unsigned int version){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateEqualizationFrameContext(unsigned int version) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
     void *toAdd = NULL;
 
-    switch(version){
+    switch (version) {
         // EQU and EQUA
         case ID3V2_TAG_VERSION_2:
         case ID3V2_TAG_VERSION_3:
-            
+
             // adjustment
             toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("adjustment"), 1, 1);
             listInsertBack(l, toAdd);
@@ -562,9 +552,9 @@ List *id3v2CreateEqualizationFrameContext(unsigned int version){
             listInsertBack(l, toAdd);
             break;
 
-        // EQU2  
+        // EQU2
         case ID3V2_TAG_VERSION_4:
-            
+
             // symbol
             toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("symbol"), 1, 1);
             listInsertBack(l, toAdd);
@@ -593,12 +583,12 @@ List *id3v2CreateEqualizationFrameContext(unsigned int version){
 
 /**
  * @brief Generates the required context for an event timing codes frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateEventTimingCodesFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateEventTimingCodesFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // select format
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("symbol"), 1, 1);
@@ -621,12 +611,12 @@ List *id3v2CreateEventTimingCodesFrameContext(void){
 
 /**
  * @brief Generates the required context for a general encapsulated object frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateGeneralEncapsulatedObjectFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateGeneralEncapsulatedObjectFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // encoding
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("encoding"), 1, 1);
@@ -653,12 +643,12 @@ List *id3v2CreateGeneralEncapsulatedObjectFrameContext(void){
 
 /**
  * @brief Generates the required context for Involved peoples list frame in ID3V2.2 and ID3V2.3
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateInvolvedPeopleListFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateInvolvedPeopleListFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // encoding
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("encoding"), 1, 1);
@@ -681,12 +671,12 @@ List *id3v2CreateInvolvedPeopleListFrameContext(void){
 
 /**
  * @brief Generates the required context for a linked information frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateLinkedInformationFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateLinkedInformationFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // url
     void *toAdd = (void *) id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("url"), UINT_MAX, 1);
@@ -702,11 +692,11 @@ List *id3v2CreateLinkedInformationFrameContext(void){
 /**
  * @brief Generates the required context for an MPEG lookup table frame
  * @details This frame does not have full support but its use is probably so rare that nobody will care
- * @return List* 
+ * @return List*
  */
-List *id3v2CreateMPEGLocationLookupTableFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateMPEGLocationLookupTableFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // data
     void *toAdd = (void *) id3v2CreateContentContext(binary_context, id3v2djb2("data"), UINT_MAX, 1);
@@ -717,12 +707,12 @@ List *id3v2CreateMPEGLocationLookupTableFrameContext(void){
 
 /**
  * @brief generates the required context for an ownership frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateOwnershipFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateOwnershipFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // data
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("encoding"), UINT_MAX, 1);
@@ -741,17 +731,16 @@ List *id3v2CreateOwnershipFrameContext(void){
     listInsertBack(l, toAdd);
 
     return l;
-
 }
 
 /**
  * @brief Generate the required context for a popularimeter frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreatePopularimeterFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreatePopularimeterFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // email
     void *toAdd = (void *) id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("identifier"), UINT_MAX, 1);
@@ -770,12 +759,12 @@ List *id3v2CreatePopularimeterFrameContext(void){
 
 /**
  * @brief Generates the required context for a position synchronisation frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreatePositionSynchronisationFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreatePositionSynchronisationFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // format
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("format"), 1, 1);
@@ -790,12 +779,12 @@ List *id3v2CreatePositionSynchronisationFrameContext(void){
 
 /**
  * @brief Generates the required context for a private frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreatePrivateFrameContext(void){
-    
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreatePrivateFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // email
     void *toAdd = (void *) id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("identifier"), UINT_MAX, 1);
@@ -804,18 +793,18 @@ List *id3v2CreatePrivateFrameContext(void){
     // data
     toAdd = (void *) id3v2CreateContentContext(binary_context, id3v2djb2("data"), UINT_MAX, 1);
     listInsertBack(l, toAdd);
-    
+
     return l;
 }
 
 /**
  * @brief Generates the required context for a recommended buffer size frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateRecommendedBufferSizeFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateRecommendedBufferSizeFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // buffer size
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("buffer"), 3, 3);
@@ -837,12 +826,12 @@ List *id3v2CreateRecommendedBufferSizeFrameContext(void){
  * @details at the time being I do not have a good way of implementing and version is a dummy so the entire frame is one block.
  * maybe post-processing functions or more contexts?
  * @
- * @param version 
- * @return List* 
+ * @param version
+ * @return List*
  */
-List *id3v2CreateRelativeVolumeAdjustmentFrameContext(unsigned int version){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateRelativeVolumeAdjustmentFrameContext(unsigned int version) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // data
     void *toAdd = (void *) id3v2CreateContentContext(binary_context, id3v2djb2("data"), UINT_MAX, 1);
@@ -853,12 +842,12 @@ List *id3v2CreateRelativeVolumeAdjustmentFrameContext(unsigned int version){
 
 /**
  * @brief Generates the required contexts for a reverb frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateReverbFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateReverbFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // left
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("left"), 2, 2);
@@ -900,18 +889,16 @@ List *id3v2CreateReverbFrameContext(void){
     toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("p right"), 1, 1);
     listInsertBack(l, toAdd);
     return l;
-
-
 }
 
 /**
  * @brief Generates the required context for a seek point index frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateSeekFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateSeekFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // offset
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("offset"), 4, 4);
@@ -922,12 +909,12 @@ List *id3v2CreateSeekFrameContext(void){
 
 /**
  * @brief Generates the required context for a signature frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateSignatureFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateSignatureFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // symbol
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("symbol"), 1, 1);
@@ -942,12 +929,12 @@ List *id3v2CreateSignatureFrameContext(void){
 
 /**
  * @brief Generates the required context for a synchronised lyric frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateSynchronisedLyricFrameContext(void){
-    
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateSynchronisedLyricFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // encoding
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("encoding"), 1, 1);
@@ -980,7 +967,7 @@ List *id3v2CreateSynchronisedLyricFrameContext(void){
     // iter
     toAdd = (void *) id3v2CreateContentContext(iter_context, id3v2djb2("iter"), UINT_MAX, 5);
     listInsertBack(l, toAdd);
-    
+
     return l;
 }
 
@@ -988,11 +975,11 @@ List *id3v2CreateSynchronisedLyricFrameContext(void){
  * @brief Generates the required context for a synced tempo codes frame
  * @details this frame is not fully supported as I do not have a good way of dealing
  * with variable tempo data as of right now. maybe postprocessing or more contexts?
- * @return List* 
+ * @return List*
  */
-List *id3v2CreateSynchronisedTempoCodesFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateSynchronisedTempoCodesFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // format
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("format"), 1, 1);
@@ -1007,12 +994,12 @@ List *id3v2CreateSynchronisedTempoCodesFrameContext(void){
 
 /**
  * @brief Generates the required contexts for a unique file identifier frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateUniqueFileIdentifierFrameContext(void){
-    
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateUniqueFileIdentifierFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // url
     void *toAdd = (void *) id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("url"), UINT_MAX, 1);
@@ -1025,9 +1012,9 @@ List *id3v2CreateUniqueFileIdentifierFrameContext(void){
     return l;
 }
 
-List *id3v2CreateTermsOfUseFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateTermsOfUseFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // encoding
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("encoding"), 1, 1);
@@ -1047,12 +1034,12 @@ List *id3v2CreateTermsOfUseFrameContext(void){
 
 /**
  * @brief Generates the required contexts for an unsynced lyrics frame
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateUnsynchronisedLyricFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateUnsynchronisedLyricFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // encoding
     void *toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("encoding"), 1, 1);
@@ -1071,17 +1058,16 @@ List *id3v2CreateUnsynchronisedLyricFrameContext(void){
     listInsertBack(l, toAdd);
 
     return l;
-
 }
 
 /**
  * @brief generates the required context for a generic frame with unknown structure
- * 
- * @return List* 
+ *
+ * @return List*
  */
-List *id3v2CreateGenericFrameContext(void){
-
-    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext, id3v2CopyContentContext);
+List *id3v2CreateGenericFrameContext(void) {
+    List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                         id3v2CopyContentContext);
 
     // encoding
     void *toAdd = (void *) id3v2CreateContentContext(binary_context, id3v2djb2("?"), UINT_MAX, 1);
@@ -1093,26 +1079,25 @@ List *id3v2CreateGenericFrameContext(void){
 /**
  * @brief Generates a default map of pairings between frame IDs and the context needed to parse them.
  * This works for all major versions of ID3v2.
- * 
- * @param version 
- * @return HashTable* 
+ *
+ * @param version
+ * @return HashTable*
  */
-HashTable *id3v2CreateDefaultIdentifierContextPairings(unsigned int version){
-
+HashTable *id3v2CreateDefaultIdentifierContextPairings(unsigned int version) {
     size_t minFrameContexts = 66;
-    HashTable *table = hashTableCreate(minFrameContexts, id3v2DeleteContentContextList, id3v2PrintContentContextList, id3v2CopyContentContextList);
+    HashTable *table = hashTableCreate(minFrameContexts, id3v2DeleteContentContextList, id3v2PrintContentContextList,
+                                       id3v2CopyContentContextList);
     List *l = NULL;
 
-    switch(version){
-        
+    switch (version) {
         case ID3V2_TAG_VERSION_2:
-            
+
             hashTableInsert(table, "BUF", (l = id3v2CreateRecommendedBufferSizeFrameContext()));
             listFree(l);
 
             hashTableInsert(table, "CNT", (l = id3v2CreatePlayCounterFrameContext()));
             listFree(l);
-            
+
             hashTableInsert(table, "COM", (l = id3v2CreateCommentFrameContext()));
             listFree(l);
             hashTableInsert(table, "CRA", (l = id3v2CreateAudioEncryptionFrameContext()));
@@ -1277,15 +1262,15 @@ HashTable *id3v2CreateDefaultIdentifierContextPairings(unsigned int version){
 
             hashTableInsert(table, "LINK", (l = id3v2CreateLinkedInformationFrameContext()));
             listFree(l);
-            
+
             hashTableInsert(table, "MCDI", (l = id3v2CreateMusicCDIdentifierFrameContext()));
             listFree(l);
             hashTableInsert(table, "MLLT", (l = id3v2CreateMPEGLocationLookupTableFrameContext()));
             listFree(l);
-            
+
             hashTableInsert(table, "OWNE", (l = id3v2CreateOwnershipFrameContext()));
             listFree(l);
-            
+
             hashTableInsert(table, "PRIV", (l = id3v2CreatePrivateFrameContext()));
             listFree(l);
             hashTableInsert(table, "PCNT", (l = id3v2CreatePlayCounterFrameContext()));
@@ -1312,13 +1297,13 @@ HashTable *id3v2CreateDefaultIdentifierContextPairings(unsigned int version){
             hashTableInsert(table, "TBPM", (l = id3v2CreateTextFrameContext()));
             listFree(l);
             hashTableInsert(table, "TCOM", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TCON", (l = id3v2CreateTextFrameContext()));
             listFree(l);
             hashTableInsert(table, "TCOP", (l = id3v2CreateTextFrameContext()));
             listFree(l);
             hashTableInsert(table, "TDAT", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TDLY", (l = id3v2CreateTextFrameContext()));
             listFree(l);
             hashTableInsert(table, "TENC", (l = id3v2CreateTextFrameContext()));
@@ -1328,7 +1313,7 @@ HashTable *id3v2CreateDefaultIdentifierContextPairings(unsigned int version){
             hashTableInsert(table, "TFLT", (l = id3v2CreateTextFrameContext()));
             listFree(l);
             hashTableInsert(table, "TIME", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TIT1", (l = id3v2CreateTextFrameContext()));
             listFree(l);
             hashTableInsert(table, "TIT2", (l = id3v2CreateTextFrameContext()));
@@ -1340,49 +1325,49 @@ HashTable *id3v2CreateDefaultIdentifierContextPairings(unsigned int version){
             hashTableInsert(table, "TLAN", (l = id3v2CreateTextFrameContext()));
             listFree(l);
             hashTableInsert(table, "TLEN", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TMED", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TOAL", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TOFN", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TOLY", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TOPE", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TORY", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TOWN", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TPE1", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TPE2", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TPE3", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TPE4", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TPOS", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TPUB", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TRCK", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TRDA", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TRSN", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TRSO", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TSIZ", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TSRC", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TSSE", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TYER", (l = id3v2CreateTextFrameContext()));
-            listFree(l); 
+            listFree(l);
             hashTableInsert(table, "TXXX", (l = id3v2CreateUserDefinedTextFrameContext()));
             listFree(l);
 
@@ -1593,7 +1578,7 @@ HashTable *id3v2CreateDefaultIdentifierContextPairings(unsigned int version){
             listFree(l);
             hashTableInsert(table, "WXXX", (l = id3v2CreateUserDefinedURLFrameContext()));
             listFree(l);
-            
+
             break;
         default:
             break;
@@ -1611,16 +1596,16 @@ HashTable *id3v2CreateDefaultIdentifierContextPairings(unsigned int version){
 
 /**
  * @brief Inserts a new frame ID and context pairing into a map
- * 
- * @param identifierContextPairs 
- * @param key 
- * @param context 
- * @return true 
- * @return false 
+ *
+ * @param identifierContextPairs
+ * @param key
+ * @param context
+ * @return true
+ * @return false
  */
-bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char key[ID3V2_FRAME_ID_MAX_SIZE], List *context){
-
-    if(!identifierContextPairs || !key || !context){
+bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char key[ID3V2_FRAME_ID_MAX_SIZE],
+                                      List *context) {
+    if (!identifierContextPairs || !key || !context) {
         return false;
     }
 
@@ -1631,25 +1616,24 @@ bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char ke
 
 /**
  * @brief Creates a binary representation of a context structure.
- * 
+ *
  * @param cc
  * @param outl
- * @return uint8_t * 
+ * @return uint8_t *
  */
-uint8_t *id3v2ContextSerialize(Id3v2ContentContext *cc, size_t *outl){
-    
+uint8_t *id3v2ContextSerialize(Id3v2ContentContext *cc, size_t *outl) {
     ByteStream *stream = NULL;
     size_t s = 0;
     unsigned char *convi = NULL;
     uint8_t *out = NULL;
 
-    if(cc == NULL){
+    if (cc == NULL) {
         *outl = 0;
         return out;
     }
 
     s += (sizeof(size_t) * 3) + 1;
-    
+
     stream = byteStreamCreate(NULL, s);
 
     byteStreamWrite(stream, (uint8_t *) &cc->type, 1);
@@ -1677,35 +1661,34 @@ uint8_t *id3v2ContextSerialize(Id3v2ContentContext *cc, size_t *outl){
 
 /**
  * @brief Converts a context structure into its representation in JSON.
- * 
- * @param cc 
- * @return char* 
+ *
+ * @param cc
+ * @return char*
  */
-char *id3v2ContextToJSON(const Id3v2ContentContext *cc){
-    
+char *id3v2ContextToJSON(const Id3v2ContentContext *cc) {
     char *json = NULL;
     size_t memCount = 3;
-    if(cc == NULL){
+    if (cc == NULL) {
         json = calloc(memCount, sizeof(char));
         memcpy(json, "{}\0", memCount);
         return json;
     }
 
     memCount += snprintf(NULL, 0,
-                        "{\"type\":%d,\"key\":%zu,\"max\":%zu,\"min\":%zu}",
-                        cc->type,
-                        cc->key,
-                        cc->max,
-                        cc->min);
+                         "{\"type\":%d,\"key\":%zu,\"max\":%zu,\"min\":%zu}",
+                         cc->type,
+                         cc->key,
+                         cc->max,
+                         cc->min);
 
     json = calloc(memCount + 1, sizeof(char));
 
     (void) snprintf(json, memCount,
-            "{\"type\":%d,\"key\":%zu,\"max\":%zu,\"min\":%zu}",
-            cc->type,
-            cc->key,
-            cc->max,
-            cc->min);
+                    "{\"type\":%d,\"key\":%zu,\"max\":%zu,\"min\":%zu}",
+                    cc->type,
+                    cc->key,
+                    cc->max,
+                    cc->min);
 
     return json;
 }

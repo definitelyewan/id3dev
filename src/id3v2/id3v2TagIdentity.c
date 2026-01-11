@@ -25,8 +25,8 @@
  * @param extendedHeader 
  * @return Id3v2TagHeader* 
  */
-Id3v2TagHeader *id3v2CreateTagHeader(uint8_t majorVersion, uint8_t minorVersion, uint8_t flags, Id3v2ExtendedTagHeader *extendedHeader){
-
+Id3v2TagHeader *id3v2CreateTagHeader(uint8_t majorVersion, uint8_t minorVersion, uint8_t flags,
+                                     Id3v2ExtendedTagHeader *extendedHeader) {
     Id3v2TagHeader *header = malloc(sizeof(Id3v2TagHeader));
 
     header->majorVersion = majorVersion;
@@ -42,15 +42,13 @@ Id3v2TagHeader *id3v2CreateTagHeader(uint8_t majorVersion, uint8_t minorVersion,
  *
  * @param toDelete
  */
-void id3v2DestroyTagHeader(Id3v2TagHeader **toDelete){
-
-    if(*toDelete){
+void id3v2DestroyTagHeader(Id3v2TagHeader **toDelete) {
+    if (*toDelete) {
         id3v2DestroyExtendedTagHeader(&((*toDelete)->extendedHeader));
         free(*toDelete);
         *toDelete = NULL;
         toDelete = NULL;
     }
-
 }
 
 /**
@@ -60,9 +58,8 @@ void id3v2DestroyTagHeader(Id3v2TagHeader **toDelete){
  * @param bit
  * @return int
  */
-bool id3v2WriteUnsynchronisationIndicator(Id3v2TagHeader *header, bool bit){
-
-    if(!header){
+bool id3v2WriteUnsynchronisationIndicator(Id3v2TagHeader *header, bool bit) {
+    if (!header) {
         return 0;
     }
 
@@ -78,13 +75,12 @@ bool id3v2WriteUnsynchronisationIndicator(Id3v2TagHeader *header, bool bit){
  * @param bit
  * @return int
  */
-bool id3v2WriteCompressionIndicator(Id3v2TagHeader *header, bool bit){
-
-    if(!header){
+bool id3v2WriteCompressionIndicator(Id3v2TagHeader *header, bool bit) {
+    if (!header) {
         return 0;
     }
 
-    if(header->majorVersion == ID3V2_TAG_VERSION_2){
+    if (header->majorVersion == ID3V2_TAG_VERSION_2) {
         header->flags = setBit(header->flags, 6, bit);
         return 1;
     }
@@ -99,14 +95,13 @@ bool id3v2WriteCompressionIndicator(Id3v2TagHeader *header, bool bit){
  * @param bit
  * @return int
  */
-bool id3v2WriteExtendedHeaderIndicator(Id3v2TagHeader *header, bool bit){
-
-    if(!header){
+bool id3v2WriteExtendedHeaderIndicator(Id3v2TagHeader *header, bool bit) {
+    if (!header) {
         return 0;
     }
 
     //set bit 7 or do nothing
-    switch(header->majorVersion){
+    switch (header->majorVersion) {
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
             header->flags = setBit(header->flags, 6, bit);
@@ -125,14 +120,13 @@ bool id3v2WriteExtendedHeaderIndicator(Id3v2TagHeader *header, bool bit){
  * @param bit
  * @return int
  */
-bool id3v2WriteExperimentalIndicator(Id3v2TagHeader *header, bool bit){
-
-    if(!header){
+bool id3v2WriteExperimentalIndicator(Id3v2TagHeader *header, bool bit) {
+    if (!header) {
         return 0;
     }
 
     //set bit 6 or do nothing
-    switch(header->majorVersion){
+    switch (header->majorVersion) {
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
             header->flags = setBit(header->flags, 5, bit);
@@ -151,13 +145,12 @@ bool id3v2WriteExperimentalIndicator(Id3v2TagHeader *header, bool bit){
  * @param bit
  * @return int
  */
-bool id3v2WriteFooterIndicator(Id3v2TagHeader *header, bool bit){
-
-    if(!header){
+bool id3v2WriteFooterIndicator(Id3v2TagHeader *header, bool bit) {
+    if (!header) {
         return 0;
     }
 
-    switch(header->majorVersion){
+    switch (header->majorVersion) {
         case ID3V2_TAG_VERSION_4:
             header->flags = setBit(header->flags, 4, bit);
             return 1;
@@ -174,9 +167,8 @@ bool id3v2WriteFooterIndicator(Id3v2TagHeader *header, bool bit){
  * @param header
  * @return int
  */
-int id3v2ReadUnsynchronisationIndicator(Id3v2TagHeader *header){
-
-    if(!header){
+int id3v2ReadUnsynchronisationIndicator(Id3v2TagHeader *header) {
+    if (!header) {
         return -1;
     }
 
@@ -189,13 +181,12 @@ int id3v2ReadUnsynchronisationIndicator(Id3v2TagHeader *header){
  * @param header
  * @return int
  */
-int id3v2ReadCompressionIndicator(Id3v2TagHeader *header){
-
-    if(!header){
+int id3v2ReadCompressionIndicator(Id3v2TagHeader *header) {
+    if (!header) {
         return -1;
     }
 
-    if(header->majorVersion != ID3V2_TAG_VERSION_2){
+    if (header->majorVersion != ID3V2_TAG_VERSION_2) {
         return -1;
     }
 
@@ -208,13 +199,12 @@ int id3v2ReadCompressionIndicator(Id3v2TagHeader *header){
  * @param header
  * @return int
  */
-int id3v2ReadExtendedHeaderIndicator(Id3v2TagHeader *header){
-
-    if(!header){
+int id3v2ReadExtendedHeaderIndicator(Id3v2TagHeader *header) {
+    if (!header) {
         return -1;
     }
 
-    switch(header->majorVersion){
+    switch (header->majorVersion) {
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
             return readBit(header->flags, 6);
@@ -231,13 +221,12 @@ int id3v2ReadExtendedHeaderIndicator(Id3v2TagHeader *header){
  * @param header
  * @return int
  */
-int id3v2ReadExperimentalIndicator(Id3v2TagHeader *header){
-
-    if(!header){
+int id3v2ReadExperimentalIndicator(Id3v2TagHeader *header) {
+    if (!header) {
         return -1;
     }
 
-    switch(header->majorVersion){
+    switch (header->majorVersion) {
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
             return readBit(header->flags, 5);
@@ -254,13 +243,12 @@ int id3v2ReadExperimentalIndicator(Id3v2TagHeader *header){
  * @param header
  * @return int
  */
-int id3v2ReadFooterIndicator(Id3v2TagHeader *header){
-
-    if(!header){
+int id3v2ReadFooterIndicator(Id3v2TagHeader *header) {
+    if (!header) {
         return -1;
     }
 
-    if(header->majorVersion != ID3V2_TAG_VERSION_4){
+    if (header->majorVersion != ID3V2_TAG_VERSION_4) {
         return -1;
     }
 
@@ -277,8 +265,8 @@ int id3v2ReadFooterIndicator(Id3v2TagHeader *header){
  * @param restrictions
  * @return Id3v2ExtendedTagHeader*
  */
-Id3v2ExtendedTagHeader *id3v2CreateExtendedTagHeader(uint32_t padding, uint32_t crc, bool update, bool tagRestrictions, uint8_t restrictions){
-
+Id3v2ExtendedTagHeader *id3v2CreateExtendedTagHeader(uint32_t padding, uint32_t crc, bool update, bool tagRestrictions,
+                                                     uint8_t restrictions) {
     Id3v2ExtendedTagHeader *extendedHeader = malloc(sizeof(Id3v2ExtendedTagHeader));
 
     memset(extendedHeader, 0, sizeof(Id3v2ExtendedTagHeader));
@@ -296,9 +284,9 @@ Id3v2ExtendedTagHeader *id3v2CreateExtendedTagHeader(uint32_t padding, uint32_t 
  * @brief Frees an extended header structure.
  * @param toDelete
  */
-void id3v2DestroyExtendedTagHeader(Id3v2ExtendedTagHeader **toDelete){
+void id3v2DestroyExtendedTagHeader(Id3v2ExtendedTagHeader **toDelete) {
     //error address free
-    if(*toDelete){
+    if (*toDelete) {
         free(*toDelete);
         *toDelete = NULL;
         toDelete = NULL;
@@ -313,18 +301,18 @@ void id3v2DestroyExtendedTagHeader(Id3v2ExtendedTagHeader **toDelete){
  * @return true
  * @return false
  */
-bool id3v2WriteTagSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
+bool id3v2WriteTagSizeRestriction(Id3v2TagHeader *header, uint8_t bits) {
     //0b00, 0b01, 0b10, 0b11 making the max option 0x03
-    if(!header || bits > 0x03){
+    if (!header || bits > 0x03) {
         return false;
     }
 
-    if(header->majorVersion != ID3V2_TAG_VERSION_4){
+    if (header->majorVersion != ID3V2_TAG_VERSION_4) {
         return false;
     }
 
-    if(!header->extendedHeader){
-        Id3v2ExtendedTagHeader *extendedHeader = id3v2CreateExtendedTagHeader(0,0,0,0,0);
+    if (!header->extendedHeader) {
+        Id3v2ExtendedTagHeader *extendedHeader = id3v2CreateExtendedTagHeader(0, 0, 0, 0, 0);
         header->extendedHeader = extendedHeader;
     }
 
@@ -345,18 +333,17 @@ bool id3v2WriteTagSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
  * @return true
  * @return false
  */
-bool id3v2WriteTextEncodingRestriction(Id3v2TagHeader *header, bool bit){
-
-    if(!header){
+bool id3v2WriteTextEncodingRestriction(Id3v2TagHeader *header, bool bit) {
+    if (!header) {
         return false;
     }
 
-    if(header->majorVersion != ID3V2_TAG_VERSION_4){
+    if (header->majorVersion != ID3V2_TAG_VERSION_4) {
         return false;
     }
 
-    if(!header->extendedHeader){
-        Id3v2ExtendedTagHeader *extendedHeader = id3v2CreateExtendedTagHeader(0,0,0,0,0);
+    if (!header->extendedHeader) {
+        Id3v2ExtendedTagHeader *extendedHeader = id3v2CreateExtendedTagHeader(0, 0, 0, 0, 0);
         header->extendedHeader = extendedHeader;
     }
 
@@ -365,7 +352,7 @@ bool id3v2WriteTextEncodingRestriction(Id3v2TagHeader *header, bool bit){
 
     header->extendedHeader->restrictions = setBit(header->extendedHeader->restrictions, 5, bit);
 
-    return true;//avoid warning
+    return true; //avoid warning
 }
 
 /**
@@ -376,18 +363,18 @@ bool id3v2WriteTextEncodingRestriction(Id3v2TagHeader *header, bool bit){
  * @return true
  * @return false
  */
-bool id3v2WriteTextFieldsSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
+bool id3v2WriteTextFieldsSizeRestriction(Id3v2TagHeader *header, uint8_t bits) {
     //0b00, 0b01, 0b10, 0b11 making the max option 0x03
-    if(!header || bits > 0x03){
+    if (!header || bits > 0x03) {
         return false;
     }
 
-    if(header->majorVersion != ID3V2_TAG_VERSION_4){
+    if (header->majorVersion != ID3V2_TAG_VERSION_4) {
         return false;
     }
 
-    if(!header->extendedHeader){
-        Id3v2ExtendedTagHeader *extendedHeader = id3v2CreateExtendedTagHeader(0,0,0,0,0);
+    if (!header->extendedHeader) {
+        Id3v2ExtendedTagHeader *extendedHeader = id3v2CreateExtendedTagHeader(0, 0, 0, 0, 0);
         header->extendedHeader = extendedHeader;
     }
 
@@ -408,18 +395,17 @@ bool id3v2WriteTextFieldsSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
  * @return true
  * @return false
  */
-bool id3v2WriteImageEncodingRestriction(Id3v2TagHeader *header, bool bit){
-
-    if(!header){
+bool id3v2WriteImageEncodingRestriction(Id3v2TagHeader *header, bool bit) {
+    if (!header) {
         return false;
     }
 
-    if(header->majorVersion != ID3V2_TAG_VERSION_4){
+    if (header->majorVersion != ID3V2_TAG_VERSION_4) {
         return false;
     }
 
-    if(!header->extendedHeader){
-        Id3v2ExtendedTagHeader *extendedHeader = id3v2CreateExtendedTagHeader(0,0,0,0,0);
+    if (!header->extendedHeader) {
+        Id3v2ExtendedTagHeader *extendedHeader = id3v2CreateExtendedTagHeader(0, 0, 0, 0, 0);
         header->extendedHeader = extendedHeader;
     }
 
@@ -428,7 +414,7 @@ bool id3v2WriteImageEncodingRestriction(Id3v2TagHeader *header, bool bit){
 
     header->extendedHeader->restrictions = setBit(header->extendedHeader->restrictions, 2, bit);
 
-    return true;//avoid warning
+    return true; //avoid warning
 }
 
 /**
@@ -439,18 +425,18 @@ bool id3v2WriteImageEncodingRestriction(Id3v2TagHeader *header, bool bit){
  * @return true
  * @return false
  */
-bool id3v2WriteImageSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
+bool id3v2WriteImageSizeRestriction(Id3v2TagHeader *header, uint8_t bits) {
     //0b00, 0b01, 0b10, 0b11 making the max option 0x03
-    if(!header || bits > 0x03){
+    if (!header || bits > 0x03) {
         return false;
     }
 
-    if(header->majorVersion != ID3V2_TAG_VERSION_4){
+    if (header->majorVersion != ID3V2_TAG_VERSION_4) {
         return false;
     }
 
-    if(!header->extendedHeader){
-        Id3v2ExtendedTagHeader *extendedHeader = id3v2CreateExtendedTagHeader(0,0,0,0,0);
+    if (!header->extendedHeader) {
+        Id3v2ExtendedTagHeader *extendedHeader = id3v2CreateExtendedTagHeader(0, 0, 0, 0, 0);
         header->extendedHeader = extendedHeader;
     }
 
@@ -469,13 +455,12 @@ bool id3v2WriteImageSizeRestriction(Id3v2TagHeader *header, uint8_t bits){
  * @param header
  * @return int
  */
-int id3v2ReadTagSizeRestriction(Id3v2TagHeader *header){
-
-    if(!header){
+int id3v2ReadTagSizeRestriction(Id3v2TagHeader *header) {
+    if (!header) {
         return -1;
     }
 
-    if(!header->extendedHeader){
+    if (!header->extendedHeader) {
         return -1;
     }
 
@@ -496,13 +481,12 @@ int id3v2ReadTagSizeRestriction(Id3v2TagHeader *header){
  * @param header
  * @return int
  */
-int id3v2ReadTextEncodingRestriction(Id3v2TagHeader *header){
-
-    if(!header){
+int id3v2ReadTextEncodingRestriction(Id3v2TagHeader *header) {
+    if (!header) {
         return -1;
     }
 
-    if(!header->extendedHeader){
+    if (!header->extendedHeader) {
         return -1;
     }
 
@@ -515,13 +499,12 @@ int id3v2ReadTextEncodingRestriction(Id3v2TagHeader *header){
  * @param header
  * @return int
  */
-int id3v2ReadTextFieldsSizeRestriction(Id3v2TagHeader *header){
-
-    if(!header){
+int id3v2ReadTextFieldsSizeRestriction(Id3v2TagHeader *header) {
+    if (!header) {
         return -1;
     }
 
-    if(!header->extendedHeader){
+    if (!header->extendedHeader) {
         return -1;
     }
 
@@ -542,12 +525,12 @@ int id3v2ReadTextFieldsSizeRestriction(Id3v2TagHeader *header){
  * @param header
  * @return int
  */
-int id3v2ReadImageEncodingRestriction(Id3v2TagHeader *header){
-    if(!header){
+int id3v2ReadImageEncodingRestriction(Id3v2TagHeader *header) {
+    if (!header) {
         return -1;
     }
 
-    if(!header->extendedHeader){
+    if (!header->extendedHeader) {
         return -1;
     }
 
@@ -560,12 +543,12 @@ int id3v2ReadImageEncodingRestriction(Id3v2TagHeader *header){
  * @param header
  * @return int
  */
-int id3v2ReadImageSizeRestriction(Id3v2TagHeader *header){
-    if(!header){
+int id3v2ReadImageSizeRestriction(Id3v2TagHeader *header) {
+    if (!header) {
         return -1;
     }
 
-    if(!header->extendedHeader){
+    if (!header->extendedHeader) {
         return -1;
     }
 
@@ -586,12 +569,12 @@ int id3v2ReadImageSizeRestriction(Id3v2TagHeader *header){
  * @return true
  * @return false
  */
-bool id3v2ClearTagRestrictions(Id3v2TagHeader *header){
-    if(!header){
+bool id3v2ClearTagRestrictions(Id3v2TagHeader *header) {
+    if (!header) {
         return 0;
     }
 
-    if(!header->extendedHeader){
+    if (!header->extendedHeader) {
         return 0;
     }
 
@@ -608,8 +591,7 @@ bool id3v2ClearTagRestrictions(Id3v2TagHeader *header){
  * @param frames
  * @return Id3v2Tag*
  */
-Id3v2Tag *id3v2CreateTag(Id3v2TagHeader *header, List *frames){
-
+Id3v2Tag *id3v2CreateTag(Id3v2TagHeader *header, List *frames) {
     Id3v2Tag *tag = malloc(sizeof(Id3v2Tag));
 
     tag->frames = frames;
@@ -623,17 +605,14 @@ Id3v2Tag *id3v2CreateTag(Id3v2TagHeader *header, List *frames){
  *
  * @param toDelete
  */
-void id3v2DestroyTag(Id3v2Tag **toDelete){
-
-    if(*toDelete){
-
+void id3v2DestroyTag(Id3v2Tag **toDelete) {
+    if (*toDelete) {
         id3v2DestroyTagHeader(&(*toDelete)->header);
         listFree((*toDelete)->frames);
         free(*toDelete);
         *toDelete = NULL;
         toDelete = NULL;
     }
-
 }
 
 /**
@@ -645,21 +624,19 @@ void id3v2DestroyTag(Id3v2Tag **toDelete){
  * @param outl
  * @return uint8_t*
  */
-uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t version, size_t *outl){
-
+uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t version, size_t *outl) {
     ByteStream *stream = NULL;
     uint8_t *out = NULL;
     int buildSize = 0;
     unsigned char *tmp = NULL;
-    unsigned char crcb[5] = {0,0,0,0,0};
+    unsigned char crcb[5] = {0, 0, 0, 0, 0};
 
-    if(ext == NULL){
+    if (ext == NULL) {
         *outl = 0;
         return NULL;
     }
 
-    switch(version){
-
+    switch (version) {
         case ID3V2_TAG_VERSION_3:
 
             // size
@@ -680,7 +657,7 @@ uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t ve
             byteStreamWrite(stream, tmp, 4);
             free(tmp);
 
-            if(ext->crc){
+            if (ext->crc) {
                 tmp = u32tob(ext->crc);
                 byteStreamWrite(stream, tmp, 4);
                 free(tmp);
@@ -690,7 +667,7 @@ uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t ve
 
         case ID3V2_TAG_VERSION_4:
 
-            buildSize = 6 + ((ext->crc) ? 5 : 0)  + ((ext->tagRestrictions) ? 1 : 0);
+            buildSize = 6 + ((ext->crc) ? 5 : 0) + ((ext->tagRestrictions) ? 1 : 0);
 
             stream = byteStreamCreate(NULL, buildSize);
 
@@ -712,21 +689,21 @@ uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t ve
             byteStreamSeek(stream, 1, SEEK_CUR);
 
             // crc
-            if(ext->crc){
+            if (ext->crc) {
                 int offset = 0;
                 int toWrite = 0;
                 tmp = sttob(byteSyncintEncode(ext->crc));
 
-                while(offset < sizeof(size_t) && tmp[offset] == 0){
+                while (offset < sizeof(size_t) && tmp[offset] == 0) {
                     offset++;
                 }
 
                 // c4c is 5 bytes if the 0s are there they must be kept
-                if(offset > 3){
+                if (offset > 3) {
                     offset = 3;
                 }
 
-                toWrite = ((int)(sizeof(size_t) - offset) > 5) ? 5 : (int)(sizeof(size_t) - offset);
+                toWrite = ((int) (sizeof(size_t) - offset) > 5) ? 5 : (int) (sizeof(size_t) - offset);
                 memcpy(crcb, tmp + offset, toWrite);
 
                 byteStreamSeek(stream, 6, SEEK_SET);
@@ -734,7 +711,7 @@ uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t ve
                 free(tmp);
             }
 
-            if(ext->tagRestrictions){
+            if (ext->tagRestrictions) {
                 byteStreamWrite(stream, &ext->restrictions, 1);
             }
 
@@ -763,52 +740,53 @@ uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t ve
  * @param version
  * @return char*
  */
-char *id3v2ExtendedTagHeaderToJSON(const Id3v2ExtendedTagHeader *ext, uint8_t version){
-
+char *id3v2ExtendedTagHeaderToJSON(const Id3v2ExtendedTagHeader *ext, uint8_t version) {
     char *json = NULL;
     size_t memCount = 3;
 
-    if(ext == NULL){
+    if (ext == NULL) {
         json = calloc(memCount, sizeof(char));
         memcpy(json, "{}\0", memCount);
         return json;
     }
 
-    switch(version){
+    switch (version) {
         case ID3V2_TAG_VERSION_3:
 
             memCount += snprintf(NULL, 0,
-                                "{\"padding\":%"PRIu32",\"crc\":%"PRIu32"}",
-                                ext->padding,
-                                ext->crc);
+                                 "{\"padding\":%"PRIu32",\"crc\":%"PRIu32"}",
+                                 ext->padding,
+                                 ext->crc);
 
             json = calloc(memCount + 1, sizeof(char)); // NOLINT(clang-analyzer-unix.Malloc)
 
             (void) snprintf(json, memCount,
-                     "{\"padding\":%"PRIu32",\"crc\":%"PRIu32"}",
-                     ext->padding,
-                     ext->crc);
+                            "{\"padding\":%"PRIu32",\"crc\":%"PRIu32"}",
+                            ext->padding,
+                            ext->crc);
 
             break;
         case ID3V2_TAG_VERSION_4:
 
             memCount += snprintf(NULL, 0,
-                                "{\"padding\":%"PRIu32",\"crc\":%"PRIu32",\"update\":%s,\"tagRestrictions\":%s,\"restrictions\":%d}",
-                                ext->padding,
-                                ext->crc,
-                                ext->update ? "true" : "false",
-                                ext->tagRestrictions ? "true" : "false",
-                                ext->restrictions);
+                                 "{\"padding\":%"PRIu32",\"crc\":%"PRIu32
+                                 ",\"update\":%s,\"tagRestrictions\":%s,\"restrictions\":%d}",
+                                 ext->padding,
+                                 ext->crc,
+                                 ext->update ? "true" : "false",
+                                 ext->tagRestrictions ? "true" : "false",
+                                 ext->restrictions);
 
             json = calloc(memCount + 1, sizeof(char)); // NOLINT(clang-analyzer-unix.Malloc)
 
             (void) snprintf(json, memCount,
-                     "{\"padding\":%"PRIu32",\"crc\":%"PRIu32",\"update\":%s,\"tagRestrictions\":%s,\"restrictions\":%d}",
-                     ext->padding,
-                     ext->crc,
-                     ext->update ? "true" : "false",
-                     ext->tagRestrictions ? "true" : "false",
-                     ext->restrictions);
+                            "{\"padding\":%"PRIu32",\"crc\":%"PRIu32
+                            ",\"update\":%s,\"tagRestrictions\":%s,\"restrictions\":%d}",
+                            ext->padding,
+                            ext->crc,
+                            ext->update ? "true" : "false",
+                            ext->tagRestrictions ? "true" : "false",
+                            ext->restrictions);
 
             break;
 
@@ -833,52 +811,50 @@ char *id3v2ExtendedTagHeaderToJSON(const Id3v2ExtendedTagHeader *ext, uint8_t ve
  * @param outl
  * @return uint8_t*
  */
-uint8_t *id3v2TagHeaderSerialize(Id3v2TagHeader *header, uint32_t uintSize, size_t *outl){
-
+uint8_t *id3v2TagHeaderSerialize(Id3v2TagHeader *header, uint32_t uintSize, size_t *outl) {
     ByteStream *stream = NULL;
     uint8_t *out = NULL;
     unsigned char *tmp = NULL;
 
-    if(header == NULL){
+    if (header == NULL) {
         *outl = 0;
         return NULL;
     }
 
     // no support
-    if(header->majorVersion > ID3V2_TAG_VERSION_4){
+    if (header->majorVersion > ID3V2_TAG_VERSION_4) {
         *outl = 0;
         return NULL;
     }
 
     stream = byteStreamCreate(NULL, 10);
 
-    byteStreamWrite(stream, (uint8_t *)"ID3", ID3V2_TAG_ID_SIZE);
+    byteStreamWrite(stream, (uint8_t *) "ID3", ID3V2_TAG_ID_SIZE);
 
     byteStreamWrite(stream, &header->majorVersion, 1);
     byteStreamWrite(stream, &header->minorVersion, 1);
 
 
-    switch((int) header->majorVersion){
-
+    switch ((int) header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
 
-            byteStreamWriteBit(stream, (bool)id3v2ReadUnsynchronisationIndicator(header), 7);
-            byteStreamWriteBit(stream, (bool)id3v2ReadCompressionIndicator(header), 6);
+            byteStreamWriteBit(stream, (bool) id3v2ReadUnsynchronisationIndicator(header), 7);
+            byteStreamWriteBit(stream, (bool) id3v2ReadCompressionIndicator(header), 6);
 
             break;
         case ID3V2_TAG_VERSION_3:
 
-            byteStreamWriteBit(stream, (bool)id3v2ReadUnsynchronisationIndicator(header), 7);
-            byteStreamWriteBit(stream, (bool)id3v2ReadExtendedHeaderIndicator(header), 6);
-            byteStreamWriteBit(stream, (bool)id3v2ReadExperimentalIndicator(header), 5);
+            byteStreamWriteBit(stream, (bool) id3v2ReadUnsynchronisationIndicator(header), 7);
+            byteStreamWriteBit(stream, (bool) id3v2ReadExtendedHeaderIndicator(header), 6);
+            byteStreamWriteBit(stream, (bool) id3v2ReadExperimentalIndicator(header), 5);
 
             break;
         case ID3V2_TAG_VERSION_4:
 
-            byteStreamWriteBit(stream, (bool)id3v2ReadUnsynchronisationIndicator(header), 7);
-            byteStreamWriteBit(stream, (bool)id3v2ReadExtendedHeaderIndicator(header), 6);
-            byteStreamWriteBit(stream, (bool)id3v2ReadExperimentalIndicator(header), 5);
-            byteStreamWriteBit(stream, (bool)id3v2ReadFooterIndicator(header), 4);
+            byteStreamWriteBit(stream, (bool) id3v2ReadUnsynchronisationIndicator(header), 7);
+            byteStreamWriteBit(stream, (bool) id3v2ReadExtendedHeaderIndicator(header), 6);
+            byteStreamWriteBit(stream, (bool) id3v2ReadExperimentalIndicator(header), 5);
+            byteStreamWriteBit(stream, (bool) id3v2ReadFooterIndicator(header), 4);
 
             break;
         // dummy break as header version is already checked to be less than 4
@@ -892,16 +868,15 @@ uint8_t *id3v2TagHeaderSerialize(Id3v2TagHeader *header, uint32_t uintSize, size
     byteStreamWrite(stream, tmp, sizeof(uint32_t));
     free(tmp);
 
-    if(id3v2ReadExtendedHeaderIndicator(header)){
+    if (id3v2ReadExtendedHeaderIndicator(header)) {
         size_t extSize = 0;
         uint8_t *ext = id3v2ExtendedTagHeaderSerialize(header->extendedHeader, header->majorVersion, &extSize);
 
-        if(ext != NULL){
+        if (ext != NULL) {
             byteStreamResize(stream, stream->bufferSize + extSize);
             byteStreamWrite(stream, ext, extSize);
             free(ext);
         }
-
     }
 
     byteStreamRewind(stream);
@@ -912,35 +887,33 @@ uint8_t *id3v2TagHeaderSerialize(Id3v2TagHeader *header, uint32_t uintSize, size
     return out;
 }
 
-char *id3v2TagHeaderToJSON(const Id3v2TagHeader *header){
-
+char *id3v2TagHeaderToJSON(const Id3v2TagHeader *header) {
     char *json = NULL;
     size_t memCount = 3;
     char *extJson = NULL;
 
-    if(header == NULL){
+    if (header == NULL) {
         json = calloc(memCount, sizeof(char));
         memcpy(json, "{}\0", memCount);
         return json;
     }
 
-    switch(header->majorVersion){
-
+    switch (header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
 
             memCount += snprintf(NULL, 0,
-                                "{\"major\":%d,\"minor\":%d,\"flags\":%d}",
-                                header->majorVersion,
-                                header->minorVersion,
-                                header->flags);
+                                 "{\"major\":%d,\"minor\":%d,\"flags\":%d}",
+                                 header->majorVersion,
+                                 header->minorVersion,
+                                 header->flags);
 
             json = calloc(memCount + 1, sizeof(char));
 
             (void) snprintf(json, memCount,
-                    "{\"major\":%d,\"minor\":%d,\"flags\":%d}",
-                    header->majorVersion,
-                    header->minorVersion,
-                    header->flags);
+                            "{\"major\":%d,\"minor\":%d,\"flags\":%d}",
+                            header->majorVersion,
+                            header->minorVersion,
+                            header->flags);
 
             break;
         case ID3V2_TAG_VERSION_3:
@@ -948,21 +921,21 @@ char *id3v2TagHeaderToJSON(const Id3v2TagHeader *header){
             extJson = id3v2ExtendedTagHeaderToJSON(header->extendedHeader, ID3V2_TAG_VERSION_3);
 
             memCount += snprintf(NULL, 0,
-                                "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
-                                header->majorVersion,
-                                header->minorVersion,
-                                header->flags,
-                                extJson);
+                                 "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
+                                 header->majorVersion,
+                                 header->minorVersion,
+                                 header->flags,
+                                 extJson);
 
             json = calloc(memCount + 1, sizeof(char));
 
 
             (void) snprintf(json, memCount,
-                    "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
-                    header->majorVersion,
-                    header->minorVersion,
-                    header->flags,
-                    extJson);
+                            "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
+                            header->majorVersion,
+                            header->minorVersion,
+                            header->flags,
+                            extJson);
 
 
             free(extJson);
@@ -971,21 +944,21 @@ char *id3v2TagHeaderToJSON(const Id3v2TagHeader *header){
             extJson = id3v2ExtendedTagHeaderToJSON(header->extendedHeader, ID3V2_TAG_VERSION_4);
 
             memCount += snprintf(NULL, 0,
-                                "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
-                                header->majorVersion,
-                                header->minorVersion,
-                                header->flags,
-                                extJson);
+                                 "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
+                                 header->majorVersion,
+                                 header->minorVersion,
+                                 header->flags,
+                                 extJson);
 
             json = calloc(memCount + 1, sizeof(char));
 
 
             (void) snprintf(json, memCount,
-                    "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
-                    header->majorVersion,
-                    header->minorVersion,
-                    header->flags,
-                    extJson);
+                            "{\"major\":%d,\"minor\":%d,\"flags\":%d,\"extended\":%s}",
+                            header->majorVersion,
+                            header->minorVersion,
+                            header->flags,
+                            extJson);
 
 
             free(extJson);

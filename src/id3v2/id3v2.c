@@ -28,17 +28,16 @@
  * @param filename 
  * @return Id3v2Tag* 
  */
-Id3v2Tag *id3v2TagFromFile(const char *filename){
-
+Id3v2Tag *id3v2TagFromFile(const char *filename) {
     ByteStream *stream = NULL;
     Id3v2Tag *tag = NULL;
 
-    if(filename == NULL){
+    if (filename == NULL) {
         return NULL;
     }
 
     stream = byteStreamFromFile(filename);
-    if(stream == NULL){
+    if (stream == NULL) {
         return NULL;
     }
 
@@ -50,84 +49,87 @@ Id3v2Tag *id3v2TagFromFile(const char *filename){
 
 /**
  * @brief Deep copies an Id3v2Tag structure.
- * 
- * @param toCopy 
- * @return Id3v2Tag* 
+ *
+ * @param toCopy
+ * @return Id3v2Tag*
  */
-Id3v2Tag *id3v2CopyTag(const Id3v2Tag *toCopy){
-
+Id3v2Tag *id3v2CopyTag(const Id3v2Tag *toCopy) {
     Id3v2TagHeader *header = NULL;
 
-    if(toCopy == NULL){
+    if (toCopy == NULL) {
         return NULL;
     }
 
-    if(toCopy->header == NULL){
+    if (toCopy->header == NULL) {
         return NULL;
     }
-    
-    header = id3v2CreateTagHeader(toCopy->header->majorVersion, toCopy->header->minorVersion, toCopy->header->flags, NULL);
-    header->extendedHeader = (toCopy->header->extendedHeader != NULL) ? id3v2CreateExtendedTagHeader(toCopy->header->extendedHeader->padding, toCopy->header->extendedHeader->crc, toCopy->header->extendedHeader->update, toCopy->header->extendedHeader->tagRestrictions, toCopy->header->extendedHeader->restrictions) : NULL;
+
+    header = id3v2CreateTagHeader(toCopy->header->majorVersion, toCopy->header->minorVersion, toCopy->header->flags,
+                                  NULL);
+    header->extendedHeader = (toCopy->header->extendedHeader != NULL)
+                                 ? id3v2CreateExtendedTagHeader(toCopy->header->extendedHeader->padding,
+                                                                toCopy->header->extendedHeader->crc,
+                                                                toCopy->header->extendedHeader->update,
+                                                                toCopy->header->extendedHeader->tagRestrictions,
+                                                                toCopy->header->extendedHeader->restrictions)
+                                 : NULL;
 
     return id3v2CreateTag(header, listDeepCopy(toCopy->frames));
 }
 
 /**
  * @brief Compares two tags and returns true if they are the same, false otherwise.
- * 
- * @param tag1 
- * @param tag2 
- * @return true 
- * @return false 
+ *
+ * @param tag1
+ * @param tag2
+ * @return true
+ * @return false
  */
-bool id3v2CompareTag(Id3v2Tag *tag1, Id3v2Tag *tag2){
-
-    if(tag1 == NULL || tag2 == NULL){
+bool id3v2CompareTag(Id3v2Tag *tag1, Id3v2Tag *tag2) {
+    if (tag1 == NULL || tag2 == NULL) {
         return false;
     }
 
-    if(tag1->header == NULL || tag2->header == NULL){
+    if (tag1->header == NULL || tag2->header == NULL) {
         return false;
-
     }
 
     // check header
 
-    if(tag1->header->majorVersion != tag2->header->majorVersion){
+    if (tag1->header->majorVersion != tag2->header->majorVersion) {
         return false;
     }
 
-    if(tag1->header->minorVersion != tag2->header->minorVersion){
+    if (tag1->header->minorVersion != tag2->header->minorVersion) {
         return false;
     }
 
-    if(tag1->header->flags != tag2->header->flags){
+    if (tag1->header->flags != tag2->header->flags) {
         return false;
     }
 
     // check extended header
 
-    if(tag1->header->extendedHeader != NULL && tag2->header->extendedHeader != NULL){
-        if(tag1->header->extendedHeader->padding != tag2->header->extendedHeader->padding){
+    if (tag1->header->extendedHeader != NULL && tag2->header->extendedHeader != NULL) {
+        if (tag1->header->extendedHeader->padding != tag2->header->extendedHeader->padding) {
             return false;
         }
 
-        if(tag1->header->extendedHeader->crc != tag2->header->extendedHeader->crc){
+        if (tag1->header->extendedHeader->crc != tag2->header->extendedHeader->crc) {
             return false;
         }
 
-        if(tag1->header->extendedHeader->update != tag2->header->extendedHeader->update){
+        if (tag1->header->extendedHeader->update != tag2->header->extendedHeader->update) {
             return false;
         }
 
-        if(tag1->header->extendedHeader->tagRestrictions != tag2->header->extendedHeader->tagRestrictions){
+        if (tag1->header->extendedHeader->tagRestrictions != tag2->header->extendedHeader->tagRestrictions) {
             return false;
         }
 
-        if(tag1->header->extendedHeader->restrictions != tag2->header->extendedHeader->restrictions){
+        if (tag1->header->extendedHeader->restrictions != tag2->header->extendedHeader->restrictions) {
             return false;
         }
-
     }
 
     // check frames
@@ -139,55 +141,54 @@ bool id3v2CompareTag(Id3v2Tag *tag1, Id3v2Tag *tag2){
     Id3v2Frame *f2 = NULL;
 
 
-    while((f1 = id3v2FrameTraverse(&frames1)) != NULL){
+    while ((f1 = id3v2FrameTraverse(&frames1)) != NULL) {
         f2 = id3v2FrameTraverse(&frames2);
 
-        if(f2 == NULL){
+        if (f2 == NULL) {
             return false;
         }
 
-        if(id3v2CompareFrame(f1, f2) != 0){
+        if (id3v2CompareFrame(f1, f2) != 0) {
             return false;
         }
     }
 
     f2 = id3v2FrameTraverse(&frames2);
-    if(f2 != NULL){
+    if (f2 != NULL) {
         return false;
     }
-    
+
     return true;
 }
 
 /**
  * @brief Returns a copy of the first occurrence of a frame with the given id. If
  * no frame is found, this function will return NULL.
- * 
- * @param id 
- * @param tag 
- * @return Id3v2Frame* 
+ *
+ * @param id
+ * @param tag
+ * @return Id3v2Frame*
  */
-Id3v2Frame *id3v2ReadFrameByID(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag *tag){
-
-    if(id == NULL || tag == NULL){
+Id3v2Frame *id3v2ReadFrameByID(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag *tag) {
+    if (id == NULL || tag == NULL) {
         return NULL;
     }
 
     int i = 0;
     ListIter frames = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
-    
+
 
     // sanitize id
-    for(i = 0; i < ID3V2_FRAME_ID_MAX_SIZE; i++){
-        if(id[i] == '\0'){
+    for (i = 0; i < ID3V2_FRAME_ID_MAX_SIZE; i++) {
+        if (id[i] == '\0') {
             break;
         }
     }
 
     // find frame
-    while((f = id3v2FrameTraverse(&frames)) != NULL){
-        if(memcmp(id, f->header->id, i) == 0){
+    while ((f = id3v2FrameTraverse(&frames)) != NULL) {
+        if (memcmp(id, f->header->id, i) == 0) {
             return id3v2CopyFrame(f);
         }
     }
@@ -196,15 +197,14 @@ Id3v2Frame *id3v2ReadFrameByID(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag 
 }
 
 /**
- * @brief Removes a frame from a tag with a matching ID. if no frame is found, 
+ * @brief Removes a frame from a tag with a matching ID. if no frame is found,
  * this function will return 0. Otherwise, it will return 1.
- * 
- * @param id 
- * @param tag 
- * @return int 
+ *
+ * @param id
+ * @param tag
+ * @return int
  */
-int id3v2RemoveFrameByID(const char *id, Id3v2Tag *tag){
-    
+int id3v2RemoveFrameByID(const char *id, Id3v2Tag *tag) {
     Id3v2Frame *test = NULL;
     Id3v2Frame *remove = NULL;
 
@@ -213,7 +213,7 @@ int id3v2RemoveFrameByID(const char *id, Id3v2Tag *tag){
 
     id3v2DestroyFrame(&test);
 
-    if(remove != NULL){
+    if (remove != NULL) {
         id3v2DestroyFrame(&remove);
         return 1;
     }
@@ -224,20 +224,20 @@ int id3v2RemoveFrameByID(const char *id, Id3v2Tag *tag){
 /**
  * @brief Creates a new text frame with the given id, desired encoding, and string null terminated string. if successful,
  * the frame will be inserted into the tag and true will be returned otherwise, no tag will be created and false will be returned.
- * 
- * @param id 
- * @param encoding 
- * @param string 
- * @param tag 
- * @return int 
+ *
+ * @param id
+ * @param encoding
+ * @param string
+ * @param tag
+ * @return int
  */
-int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t encoding, const char *string, Id3v2Tag *tag){
-
-    if(id == NULL || string == NULL || tag == NULL || encoding > BYTE_UTF8){
+int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t encoding, const char *string,
+                         Id3v2Tag *tag) {
+    if (id == NULL || string == NULL || tag == NULL || encoding > BYTE_UTF8) {
         return false;
     }
 
-    if(strlen(string) == 0){
+    if (strlen(string) == 0) {
         return false;
     }
 
@@ -249,18 +249,21 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
     bool convi = false;
 
     // set up frame
-    header = id3v2CreateFrameHeader((uint8_t *)id, 0, 0, 0, 0, 0, 0, 0);
-    f = id3v2CreateFrame(header, id3v2CreateTextFrameContext(), listCreate(id3v2PrintContentEntry, id3v2DeleteContentEntry, id3v2CompareContentEntry, id3v2CopyContentEntry));
-    
+    header = id3v2CreateFrameHeader((uint8_t *) id, 0, 0, 0, 0, 0, 0, 0);
+    f = id3v2CreateFrame(header, id3v2CreateTextFrameContext(),
+                         listCreate(id3v2PrintContentEntry, id3v2DeleteContentEntry, id3v2CompareContentEntry,
+                                    id3v2CopyContentEntry));
+
     // add encoding
     entry = id3v2CreateContentEntry((void *) &encoding, 1);
-    listInsertBack(f->entries, (void *)entry);
+    listInsertBack(f->entries, (void *) entry);
 
     //add text
-    convi = byteConvertTextFormat((unsigned char *)string, BYTE_UTF8, strlen(string), &usableString, encoding, &outLen);
+    convi = byteConvertTextFormat((unsigned char *) string, BYTE_UTF8, strlen(string), &usableString, encoding,
+                                  &outLen);
 
     // already in target encoding - use original string
-    if(convi == true && outLen == 0){
+    if (convi == true && outLen == 0) {
         usableString = (uint8_t *) strdup(string);
 
         if (usableString == NULL) {
@@ -269,7 +272,7 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
         }
 
         outLen = strlen(string);
-    }else if(convi == false || outLen == 0 || usableString == NULL){
+    } else if (convi == false || outLen == 0 || usableString == NULL) {
         id3v2DestroyFrame(&f);
         return false;
     }
@@ -277,11 +280,11 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
     // re enable utf16 len support
     bytePrependBOM(encoding, &usableString, &outLen);
 
-    if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
+    if (encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE) {
         // false positive memory leak from realloc
         // NOLINTNEXTLINE
         uint8_t *reallocPtr = realloc(usableString, outLen + BYTE_PADDING);
-        if(reallocPtr == NULL){
+        if (reallocPtr == NULL) {
             free(usableString);
             id3v2DestroyFrame(&f);
             return false;
@@ -291,11 +294,11 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
     }
 
     // add encoded text
-    entry = id3v2CreateContentEntry((void *)usableString, outLen);
-    listInsertBack(f->entries, (void *)entry);
+    entry = id3v2CreateContentEntry((void *) usableString, outLen);
+    listInsertBack(f->entries, (void *) entry);
     free(usableString);
 
-    listInsertBack(tag->frames, (void *)f);
+    listInsertBack(tag->frames, (void *) f);
 
     // false positive memory leak for usableString due to realloc
     // NOLINTNEXTLINE
@@ -305,32 +308,30 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
 /**
  * @brief Returns the major version of a tag. On success, a positive integer will be returned. Otherwise, -1 will be returned.
  * @details This function just returns tag->header->majorVersion, so I don't see a need to test it considering all the error checking.
- * @param tag 
- * @return int 
+ * @param tag
+ * @return int
  */
-int id3v2ReadTagVersion(const Id3v2Tag *tag){
-    
-    if(tag == NULL){
+int id3v2ReadTagVersion(const Id3v2Tag *tag) {
+    if (tag == NULL) {
         return -1;
     }
 
-    if(tag->header == NULL){
+    if (tag->header == NULL) {
         return -1;
     }
 
     return tag->header->majorVersion;
-
 }
 
 /**
  * @brief Reads the content of a text frame with the given id. If no frame is found,
  * NULL is returned.
- * 
- * @param id 
- * @param tag 
- * @return char* 
+ *
+ * @param id
+ * @param tag
+ * @return char*
  */
-char *id3v2ReadTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag *tag){
+char *id3v2ReadTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag *tag) {
     Id3v2Frame *frame = id3v2ReadFrameByID(id, tag);
     ListIter entries = {0};
     ListIter context = {0};
@@ -338,33 +339,33 @@ char *id3v2ReadTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag
     size_t dataSize = 0;
     char *ret = NULL;
 
-    if(frame == NULL){
+    if (frame == NULL) {
         return NULL;
     }
 
     // verify text frame via context
-    if(frame->contexts->length != 2 && frame->entries->length != 2){
+    if (frame->contexts->length != 2 && frame->entries->length != 2) {
         id3v2DestroyFrame(&frame);
         return NULL;
     }
 
     context = listCreateIterator(frame->contexts);
 
-    for(int i = 0; i < 2; i++){
+    for (int i = 0; i < 2; i++) {
         cc = listIteratorNext(&context);
 
-        if(cc == NULL){
+        if (cc == NULL) {
             id3v2DestroyFrame(&frame);
             return NULL;
         }
 
-        if(i == 0){
-            if(cc->type != numeric_context){
+        if (i == 0) {
+            if (cc->type != numeric_context) {
                 id3v2DestroyFrame(&frame);
                 return NULL;
             }
-        }else if(i == 1){
-            if(cc->type != encodedString_context){
+        } else if (i == 1) {
+            if (cc->type != encodedString_context) {
                 id3v2DestroyFrame(&frame);
                 return NULL;
             }
@@ -383,21 +384,20 @@ char *id3v2ReadTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag
 }
 
 /**
- * @brief Reads the first Title/Song Name/Content Description (TT2 or TIT2) of a tag. 
+ * @brief Reads the first Title/Song Name/Content Description (TT2 or TIT2) of a tag.
  * If no title is found, NULL is returned.
- * 
- * @param tag 
- * @return char* 
+ *
+ * @param tag
+ * @return char*
  */
-char *id3v2ReadTitle(Id3v2Tag *tag){
-    
-    if(tag == NULL){
+char *id3v2ReadTitle(Id3v2Tag *tag) {
+    if (tag == NULL) {
         return NULL;
     }
 
     char *str = NULL;
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             str = id3v2ReadTextFrameContent("TT2", tag);
             break;
@@ -413,80 +413,78 @@ char *id3v2ReadTitle(Id3v2Tag *tag){
 }
 
 /**
- * @brief Reads the first Lead artist/Lead performer/Soloist/Performing group (TP1 or TPE1) 
+ * @brief Reads the first Lead artist/Lead performer/Soloist/Performing group (TP1 or TPE1)
  * of a tag. If no artist is found, NULL is returned.
- * 
- * @param tag 
- * @return char* 
+ *
+ * @param tag
+ * @return char*
  */
-char *id3v2ReadArtist(Id3v2Tag *tag){
-        
-        if(tag == NULL){
-            return NULL;
-        }
-    
-        char *str = NULL;
-    
-        switch(tag->header->majorVersion){
-            case ID3V2_TAG_VERSION_2:
-                str = id3v2ReadTextFrameContent("TP1", tag);
-                break;
-            case ID3V2_TAG_VERSION_3:
-            case ID3V2_TAG_VERSION_4:
-                str = id3v2ReadTextFrameContent("TPE1", tag);
-                break;
-            default:
-                return NULL;
-        }
-    
-        return str;
-}
-/**
- * @brief Reads the first Band/Orchestra/Accompaniment (TP2 or TPE2) of a tag. 
- * If no album artist is found, NULL is returned.
- * 
- * @param tag 
- * @return char* 
- */
-char *id3v2ReadAlbumArtist(Id3v2Tag *tag){
-        
-        if(tag == NULL){
-            return NULL;
-        }
-    
-        char *str = NULL;
-    
-        switch(tag->header->majorVersion){
-            case ID3V2_TAG_VERSION_2:
-                str = id3v2ReadTextFrameContent("TP2", tag);
-                break;
-            case ID3V2_TAG_VERSION_3:
-            case ID3V2_TAG_VERSION_4:
-                str = id3v2ReadTextFrameContent("TPE2", tag);
-                break;
-            default:
-                return NULL;
-        }
-    
-        return str;
-}
-
-/**
- * @brief Reads the first Album/Movie/Show title (TAL or TALB) of a tag. 
- * If no album is found, NULL is returned.
- * 
- * @param tag 
- * @return char* 
- */
-char *id3v2ReadAlbum(Id3v2Tag *tag){
-
-    if(tag == NULL){
+char *id3v2ReadArtist(Id3v2Tag *tag) {
+    if (tag == NULL) {
         return NULL;
     }
 
     char *str = NULL;
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
+        case ID3V2_TAG_VERSION_2:
+            str = id3v2ReadTextFrameContent("TP1", tag);
+            break;
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            str = id3v2ReadTextFrameContent("TPE1", tag);
+            break;
+        default:
+            return NULL;
+    }
+
+    return str;
+}
+
+/**
+ * @brief Reads the first Band/Orchestra/Accompaniment (TP2 or TPE2) of a tag.
+ * If no album artist is found, NULL is returned.
+ *
+ * @param tag
+ * @return char*
+ */
+char *id3v2ReadAlbumArtist(Id3v2Tag *tag) {
+    if (tag == NULL) {
+        return NULL;
+    }
+
+    char *str = NULL;
+
+    switch (tag->header->majorVersion) {
+        case ID3V2_TAG_VERSION_2:
+            str = id3v2ReadTextFrameContent("TP2", tag);
+            break;
+        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_4:
+            str = id3v2ReadTextFrameContent("TPE2", tag);
+            break;
+        default:
+            return NULL;
+    }
+
+    return str;
+}
+
+/**
+ * @brief Reads the first Album/Movie/Show title (TAL or TALB) of a tag.
+ * If no album is found, NULL is returned.
+ *
+ * @param tag
+ * @return char*
+ */
+char *id3v2ReadAlbum(Id3v2Tag *tag) {
+    if (tag == NULL) {
+        return NULL;
+    }
+
+    char *str = NULL;
+
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             str = id3v2ReadTextFrameContent("TAL", tag);
             break;
@@ -496,28 +494,26 @@ char *id3v2ReadAlbum(Id3v2Tag *tag){
             break;
         default:
             return NULL;
-
     }
 
     return str;
 }
 
 /**
- * @brief Reads the first Year (TYE or TYER) of a tag. If no year is found, 
+ * @brief Reads the first Year (TYE or TYER) of a tag. If no year is found,
  * NULL is returned.
- * 
- * @param tag 
- * @return char* 
+ *
+ * @param tag
+ * @return char*
  */
-char *id3v2ReadYear(Id3v2Tag *tag){
-
-    if(tag == NULL){
+char *id3v2ReadYear(Id3v2Tag *tag) {
+    if (tag == NULL) {
         return NULL;
     }
 
     char *str = NULL;
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             str = id3v2ReadTextFrameContent("TYE", tag);
             break;
@@ -527,7 +523,6 @@ char *id3v2ReadYear(Id3v2Tag *tag){
             break;
         default:
             return NULL;
-
     }
 
     return str;
@@ -536,19 +531,18 @@ char *id3v2ReadYear(Id3v2Tag *tag){
 /**
  * @brief Reads the first Content type (TCO or TCON) of a tag.
  * If no track is found, NULL is returned.
- * 
- * @param tag 
- * @return char* 
+ *
+ * @param tag
+ * @return char*
  */
-char *id3v2ReadGenre(Id3v2Tag *tag){
-
-    if(tag == NULL){
+char *id3v2ReadGenre(Id3v2Tag *tag) {
+    if (tag == NULL) {
         return NULL;
     }
 
     char *str = NULL;
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             str = id3v2ReadTextFrameContent("TCO", tag);
             break;
@@ -566,20 +560,18 @@ char *id3v2ReadGenre(Id3v2Tag *tag){
 /**
  * @brief Reads the first Track number/Position in set (TRK or TRCK) of a tag.
  * If no track is found, NULL is returned.
- * 
- * @param tag 
- * @return char* 
+ *
+ * @param tag
+ * @return char*
  */
-char *id3v2ReadTrack(Id3v2Tag *tag){
-
-    if(tag == NULL){
+char *id3v2ReadTrack(Id3v2Tag *tag) {
+    if (tag == NULL) {
         return NULL;
-
     }
 
     char *str = NULL;
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             str = id3v2ReadTextFrameContent("TRK", tag);
             break;
@@ -597,19 +589,18 @@ char *id3v2ReadTrack(Id3v2Tag *tag){
 /**
  * @brief Reads the first composer (TCM or TCOM) of a tag. If no composer is found,
  * NULL is returned.
- * 
- * @param tag 
- * @return char* 
+ *
+ * @param tag
+ * @return char*
  */
-char *id3v2ReadComposer(Id3v2Tag *tag){
-
-    if(tag == NULL){
+char *id3v2ReadComposer(Id3v2Tag *tag) {
+    if (tag == NULL) {
         return NULL;
     }
 
     char *str = NULL;
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             str = id3v2ReadTextFrameContent("TCM", tag);
             break;
@@ -627,19 +618,18 @@ char *id3v2ReadComposer(Id3v2Tag *tag){
 /**
  * @brief Reads the first Disc number (TPA or TPOS) of a tag. If no disc is found,
  * NULL is returned.
- * 
- * @param tag 
- * @return char* 
+ *
+ * @param tag
+ * @return char*
  */
-char *id3v2ReadDisc(Id3v2Tag *tag){
-
-    if(tag == NULL){
+char *id3v2ReadDisc(Id3v2Tag *tag) {
+    if (tag == NULL) {
         return NULL;
     }
 
     char *str = NULL;
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             str = id3v2ReadTextFrameContent("TPA", tag);
             break;
@@ -657,12 +647,11 @@ char *id3v2ReadDisc(Id3v2Tag *tag){
 /**
  * @brief Reads the first Unsynchronised Lyric/Text Transcription (ULT or USLT) of a tag.
  * If no lyrics are found, NULL is returned.
- * 
- * @param tag 
- * @return char* 
+ *
+ * @param tag
+ * @return char*
  */
-char *id3v2ReadLyrics(Id3v2Tag *tag){
-
+char *id3v2ReadLyrics(Id3v2Tag *tag) {
     Id3v2Frame *frame = NULL;
     ListIter entries = {0};
     ListIter context = {0};
@@ -670,12 +659,12 @@ char *id3v2ReadLyrics(Id3v2Tag *tag){
     size_t dataSize = 0;
     char *ret = NULL;
 
-    if(tag == NULL){
+    if (tag == NULL) {
         return NULL;
     }
 
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             frame = id3v2ReadFrameByID("ULT", tag);
             break;
@@ -687,25 +676,25 @@ char *id3v2ReadLyrics(Id3v2Tag *tag){
             return NULL;
     }
 
-    if(frame == NULL){
+    if (frame == NULL) {
         return NULL;
     }
 
     // verify lyric frame via context
-    if(frame->contexts->length != 4 && frame->entries->length != 4){
+    if (frame->contexts->length != 4 && frame->entries->length != 4) {
         id3v2DestroyFrame(&frame);
         return NULL;
     }
 
     context = listCreateIterator(frame->contexts);
 
-    for(int i = 0; i < 4; i++){
+    for (int i = 0; i < 4; i++) {
         cc = listIteratorNext(&context);
 
-        if(cc == NULL || (i == 0 && cc->type != numeric_context) ||
+        if (cc == NULL || (i == 0 && cc->type != numeric_context) ||
             (i == 1 && cc->type != noEncoding_context) ||
             (i == 2 && cc->type != encodedString_context) ||
-            (i == 3 && cc->type != encodedString_context)){
+            (i == 3 && cc->type != encodedString_context)) {
             id3v2DestroyFrame(&frame);
             return NULL;
         }
@@ -726,12 +715,11 @@ char *id3v2ReadLyrics(Id3v2Tag *tag){
 /**
  * @brief Reads the first Comment (COM or COMM) of a tag. If no comment is found,
  * NULL is returned.
- * 
- * @param tag 
- * @return char* 
+ *
+ * @param tag
+ * @return char*
  */
-char *id3v2ReadComment(Id3v2Tag *tag){
-
+char *id3v2ReadComment(Id3v2Tag *tag) {
     Id3v2Frame *frame = NULL;
     ListIter entries = {0};
     ListIter context = {0};
@@ -739,12 +727,12 @@ char *id3v2ReadComment(Id3v2Tag *tag){
     size_t dataSize = 0;
     char *ret = NULL;
 
-    if(tag == NULL){
+    if (tag == NULL) {
         return NULL;
     }
 
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             frame = id3v2ReadFrameByID("COM", tag);
             break;
@@ -756,25 +744,25 @@ char *id3v2ReadComment(Id3v2Tag *tag){
             return NULL;
     }
 
-    if(frame == NULL){
+    if (frame == NULL) {
         return NULL;
     }
 
     // verify lyric frame via context
-    if(frame->contexts->length != 4 && frame->entries->length != 4){
+    if (frame->contexts->length != 4 && frame->entries->length != 4) {
         id3v2DestroyFrame(&frame);
         return NULL;
     }
 
     context = listCreateIterator(frame->contexts);
 
-    for(int i = 0; i < 4; i++){
+    for (int i = 0; i < 4; i++) {
         cc = listIteratorNext(&context);
 
-        if(cc == NULL || (i == 0 && cc->type != numeric_context) ||
+        if (cc == NULL || (i == 0 && cc->type != numeric_context) ||
             (i == 1 && cc->type != noEncoding_context) ||
             (i == 2 && cc->type != encodedString_context) ||
-            (i == 3 && cc->type != encodedString_context)){
+            (i == 3 && cc->type != encodedString_context)) {
             id3v2DestroyFrame(&frame);
             return NULL;
         }
@@ -790,23 +778,21 @@ char *id3v2ReadComment(Id3v2Tag *tag){
     id3v2DestroyFrame(&frame);
 
     return ret;
-
 }
 
 /**
  * @brief Reads the first Attached picture (PIC or APIC) of a tag.
  * If no picture is found, NULL is returned.
- * 
- * @param type 
+ *
+ * @param type
  * @param tag
  * @param dataSize
- * @return char* 
+ * @return char*
  */
-uint8_t *id3v2ReadPicture(uint8_t type, const Id3v2Tag *tag, size_t *dataSize){
-    
+uint8_t *id3v2ReadPicture(uint8_t type, const Id3v2Tag *tag, size_t *dataSize) {
     *dataSize = 0;
 
-    if(tag == NULL){
+    if (tag == NULL) {
         return NULL;
     }
 
@@ -814,18 +800,15 @@ uint8_t *id3v2ReadPicture(uint8_t type, const Id3v2Tag *tag, size_t *dataSize){
     ListIter frames = listCreateIterator(tag->frames);
     uint8_t usableType = ((type > 0x14) ? 0x00 : type); // clamp type
 
-    while((f = listIteratorNext(&frames)) != NULL){
-        
+    while ((f = listIteratorNext(&frames)) != NULL) {
         ListIter entries = id3v2CreateFrameEntryTraverser(f);
 
-        if(memcmp("PIC",f->header->id, ID3V2_FRAME_ID_MAX_SIZE - 1) == 0 ||
-           memcmp("APIC",f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0){
-
+        if (memcmp("PIC", f->header->id, ID3V2_FRAME_ID_MAX_SIZE - 1) == 0 ||
+            memcmp("APIC", f->header->id, ID3V2_FRAME_ID_MAX_SIZE) == 0) {
             id3v2ReadFrameEntryAsU8(&entries); // encoding
             id3v2ReadFrameEntryAsU8(&entries); // mime type
 
-            if(id3v2ReadFrameEntryAsU8(&entries) == usableType){
-
+            if (id3v2ReadFrameEntryAsU8(&entries) == usableType) {
                 id3v2ReadFrameEntryAsU8(&entries); // description
                 return id3v2ReadFrameEntry(&entries, dataSize);
             }
@@ -842,18 +825,17 @@ uint8_t *id3v2ReadPicture(uint8_t type, const Id3v2Tag *tag, size_t *dataSize){
  * Any failure will result in this function returning false otherwise, true.
  *
  * @param id
- * @param string 
- * @param tag 
- * @return int 
+ * @param string
+ * @param tag
+ * @return int
  */
-int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const char *string, Id3v2Tag *tag){
-    
-    if(id == NULL || string == NULL || tag == NULL){
+int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const char *string, Id3v2Tag *tag) {
+    if (id == NULL || string == NULL || tag == NULL) {
         return false;
     }
 
     // null is an invalid string
-    if(strlen(string) == 0){
+    if (strlen(string) == 0) {
         return false;
     }
 
@@ -869,37 +851,35 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
     bool convi = false;
 
 
-
     // sanitize id
-    for(i = 0; i < ID3V2_FRAME_ID_MAX_SIZE; i++){
-        if(id[i] == '\0'){
+    for (i = 0; i < ID3V2_FRAME_ID_MAX_SIZE; i++) {
+        if (id[i] == '\0') {
             break;
         }
     }
 
-    while((f = id3v2FrameTraverse(&frames)) != NULL){
-
-        if(memcmp(id, f->header->id, i) == 0){
+    while ((f = id3v2FrameTraverse(&frames)) != NULL) {
+        if (memcmp(id, f->header->id, i) == 0) {
             break;
         }
     }
 
-    if(f == NULL){
+    if (f == NULL) {
         return id3v2InsertTextFrame(id, BYTE_UTF16LE, string, tag);
     }
 
     // verify text frame via context
-    if(f->contexts->length != 2 && f->entries->length != 2){
+    if (f->contexts->length != 2 && f->entries->length != 2) {
         return false;
     }
 
     context = listCreateIterator(f->contexts);
 
-    for(int j = 0; j < 2; j++){
+    for (int j = 0; j < 2; j++) {
         cc = listIteratorNext(&context);
 
-        if(cc == NULL || (j == 0 && cc->type != numeric_context) ||
-            (j == 1 && cc->type != encodedString_context)){
+        if (cc == NULL || (j == 0 && cc->type != numeric_context) ||
+            (j == 1 && cc->type != encodedString_context)) {
             return false;
         }
     }
@@ -908,14 +888,15 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
 
     encoding = id3v2ReadFrameEntryAsU8(&entries); // encoding
 
-    convi = byteConvertTextFormat((unsigned char *)string, BYTE_UTF8, strlen(string), &usableString, encoding, &outLen);
+    convi = byteConvertTextFormat((unsigned char *) string, BYTE_UTF8, strlen(string), &usableString, encoding,
+                                  &outLen);
 
-    if(!convi && outLen == 0 && usableString == NULL){
+    if (!convi && outLen == 0 && usableString == NULL) {
         return false;
     }
 
     // data is already in utf8
-    if(convi && outLen == 0){
+    if (convi && outLen == 0) {
         usableString = (uint8_t *) strdup(string);
         outLen = strlen(string);
     }
@@ -923,11 +904,11 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
     bytePrependBOM(encoding, &usableString, &outLen);
 
     // re enable utf16 len support
-    if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
+    if (encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE) {
         // realloc false positive memory leak as usableString becomes the memory owner
         // NOLINTNEXTLINE
         uint8_t *reallocPtr = realloc(usableString, outLen + BYTE_PADDING);
-        if(reallocPtr == NULL){
+        if (reallocPtr == NULL) {
             free(usableString);
             return false;
         }
@@ -935,14 +916,14 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
         memset(usableString + outLen, 0, BYTE_PADDING);
     }
 
-    if(id3v2WriteFrameEntry(f, &entries, byteStrlen(encoding, usableString), (void *) usableString)){
+    if (id3v2WriteFrameEntry(f, &entries, byteStrlen(encoding, usableString), (void *) usableString)) {
         free(usableString);
         // memory is now owned by frame
         // NOLINTNEXTLINE
         return true;
     }
-    
-    if(usableString != NULL){
+
+    if (usableString != NULL) {
         free(usableString);
     }
 
@@ -952,19 +933,18 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
 }
 
 /**
- * @brief Writes a new title to the first Title/Song Name/Content Description (TT2 or TIT2) 
+ * @brief Writes a new title to the first Title/Song Name/Content Description (TT2 or TIT2)
  * frame of a tag. If this function fails false is returned otherwise, true.
- * @param title 
- * @param tag 
- * @return int 
+ * @param title
+ * @param tag
+ * @return int
  */
-int id3v2WriteTitle(const char *title, Id3v2Tag *tag){
-
-    if(title == NULL || tag == NULL){
+int id3v2WriteTitle(const char *title, Id3v2Tag *tag) {
+    if (title == NULL || tag == NULL) {
         return false;
     }
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             return id3v2WriteTextFrameContent("TT2", title, tag);
         case ID3V2_TAG_VERSION_3:
@@ -980,18 +960,17 @@ int id3v2WriteTitle(const char *title, Id3v2Tag *tag){
 /**
  * @brief Writes a new artist to the first Lead artist/Lead performer/Soloist/Performing group (TP1 or TPE1)
  * frame of a tag. If this function fails false is returned otherwise, true.
- * 
- * @param artist 
- * @param tag 
- * @return int 
+ *
+ * @param artist
+ * @param tag
+ * @return int
  */
-int id3v2WriteArtist(const char *artist, Id3v2Tag *tag){
-
-    if(artist == NULL || tag == NULL){
+int id3v2WriteArtist(const char *artist, Id3v2Tag *tag) {
+    if (artist == NULL || tag == NULL) {
         return false;
     }
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             return id3v2WriteTextFrameContent("TP1", artist, tag);
         case ID3V2_TAG_VERSION_3:
@@ -1007,18 +986,17 @@ int id3v2WriteArtist(const char *artist, Id3v2Tag *tag){
 /**
  * @brief Writes a new album artist to the first Band/Orchestra/Accompaniment (TP2 or TPE2) frame
  * of a tag. If this function fails false is returned otherwise, true.
- * 
- * @param albumArtist 
- * @param tag 
- * @return int 
+ *
+ * @param albumArtist
+ * @param tag
+ * @return int
  */
-int id3v2WriteAlbumArtist(const char *albumArtist, Id3v2Tag *tag){
-
-    if(albumArtist == NULL || tag == NULL){
+int id3v2WriteAlbumArtist(const char *albumArtist, Id3v2Tag *tag) {
+    if (albumArtist == NULL || tag == NULL) {
         return false;
     }
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             return id3v2WriteTextFrameContent("TP2", albumArtist, tag);
         case ID3V2_TAG_VERSION_3:
@@ -1034,18 +1012,17 @@ int id3v2WriteAlbumArtist(const char *albumArtist, Id3v2Tag *tag){
 /**
  * @brief Writes a new album to the first Album/Movie/Show title (TAL or TALB) frame of a tag.
  * If this function fails false is returned otherwise, true.
- * 
- * @param album 
- * @param tag 
- * @return int 
+ *
+ * @param album
+ * @param tag
+ * @return int
  */
-int id3v2WriteAlbum(const char *album, Id3v2Tag *tag){
-    
-    if(album == NULL || tag == NULL){
+int id3v2WriteAlbum(const char *album, Id3v2Tag *tag) {
+    if (album == NULL || tag == NULL) {
         return false;
     }
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             return id3v2WriteTextFrameContent("TAL", album, tag);
         case ID3V2_TAG_VERSION_3:
@@ -1061,18 +1038,17 @@ int id3v2WriteAlbum(const char *album, Id3v2Tag *tag){
 /**
  * @brief Writes a new year to the first Year (TYE or TYER) frame of a tag. If this function fails
  * false is returned otherwise, true.
- * 
- * @param year 
- * @param tag 
- * @return int 
+ *
+ * @param year
+ * @param tag
+ * @return int
  */
-int id3v2WriteYear(const char *year, Id3v2Tag *tag){
-        
-    if(year == NULL || tag == NULL){
+int id3v2WriteYear(const char *year, Id3v2Tag *tag) {
+    if (year == NULL || tag == NULL) {
         return false;
     }
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             return id3v2WriteTextFrameContent("TYE", year, tag);
         case ID3V2_TAG_VERSION_3:
@@ -1088,18 +1064,17 @@ int id3v2WriteYear(const char *year, Id3v2Tag *tag){
 /**
  * @brief Writes a new genre to the first Genre (TCO or TCON) frame of a tag. If this function fails
  * false is returned otherwise, true.
- * 
- * @param genre 
- * @param tag 
- * @return int 
+ *
+ * @param genre
+ * @param tag
+ * @return int
  */
-int id3v2WriteGenre(const char *genre, Id3v2Tag *tag){
-
-    if(genre == NULL || tag == NULL){
+int id3v2WriteGenre(const char *genre, Id3v2Tag *tag) {
+    if (genre == NULL || tag == NULL) {
         return false;
     }
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             return id3v2WriteTextFrameContent("TCO", genre, tag);
         case ID3V2_TAG_VERSION_3:
@@ -1115,18 +1090,17 @@ int id3v2WriteGenre(const char *genre, Id3v2Tag *tag){
 /**
  * @brief Writes a new track to the first Track number/Position in set (TRK or TRCK) frame of a tag.
  * if this function fails false is returned otherwise, true.
- * 
- * @param track 
- * @param tag 
- * @return int 
+ *
+ * @param track
+ * @param tag
+ * @return int
  */
-int id3v2WriteTrack(const char *track, Id3v2Tag *tag){
-
-    if(track == NULL || tag == NULL){
+int id3v2WriteTrack(const char *track, Id3v2Tag *tag) {
+    if (track == NULL || tag == NULL) {
         return false;
     }
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             return id3v2WriteTextFrameContent("TRK", track, tag);
         case ID3V2_TAG_VERSION_3:
@@ -1142,18 +1116,17 @@ int id3v2WriteTrack(const char *track, Id3v2Tag *tag){
 /**
  * @brief Writes a new disc to the first Disc number (TPA or TPOS) frame of a tag. If this function fails
  * false is returned otherwise, true.
- * 
- * @param disc 
- * @param tag 
- * @return int 
+ *
+ * @param disc
+ * @param tag
+ * @return int
  */
-int id3v2WriteDisc(const char *disc, Id3v2Tag *tag){
-
-    if(disc == NULL || tag == NULL){
+int id3v2WriteDisc(const char *disc, Id3v2Tag *tag) {
+    if (disc == NULL || tag == NULL) {
         return false;
     }
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             return id3v2WriteTextFrameContent("TPA", disc, tag);
         case ID3V2_TAG_VERSION_3:
@@ -1169,18 +1142,17 @@ int id3v2WriteDisc(const char *disc, Id3v2Tag *tag){
 /**
  * @brief Writes a new composer to the first Composer (TCM or TCOM) frame of a tag.
  * if this function fails false is returned otherwise, true.
- * 
- * @param composer 
- * @param tag 
- * @return int 
+ *
+ * @param composer
+ * @param tag
+ * @return int
  */
-int id3v2WriteComposer(const char *composer, Id3v2Tag *tag){
-
-    if(composer == NULL || tag == NULL){
+int id3v2WriteComposer(const char *composer, Id3v2Tag *tag) {
+    if (composer == NULL || tag == NULL) {
         return false;
     }
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             return id3v2WriteTextFrameContent("TCM", composer, tag);
         case ID3V2_TAG_VERSION_3:
@@ -1194,16 +1166,15 @@ int id3v2WriteComposer(const char *composer, Id3v2Tag *tag){
 }
 
 // internal function ------------------------------------------------------------------------
-static int internal_id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *lyrics, Id3v2Tag *tag){
-
+static int internal_id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *lyrics, Id3v2Tag *tag) {
     // check for legal args
     // NOLINTNEXTLINE
-    if(lyrics == NULL){
+    if (lyrics == NULL) {
         // NOLINTNEXTLINE
         return false;
     }
 
-    if(strlen(lyrics) == 0){
+    if (strlen(lyrics) == 0) {
         return false;
     }
 
@@ -1215,7 +1186,7 @@ static int internal_id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *ly
     bool convi = false;
 
     // create frame
-    switch(v){
+    switch (v) {
         case ID3V2_TAG_VERSION_2:
             f = id3v2CreateEmptyFrame("ULT\0", v, NULL);
             break;
@@ -1227,7 +1198,7 @@ static int internal_id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *ly
             return false;
     }
 
-    if(f == NULL){
+    if (f == NULL) {
         return false;
     }
 
@@ -1235,21 +1206,22 @@ static int internal_id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *ly
     entries = id3v2CreateFrameEntryTraverser(f);
 
     // add encoding
-    if(!id3v2WriteFrameEntry(f, &entries, 1, (void *) &encoding)){
+    if (!id3v2WriteFrameEntry(f, &entries, 1, (void *) &encoding)) {
         id3v2DestroyFrame(&f);
         return false;
     }
     id3v2ReadFrameEntryAsU8(&entries);
 
     // add language
-    if(!id3v2WriteFrameEntry(f, &entries, 3, (void *) "zxx")){ // unknown language
+    if (!id3v2WriteFrameEntry(f, &entries, 3, (void *) "zxx")) {
+        // unknown language
         id3v2DestroyFrame(&f);
         return false;
     }
     id3v2ReadFrameEntryAsU8(&entries);
 
     // ensure description is nothing
-    if(!id3v2WriteFrameEntry(f, &entries, 1, (void *) "\0")){
+    if (!id3v2WriteFrameEntry(f, &entries, 1, (void *) "\0")) {
         id3v2DestroyFrame(&f);
         return false;
     }
@@ -1257,9 +1229,10 @@ static int internal_id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *ly
 
     // add lyrics
 
-    convi = byteConvertTextFormat((unsigned char *)lyrics, BYTE_UTF8, strlen(lyrics), &usableString, BYTE_UTF16LE, &outLen);
+    convi = byteConvertTextFormat((unsigned char *) lyrics, BYTE_UTF8, strlen(lyrics), &usableString, BYTE_UTF16LE,
+                                  &outLen);
 
-    if(convi == false || outLen == 0 || usableString == NULL){
+    if (convi == false || outLen == 0 || usableString == NULL) {
         id3v2DestroyFrame(&f);
         return false;
     }
@@ -1270,7 +1243,7 @@ static int internal_id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *ly
     // realloc false positive memory leak as usableString becomes the memory owner
     // NOLINTNEXTLINE
     uint8_t *reallocPtr = realloc(usableString, outLen + BYTE_PADDING);
-    if(reallocPtr == NULL){
+    if (reallocPtr == NULL) {
         free(usableString);
         id3v2DestroyFrame(&f);
         return false;
@@ -1278,9 +1251,9 @@ static int internal_id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *ly
     usableString = reallocPtr;
 
     memset(usableString + outLen, 0, BYTE_PADDING);
-    
 
-    if(!id3v2WriteFrameEntry(f, &entries, outLen, (void *) usableString)){
+
+    if (!id3v2WriteFrameEntry(f, &entries, outLen, (void *) usableString)) {
         id3v2DestroyFrame(&f);
         free(usableString);
 
@@ -1298,22 +1271,22 @@ static int internal_id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *ly
     // NOLINTNEXTLINE
     return true;
 }
-/**
- * @brief Writes new lyrics to the first Unsynchronised Lyric/Text Transcription (ULT or USLT) 
- * frame of a tag. If this function fails false is returned otherwise, true.
- * 
- * @param lyrics
- * @param tag 
- * @return int 
- */
-int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
 
-    if(lyrics == NULL || tag == NULL){
+/**
+ * @brief Writes new lyrics to the first Unsynchronised Lyric/Text Transcription (ULT or USLT)
+ * frame of a tag. If this function fails false is returned otherwise, true.
+ *
+ * @param lyrics
+ * @param tag
+ * @return int
+ */
+int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag) {
+    if (lyrics == NULL || tag == NULL) {
         return false;
     }
 
     // null is an invalid string
-    if(strlen(lyrics) == 0){
+    if (strlen(lyrics) == 0) {
         return false;
     }
 
@@ -1325,11 +1298,11 @@ int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
     uint8_t encoding = 0;
     uint8_t *usableString = NULL;
     size_t outLen = 0;
-    char id[ID3V2_FRAME_ID_MAX_SIZE] = {0,0,0,0};
+    char id[ID3V2_FRAME_ID_MAX_SIZE] = {0, 0, 0, 0};
     int i = 0;
     bool convi = false;
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             i = ID3V2_FRAME_ID_MAX_SIZE - 1;
             memcpy(id, "ULT", i);
@@ -1341,34 +1314,32 @@ int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
             break;
         default:
             return false;
-
     }
 
-    while((f = id3v2FrameTraverse(&frames)) != NULL){
-
-        if(memcmp(id, f->header->id, i) == 0){
+    while ((f = id3v2FrameTraverse(&frames)) != NULL) {
+        if (memcmp(id, f->header->id, i) == 0) {
             break;
         }
     }
 
-    if(f == NULL){
+    if (f == NULL) {
         return internal_id3v2CreateLyricFrameUTF16LE(tag->header->majorVersion, lyrics, tag);
     }
 
     // verify frame via context
-    if(f->contexts->length != 4 && f->entries->length != 4){
+    if (f->contexts->length != 4 && f->entries->length != 4) {
         return false;
     }
 
     context = listCreateIterator(f->contexts);
 
-    for(int j = 0; j < 4; j++){
+    for (int j = 0; j < 4; j++) {
         cc = listIteratorNext(&context);
 
-        if(cc == NULL || (j == 0 && cc->type != numeric_context) ||
+        if (cc == NULL || (j == 0 && cc->type != numeric_context) ||
             (j == 1 && cc->type != noEncoding_context) ||
             (j == 2 && cc->type != encodedString_context) ||
-            (j == 3 && cc->type != encodedString_context)){
+            (j == 3 && cc->type != encodedString_context)) {
             return false;
         }
     }
@@ -1377,14 +1348,15 @@ int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
 
     encoding = id3v2ReadFrameEntryAsU8(&entries); // encoding
 
-    convi = byteConvertTextFormat((unsigned char *)lyrics, BYTE_UTF8, strlen(lyrics), &usableString, encoding, &outLen);
+    convi = byteConvertTextFormat((unsigned char *) lyrics, BYTE_UTF8, strlen(lyrics), &usableString, encoding,
+                                  &outLen);
 
-    if(!convi && outLen == 0 && usableString == NULL){
+    if (!convi && outLen == 0 && usableString == NULL) {
         return false;
     }
 
     // data is already in utf8
-    if(convi && outLen == 0){
+    if (convi && outLen == 0) {
         usableString = (uint8_t *) strdup(lyrics);
         outLen = strlen(lyrics);
     }
@@ -1392,11 +1364,11 @@ int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
     bytePrependBOM(encoding, &usableString, &outLen);
 
     // re enable utf16 len support
-    if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
+    if (encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE) {
         // realloc false positive memory leak as usableString becomes the memory owner
         // NOLINTNEXTLINE
         uint8_t *reallocPtr = realloc(usableString, outLen + BYTE_PADDING);
-        if(reallocPtr == NULL){
+        if (reallocPtr == NULL) {
             free(usableString);
             return false;
         }
@@ -1407,17 +1379,17 @@ int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
     id3v2ReadFrameEntryAsU8(&entries); // language
     id3v2ReadFrameEntryAsU8(&entries); // description
 
-    if(id3v2WriteFrameEntry(f, &entries, byteStrlen(encoding, usableString), (void *) usableString)){
+    if (id3v2WriteFrameEntry(f, &entries, byteStrlen(encoding, usableString), (void *) usableString)) {
         free(usableString);
         // memory is now owned by frame
         // NOLINTNEXTLINE
         return true;
     }
-    
-    if(usableString != NULL){
+
+    if (usableString != NULL) {
         free(usableString);
     }
-    
+
     // memory is owned by frame
     // NOLINTNEXTLINE
     return false;
@@ -1426,16 +1398,16 @@ int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag){
 
 // internal function -----------------------------------------------------------------------------------------------------------
 // NOLINTNEXTLINE
-static int internal_id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3], const char *desc, const char *comment, Id3v2Tag *tag){
-
+static int internal_id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3], const char *desc, const char *comment,
+                                                   Id3v2Tag *tag) {
     // check for legal args
     // NOLINTNEXTLINE
-    if(lang == NULL || desc == NULL || comment == NULL){
+    if (lang == NULL || desc == NULL || comment == NULL) {
         // NOLINTNEXTLINE
         return false;
     }
 
-    if(strlen(lang) != 3 || strlen(comment) == 0){
+    if (strlen(lang) != 3 || strlen(comment) == 0) {
         return false;
     }
 
@@ -1448,20 +1420,22 @@ static int internal_id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3]
     bool convi = false;
 
     // get frame header
-    switch(v){
+    switch (v) {
         case ID3V2_TAG_VERSION_2:
-            header = id3v2CreateFrameHeader((uint8_t *)"COM\0", 0,0,0,0,0,0,0);
+            header = id3v2CreateFrameHeader((uint8_t *) "COM\0", 0, 0, 0, 0, 0, 0, 0);
             break;
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
-            header = id3v2CreateFrameHeader((uint8_t *)"COMM", 0,0,0,0,0,0,0);
+            header = id3v2CreateFrameHeader((uint8_t *) "COMM", 0, 0, 0, 0, 0, 0, 0);
             break;
         default:
             return false;
     }
 
     // create frame
-    f = id3v2CreateFrame(header, id3v2CreateCommentFrameContext(), listCreate(id3v2PrintContentEntry, id3v2DeleteContentEntry, id3v2CompareContentEntry, id3v2CopyContentEntry));
+    f = id3v2CreateFrame(header, id3v2CreateCommentFrameContext(),
+                         listCreate(id3v2PrintContentEntry, id3v2DeleteContentEntry, id3v2CompareContentEntry,
+                                    id3v2CopyContentEntry));
 
     ce = id3v2CreateContentEntry((void *) &encoding, 1);
     listInsertBack(f->entries, (void *) ce);
@@ -1470,16 +1444,17 @@ static int internal_id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3]
     listInsertBack(f->entries, (void *) ce);
 
     // make a description
-    if(strlen(desc) != 0){
-        convi = byteConvertTextFormat((unsigned char *) desc, BYTE_UTF8, strlen(desc), &usableString, encoding, &outLen);
+    if (strlen(desc) != 0) {
+        convi = byteConvertTextFormat((unsigned char *) desc, BYTE_UTF8, strlen(desc), &usableString, encoding,
+                                      &outLen);
 
-        if(!convi && outLen == 0 && usableString == NULL){
+        if (!convi && outLen == 0 && usableString == NULL) {
             id3v2DestroyFrame(&f);
             return false;
         }
 
         // data is already in target encoding
-        if(convi && outLen == 0){
+        if (convi && outLen == 0) {
             usableString = (uint8_t *) strdup(desc);
             outLen = strlen(desc);
         }
@@ -1487,11 +1462,11 @@ static int internal_id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3]
         bytePrependBOM(encoding, &usableString, &outLen);
 
         // re enable utf16 len support
-        if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
+        if (encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE) {
             // realloc false positive memory leak as usableString becomes the memory owner
             // NOLINTNEXTLINE
             uint8_t *reallocPtr = realloc(usableString, outLen + BYTE_PADDING);
-            if(reallocPtr == NULL){
+            if (reallocPtr == NULL) {
                 free(usableString);
                 id3v2DestroyFrame(&f);
                 return false;
@@ -1507,14 +1482,15 @@ static int internal_id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3]
         free(usableString);
         usableString = NULL;
         outLen = 0;
-    }else{
+    } else {
         ce = id3v2CreateContentEntry("\0", 1);
         listInsertBack(f->entries, (void *) ce);
     }
-    
-    convi = byteConvertTextFormat((unsigned char *) comment, BYTE_UTF8, strlen(comment), &usableString, encoding, &outLen);
 
-    if(!convi && outLen == 0 && usableString == NULL){
+    convi = byteConvertTextFormat((unsigned char *) comment, BYTE_UTF8, strlen(comment), &usableString, encoding,
+                                  &outLen);
+
+    if (!convi && outLen == 0 && usableString == NULL) {
         id3v2DestroyFrame(&f);
         // memory is owned by frame which gets freed - false positive
         // NOLINTNEXTLINE
@@ -1522,7 +1498,7 @@ static int internal_id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3]
     }
 
     // data is already in target encoding
-    if(convi && outLen == 0){
+    if (convi && outLen == 0) {
         usableString = (uint8_t *) strdup(comment);
         outLen = strlen(comment);
     }
@@ -1530,11 +1506,11 @@ static int internal_id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3]
     bytePrependBOM(encoding, &usableString, &outLen);
 
     // re enable utf16 len support
-    if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
+    if (encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE) {
         // realloc false positive memory leak as usableString becomes the memory owner
         // NOLINTNEXTLINE
         uint8_t *reallocPtr = realloc(usableString, outLen + BYTE_PADDING);
-        if(reallocPtr == NULL){
+        if (reallocPtr == NULL) {
             free(usableString);
             id3v2DestroyFrame(&f);
             // memory is owned by frame which gets freed - false positive
@@ -1555,22 +1531,22 @@ static int internal_id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3]
     // NOLINTNEXTLINE
     return true;
 }
+
 /**
  * @brief Writes a new comment to the first Comment (COM or COMM) frame of a tag. If no comment frame exits
  * one will be created with a UTF16LE encoding. If this function fails false is returned otherwise, true.
- * 
- * @param comment 
- * @param tag 
- * @return int 
+ *
+ * @param comment
+ * @param tag
+ * @return int
  */
-int id3v2WriteComment(const char *comment, Id3v2Tag *tag){
-
-    if(comment == NULL || tag == NULL){
+int id3v2WriteComment(const char *comment, Id3v2Tag *tag) {
+    if (comment == NULL || tag == NULL) {
         return false;
     }
 
     // null is an invalid string
-    if(strlen(comment) == 0){
+    if (strlen(comment) == 0) {
         return false;
     }
 
@@ -1582,12 +1558,12 @@ int id3v2WriteComment(const char *comment, Id3v2Tag *tag){
     uint8_t encoding = 0;
     uint8_t *usableString = NULL;
     size_t outLen = 0;
-    char id[ID3V2_FRAME_ID_MAX_SIZE] = {0,0,0,0};
+    char id[ID3V2_FRAME_ID_MAX_SIZE] = {0, 0, 0, 0};
     int i = 0;
     bool convi = false;
 
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             i = ID3V2_FRAME_ID_MAX_SIZE - 1;
             memcpy(id, "COM", i);
@@ -1601,30 +1577,31 @@ int id3v2WriteComment(const char *comment, Id3v2Tag *tag){
             return false;
     }
 
-    while((f = id3v2FrameTraverse(&frames)) != NULL){
-        if(memcmp(id, f->header->id, i) == 0){
+    while ((f = id3v2FrameTraverse(&frames)) != NULL) {
+        if (memcmp(id, f->header->id, i) == 0) {
             break;
         }
     }
 
-    if(f == NULL){
-        return internal_id3v2CreateCommentFrameUTF16LE(tag->header->majorVersion, "zxx", "", comment, tag); // zxx is no/unknown language
+    if (f == NULL) {
+        return internal_id3v2CreateCommentFrameUTF16LE(tag->header->majorVersion, "zxx", "", comment, tag);
+        // zxx is no/unknown language
     }
 
     // verify frame via context
-    if(f->contexts->length != 4 && f->entries->length != 4){
+    if (f->contexts->length != 4 && f->entries->length != 4) {
         return false;
     }
 
     context = listCreateIterator(f->contexts);
 
-    for(int j = 0; j < 4; j++){
+    for (int j = 0; j < 4; j++) {
         cc = listIteratorNext(&context);
 
-        if(cc == NULL || (j == 0 && cc->type != numeric_context) ||
+        if (cc == NULL || (j == 0 && cc->type != numeric_context) ||
             (j == 1 && cc->type != noEncoding_context) ||
             (j == 2 && cc->type != encodedString_context) ||
-            (j == 3 && cc->type != encodedString_context)){
+            (j == 3 && cc->type != encodedString_context)) {
             return false;
         }
     }
@@ -1633,14 +1610,15 @@ int id3v2WriteComment(const char *comment, Id3v2Tag *tag){
 
     encoding = id3v2ReadFrameEntryAsU8(&entries); // encoding
 
-    convi = byteConvertTextFormat((unsigned char *)comment, BYTE_UTF8, strlen(comment), &usableString, encoding, &outLen);
+    convi = byteConvertTextFormat((unsigned char *) comment, BYTE_UTF8, strlen(comment), &usableString, encoding,
+                                  &outLen);
 
-    if(!convi && outLen == 0 && usableString == NULL){
+    if (!convi && outLen == 0 && usableString == NULL) {
         return false;
     }
 
     // data is already in utf8
-    if(convi && outLen == 0){
+    if (convi && outLen == 0) {
         usableString = (uint8_t *) strdup(comment);
         outLen = strlen(comment);
     }
@@ -1648,11 +1626,11 @@ int id3v2WriteComment(const char *comment, Id3v2Tag *tag){
     bytePrependBOM(encoding, &usableString, &outLen);
 
     // re enable utf16 len support
-    if(encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE){
+    if (encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE) {
         // realloc false positive memory leak as usableString becomes the memory owner
         // NOLINTNEXTLINE
         uint8_t *reallocPtr = realloc(usableString, outLen + BYTE_PADDING);
-        if(reallocPtr == NULL){
+        if (reallocPtr == NULL) {
             free(usableString);
             return false;
         }
@@ -1663,14 +1641,14 @@ int id3v2WriteComment(const char *comment, Id3v2Tag *tag){
     id3v2ReadFrameEntryAsU8(&entries); // language
     id3v2ReadFrameEntryAsU8(&entries); // description
 
-    if(id3v2WriteFrameEntry(f, &entries, byteStrlen(encoding, usableString), (void *) usableString)){
+    if (id3v2WriteFrameEntry(f, &entries, byteStrlen(encoding, usableString), (void *) usableString)) {
         free(usableString);
         // memory is now owned by frame
         // NOLINTNEXTLINE
         return true;
     }
-    
-    if(usableString != NULL){
+
+    if (usableString != NULL) {
         free(usableString);
     }
     // memory is owned by frame
@@ -1680,16 +1658,16 @@ int id3v2WriteComment(const char *comment, Id3v2Tag *tag){
 
 // internal function ---------------------------------------------------------------------------------------------------------
 // NOLINTNEXTLINE
-static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *image, size_t imageSize, const char *kind, Id3v2Tag *tag){
-
+static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *image, size_t imageSize, const char *kind,
+                                                        Id3v2Tag *tag) {
     // check for legal args
     // NOLINTNEXTLINE
-    if(image == NULL || imageSize == 0 || kind == NULL || tag == NULL){
+    if (image == NULL || imageSize == 0 || kind == NULL || tag == NULL) {
         // NOLINTNEXTLINE
         return false;
     }
 
-    if(strlen(kind) == 0){
+    if (strlen(kind) == 0) {
         return false;
     }
 
@@ -1699,7 +1677,7 @@ static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *imag
     size_t kindLen = 0;
 
     // create frame
-    switch(v){
+    switch (v) {
         case ID3V2_TAG_VERSION_2:
             f = id3v2CreateEmptyFrame("PIC\0", v, NULL);
             break;
@@ -1711,7 +1689,7 @@ static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *imag
             return false;
     }
 
-    if(f == NULL){
+    if (f == NULL) {
         return false;
     }
 
@@ -1719,28 +1697,27 @@ static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *imag
     entries = id3v2CreateFrameEntryTraverser(f);
 
     // add encoding
-    if(!id3v2WriteFrameEntry(f, &entries, 1, (void *) &encoding)){
+    if (!id3v2WriteFrameEntry(f, &entries, 1, (void *) &encoding)) {
         id3v2DestroyFrame(&f);
         return false;
     }
     id3v2ReadFrameEntryAsU8(&entries);
 
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             kindLen = strlen(kind);
 
-            if(kindLen > 3){
+            if (kindLen > 3) {
                 kindLen = 3;
             }
 
-            if(!id3v2WriteFrameEntry(f, &entries, kindLen, (void *) kind)){
+            if (!id3v2WriteFrameEntry(f, &entries, kindLen, (void *) kind)) {
                 return false;
             }
 
             break;
         case ID3V2_TAG_VERSION_3:
-        case ID3V2_TAG_VERSION_4:{
-
+        case ID3V2_TAG_VERSION_4: {
             char *mime = NULL;
 
             mime = calloc(sizeof(char), strlen("image/") + strlen(kind) + 1);
@@ -1750,37 +1727,36 @@ static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *imag
             // NOLINTNEXTLINE
             memcpy(mime + strlen("image/"), kind, strlen(kind));
 
-            if(!id3v2WriteFrameEntry(f, &entries, strlen(mime), (void *) mime)){
+            if (!id3v2WriteFrameEntry(f, &entries, strlen(mime), (void *) mime)) {
                 free(mime);
                 return false;
             }
 
             free(mime);
         }
-            break;
+        break;
         default:
             id3v2DestroyFrame(&f);
             return false;
-
     }
     id3v2ReadFrameEntryAsU8(&entries); // mime type skip
 
     // add type
-    if(!id3v2WriteFrameEntry(f, &entries, 1, (void *) "\0")){
+    if (!id3v2WriteFrameEntry(f, &entries, 1, (void *) "\0")) {
         id3v2DestroyFrame(&f);
         return false;
     }
     id3v2ReadFrameEntryAsU8(&entries);
 
     // ensure description is nothing
-    if(!id3v2WriteFrameEntry(f, &entries, 1, (void *) "\0")){
+    if (!id3v2WriteFrameEntry(f, &entries, 1, (void *) "\0")) {
         id3v2DestroyFrame(&f);
         return false;
     }
     id3v2ReadFrameEntryAsU8(&entries);
 
     // write image
-    if(!id3v2WriteFrameEntry(f, &entries, imageSize, (void *) image)){
+    if (!id3v2WriteFrameEntry(f, &entries, imageSize, (void *) image)) {
         id3v2DestroyFrame(&f);
         return false;
     }
@@ -1789,27 +1765,26 @@ static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *imag
 
     listInsertBack(tag->frames, (void *) f);
     return true;
-
 }
+
 /**
  * @brief Writes a new picture to the first Attached picture (PIC or APIC) frame of a tag that matches the
  * given type. It will additionally write the mime type via the null terminated string kind. If this function fails
  * or any argument is null, false is returned otherwise, true.
- * 
- * @param image 
- * @param imageSize 
- * @param kind 
- * @param type 
- * @param tag 
- * @return int 
+ *
+ * @param image
+ * @param imageSize
+ * @param kind
+ * @param type
+ * @param tag
+ * @return int
  */
-int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_t type, Id3v2Tag *tag){
-
-    if(image == NULL || imageSize == 0 || kind == NULL || tag == NULL){
+int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_t type, Id3v2Tag *tag) {
+    if (image == NULL || imageSize == 0 || kind == NULL || tag == NULL) {
         return false;
     }
 
-    if(strlen(kind) == 0){
+    if (strlen(kind) == 0) {
         return false;
     }
 
@@ -1819,12 +1794,12 @@ int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_
     ListIter entries = {0};
     Id3v2ContentContext *cc = NULL;
     uint8_t usableType = ((type > 0x14) ? 0x00 : type); // clamp type
-    char id[ID3V2_FRAME_ID_MAX_SIZE] = {0,0,0,0};
+    char id[ID3V2_FRAME_ID_MAX_SIZE] = {0, 0, 0, 0};
     int i = 0;
     int kindLen = 0;
 
     // what id will be used
-    switch(tag->header->majorVersion){
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             i = ID3V2_FRAME_ID_MAX_SIZE - 1;
             memcpy(id, "PIC", i);
@@ -1839,40 +1814,39 @@ int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_
     }
 
     // find frame
-    while(true){
-        while((f = id3v2FrameTraverse(&frames)) != NULL){
-            if(memcmp(id, f->header->id, i) == 0){
+    while (true) {
+        while ((f = id3v2FrameTraverse(&frames)) != NULL) {
+            if (memcmp(id, f->header->id, i) == 0) {
                 break;
             }
         }
 
-        if(f == NULL){
+        if (f == NULL) {
             return internal_id3v2CreatePictureFrameUTF16LEtype0(tag->header->majorVersion, image, imageSize, kind, tag);
         }
 
         // verify frame via context
-        if(f->contexts->length != 5 && f->entries->length != 5){
+        if (f->contexts->length != 5 && f->entries->length != 5) {
             return false;
         }
 
         context = listCreateIterator(f->contexts);
 
-        for(int j = 0; j < 4; j++){
+        for (int j = 0; j < 4; j++) {
             cc = listIteratorNext(&context);
 
-            if(cc == NULL){
+            if (cc == NULL) {
                 return false;
             }
 
-            if((j == 0 && cc->type != numeric_context) ||
-            (j == 1 && (cc->type != noEncoding_context && cc->type != latin1Encoding_context)) ||
-            (j == 2 && cc->type != numeric_context) ||
-            (j == 3 && cc->type != encodedString_context) ||
-            // can always be binary context - false positive
-            // NOLINTNEXTLINE
-            (j == 4 && cc->type != binary_context)){
+            if ((j == 0 && cc->type != numeric_context) ||
+                (j == 1 && (cc->type != noEncoding_context && cc->type != latin1Encoding_context)) ||
+                (j == 2 && cc->type != numeric_context) ||
+                (j == 3 && cc->type != encodedString_context) ||
+                // can always be binary context - false positive
+                // NOLINTNEXTLINE
+                (j == 4 && cc->type != binary_context)) {
                 return false;
-
             }
         }
 
@@ -1880,32 +1854,30 @@ int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_
 
         id3v2ReadFrameEntryAsU8(&entries); // encoding
         id3v2ReadFrameEntryAsU8(&entries); // mime type
-        if(id3v2ReadFrameEntryAsU8(&entries) == usableType){
+        if (id3v2ReadFrameEntryAsU8(&entries) == usableType) {
             break;
         }
-
     }
 
     entries = id3v2CreateFrameEntryTraverser(f);
 
     id3v2ReadFrameEntryAsU8(&entries); // encoding
-    
-    switch(tag->header->majorVersion){
+
+    switch (tag->header->majorVersion) {
         case ID3V2_TAG_VERSION_2:
             kindLen = (int) strlen(kind);
 
-            if(kindLen > 3){
+            if (kindLen > 3) {
                 kindLen = 3;
             }
 
-            if(!id3v2WriteFrameEntry(f, &entries, kindLen, (void *) kind)){
+            if (!id3v2WriteFrameEntry(f, &entries, kindLen, (void *) kind)) {
                 return false;
             }
 
             break;
         case ID3V2_TAG_VERSION_3:
-        case ID3V2_TAG_VERSION_4:{
-
+        case ID3V2_TAG_VERSION_4: {
             char *mime = NULL;
 
             mime = calloc(sizeof(char), strlen("image/") + strlen(kind) + 1);
@@ -1915,17 +1887,16 @@ int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_
             // NOLINTNEXTLINE
             memcpy(mime + strlen("image/"), kind, strlen(kind));
 
-            if(!id3v2WriteFrameEntry(f, &entries, strlen(mime), (void *) mime)){
+            if (!id3v2WriteFrameEntry(f, &entries, strlen(mime), (void *) mime)) {
                 free(mime);
                 return false;
             }
 
             free(mime);
         }
-            break;
+        break;
         default:
             return false;
-
     }
 
     id3v2ReadFrameEntryAsU8(&entries); // mime type skip
@@ -1936,23 +1907,22 @@ int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_
 }
 
 /**
- * @brief Writes a new picture from a file to the first Attached picture (PIC or APIC) frame of a tag that 
- * matches the given type. It will additionally write the mime type via the null terminated string kind. 
+ * @brief Writes a new picture from a file to the first Attached picture (PIC or APIC) frame of a tag that
+ * matches the given type. It will additionally write the mime type via the null terminated string kind.
  * If this function fails or any argument is null, false is returned otherwise, true.
- * 
- * @param filename 
- * @param kind 
- * @param type 
- * @param tag 
- * @return int 
+ *
+ * @param filename
+ * @param kind
+ * @param type
+ * @param tag
+ * @return int
  */
-int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t type, Id3v2Tag *tag){
-    
-    if(filename == NULL || kind == NULL || tag == NULL){
+int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t type, Id3v2Tag *tag) {
+    if (filename == NULL || kind == NULL || tag == NULL) {
         return false;
     }
 
-    if(strlen(filename) == 0 || strlen(kind) == 0){
+    if (strlen(filename) == 0 || strlen(kind) == 0) {
         return false;
     }
 
@@ -1963,7 +1933,7 @@ int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t ty
 
     f = fopen(filename, "rb");
 
-    if(f == NULL){
+    if (f == NULL) {
         return false;
     }
 
@@ -1973,7 +1943,7 @@ int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t ty
 
     data = calloc(sizeof(uint8_t), size);
 
-    if(fread(data, sizeof(uint8_t), size, f) != size){
+    if (fread(data, sizeof(uint8_t), size, f) != size) {
         (void) fclose(f);
         free(data);
         return false;
@@ -1991,19 +1961,18 @@ int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t ty
 /**
  * @brief Converts an ID3v2.x tag data structure back to its binary representation. If this function fails
  * NULL is returned otherwise, an uint8_t pointer.
- * 
+ *
  * @param tag
  * @param outl
- * @return ByteStream* 
+ * @return ByteStream*
  */
-uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl){
-
-    if(tag == NULL){
+uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl) {
+    if (tag == NULL) {
         *outl = 0;
         return NULL;
     }
 
-    if(tag->header == NULL || tag->frames == NULL){
+    if (tag->header == NULL || tag->frames == NULL) {
         *outl = 0;
         return NULL;
     }
@@ -2022,32 +1991,30 @@ uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl){
     size_t headerOutl = 0;
 
     // frame stream
-    while((f = id3v2FrameTraverse(&frames)) != NULL){
-        
+    while ((f = id3v2FrameTraverse(&frames)) != NULL) {
         ByteStream *tmp = NULL;
         size_t frameOutl = 0;
         uint8_t *frameOut = NULL;
 
         frameOut = id3v2FrameSerialize(f, tag->header->majorVersion, &frameOutl);
 
-        if(frameOut == NULL && frameOutl == 0){
+        if (frameOut == NULL && frameOutl == 0) {
             break;
         }
 
         tmp = byteStreamCreate(frameOut, frameOutl);
         free(frameOut);
-        
-        if(tmp == NULL){
+
+        if (tmp == NULL) {
             break;
         }
 
-        if(frameStream == NULL){
+        if (frameStream == NULL) {
             frameStream = byteStreamCreate(byteStreamCursor(tmp), tmp->bufferSize);
             byteStreamSeek(frameStream, 0, SEEK_END);
-        }else{
+        } else {
             byteStreamResize(frameStream, frameStream->bufferSize + tmp->bufferSize);
             byteStreamWrite(frameStream, tmp->buffer, tmp->bufferSize);
-            
         }
         byteStreamDestroy(tmp);
     }
@@ -2061,83 +2028,76 @@ uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl){
     byteStreamRewind(frameStream);
 
     // unsync?
-    if(id3v2ReadUnsynchronisationIndicator(tag->header)){
+    if (id3v2ReadUnsynchronisationIndicator(tag->header)) {
         ByteStream *tmp = NULL;
 
         tmp = byteStreamCreate(NULL, frameStream->bufferSize * 2);
 
-        for(size_t i = 0; i < frameStream->bufferSize; i++){
-            
+        for (size_t i = 0; i < frameStream->bufferSize; i++) {
             byteStreamWrite(tmp, byteStreamCursor(frameStream), 1);
-            
+
             byteStreamSeek(tmp, 1, SEEK_CUR);
             byteStreamSeek(frameStream, 1, SEEK_CUR);
-
         }
 
         byteStreamDestroy(frameStream);
         frameStream = tmp;
         fsize = frameStream->bufferSize;
         byteStreamRewind(frameStream);
-
-    }else{
+    } else {
         fsize = frameStream->bufferSize;
     }
 
     // header stream
     headerOut = id3v2TagHeaderSerialize(tag->header, 0, &headerOutl);
 
-    if(headerOut == NULL && headerOutl == 0){
+    if (headerOut == NULL && headerOutl == 0) {
         byteStreamDestroy(frameStream);
         *outl = 0;
         return NULL;
     }
-    
+
     headerStream = byteStreamCreate(headerOut, headerOutl);
     free(headerOut);
 
     // unsync?
-    if(id3v2ReadUnsynchronisationIndicator(tag->header) && headerStream->bufferSize > 10){
+    if (id3v2ReadUnsynchronisationIndicator(tag->header) && headerStream->bufferSize > 10) {
         ByteStream *tmp = NULL;
         uint32_t size = 0;
 
         // ext size
         size = (headerStream->bufferSize - 10) * 2;
-        
+
         tmp = byteStreamCreate(NULL, 10 + size);
 
         // write header back
         byteStreamWrite(tmp, byteStreamCursor(headerStream), 10);
         byteStreamSeek(headerStream, 10, SEEK_SET);
 
-        for(uint32_t i = 0; i < size; i++){
-            
+        for (uint32_t i = 0; i < size; i++) {
             byteStreamWrite(tmp, byteStreamCursor(headerStream), 1);
-            
+
             byteStreamSeek(tmp, 1, SEEK_CUR);
             byteStreamSeek(headerStream, 1, SEEK_CUR);
-
         }
 
         byteStreamDestroy(headerStream);
         headerStream = tmp;
         fsize += size;
-
-    }else{
-        fsize += ((headerStream->bufferSize > 10 ) ? headerStream->bufferSize - 10 : 0);
+    } else {
+        fsize += ((headerStream->bufferSize > 10) ? headerStream->bufferSize - 10 : 0);
     }
 
     byteStreamRewind(headerStream);
 
     // footer stream?
-    if(id3v2ReadFooterIndicator(tag->header) && tag->header->majorVersion == ID3V2_TAG_VERSION_4){
-
+    if (id3v2ReadFooterIndicator(tag->header) && tag->header->majorVersion == ID3V2_TAG_VERSION_4) {
         footerStream = byteStreamCreate(byteStreamCursor(headerStream), 10);
         byteStreamWrite(footerStream, (unsigned char *) "3DI", ID3V2_TAG_ID_SIZE);
         byteStreamRewind(footerStream);
     }
 
-    if(tag->header->extendedHeader != NULL){
+    if (tag->header->extendedHeader != NULL) {
         fsize += tag->header->extendedHeader->padding;
         padding = tag->header->extendedHeader->padding;
     }
@@ -2148,7 +2108,7 @@ uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl){
     byteStreamWrite(headerStream, sizeBytes, 4);
     byteStreamRewind(headerStream);
 
-    if(footerStream != NULL){
+    if (footerStream != NULL) {
         byteStreamSeek(footerStream, 6, SEEK_SET);
         byteStreamWrite(footerStream, sizeBytes, 4);
         byteStreamRewind(footerStream);
@@ -2157,11 +2117,14 @@ uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl){
     free(sizeBytes);
 
     // create stream
-    stream = byteStreamCreate(NULL, frameStream->bufferSize + headerStream->bufferSize + ((footerStream != NULL) ? footerStream->bufferSize : 0));
+    stream = byteStreamCreate(
+        NULL, frameStream->bufferSize + headerStream->bufferSize + ((footerStream != NULL)
+                                                                        ? footerStream->bufferSize
+                                                                        : 0));
     byteStreamWrite(stream, byteStreamCursor(headerStream), headerStream->bufferSize);
     byteStreamWrite(stream, byteStreamCursor(frameStream), frameStream->bufferSize);
     byteStreamSeek(stream, padding, SEEK_CUR);
-    if(footerStream != NULL){
+    if (footerStream != NULL) {
         byteStreamWrite(stream, byteStreamCursor(footerStream), footerStream->bufferSize);
         byteStreamDestroy(footerStream);
     }
@@ -2180,12 +2143,11 @@ uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl){
 
 /**
  * @brief Converts an ID3v2.x tag data structure back to its json representation.
- * 
- * @param tag 
- * @return char* 
+ *
+ * @param tag
+ * @return char*
  */
-char *id3v2TagToJSON(Id3v2Tag *tag){
-
+char *id3v2TagToJSON(Id3v2Tag *tag) {
     char *json = NULL;
     char *headerJson = NULL;
     char **contentJson = NULL;
@@ -2193,19 +2155,19 @@ char *id3v2TagToJSON(Id3v2Tag *tag){
     size_t contentJsonSize = 0;
     size_t memCount = 3;
 
-    if(tag == NULL){
+    if (tag == NULL) {
         json = calloc(memCount, sizeof(char));
         memcpy(json, "{}\0", memCount);
         return json;
     }
 
-    if(tag->frames == NULL || tag->header == NULL){
+    if (tag->frames == NULL || tag->header == NULL) {
         json = calloc(memCount, sizeof(char));
         memcpy(json, "{}\0", memCount);
         return json;
     }
 
-    if(tag->header->majorVersion > ID3V2_TAG_VERSION_4){
+    if (tag->header->majorVersion > ID3V2_TAG_VERSION_4) {
         json = calloc(memCount, sizeof(char));
         memcpy(json, "{}\0", memCount);
         return json;
@@ -2216,7 +2178,7 @@ char *id3v2TagToJSON(Id3v2Tag *tag){
     ListIter frames = id3v2CreateFrameTraverser(tag);
     Id3v2Frame *f = NULL;
 
-    while((f = id3v2FrameTraverse(&frames)) != NULL){
+    while ((f = id3v2FrameTraverse(&frames)) != NULL) {
         char *tmp = NULL;
         size_t jsonSize = 0;
 
@@ -2224,34 +2186,32 @@ char *id3v2TagToJSON(Id3v2Tag *tag){
         jsonSize = strlen(tmp);
 
         contentJsonSize++;
-        if(contentJson == NULL){
+        if (contentJson == NULL) {
             // first allocation and returned by the function - false positive
             // NOLINTNEXTLINE
             contentJson = (char **) calloc(contentJsonSize, sizeof(char *));
             contentJson[contentJsonSize - 1] = calloc(jsonSize + 1, sizeof(char));
-                
-        }else{
+        } else {
             // realloc false positive memory leak - false positive below
             // NOLINTNEXTLINE
             char **reallocPtr = realloc(contentJson, (contentJsonSize) * sizeof(char *));
-            if(reallocPtr == NULL){
-                for(size_t i = 0; i < contentJsonSize - 1; i++){
+            if (reallocPtr == NULL) {
+                for (size_t i = 0; i < contentJsonSize - 1; i++) {
                     free(contentJson[i]);
                 }
-                free((void *)contentJson);
+                free((void *) contentJson);
                 free(tmp);
                 // all memory freed above - false positive
                 // NOLINTNEXTLINE
                 return NULL;
             }
             contentJson = reallocPtr;
-            contentJson[contentJsonSize - 1] = calloc(jsonSize + 1, sizeof(char)); 
+            contentJson[contentJsonSize - 1] = calloc(jsonSize + 1, sizeof(char));
         }
 
         memcpy(contentJson[contentJsonSize - 1], tmp, jsonSize);
 
         free(tmp);
-
     }
 
     // get header
@@ -2260,7 +2220,7 @@ char *id3v2TagToJSON(Id3v2Tag *tag){
     // concatenate all JSON data stored in contentJson into a single string split by ","
     if (contentJson != NULL) {
         size_t concatenatedStringLength = 0;
-        for(size_t i = 0; i < contentJsonSize; i++){
+        for (size_t i = 0; i < contentJsonSize; i++) {
             concatenatedStringLength += strlen(contentJson[i]) + 1;
         }
 
@@ -2268,7 +2228,6 @@ char *id3v2TagToJSON(Id3v2Tag *tag){
 
         size_t offset = 0;
         for (size_t i = 0; i < contentJsonSize; i++) {
-
             if (i > 0) {
                 concatenatedString[offset++] = ',';
             }
@@ -2276,16 +2235,14 @@ char *id3v2TagToJSON(Id3v2Tag *tag){
             const size_t currentLen = strlen(contentJson[i]);
             memcpy(concatenatedString + offset, contentJson[i], currentLen);
             offset += currentLen;
-
         }
         concatenatedString[offset] = '\0';
-
     }
 
     memCount += snprintf(NULL, 0,
-                        "{\"header\":%s,\"content\":[%s]}",
-                        headerJson,
-                        concatenatedString);
+                         "{\"header\":%s,\"content\":[%s]}",
+                         headerJson,
+                         concatenatedString);
     json = calloc(memCount + 1, sizeof(char));
     (void) snprintf(json, memCount,
                     "{\"header\":%s,\"content\":[%s]}",
@@ -2293,19 +2250,17 @@ char *id3v2TagToJSON(Id3v2Tag *tag){
                     concatenatedString);
 
 
-
     free(headerJson);
 
-    if(concatenatedString != NULL){
+    if (concatenatedString != NULL) {
         free(concatenatedString);
     }
 
-    if(contentJson != NULL){
-        for(size_t i = 0; i < contentJsonSize; i++){
+    if (contentJson != NULL) {
+        for (size_t i = 0; i < contentJsonSize; i++) {
             free(contentJson[i]);
-
         }
-        free((void *)contentJson);
+        free((void *) contentJson);
     }
 
     // all memory is freed of moved to contentJson - false positive
@@ -2316,28 +2271,25 @@ char *id3v2TagToJSON(Id3v2Tag *tag){
 /**
  * @brief Writes an ID3v2.x tag data structure to a file. If this function fails false is returned otherwise, true.
  * If the file does not exist it will be created if it does and there is no tag it will be prepended. If the update
- * flag is set in the tag header it will be prepended to the file without overwriting any existing tags. 
- * 
+ * flag is set in the tag header it will be prepended to the file without overwriting any existing tags.
+ *
  * @param filePath
- * @param tag 
- * @return int 
+ * @param tag
+ * @return int
  */
-int id3v2WriteTagToFile(const char* filePath, Id3v2Tag* tag)
-{
-    if (filePath == NULL || tag == NULL)
-    {
+int id3v2WriteTagToFile(const char *filePath, Id3v2Tag *tag) {
+    if (filePath == NULL || tag == NULL) {
         return false;
     }
 
-    FILE* fp = NULL;
-    uint8_t* out = NULL;
+    FILE *fp = NULL;
+    uint8_t *out = NULL;
     size_t outl = 0;
-    ByteStream* stream = NULL;
+    ByteStream *stream = NULL;
 
     out = id3v2TagSerialize(tag, &outl);
 
-    if (out == NULL && outl == 0)
-    {
+    if (out == NULL && outl == 0) {
         return false;
     }
 
@@ -2347,25 +2299,23 @@ int id3v2WriteTagToFile(const char* filePath, Id3v2Tag* tag)
     fp = fopen(filePath, "r+b");
 
     // write to a new file
-    if(fp == NULL){
-
-        // create a new file and write the bytes to it    
+    if (fp == NULL) {
+        // create a new file and write the bytes to it
         fp = fopen(filePath, "wb");
 
-        if(fp == NULL){
+        if (fp == NULL) {
             byteStreamDestroy(stream);
             return false;
         }
 
-        if((fwrite(byteStreamCursor(stream), 1, stream->bufferSize, fp)) == 0){
+        if ((fwrite(byteStreamCursor(stream), 1, stream->bufferSize, fp)) == 0) {
             byteStreamDestroy(stream);
             (void) fclose(fp);
             return false;
         }
 
-    // update file
-    }else{
-
+        // update file
+    } else {
         char id[ID3V2_TAG_ID_SIZE] = {0};
         bool hasTag = false;
         long fileSize = 0;
@@ -2376,11 +2326,11 @@ int id3v2WriteTagToFile(const char* filePath, Id3v2Tag* tag)
         uint32_t oldTagSize = 0;
 
         // does the tag exist?
-        while(hasTag == false && feof(fp) == 0){
+        while (hasTag == false && feof(fp) == 0) {
             const size_t bytesRead = fread(id, sizeof(char), ID3V2_TAG_ID_SIZE, fp);
             upperBytes += bytesRead;
-            if(bytesRead != ID3V2_TAG_ID_SIZE){
-                if(ferror(fp)){
+            if (bytesRead != ID3V2_TAG_ID_SIZE) {
+                if (ferror(fp)) {
                     break;
                 }
                 break;
@@ -2390,16 +2340,15 @@ int id3v2WriteTagToFile(const char* filePath, Id3v2Tag* tag)
         }
 
         // 1. update flag is set
-        if(hasTag == true && tag->header->extendedHeader != NULL){
-
+        if (hasTag == true && tag->header->extendedHeader != NULL) {
             prepend = false;
-            
-            if(tag->header->extendedHeader->update == true){
+
+            if (tag->header->extendedHeader->update == true) {
                 prepend = true;
             }
-        
-        // 2. a tag exists
-        }else if(hasTag == true){
+
+            // 2. a tag exists
+        } else if (hasTag == true) {
             prepend = false;
 
             // get the tag size
@@ -2409,8 +2358,8 @@ int id3v2WriteTagToFile(const char* filePath, Id3v2Tag* tag)
             oldTagSize = byteSyncintDecode(btou32(tmp, 4));
             free(tmp);
 
-        // 3. no tag exists
-        }else{
+            // 3. no tag exists
+        } else {
             prepend = true;
         }
 
@@ -2424,7 +2373,7 @@ int id3v2WriteTagToFile(const char* filePath, Id3v2Tag* tag)
 
         // read the file
         tmp = malloc(fileSize);
-        if(fread(tmp, 1, fileSize, fp) != fileSize){
+        if (fread(tmp, 1, fileSize, fp) != fileSize) {
             free(tmp);
             (void) fclose(fp);
             byteStreamDestroy(stream);
@@ -2433,10 +2382,9 @@ int id3v2WriteTagToFile(const char* filePath, Id3v2Tag* tag)
 
         (void) fseek(fp, 0, SEEK_SET);
 
-        if(prepend){
-
+        if (prepend) {
             // write the stream to a file
-            if(fwrite(byteStreamCursor(stream), 1, stream->bufferSize, fp) != stream->bufferSize){
+            if (fwrite(byteStreamCursor(stream), 1, stream->bufferSize, fp) != stream->bufferSize) {
                 free(tmp);
                 (void) fclose(fp);
                 byteStreamDestroy(stream);
@@ -2444,7 +2392,7 @@ int id3v2WriteTagToFile(const char* filePath, Id3v2Tag* tag)
             }
 
             // write the existing file data back to the file
-            if(fwrite(tmp, 1, fileSize, fp) != fileSize){
+            if (fwrite(tmp, 1, fileSize, fp) != fileSize) {
                 free(tmp);
                 (void) fclose(fp);
                 byteStreamDestroy(stream);
@@ -2452,26 +2400,24 @@ int id3v2WriteTagToFile(const char* filePath, Id3v2Tag* tag)
             }
 
             free(tmp);
-        }else{
-            
+        } else {
             uint32_t offset = 10;
 
-            if(id3v2ReadFooterIndicator(tag->header) && tag->header->majorVersion == ID3V2_TAG_VERSION_4){
+            if (id3v2ReadFooterIndicator(tag->header) && tag->header->majorVersion == ID3V2_TAG_VERSION_4) {
                 offset += 10;
             }
 
-            if(tag->header->extendedHeader != NULL){
-                if(tag->header->extendedHeader->padding > 0){
+            if (tag->header->extendedHeader != NULL) {
+                if (tag->header->extendedHeader->padding > 0) {
                     offset += tag->header->extendedHeader->padding;
                 }
             }
 
             // prepend data above the tag
-            if(upperBytes > 0){
-                
+            if (upperBytes > 0) {
                 upperTmp = calloc(sizeof(uint8_t), upperBytes);
-                
-                if(fread(upperTmp, sizeof(char), upperBytes, fp) != upperBytes){
+
+                if (fread(upperTmp, sizeof(char), upperBytes, fp) != upperBytes) {
                     free(upperTmp);
                     free(tmp);
                     (void) fclose(fp);
@@ -2484,7 +2430,7 @@ int id3v2WriteTagToFile(const char* filePath, Id3v2Tag* tag)
             }
 
             // write the stream to a file
-            if(fwrite(byteStreamCursor(stream), 1, stream->bufferSize, fp) != stream->bufferSize){
+            if (fwrite(byteStreamCursor(stream), 1, stream->bufferSize, fp) != stream->bufferSize) {
                 free(tmp);
                 (void) fclose(fp);
                 byteStreamDestroy(stream);
@@ -2492,9 +2438,9 @@ int id3v2WriteTagToFile(const char* filePath, Id3v2Tag* tag)
             }
 
             // no need to read the old tag
-            fileSize = fileSize - ((long)(oldTagSize + offset)) - (long) upperBytes;
+            fileSize = fileSize - ((long) (oldTagSize + offset)) - (long) upperBytes;
 
-            if(fwrite(tmp + upperBytes + oldTagSize + offset, 1, fileSize, fp)){
+            if (fwrite(tmp + upperBytes + oldTagSize + offset, 1, fileSize, fp)) {
                 free(tmp);
                 (void) fclose(fp);
                 byteStreamDestroy(stream);

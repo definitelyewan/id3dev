@@ -18,7 +18,7 @@
 #include "id3v2/id3v2Context.h"
 #include "byteInt.h"
 
-static void id3v2CreateContentContext_validStruct(void **state){
+static void id3v2CreateContentContext_validStruct(void **state) {
     (void) state;
 
     Id3v2ContentContext *c = id3v2CreateContentContext(unknown_context, 6712, 10, 1);
@@ -28,24 +28,24 @@ static void id3v2CreateContentContext_validStruct(void **state){
     assert_int_equal(c->key, 6712);
     assert_int_equal(c->max, 10);
     assert_int_equal(c->min, 1);
-    
+
     free(c);
 }
-  
 
-static void id3v2DestroyContentContext_freeStruct(void **state){
+
+static void id3v2DestroyContentContext_freeStruct(void **state) {
     (void) state;
 
     Id3v2ContentContext *c = id3v2CreateContentContext(unknown_context, 6712, 10, 1);
     id3v2DestroyContentContext(&c);
-    
+
     assert_null(c);
 }
 
-static void id3v2CreateTextFrameContext_valid(void **state){
+static void id3v2CreateTextFrameContext_valid(void **state) {
     (void) state;
 
-    List* l = id3v2CreateTextFrameContext();
+    List *l = id3v2CreateTextFrameContext();
 
     assert_non_null(l);
 
@@ -68,10 +68,10 @@ static void id3v2CreateTextFrameContext_valid(void **state){
     listFree(l);
 }
 
-static void id3v2CreateUserDefinedTextFrameContext_valid(void **state){
+static void id3v2CreateUserDefinedTextFrameContext_valid(void **state) {
     (void) state;
 
-    List* l = id3v2CreateUserDefinedTextFrameContext();
+    List *l = id3v2CreateUserDefinedTextFrameContext();
 
     assert_non_null(l);
 
@@ -97,13 +97,13 @@ static void id3v2CreateUserDefinedTextFrameContext_valid(void **state){
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 1);
     assert_int_equal(c->key, id3v2djb2("text"));
-    
+
     listFree(l);
 }
 
-static void id3v2CreateURLFrameContext_valid(void **state){
+static void id3v2CreateURLFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateURLFrameContext();
+    List *l = id3v2CreateURLFrameContext();
 
     assert_non_null(l);
 
@@ -117,12 +117,11 @@ static void id3v2CreateURLFrameContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("url"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateUserDefinedURLFrameContext_valid(void **state){
+static void id3v2CreateUserDefinedURLFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateUserDefinedURLFrameContext();
+    List *l = id3v2CreateUserDefinedURLFrameContext();
 
     assert_non_null(l);
 
@@ -150,12 +149,11 @@ static void id3v2CreateUserDefinedURLFrameContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("url"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateAttachedPictureFrameContext_unknownVersion(void **state){
+static void id3v2CreateAttachedPictureFrameContext_unknownVersion(void **state) {
     (void) state;
-    List* l = id3v2CreateAttachedPictureFrameContext(12312);
+    List *l = id3v2CreateAttachedPictureFrameContext(12312);
 
     assert_non_null(l);
 
@@ -197,12 +195,11 @@ static void id3v2CreateAttachedPictureFrameContext_unknownVersion(void **state){
     assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateAttachedPictureFrameContext_version2(void **state){
+static void id3v2CreateAttachedPictureFrameContext_version2(void **state) {
     (void) state;
-    List* l = id3v2CreateAttachedPictureFrameContext(ID3V2_TAG_VERSION_2);
+    List *l = id3v2CreateAttachedPictureFrameContext(ID3V2_TAG_VERSION_2);
 
     assert_non_null(l);
 
@@ -244,12 +241,11 @@ static void id3v2CreateAttachedPictureFrameContext_version2(void **state){
     assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateAttachedPictureFrameContext_version3(void **state){
+static void id3v2CreateAttachedPictureFrameContext_version3(void **state) {
     (void) state;
-    List* l = id3v2CreateAttachedPictureFrameContext(ID3V2_TAG_VERSION_3);
+    List *l = id3v2CreateAttachedPictureFrameContext(ID3V2_TAG_VERSION_3);
 
     assert_non_null(l);
 
@@ -291,12 +287,11 @@ static void id3v2CreateAttachedPictureFrameContext_version3(void **state){
     assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateAudioEncryptionContext_valid(void **state){
+static void id3v2CreateAudioEncryptionContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateAudioEncryptionFrameContext();
+    List *l = id3v2CreateAudioEncryptionFrameContext();
 
     assert_non_null(l);
 
@@ -333,9 +328,9 @@ static void id3v2CreateAudioEncryptionContext_valid(void **state){
     listFree(l);
 }
 
-static void id3v2CreateAudioSeekPointIndexFrameContext_valid(void **state){
+static void id3v2CreateAudioSeekPointIndexFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateAudioSeekPointIndexFrameContext();
+    List *l = id3v2CreateAudioSeekPointIndexFrameContext();
 
     assert_non_null(l);
 
@@ -351,9 +346,9 @@ static void id3v2CreateAudioSeekPointIndexFrameContext_valid(void **state){
     listFree(l);
 }
 
-static void id3v2CreateCommentFrameContext_valid(void **state){
+static void id3v2CreateCommentFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateCommentFrameContext();
+    List *l = id3v2CreateCommentFrameContext();
 
     assert_non_null(l);
 
@@ -388,12 +383,11 @@ static void id3v2CreateCommentFrameContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("text"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateCommercialFrameContext_valid(void **state){
+static void id3v2CreateCommercialFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateCommercialFrameContext();
+    List *l = id3v2CreateCommercialFrameContext();
 
     assert_non_null(l);
 
@@ -465,9 +459,9 @@ static void id3v2CreateCommercialFrameContext_valid(void **state){
     listFree(l);
 }
 
-static void id3v2CreateEncryptedMetaFrameContext_valid(void **state){
+static void id3v2CreateEncryptedMetaFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateEncryptedMetaFrameContext();
+    List *l = id3v2CreateEncryptedMetaFrameContext();
 
     assert_non_null(l);
 
@@ -497,9 +491,9 @@ static void id3v2CreateEncryptedMetaFrameContext_valid(void **state){
     listFree(l);
 }
 
-static void id3v2CreateMusicCDIdentifierFrameContext_valid(void **state){
+static void id3v2CreateMusicCDIdentifierFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateMusicCDIdentifierFrameContext();
+    List *l = id3v2CreateMusicCDIdentifierFrameContext();
 
     assert_non_null(l);
 
@@ -515,9 +509,9 @@ static void id3v2CreateMusicCDIdentifierFrameContext_valid(void **state){
     listFree(l);
 }
 
-static void id3v2CreatePlayCounterFrameContext_valid(void **state){
+static void id3v2CreatePlayCounterFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreatePlayCounterFrameContext();
+    List *l = id3v2CreatePlayCounterFrameContext();
 
     assert_non_null(l);
 
@@ -533,9 +527,9 @@ static void id3v2CreatePlayCounterFrameContext_valid(void **state){
     listFree(l);
 }
 
-static void id3v2CreateEqualizationFrameContext_validVersion2(void **state){
+static void id3v2CreateEqualizationFrameContext_validVersion2(void **state) {
     (void) state;
-    List* l = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_2);
+    List *l = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_2);
 
     assert_non_null(l);
 
@@ -579,9 +573,9 @@ static void id3v2CreateEqualizationFrameContext_validVersion2(void **state){
     listFree(l);
 }
 
-void id3v2CreateEqualizationFrameContext_wrongVersion(void **state){
+void id3v2CreateEqualizationFrameContext_wrongVersion(void **state) {
     (void) state;
-    List* l = id3v2CreateEqualizationFrameContext(123);
+    List *l = id3v2CreateEqualizationFrameContext(123);
 
     assert_non_null(l);
 
@@ -595,12 +589,11 @@ void id3v2CreateEqualizationFrameContext_wrongVersion(void **state){
     assert_int_equal(c->key, id3v2djb2("unknown"));
 
     listFree(l);
-
 }
 
-void id3v2CreateEqualizationFrameContext_validVersion4(void **state){
+void id3v2CreateEqualizationFrameContext_validVersion4(void **state) {
     (void) state;
-    List* l = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_4);
+    List *l = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_4);
 
     assert_non_null(l);
 
@@ -635,12 +628,11 @@ void id3v2CreateEqualizationFrameContext_validVersion4(void **state){
     assert_int_equal(c->key, id3v2djb2("iter"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateEventTimingCodesFrameContext_valid(void **state){
+static void id3v2CreateEventTimingCodesFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateEventTimingCodesFrameContext();
+    List *l = id3v2CreateEventTimingCodesFrameContext();
 
     assert_non_null(l);
 
@@ -677,9 +669,9 @@ static void id3v2CreateEventTimingCodesFrameContext_valid(void **state){
     listFree(l);
 }
 
-static void id3v2CreateGeneralEncapsulatedObjectFrameContext_valid(void **state){
+static void id3v2CreateGeneralEncapsulatedObjectFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateGeneralEncapsulatedObjectFrameContext();
+    List *l = id3v2CreateGeneralEncapsulatedObjectFrameContext();
 
     assert_non_null(l);
 
@@ -721,12 +713,11 @@ static void id3v2CreateGeneralEncapsulatedObjectFrameContext_valid(void **state)
     assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateInvolvedPeopleListFrameContext_valid(void **state){
+static void id3v2CreateInvolvedPeopleListFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateInvolvedPeopleListFrameContext();
+    List *l = id3v2CreateInvolvedPeopleListFrameContext();
 
     assert_non_null(l);
 
@@ -763,9 +754,9 @@ static void id3v2CreateInvolvedPeopleListFrameContext_valid(void **state){
     listFree(l);
 }
 
-static void id3v2CreateLinkedInformationFrameContext_valid(void **state){
+static void id3v2CreateLinkedInformationFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateLinkedInformationFrameContext();
+    List *l = id3v2CreateLinkedInformationFrameContext();
 
     assert_non_null(l);
 
@@ -786,12 +777,11 @@ static void id3v2CreateLinkedInformationFrameContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateMPEGLocationLookupTableFrameContext_valid(void **state){
+static void id3v2CreateMPEGLocationLookupTableFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateMPEGLocationLookupTableFrameContext();
+    List *l = id3v2CreateMPEGLocationLookupTableFrameContext();
 
     assert_non_null(l);
 
@@ -805,12 +795,11 @@ static void id3v2CreateMPEGLocationLookupTableFrameContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateOwnershipFrameContext_valid(void **state){
+static void id3v2CreateOwnershipFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateOwnershipFrameContext();
+    List *l = id3v2CreateOwnershipFrameContext();
 
     assert_non_null(l);
 
@@ -845,12 +834,11 @@ static void id3v2CreateOwnershipFrameContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("name"));
 
     listFree(l);
-
 }
 
-static void id3v2CreatePopularimeterFrameContext_valid(void **state){
+static void id3v2CreatePopularimeterFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreatePopularimeterFrameContext();
+    List *l = id3v2CreatePopularimeterFrameContext();
 
     assert_non_null(l);
 
@@ -878,12 +866,11 @@ static void id3v2CreatePopularimeterFrameContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
-
 }
 
-static void id3v2CreatePositionSynchronisationFrameContext_valid(void **state){
+static void id3v2CreatePositionSynchronisationFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreatePositionSynchronisationFrameContext();
+    List *l = id3v2CreatePositionSynchronisationFrameContext();
 
     assert_non_null(l);
 
@@ -904,12 +891,11 @@ static void id3v2CreatePositionSynchronisationFrameContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("stamp"));
 
     listFree(l);
-
 }
 
-static void id3v2CreatePrivateFrameContext_valid(void **state){
+static void id3v2CreatePrivateFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreatePrivateFrameContext();
+    List *l = id3v2CreatePrivateFrameContext();
 
     assert_non_null(l);
 
@@ -930,12 +916,10 @@ static void id3v2CreatePrivateFrameContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateRecommendedBufferSizeFrameContext_valid(){
-
-    List* l = id3v2CreateRecommendedBufferSizeFrameContext();
+static void id3v2CreateRecommendedBufferSizeFrameContext_valid() {
+    List *l = id3v2CreateRecommendedBufferSizeFrameContext();
 
     assert_non_null(l);
 
@@ -963,12 +947,11 @@ static void id3v2CreateRecommendedBufferSizeFrameContext_valid(){
     assert_int_equal(c->key, id3v2djb2("offset"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateRelativeVolumeAdjustmentFrameContext_valid(void **state){
+static void id3v2CreateRelativeVolumeAdjustmentFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateRelativeVolumeAdjustmentFrameContext(1);
+    List *l = id3v2CreateRelativeVolumeAdjustmentFrameContext(1);
 
     assert_non_null(l);
 
@@ -982,12 +965,11 @@ static void id3v2CreateRelativeVolumeAdjustmentFrameContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateReverbFrameContext_valid(void **state){
+static void id3v2CreateReverbFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateReverbFrameContext();
+    List *l = id3v2CreateReverbFrameContext();
 
     assert_non_null(l);
 
@@ -1071,12 +1053,11 @@ static void id3v2CreateReverbFrameContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("p right"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateSeekPointIndexFrameContext_valid(void **state){
+static void id3v2CreateSeekPointIndexFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateSeekFrameContext();
+    List *l = id3v2CreateSeekFrameContext();
 
     assert_non_null(l);
 
@@ -1092,9 +1073,9 @@ static void id3v2CreateSeekPointIndexFrameContext_valid(void **state){
     listFree(l);
 }
 
-static void id3v2CreateSignatureFrameContext_valid(void **state){
+static void id3v2CreateSignatureFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateSignatureFrameContext();
+    List *l = id3v2CreateSignatureFrameContext();
 
     assert_non_null(l);
 
@@ -1115,12 +1096,11 @@ static void id3v2CreateSignatureFrameContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateSynchronisedLyricFrameContext_valid(void **state){
+static void id3v2CreateSynchronisedLyricFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateSynchronisedLyricFrameContext();
+    List *l = id3v2CreateSynchronisedLyricFrameContext();
 
     assert_non_null(l);
 
@@ -1182,12 +1162,11 @@ static void id3v2CreateSynchronisedLyricFrameContext_valid(void **state){
     assert_int_equal(c->min, 5);
     assert_int_equal(c->key, id3v2djb2("iter"));
     listFree(l);
-
 }
 
-static void id3v2CreateSynchronisedTempoCodesFrameContext_valid(void **state){
+static void id3v2CreateSynchronisedTempoCodesFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateSynchronisedTempoCodesFrameContext();
+    List *l = id3v2CreateSynchronisedTempoCodesFrameContext();
 
     assert_non_null(l);
 
@@ -1210,9 +1189,9 @@ static void id3v2CreateSynchronisedTempoCodesFrameContext_valid(void **state){
     listFree(l);
 }
 
-static void id3v2CreateUniqueFileIdentifierFrameContext_valid(void **state){
+static void id3v2CreateUniqueFileIdentifierFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateUniqueFileIdentifierFrameContext();
+    List *l = id3v2CreateUniqueFileIdentifierFrameContext();
 
     assert_non_null(l);
 
@@ -1233,12 +1212,11 @@ static void id3v2CreateUniqueFileIdentifierFrameContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("data"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateTermsOfUseFrameContext_valid(void **state){
+static void id3v2CreateTermsOfUseFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateTermsOfUseFrameContext();
+    List *l = id3v2CreateTermsOfUseFrameContext();
 
     assert_non_null(l);
 
@@ -1266,12 +1244,11 @@ static void id3v2CreateTermsOfUseFrameContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("text"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateUnsynchronisedLyricFrameContext_valid(void **state){
+static void id3v2CreateUnsynchronisedLyricFrameContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateUnsynchronisedLyricFrameContext();
+    List *l = id3v2CreateUnsynchronisedLyricFrameContext();
 
     assert_non_null(l);
 
@@ -1306,12 +1283,11 @@ static void id3v2CreateUnsynchronisedLyricFrameContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("text"));
 
     listFree(l);
-
 }
 
-static void id3v2CreateGenericContext_valid(void **state){
+static void id3v2CreateGenericContext_valid(void **state) {
     (void) state;
-    List* l = id3v2CreateGenericFrameContext();
+    List *l = id3v2CreateGenericFrameContext();
 
     assert_non_null(l);
 
@@ -1325,10 +1301,9 @@ static void id3v2CreateGenericContext_valid(void **state){
     assert_int_equal(c->key, id3v2djb2("?"));
 
     listFree(l);
-
 }
 
-static void id3v2ContextSerialize_valid(void **state){
+static void id3v2ContextSerialize_valid(void **state) {
     (void) state;
     Id3v2ContentContext *cc = id3v2CreateContentContext(iter_context, id3v2djb2("test"), INT16_MAX, 1);
     size_t outl = 0;
@@ -1352,7 +1327,7 @@ static void id3v2ContextSerialize_valid(void **state){
 }
 
 
-static void id3v2ContextSerialize_min(void **state){
+static void id3v2ContextSerialize_min(void **state) {
     (void) state;
 
     Id3v2ContentContext *cc = id3v2CreateContentContext(0, 0, 0, 0);
@@ -1376,48 +1351,46 @@ static void id3v2ContextSerialize_min(void **state){
     free(start);
 }
 
-static void id3v2ContextToJSON_valid(void **state){
+static void id3v2ContextToJSON_valid(void **state) {
     (void) state;
 
     Id3v2ContentContext *cc = id3v2CreateContentContext(iter_context, id3v2djb2("test"), INT16_MAX, 1);
     char *json = id3v2ContextToJSON(cc);
     assert_non_null(json);
-    assert_string_equal(json,"{\"type\":7,\"key\":6385723493,\"max\":32767,\"min\":1}");
+    assert_string_equal(json, "{\"type\":7,\"key\":6385723493,\"max\":32767,\"min\":1}");
 
     id3v2DestroyContentContext(&cc);
     free(json);
 }
 
 
-static void id3v2ContextToJSON_min(void **state){
+static void id3v2ContextToJSON_min(void **state) {
     (void) state;
 
     Id3v2ContentContext *cc = id3v2CreateContentContext(0, 0, 0, 0);
     char *json = id3v2ContextToJSON(cc);
 
     assert_non_null(json);
-    assert_string_equal(json,"{\"type\":0,\"key\":0,\"max\":0,\"min\":0}");
+    assert_string_equal(json, "{\"type\":0,\"key\":0,\"max\":0,\"min\":0}");
 
     id3v2DestroyContentContext(&cc);
     free(json);
 }
 
-static void id3v2ContextToJSON_NULL(void **state){
+static void id3v2ContextToJSON_NULL(void **state) {
     (void) state;
 
     char *json = id3v2ContextToJSON(NULL);
 
     assert_non_null(json);
-    assert_string_equal(json,"{}");
+    assert_string_equal(json, "{}");
     free(json);
 }
 
 
-
-int main(){
-
+int main() {
     const struct CMUnitTest tests[] = {
-        
+
         // id3v2CreateContentContext tests
         cmocka_unit_test(id3v2CreateContentContext_validStruct),
 
@@ -1466,7 +1439,7 @@ int main(){
         cmocka_unit_test(id3v2CreateEqualizationFrameContext_wrongVersion),
         cmocka_unit_test(id3v2CreateEqualizationFrameContext_validVersion2),
         cmocka_unit_test(id3v2CreateEqualizationFrameContext_validVersion4),
-        
+
         // id3v2CreateEventTimingCodesFrameContext tests
         cmocka_unit_test(id3v2CreateEventTimingCodesFrameContext_valid),
 
