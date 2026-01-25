@@ -1,11 +1,11 @@
 /**
  * @file id3v2TagIdentity.h
  * @author Ewan Jones
- * @brief Declarations for id3v2 tag headers and extended headers
- * @version 2.0
- * @date 2023-12-13
+ * @brief Function definitions of ID3v2 tag header and tag structure creation, manipulation, serialization, and JSON conversion
+ * @version 26..01
+ * @date 2023-12-13 - 2026-01-13
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) 2023 - 2026
  * 
  */
 

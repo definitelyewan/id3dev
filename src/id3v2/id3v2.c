@@ -1,11 +1,11 @@
 /**
  * @file id3v2.c
  * @author Ewan Jones
- * @brief Contains all main functions for the id3v2 library.
- * @version 0.1
- * @date 2024-04-11
+ * @brief Function implementation of ID3v2 tag operations including reading/writing metadata frames, tag serialization, and file I/O.
+ * @version 26.01
+ * @date 2024-04-11 - 2026-01-25
  * 
- * @copyright Copyright (c) 2024
+ * @copyright Copyright (c) 2024 - 2026
  * 
  */
 
@@ -22,11 +22,11 @@
 #include "id3v2/id3v2TagIdentity.h"
 
 /**
- * @brief Generates a Id3v2Tag structure from a file. If
- * this function fails to generate a tag, it will return NULL.
- * 
- * @param filename 
- * @return Id3v2Tag* 
+ * @brief Reads and parses an ID3v2 tag from a file.
+ * @details Loads file contents into memory, parses the ID3v2 tag structure, and cleans up temporary resources.
+ * Returns NULL on any failure (invalid filename, file I/O error, or parse error).
+ * @param filename - Path to the file containing an ID3v2 tag.
+ * @return Id3v2Tag* - Newly allocated tag on success, NULL on failure. Caller must free with id3v2DestroyTag.
  */
 Id3v2Tag *id3v2TagFromFile(const char *filename) {
     ByteStream *stream = NULL;
@@ -48,10 +48,11 @@ Id3v2Tag *id3v2TagFromFile(const char *filename) {
 }
 
 /**
- * @brief Deep copies an Id3v2Tag structure.
- *
- * @param toCopy
- * @return Id3v2Tag*
+ * @brief Creates a deep copy of an ID3v2 tag structure.
+ * @details Recursively duplicates the tag header, extended header (if present), and all frames.
+ * Returns NULL if the source tag or its header is invalid.
+ * @param toCopy - Source tag to duplicate.
+ * @return Id3v2Tag* - Newly allocated deep copy on success, NULL if source is invalid. Caller must free with id3v2DestroyTag.
  */
 Id3v2Tag *id3v2CopyTag(const Id3v2Tag *toCopy) {
     Id3v2TagHeader *header = NULL;
@@ -78,12 +79,12 @@ Id3v2Tag *id3v2CopyTag(const Id3v2Tag *toCopy) {
 }
 
 /**
- * @brief Compares two tags and returns true if they are the same, false otherwise.
- *
- * @param tag1
- * @param tag2
- * @return true
- * @return false
+ * @brief Performs deep structural comparison of two ID3v2 tags for equality.
+ * @details Compares tag headers (version, flags), extended headers (if present), and frames in order.
+ * Returns false if tags differ in structure, metadata, or frame content/ordering.
+ * @param tag1 - First tag to compare.
+ * @param tag2 - Second tag to compare.
+ * @return true if tags are structurally identical, false if they differ or either is NULL.
  */
 bool id3v2CompareTag(Id3v2Tag *tag1, Id3v2Tag *tag2) {
     if (tag1 == NULL || tag2 == NULL) {
@@ -162,12 +163,12 @@ bool id3v2CompareTag(Id3v2Tag *tag1, Id3v2Tag *tag2) {
 }
 
 /**
- * @brief Returns a copy of the first occurrence of a frame with the given id. If
- * no frame is found, this function will return NULL.
- *
- * @param id
- * @param tag
- * @return Id3v2Frame*
+ * @brief Searches for and returns a copy of the first frame matching the given ID.
+ * @details Traverses frames in order, comparing IDs up to the null terminator or ID3V2_FRAME_ID_MAX_SIZE.
+ * Returns NULL if no matching frame exists or inputs are invalid.
+ * @param id - Frame ID string to search for (max ID3V2_FRAME_ID_MAX_SIZE bytes).
+ * @param tag - Tag to search within.
+ * @return Id3v2Frame* - Deep copy of first matching frame on success, NULL if not found. Caller must free with id3v2DestroyFrame.
  */
 Id3v2Frame *id3v2ReadFrameByID(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag *tag) {
     if (id == NULL || tag == NULL) {
@@ -197,12 +198,12 @@ Id3v2Frame *id3v2ReadFrameByID(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag 
 }
 
 /**
- * @brief Removes a frame from a tag with a matching ID. if no frame is found,
- * this function will return 0. Otherwise, it will return 1.
- *
- * @param id
- * @param tag
- * @return int
+ * @brief Locates and removes the first frame matching the given ID from a tag.
+ * @details Searches for a frame with the specified ID, detaches it from the tag's frame list, and frees associated memory.
+ * Only removes the first occurrence if multiple frames share the same ID.
+ * @param id - Frame ID string to search for.
+ * @param tag - Tag to remove the frame from.
+ * @return int - 1 if a frame was found and removed, 0 if no matching frame exists.
  */
 int id3v2RemoveFrameByID(const char *id, Id3v2Tag *tag) {
     Id3v2Frame *test = NULL;
@@ -222,14 +223,14 @@ int id3v2RemoveFrameByID(const char *id, Id3v2Tag *tag) {
 }
 
 /**
- * @brief Creates a new text frame with the given id, desired encoding, and string null terminated string. if successful,
- * the frame will be inserted into the tag and true will be returned otherwise, no tag will be created and false will be returned.
- *
- * @param id
- * @param encoding
- * @param string
- * @param tag
- * @return int
+ * @brief Creates and inserts a new text frame with the specified encoding into a tag.
+ * @details Converts the input UTF-8 string to the target encoding, prepends BOM if needed, and adds appropriate padding for UTF-16.
+ * Returns false on validation failures, encoding conversion errors, or memory allocation failures without modifying the tag.
+ * @param id - Frame ID string (max ID3V2_FRAME_ID_MAX_SIZE bytes).
+ * @param encoding - Target text encoding (0-3: ISO-8859-1, UTF-16, UTF-16BE, UTF-8).
+ * @param string - Null-terminated UTF-8 string to encode and insert.
+ * @param tag - Tag to insert the frame into.
+ * @return int - 1 (true) if frame created and inserted successfully, 0 (false) on failure.
  */
 int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t encoding, const char *string,
                          Id3v2Tag *tag) {
@@ -306,10 +307,11 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
 }
 
 /**
- * @brief Returns the major version of a tag. On success, a positive integer will be returned. Otherwise, -1 will be returned.
- * @details This function just returns tag->header->majorVersion, so I don't see a need to test it considering all the error checking.
- * @param tag
- * @return int
+ * @brief Retrieves the major version number from an ID3v2 tag.
+ * @details Extracts the major version field from the tag header (e.g., 3 for ID3v2.3, 4 for ID3v2.4).
+ * Returns -1 if the tag or header is invalid.
+ * @param tag - Tag to query for version information.
+ * @return int - Major version number (2-4) on success, -1 if tag or header is NULL.
  */
 int id3v2ReadTagVersion(const Id3v2Tag *tag) {
     if (tag == NULL) {
@@ -324,12 +326,13 @@ int id3v2ReadTagVersion(const Id3v2Tag *tag) {
 }
 
 /**
- * @brief Reads the content of a text frame with the given id. If no frame is found,
- * NULL is returned.
- *
- * @param id
- * @param tag
- * @return char*
+ * @brief Extracts the text content from a text frame with the specified ID.
+ * @details Locates the frame, validates its structure (2 contexts/entries: numeric encoding + encoded string),
+ * decodes the text content, and returns it as a newly allocated string. Returns NULL if frame is not found,
+ * has invalid structure, or is not a text frame type.
+ * @param id - Frame ID string to search for (max ID3V2_FRAME_ID_MAX_SIZE bytes).
+ * @param tag - Tag to search within.
+ * @return char* - Newly allocated decoded text content on success, NULL if frame not found or invalid. Caller must free.
  */
 char *id3v2ReadTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag *tag) {
     Id3v2Frame *frame = id3v2ReadFrameByID(id, tag);
@@ -384,11 +387,11 @@ char *id3v2ReadTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag
 }
 
 /**
- * @brief Reads the first Title/Song Name/Content Description (TT2 or TIT2) of a tag.
- * If no title is found, NULL is returned.
- *
- * @param tag
- * @return char*
+ * @brief Extracts the title/song name from an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TT2 for v2.x, TIT2 for v3.x/v4.x).
+ * Returns NULL if the tag is invalid, version is unsupported, or no title frame exists.
+ * @param tag - Tag to read the title from.
+ * @return char* - Newly allocated title string on success, NULL if not found or invalid. Caller must free.
  */
 char *id3v2ReadTitle(Id3v2Tag *tag) {
     if (tag == NULL) {
@@ -413,11 +416,11 @@ char *id3v2ReadTitle(Id3v2Tag *tag) {
 }
 
 /**
- * @brief Reads the first Lead artist/Lead performer/Soloist/Performing group (TP1 or TPE1)
- * of a tag. If no artist is found, NULL is returned.
- *
- * @param tag
- * @return char*
+ * @brief Extracts the lead artist/performer from an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TP1 for v2.x, TPE1 for v3.x/v4.x).
+ * Returns NULL if the tag is invalid, version is unsupported, or no artist frame exists.
+ * @param tag - Tag to read the artist from.
+ * @return char* - Newly allocated artist string on success, NULL if not found or invalid. Caller must free.
  */
 char *id3v2ReadArtist(Id3v2Tag *tag) {
     if (tag == NULL) {
@@ -442,11 +445,11 @@ char *id3v2ReadArtist(Id3v2Tag *tag) {
 }
 
 /**
- * @brief Reads the first Band/Orchestra/Accompaniment (TP2 or TPE2) of a tag.
- * If no album artist is found, NULL is returned.
- *
- * @param tag
- * @return char*
+ * @brief Extracts the album artist/band/orchestra from an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TP2 for v2.x, TPE2 for v3.x/v4.x).
+ * Returns NULL if the tag is invalid, version is unsupported, or no album artist frame exists.
+ * @param tag - Tag to read the album artist from.
+ * @return char* - Newly allocated album artist string on success, NULL if not found or invalid. Caller must free.
  */
 char *id3v2ReadAlbumArtist(Id3v2Tag *tag) {
     if (tag == NULL) {
@@ -471,11 +474,11 @@ char *id3v2ReadAlbumArtist(Id3v2Tag *tag) {
 }
 
 /**
- * @brief Reads the first Album/Movie/Show title (TAL or TALB) of a tag.
- * If no album is found, NULL is returned.
- *
- * @param tag
- * @return char*
+ * @brief Extracts the album name from an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TAL for v2.x, TALB for v3.x/v4.x).
+ * Returns NULL if the tag is invalid, version is unsupported, or no album frame exists.
+ * @param tag - Tag to read the album from.
+ * @return char* - Newly allocated album string on success, NULL if not found or invalid. Caller must free.
  */
 char *id3v2ReadAlbum(Id3v2Tag *tag) {
     if (tag == NULL) {
@@ -500,11 +503,11 @@ char *id3v2ReadAlbum(Id3v2Tag *tag) {
 }
 
 /**
- * @brief Reads the first Year (TYE or TYER) of a tag. If no year is found,
- * NULL is returned.
- *
- * @param tag
- * @return char*
+ * @brief Extracts the year from an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TYE for v2.x, TYER for v3.x/v4.x).
+ * Returns NULL if the tag is invalid, version is unsupported, or no year frame exists.
+ * @param tag - Tag to read the year from.
+ * @return char* - Newly allocated year string on success, NULL if not found or invalid. Caller must free.
  */
 char *id3v2ReadYear(Id3v2Tag *tag) {
     if (tag == NULL) {
@@ -529,11 +532,11 @@ char *id3v2ReadYear(Id3v2Tag *tag) {
 }
 
 /**
- * @brief Reads the first Content type (TCO or TCON) of a tag.
- * If no track is found, NULL is returned.
- *
- * @param tag
- * @return char*
+ * @brief Extracts the genre/content type from an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TCO for v2.x, TCON for v3.x/v4.x).
+ * Returns NULL if the tag is invalid, version is unsupported, or no genre frame exists.
+ * @param tag - Tag to read the genre from.
+ * @return char* - Newly allocated genre string on success, NULL if not found or invalid. Caller must free.
  */
 char *id3v2ReadGenre(Id3v2Tag *tag) {
     if (tag == NULL) {
@@ -558,11 +561,11 @@ char *id3v2ReadGenre(Id3v2Tag *tag) {
 }
 
 /**
- * @brief Reads the first Track number/Position in set (TRK or TRCK) of a tag.
- * If no track is found, NULL is returned.
- *
- * @param tag
- * @return char*
+ * @brief Extracts the track number/position from an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TRK for v2.x, TRCK for v3.x/v4.x).
+ * Returns NULL if the tag is invalid, version is unsupported, or no track frame exists.
+ * @param tag - Tag to read the track number from.
+ * @return char* - Newly allocated track string on success, NULL if not found or invalid. Caller must free.
  */
 char *id3v2ReadTrack(Id3v2Tag *tag) {
     if (tag == NULL) {
@@ -587,11 +590,11 @@ char *id3v2ReadTrack(Id3v2Tag *tag) {
 }
 
 /**
- * @brief Reads the first composer (TCM or TCOM) of a tag. If no composer is found,
- * NULL is returned.
- *
- * @param tag
- * @return char*
+ * @brief Extracts the composer from an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TCM for v2.x, TCOM for v3.x/v4.x).
+ * Returns NULL if the tag is invalid, version is unsupported, or no composer frame exists.
+ * @param tag - Tag to read the composer from.
+ * @return char* - Newly allocated composer string on success, NULL if not found or invalid. Caller must free.
  */
 char *id3v2ReadComposer(Id3v2Tag *tag) {
     if (tag == NULL) {
@@ -616,11 +619,11 @@ char *id3v2ReadComposer(Id3v2Tag *tag) {
 }
 
 /**
- * @brief Reads the first Disc number (TPA or TPOS) of a tag. If no disc is found,
- * NULL is returned.
- *
- * @param tag
- * @return char*
+ * @brief Extracts the disc number/position from an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TPA for v2.x, TPOS for v3.x/v4.x).
+ * Returns NULL if the tag is invalid, version is unsupported, or no disc frame exists.
+ * @param tag - Tag to read the disc number from.
+ * @return char* - Newly allocated disc string on success, NULL if not found or invalid. Caller must free.
  */
 char *id3v2ReadDisc(Id3v2Tag *tag) {
     if (tag == NULL) {
@@ -645,11 +648,12 @@ char *id3v2ReadDisc(Id3v2Tag *tag) {
 }
 
 /**
- * @brief Reads the first Unsynchronised Lyric/Text Transcription (ULT or USLT) of a tag.
- * If no lyrics are found, NULL is returned.
- *
- * @param tag
- * @return char*
+ * @brief Extracts unsynchronised lyrics/text transcription from an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (ULT for v2.x, USLT for v3.x/v4.x).
+ * Validates frame structure (4 contexts/entries: encoding, language, content descriptor, lyrics text) and extracts the lyrics content.
+ * Returns NULL if the tag is invalid, version is unsupported, frame not found, or frame structure is invalid.
+ * @param tag - Tag to read the lyrics from.
+ * @return char* - Newly allocated lyrics string on success, NULL if not found or invalid. Caller must free.
  */
 char *id3v2ReadLyrics(Id3v2Tag *tag) {
     Id3v2Frame *frame = NULL;
@@ -713,11 +717,12 @@ char *id3v2ReadLyrics(Id3v2Tag *tag) {
 }
 
 /**
- * @brief Reads the first Comment (COM or COMM) of a tag. If no comment is found,
- * NULL is returned.
- *
- * @param tag
- * @return char*
+ * @brief Extracts the comment text from an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (COM for v2.x, COMM for v3.x/v4.x).
+ * Validates frame structure (4 contexts/entries: encoding, language, short description, comment text) and extracts the comment content.
+ * Returns NULL if the tag is invalid, version is unsupported, frame not found, or structure is invalid.
+ * @param tag - Tag to read the comment from.
+ * @return char* - Newly allocated comment string on success, NULL if not found or invalid. Caller must free.
  */
 char *id3v2ReadComment(Id3v2Tag *tag) {
     Id3v2Frame *frame = NULL;
@@ -781,13 +786,13 @@ char *id3v2ReadComment(Id3v2Tag *tag) {
 }
 
 /**
- * @brief Reads the first Attached picture (PIC or APIC) of a tag.
- * If no picture is found, NULL is returned.
- *
- * @param type
- * @param tag
- * @param dataSize
- * @return char*
+ * @brief Extracts picture/artwork data of a specific type from an ID3v2 tag.
+ * @details Searches for picture frames (PIC/APIC) matching the requested picture type, traversing all frames until a match is found.
+ * Clamps invalid type values to 0x00 (Other). Returns NULL if no matching picture exists or tag is invalid.
+ * @param type - Picture type to search for.
+ * @param tag - Tag to search for picture data.
+ * @param dataSize - Output parameter receiving the size of the picture data in bytes, set to 0 on failure.
+ * @return uint8_t* - Newly allocated binary picture data on success, NULL if not found. Caller must free.
  */
 uint8_t *id3v2ReadPicture(uint8_t type, const Id3v2Tag *tag, size_t *dataSize) {
     *dataSize = 0;
@@ -819,15 +824,14 @@ uint8_t *id3v2ReadPicture(uint8_t type, const Id3v2Tag *tag, size_t *dataSize) {
 }
 
 /**
- * @brief Writes a null-terminated UTF8 string to a text frame with a given id.
- * The provided string will be converted to the appropriate encoding for the frame.
- * If no text frame is found one will be created with a UTF16LE encoding.
- * Any failure will result in this function returning false otherwise, true.
- *
- * @param id
- * @param string
- * @param tag
- * @return int
+ * @brief Writes UTF-8 text content to a text frame, creating it if necessary.
+ * @details Searches for an existing text frame with the specified ID. If found, converts the input string to the frame's
+ * existing encoding and updates the content. If not found, creates a new text frame with UTF16LE encoding. Handles BOM
+ * prepending and UTF-16 padding automatically. Returns false on validation failures, conversion errors, or write failures.
+ * @param id - Frame ID string to write to (max ID3V2_FRAME_ID_MAX_SIZE bytes).
+ * @param string - Null-terminated UTF-8 string to write.
+ * @param tag - Tag to write the frame content into.
+ * @return int - 1 (true) if content written successfully, 0 (false) on failure.
  */
 int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const char *string, Id3v2Tag *tag) {
     if (id == NULL || string == NULL || tag == NULL) {
@@ -933,11 +937,12 @@ int id3v2WriteTextFrameContent(const char id[ID3V2_FRAME_ID_MAX_SIZE], const cha
 }
 
 /**
- * @brief Writes a new title to the first Title/Song Name/Content Description (TT2 or TIT2)
- * frame of a tag. If this function fails false is returned otherwise, true.
- * @param title
- * @param tag
- * @return int
+ * @brief Writes the title/song name to an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TT2 for v2.x, TIT2 for v3.x/v4.x).
+ * Creates a new title frame if none exists, or updates existing frame content.
+ * @param title - Null-terminated UTF-8 title string to write.
+ * @param tag - Tag to write the title into.
+ * @return int - 1 (true) if title written successfully, 0 (false) if inputs invalid or version unsupported.
  */
 int id3v2WriteTitle(const char *title, Id3v2Tag *tag) {
     if (title == NULL || tag == NULL) {
@@ -958,12 +963,12 @@ int id3v2WriteTitle(const char *title, Id3v2Tag *tag) {
 }
 
 /**
- * @brief Writes a new artist to the first Lead artist/Lead performer/Soloist/Performing group (TP1 or TPE1)
- * frame of a tag. If this function fails false is returned otherwise, true.
- *
- * @param artist
- * @param tag
- * @return int
+ * @brief Writes the lead artist/performer to an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TP1 for v2.x, TPE1 for v3.x/v4.x).
+ * Creates a new artist frame if none exists, or updates existing frame content.
+ * @param artist - Null-terminated UTF-8 artist string to write.
+ * @param tag - Tag to write the artist into.
+ * @return int - 1 (true) if artist written successfully, 0 (false) if inputs invalid or version unsupported.
  */
 int id3v2WriteArtist(const char *artist, Id3v2Tag *tag) {
     if (artist == NULL || tag == NULL) {
@@ -984,12 +989,12 @@ int id3v2WriteArtist(const char *artist, Id3v2Tag *tag) {
 }
 
 /**
- * @brief Writes a new album artist to the first Band/Orchestra/Accompaniment (TP2 or TPE2) frame
- * of a tag. If this function fails false is returned otherwise, true.
- *
- * @param albumArtist
- * @param tag
- * @return int
+ * @brief Writes the album artist/band/orchestra to an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TP2 for v2.x, TPE2 for v3.x/v4.x).
+ * Creates a new album artist frame if none exists, or updates existing frame content.
+ * @param albumArtist - Null-terminated UTF-8 album artist string to write.
+ * @param tag - Tag to write the album artist into.
+ * @return int - 1 (true) if album artist written successfully, 0 (false) if inputs invalid or version unsupported.
  */
 int id3v2WriteAlbumArtist(const char *albumArtist, Id3v2Tag *tag) {
     if (albumArtist == NULL || tag == NULL) {
@@ -1010,12 +1015,12 @@ int id3v2WriteAlbumArtist(const char *albumArtist, Id3v2Tag *tag) {
 }
 
 /**
- * @brief Writes a new album to the first Album/Movie/Show title (TAL or TALB) frame of a tag.
- * If this function fails false is returned otherwise, true.
- *
- * @param album
- * @param tag
- * @return int
+ * @brief Writes the album name to an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TAL for v2.x, TALB for v3.x/v4.x).
+ * Creates a new album frame if none exists, or updates existing frame content.
+ * @param album - Null-terminated UTF-8 album string to write.
+ * @param tag - Tag to write the album into.
+ * @return int - 1 (true) if album written successfully, 0 (false) if inputs invalid or version unsupported.
  */
 int id3v2WriteAlbum(const char *album, Id3v2Tag *tag) {
     if (album == NULL || tag == NULL) {
@@ -1036,12 +1041,12 @@ int id3v2WriteAlbum(const char *album, Id3v2Tag *tag) {
 }
 
 /**
- * @brief Writes a new year to the first Year (TYE or TYER) frame of a tag. If this function fails
- * false is returned otherwise, true.
- *
- * @param year
- * @param tag
- * @return int
+ * @brief Writes the year to an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TYE for v2.x, TYER for v3.x/v4.x).
+ * Creates a new year frame if none exists, or updates existing frame content.
+ * @param year - Null-terminated UTF-8 year string to write.
+ * @param tag - Tag to write the year into.
+ * @return int - 1 (true) if year written successfully, 0 (false) if inputs invalid or version unsupported.
  */
 int id3v2WriteYear(const char *year, Id3v2Tag *tag) {
     if (year == NULL || tag == NULL) {
@@ -1062,12 +1067,12 @@ int id3v2WriteYear(const char *year, Id3v2Tag *tag) {
 }
 
 /**
- * @brief Writes a new genre to the first Genre (TCO or TCON) frame of a tag. If this function fails
- * false is returned otherwise, true.
- *
- * @param genre
- * @param tag
- * @return int
+ * @brief Writes the genre/content type to an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TCO for v2.x, TCON for v3.x/v4.x).
+ * Creates a new genre frame if none exists, or updates existing frame content.
+ * @param genre - Null-terminated UTF-8 genre string to write.
+ * @param tag - Tag to write the genre into.
+ * @return int - 1 (true) if genre written successfully, 0 (false) if inputs invalid or version unsupported.
  */
 int id3v2WriteGenre(const char *genre, Id3v2Tag *tag) {
     if (genre == NULL || tag == NULL) {
@@ -1088,12 +1093,12 @@ int id3v2WriteGenre(const char *genre, Id3v2Tag *tag) {
 }
 
 /**
- * @brief Writes a new track to the first Track number/Position in set (TRK or TRCK) frame of a tag.
- * if this function fails false is returned otherwise, true.
- *
- * @param track
- * @param tag
- * @return int
+ * @brief Writes the track number/position to an ID3v2 tag.
+ * @details Automatically selects the appropriate frame ID based on tag version (TRK for v2.x, TRCK for v3.x/v4.x).
+ * Creates a new track frame if none exists, or updates existing frame content.
+ * @param track - Null-terminated UTF-8 track string to write.
+ * @param tag - Tag to write the track number into.
+ * @return int - 1 (true) if track written successfully, 0 (false) if inputs invalid or version unsupported.
  */
 int id3v2WriteTrack(const char *track, Id3v2Tag *tag) {
     if (track == NULL || tag == NULL) {
@@ -1114,12 +1119,12 @@ int id3v2WriteTrack(const char *track, Id3v2Tag *tag) {
 }
 
 /**
- * @brief Writes a new disc to the first Disc number (TPA or TPOS) frame of a tag. If this function fails
- * false is returned otherwise, true.
- *
- * @param disc
- * @param tag
- * @return int
+ * @brief Writes a disc number to the appropriate disc number frame in a tag.
+ * @details Updates the first disc number frame (TPA for ID3v2.2, TPOS for ID3v2.3/2.4) with the provided disc string.
+ * Returns false on validation failures (null parameters or unsupported tag version) without modifying the tag.
+ * @param disc - Null-terminated string containing the disc number (e.g., "1", "1/2").
+ * @param tag - Tag to update with the disc number.
+ * @return int - 1 (true) if disc number written successfully, 0 (false) on failure.
  */
 int id3v2WriteDisc(const char *disc, Id3v2Tag *tag) {
     if (disc == NULL || tag == NULL) {
@@ -1140,12 +1145,12 @@ int id3v2WriteDisc(const char *disc, Id3v2Tag *tag) {
 }
 
 /**
- * @brief Writes a new composer to the first Composer (TCM or TCOM) frame of a tag.
- * if this function fails false is returned otherwise, true.
- *
- * @param composer
- * @param tag
- * @return int
+ * @brief Writes a composer name to the appropriate composer frame in a tag.
+ * @details Updates the first composer frame (TCM for ID3v2.2, TCOM for ID3v2.3/2.4) with the provided composer string.
+ * Returns false on validation failures (null parameters or unsupported tag version) without modifying the tag.
+ * @param composer - Null-terminated string containing the composer name.
+ * @param tag - Tag to update with the composer name.
+ * @return int - 1 (true) if composer written successfully, 0 (false) on failure.
  */
 int id3v2WriteComposer(const char *composer, Id3v2Tag *tag) {
     if (composer == NULL || tag == NULL) {
@@ -1273,12 +1278,14 @@ static int internal_id3v2CreateLyricFrameUTF16LE(const uint8_t v, const char *ly
 }
 
 /**
- * @brief Writes new lyrics to the first Unsynchronised Lyric/Text Transcription (ULT or USLT)
- * frame of a tag. If this function fails false is returned otherwise, true.
- *
- * @param lyrics
- * @param tag
- * @return int
+ * @brief Writes lyrics to the appropriate unsynchronized lyrics frame in a tag.
+ * @details Updates the first unsynchronized lyrics frame (ULT for ID3v2.2, USLT for ID3v2.3/2.4) with the provided lyrics string.
+ * If no lyrics frame exists, creates a new UTF-16LE frame. If a frame exists, validates its structure (4 contexts/entries with correct types),
+ * converts the UTF-8 input to the frame's encoding, prepends BOM if needed, and adds padding for UTF-16.
+ * Returns false on validation failures (null parameters, empty string, invalid frame structure, encoding conversion errors, or memory allocation failures) without modifying the tag.
+ * @param lyrics - Null-terminated UTF-8 string containing the lyrics text (must not be empty).
+ * @param tag - Tag to update with the lyrics.
+ * @return int - 1 (true) if lyrics written successfully, 0 (false) on failure.
  */
 int id3v2WriteLyrics(const char *lyrics, Id3v2Tag *tag) {
     if (lyrics == NULL || tag == NULL) {
@@ -1533,12 +1540,15 @@ static int internal_id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3]
 }
 
 /**
- * @brief Writes a new comment to the first Comment (COM or COMM) frame of a tag. If no comment frame exits
- * one will be created with a UTF16LE encoding. If this function fails false is returned otherwise, true.
- *
- * @param comment
- * @param tag
- * @return int
+ * @brief Writes a comment to the appropriate comment frame in a tag.
+ * @details Updates the first comment frame (COM for ID3v2.2, COMM for ID3v2.3/2.4) with the provided comment string.
+ * If no comment frame exists, creates a new UTF-16LE frame with language code "zxx" (unknown language) and empty description.
+ * If a frame exists, validates its structure (4 contexts/entries with correct types), converts the UTF-8 input to the frame's encoding,
+ * prepends BOM if needed, and adds padding for UTF-16.
+ * Returns false on validation failures (null parameters, empty string, invalid frame structure, encoding conversion errors, or memory allocation failures) without modifying the tag.
+ * @param comment - Null-terminated UTF-8 string containing the comment text (must not be empty).
+ * @param tag - Tag to update with the comment.
+ * @return int - 1 (true) if comment written successfully, 0 (false) on failure.
  */
 int id3v2WriteComment(const char *comment, Id3v2Tag *tag) {
     if (comment == NULL || tag == NULL) {
@@ -1768,16 +1778,18 @@ static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *imag
 }
 
 /**
- * @brief Writes a new picture to the first Attached picture (PIC or APIC) frame of a tag that matches the
- * given type. It will additionally write the mime type via the null terminated string kind. If this function fails
- * or any argument is null, false is returned otherwise, true.
- *
- * @param image
- * @param imageSize
- * @param kind
- * @param type
- * @param tag
- * @return int
+ * @brief Writes a picture to the appropriate attached picture frame in a tag.
+ * @details Updates the first picture frame (PIC for ID3v2.2, APIC for ID3v2.3/2.4) that matches the specified picture type.
+ * If no matching frame exists, creates a new UTF-16LE frame with type 0. For ID3v2.2, writes up to 3 characters of kind as the image format;
+ * for ID3v2.3/2.4, prepends "image/" to kind as the MIME type. Validates frame structure (5 contexts/entries with correct types).
+ * Picture type values are clamped to the valid range (0x00-0x14).
+ * Returns false on validation failures (null parameters, zero imageSize, empty kind string, invalid frame structure, or write errors) without modifying the tag.
+ * @param image - Pointer to the binary image data to write.
+ * @param imageSize - Size of the image data in bytes (must be greater than 0).
+ * @param kind - Null-terminated string specifying image format (e.g., "jpeg", "png") used as MIME type suffix (must not be empty).
+ * @param type - Picture type value (0x00-0x14, values above 0x14 are clamped to 0x00).
+ * @param tag - Tag to update with the picture.
+ * @return int - 1 (true) if picture written successfully, 0 (false) on failure.
  */
 int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_t type, Id3v2Tag *tag) {
     if (image == NULL || imageSize == 0 || kind == NULL || tag == NULL) {
@@ -1907,15 +1919,15 @@ int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_
 }
 
 /**
- * @brief Writes a new picture from a file to the first Attached picture (PIC or APIC) frame of a tag that
- * matches the given type. It will additionally write the mime type via the null terminated string kind.
- * If this function fails or any argument is null, false is returned otherwise, true.
- *
- * @param filename
- * @param kind
- * @param type
- * @param tag
- * @return int
+ * @brief Reads a picture from a file and writes it to the appropriate attached picture frame in a tag.
+ * @details Loads binary image data from the specified file and delegates to id3v2WritePicture to update the first picture frame (PIC for ID3v2.2, APIC for ID3v2.3/2.4) matching the specified picture type.
+ * If no matching frame exists, creates a new UTF-16LE frame with type 0. For ID3v2.2, writes up to 3 characters of kind as the image format; for ID3v2.3/2.4, prepends "image/" to kind as the MIME type.
+ * Returns false on validation failures (null parameters, empty strings, file open/read errors, or frame write errors) without modifying the tag. Frees allocated memory on all paths.
+ * @param filename - Null-terminated string containing the path to the image file to read (must not be empty).
+ * @param kind - Null-terminated string specifying image format (e.g., "jpeg", "png") used as MIME type suffix (must not be empty).
+ * @param type - Picture type value (0x00-0x14, values above 0x14 are clamped to 0x00).
+ * @param tag - Tag to update with the picture.
+ * @return int - 1 (true) if picture read and written successfully, 0 (false) on failure.
  */
 int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t type, Id3v2Tag *tag) {
     if (filename == NULL || kind == NULL || tag == NULL) {
@@ -1959,12 +1971,15 @@ int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t ty
 }
 
 /**
- * @brief Converts an ID3v2.x tag data structure back to its binary representation. If this function fails
- * NULL is returned otherwise, an uint8_t pointer.
- *
- * @param tag
- * @param outl
- * @return ByteStream*
+ * @brief Serializes an ID3v2 tag structure to its binary representation.
+ * @details Converts the tag back to raw bytes by serializing all frames, applying unsynchronization if enabled, encoding the header and optional footer,
+ * calculating total size (including padding from extended header), and combining all components into a single binary buffer.
+ * For ID3v2.4 tags with footer indicator set, generates a footer (10-byte header copy with "3DI" identifier).
+ * Unsynchronization doubles buffer size to accommodate potential expansion. Size fields are encoded as synchsafe integers.
+ * Returns NULL on validation failures (null tag/header/frames, frame serialization errors, or header serialization errors) and sets outl to 0 without allocating memory.
+ * @param tag - Tag structure to serialize.
+ * @param outl - Pointer to size_t to receive the output buffer size in bytes.
+ * @return uint8_t* - Pointer to allocated binary data on success, NULL on failure. Caller must free the returned buffer.
  */
 uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl) {
     if (tag == NULL) {
@@ -2142,10 +2157,29 @@ uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl) {
 }
 
 /**
- * @brief Converts an ID3v2.x tag data structure back to its json representation.
- *
- * @param tag
- * @return char*
+ * @brief Serializes an ID3v2 tag structure to JSON format.
+ * @details Converts the tag header and all frames to JSON representation. Returns "{}" for invalid tags (null parameters, null frames/header, or unsupported version > ID3v2.4).
+ * For valid tags, serializes the header and each frame, concatenates frame JSON with commas, and constructs a JSON object with "header" and "content" array.
+ * Allocates and returns a null-terminated JSON string. Frees all intermediate allocations on both success and failure paths.
+ * @param tag - Tag structure to serialize to JSON.
+ * @return char* - Pointer to allocated null-terminated JSON string. Caller must free the returned buffer.
+ * 
+ * Example output:
+ * ```json
+ * {
+ *   "header": {
+ *      ...
+ *   },
+ *   "content": [
+ *      ...
+ *   ]
+ * }
+ * ```
+ * 
+ * Invalid tag returns:
+ * ```json
+ * {}
+ * ```
  */
 char *id3v2TagToJSON(Id3v2Tag *tag) {
     char *json = NULL;
@@ -2269,13 +2303,16 @@ char *id3v2TagToJSON(Id3v2Tag *tag) {
 }
 
 /**
- * @brief Writes an ID3v2.x tag data structure to a file. If this function fails false is returned otherwise, true.
- * If the file does not exist it will be created if it does and there is no tag it will be prepended. If the update
- * flag is set in the tag header it will be prepended to the file without overwriting any existing tags.
- *
- * @param filePath
- * @param tag
- * @return int
+ * @brief Writes an ID3v2 tag to a file, creating, prepending, or replacing as needed.
+ * @details Serializes the tag and handles three scenarios: (1) If file doesn't exist, creates it and writes the tag; 
+ * (2) If file exists without a tag or with the update flag set in the extended header, prepends the new tag to the file; 
+ * (3) If file exists with a tag and no update flag, replaces the old tag by reading existing tag size, writing new tag at file start, 
+ * and appending remaining file data. Accounts for footer (10 bytes for ID3v2.4) and padding from extended header when calculating offsets.
+ * Returns false on validation failures (null parameters, serialization errors, file open/read/write errors, or memory allocation failures) without modifying the file.
+ * Frees all allocated memory on both success and failure paths.
+ * @param filePath - Null-terminated string containing the path to the file to write.
+ * @param tag - Tag structure to write to the file.
+ * @return int - 1 (true) if tag written successfully, 0 (false) on failure.
  */
 int id3v2WriteTagToFile(const char *filePath, Id3v2Tag *tag) {
     if (filePath == NULL || tag == NULL) {

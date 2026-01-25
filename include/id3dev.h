@@ -1,11 +1,11 @@
 /**
  * @file id3dev.h
  * @author Ewan Jones
- * @brief decleations of main library functions
- * @version 0.1
- * @date 2024-01-19
+ * @brief Decleations for reading, writing, converting, and comparing ID3v1 and ID3v2 metadata tags.
+ * @version 26.01
+ * @date 2024-01-19 - 2026-01-25
  * 
- * @copyright Copyright (c) 2024
+ * @copyright Copyright (c) 2024 - 2026
  * 
  */
 

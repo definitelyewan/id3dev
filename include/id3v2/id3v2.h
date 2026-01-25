@@ -1,11 +1,11 @@
 /**
  * @file id3v2.h
  * @author Ewan Jones
- * @brief Declarations used by utility functions
+ * @brief Declarations of ID3v2 tag operations including reading/writing metadata frames, tag serialization, and file I/O.
  * @version 2.0
- * @date 2023-12-13
+ * @date 2023-12-13 - 2026-01-25
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) 2023 - 2026
  * 
  */
 

@@ -1,11 +1,11 @@
 /**
  * @file id3v2Parser.h
  * @author Ewan Jones
- * @brief functions that make up the parser
- * @version 0.1
- * @date 2024-01-19
+ * @brief Definitions for binary parsing of ID3v2 tags, headers, frames, and complete tag structures from byte buffers
+ * @version 26.01
+ * @date 2024-01-19 - 2026-01-13
  * 
- * @copyright Copyright (c) 2024
+ * @copyright Copyright (c) 2024 - 2026
  * 
  */
 

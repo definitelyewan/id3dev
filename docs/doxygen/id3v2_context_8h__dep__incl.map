@@ -1,11 +1,11 @@
 <map id="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2Context.h" name="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2Context.h">
-<area shape="rect" id="Node000001" title="provides the ability to generate a context and a list of contexts that represent the ruleset of a fra..." alt="" coords="310,5,546,46"/>
-<area shape="rect" id="Node000002" href="$id3v2_8c.html" title="Contains all main functions for the id3v2 library." alt="" coords="5,94,182,135"/>
+<area shape="rect" id="Node000001" title="Function definitions for ID3v2 frame context definitions and parsing configuration." alt="" coords="310,5,546,46"/>
+<area shape="rect" id="Node000002" href="$id3v2_8c.html" title="Function implementation of ID3v2 tag operations including reading/writing metadata frames,..." alt="" coords="5,94,182,135"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="338,53,170,96,169,91,336,48"/>
-<area shape="rect" id="Node000003" href="$id3v2_context_8c.html" title="Functions for configuring the parser and any output of a tag." alt="" coords="206,94,418,135"/>
+<area shape="rect" id="Node000003" href="$id3v2_context_8c.html" title="Function implementation of ID3v2 frame context definitions and parsing configuration." alt="" coords="206,94,418,135"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="391,58,340,96,337,91,388,53"/>
-<area shape="rect" id="Node000004" href="$id3v2_frame_8c.html" title="Functions for creating, destroying, and manipulating ID3v2 frames." alt="" coords="442,94,646,135"/>
+<area shape="rect" id="Node000004" href="$id3v2_frame_8c.html" title="Function implementation for ID3v2 frame lifecycle, traversal, serialization, and content management." alt="" coords="442,94,646,135"/>
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="468,53,520,91,516,96,465,58"/>
-<area shape="rect" id="Node000005" href="$id3v2_parser_8c.html" title="Functions related to parsing content." alt="" coords="670,94,874,135"/>
+<area shape="rect" id="Node000005" href="$id3v2_parser_8c.html" title="Implementations for binary parsing of ID3v2 tags, headers, frames, and complete tag structures from b..." alt="" coords="670,94,874,135"/>
 <area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="522,48,695,91,693,96,521,53"/>
 </map>

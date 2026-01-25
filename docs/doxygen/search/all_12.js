@@ -1,6 +1,24 @@
 var searchData=
 [
-  ['unknown_5fcontext_0',['unknown_context',['../id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0ae7adab00dd10834fe882ea87e003e286',1,'id3v2Types.h']]],
-  ['unsynchronisation_1',['unsynchronisation',['../struct___id3v2_frame_header.html#ade74b883f046f1fe1ce2a2e445c61135',1,'_Id3v2FrameHeader']]],
-  ['update_2',['update',['../struct___id3v2_extended_tag_header.html#a939df692953c6857c8b6c2b6c105b1f4',1,'_Id3v2ExtendedTagHeader']]]
+  ['salsa_5fgenre_0',['SALSA_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a365db39015fa19030a96d811656b91d8',1,'id3v1Types.h']]],
+  ['samba_5fgenre_1',['SAMBA_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a35f52eb745d10a43bf1de40ba1e4d2da',1,'id3v1Types.h']]],
+  ['satire_5fgenre_2',['SATIRE_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172aa04c80e10eb83351afa1e911fd69191d',1,'id3v1Types.h']]],
+  ['shoegaze_5fgenre_3',['SHOEGAZE_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172ad59bf05e9e7f99fc8cc7ed4e8bf833b5',1,'id3v1Types.h']]],
+  ['showtunes_5fgenre_4',['SHOWTUNES_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a26bda629e3ac7595e068f39aa8ae1478',1,'id3v1Types.h']]],
+  ['size_5',['size',['../struct___id3v2_content_entry.html#a5d16ae63c5366f4ed9d7f3a07aa6bf86',1,'_Id3v2ContentEntry']]],
+  ['ska_5fgenre_6',['SKA_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a889e0fbaf3f0679937b066a980c33785',1,'id3v1Types.h']]],
+  ['slow_5fjam_5fgenre_7',['SLOW_JAM_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172ac41b436ec3486e1ba99af5541882c5a2',1,'id3v1Types.h']]],
+  ['slow_5frock_5fgenre_8',['SLOW_ROCK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172ae302145b77347bace31eff841ff114ee',1,'id3v1Types.h']]],
+  ['sonata_5fgenre_9',['SONATA_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a3e3a6e86a5ec0af00782668e66897e27',1,'id3v1Types.h']]],
+  ['soul_5fgenre_10',['SOUL_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172abf46557a86291e45bbc52319d6b1d3d9',1,'id3v1Types.h']]],
+  ['sound_5fclip_5fgenre_11',['SOUND_CLIP_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172acc5a4e44bc3b18ba735fb77647763a32',1,'id3v1Types.h']]],
+  ['soundtrack_5fgenre_12',['SOUNDTRACK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a7f34f1b3043c389a9907018178f0e2f7',1,'id3v1Types.h']]],
+  ['southern_5frock_5fgenre_13',['SOUTHERN_ROCK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172ad74cc5e6f804f2b932a6ae35f330e5f3',1,'id3v1Types.h']]],
+  ['space_5fgenre_14',['SPACE_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a03d5558676824faebfd9269e94b81d1c',1,'id3v1Types.h']]],
+  ['space_5frock_5fgenre_15',['SPACE_ROCK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a964a476d79f20c3d3f7a349566a0e16c',1,'id3v1Types.h']]],
+  ['speech_5fgenre_16',['SPEECH_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a784eacec2acfe377df1365e58f7cf5a0',1,'id3v1Types.h']]],
+  ['swing_5fgenre_17',['SWING_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a2846ae1c2ad126724c08963598f2de56',1,'id3v1Types.h']]],
+  ['symphonic_5frock_5fgenre_18',['SYMPHONIC_ROCK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172ac44ca62feadb882d6fb1d41f61772fcc',1,'id3v1Types.h']]],
+  ['symphony_5fgenre_19',['SYMPHONY_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a38a078b400b6d739a5ffe1af9d5b0e94',1,'id3v1Types.h']]],
+  ['synthpop_5fgenre_20',['SYNTHPOP_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a2ff1062dee697497b63ba8c00a2a19c8',1,'id3v1Types.h']]]
 ];

@@ -1,6 +1,25 @@
 var searchData=
 [
-  ['comment_0',['comment',['../struct___id3v1_tag.html#aab41e0351a09b36fa8be185b8937e16e',1,'_Id3v1Tag']]],
-  ['contexts_1',['contexts',['../struct___id3v2_frame.html#a599ace59492026e39986bbf093584923',1,'_Id3v2Frame']]],
-  ['crc_2',['crc',['../struct___id3v2_extended_tag_header.html#a59702c711980c6cc7a7b7211c897d4e5',1,'_Id3v2ExtendedTagHeader']]]
+  ['cabaret_5fgenre_0',['CABARET_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172aed854793b1d9f00cd92fe605213c204d',1,'id3v1Types.h']]],
+  ['celtic_5fgenre_1',['CELTIC_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a42f72ffc0f58b37511d8bd95cc3e14f8',1,'id3v1Types.h']]],
+  ['chamber_5fmusic_5fgenre_2',['CHAMBER_MUSIC_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a0842ef2c910618451a497a52d5fd1481',1,'id3v1Types.h']]],
+  ['chanson_5fgenre_3',['CHANSON_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a40c82c3588b0c555f73cbfde1d59f9f2',1,'id3v1Types.h']]],
+  ['chillout_5fgenre_4',['CHILLOUT_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172ac5358248df5c2d7ab8f183960713d327',1,'id3v1Types.h']]],
+  ['chorus_5fgenre_5',['CHORUS_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a4c2050b8d6d57e3f40ac3c891a25a9ca',1,'id3v1Types.h']]],
+  ['christian_5fgangsta_5frap_5fgenre_6',['CHRISTIAN_GANGSTA_RAP_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172aedbcf84621ec56571d80e7edf241ddf9',1,'id3v1Types.h']]],
+  ['christian_5frap_5fgenre_7',['CHRISTIAN_RAP_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a7725e523ed9b80a0647fdc2a546092ab',1,'id3v1Types.h']]],
+  ['christian_5frock_5fgenre_8',['CHRISTIAN_ROCK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a1306089fb35e1ae7ed3de2dfeaa6178f',1,'id3v1Types.h']]],
+  ['christmas_5fgenre_9',['CHRISTMAS_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172ae055df9f12000f9c172884b13c72da21',1,'id3v1Types.h']]],
+  ['classic_5frock_5fgenre_10',['CLASSIC_ROCK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172ab7251d51c1a3400dcd93557cc354711a',1,'id3v1Types.h']]],
+  ['classical_5fgenre_11',['CLASSICAL_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a182a8ad81d6c2446633a5793c2721680',1,'id3v1Types.h']]],
+  ['club_5fgenre_12',['CLUB_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172ab31960993ac4d8f2533f6b2e13fd7b1b',1,'id3v1Types.h']]],
+  ['club_5fhouse_5fgenre_13',['CLUB_HOUSE_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a6d1bb15703fc03f09aed8cf72b4cd8cb',1,'id3v1Types.h']]],
+  ['comedy_5fgenre_14',['COMEDY_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a8baab20dff9f3fc1655be7e937757f0d',1,'id3v1Types.h']]],
+  ['comment_15',['comment',['../struct___id3v1_tag.html#aab41e0351a09b36fa8be185b8937e16e',1,'_Id3v1Tag']]],
+  ['contemporary_5fchristian_5fgenre_16',['CONTEMPORARY_CHRISTIAN_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172ae47852ddbc6136fff8a70cfe7b9b2272',1,'id3v1Types.h']]],
+  ['contexts_17',['contexts',['../struct___id3v2_frame.html#a599ace59492026e39986bbf093584923',1,'_Id3v2Frame']]],
+  ['country_5fgenre_18',['COUNTRY_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a8c2e68fcf77818b6451d01175481b745',1,'id3v1Types.h']]],
+  ['crc_19',['crc',['../struct___id3v2_extended_tag_header.html#a59702c711980c6cc7a7b7211c897d4e5',1,'_Id3v2ExtendedTagHeader']]],
+  ['crossover_5fgenre_20',['CROSSOVER_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a4b0664c0b2d1d4a05a8904654139d630',1,'id3v1Types.h']]],
+  ['cult_5fgenre_21',['CULT_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a1179fc824bd034e5ce17f548f7ae20b9',1,'id3v1Types.h']]]
 ];

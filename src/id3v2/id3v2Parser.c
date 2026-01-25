@@ -1,11 +1,11 @@
 /**
  * @file id3v2Parser.c
  * @author Ewan Jones
- * @brief Functions related to parsing content
- * @version 0.1
- * @date 2024-02-01
+ * @brief Implementations for binary parsing of ID3v2 tags, headers, frames, and complete tag structures from byte buffers
+ * @version 26.01
+ * @date 2024-02-01 - 2026-01-13
  * 
- * @copyright Copyright (c) 2024
+ * @copyright Copyright (c) 2024 - 2026
  * 
  */
 
@@ -21,7 +21,7 @@
 #include "id3dependencies/ByteStream/include/byteInt.h"
 #include "id3dependencies/ByteStream/include/byteUnicode.h"
 
-static void copyNBits(const unsigned char *src, unsigned char *dest, int startBit, int nBits) {
+static void internal_copyNBits(const unsigned char *src, unsigned char *dest, int startBit, int nBits) {
     int byteIndex = startBit / CHAR_BIT;
     int bitIndex = startBit % CHAR_BIT;
     int remainingBits = nBits;
@@ -48,16 +48,26 @@ static void copyNBits(const unsigned char *src, unsigned char *dest, int startBi
 }
 
 /**
- * @brief Parses an ID3v2.3, ID3v2.4, and unsupported versions. This function will return the number of bytes it read
- * to correctly parse an extended header and a heap stored structure through extendedTagHeader. There are no error
- * states for this function but if a size of 0 is returned or extendedTagHeader = NULL it likely failed but this could
- * also mean an unsupported version was passed.
- *
- * @param in
- * @param inl
- * @param version
- * @param extendedTagHeader
- * @return uint32_t
+ * @brief Parses an ID3v2 extended tag header from a byte buffer.
+ * @details Extracts and decodes extended header fields from binary data according to the 
+ * ID3v2 specification. Returns the number of bytes consumed during parsing and creates 
+ * a heap-allocated extended header structure. Supports version-specific parsing:
+ * 
+ * - ID3v2.3: Reads size (4 bytes), CRC flag (bit 7), 2 reserved bytes, padding size (4 bytes), 
+ * and optional CRC-32 (4 bytes if flag set).
+ * 
+ * - ID3v2.4: Reads extended size (4 bytes), flag bytes count (1 byte), flags byte (update at 
+ * bit 6, CRC at bit 5, restrictions at bit 4), optional syncsafe CRC-32 (5 bytes), and 
+ * optional restrictions byte (8 bits for tag/text/image limitations).
+ * 
+ * ID3v2.2 and unsupported versions return 0 with NULL extendedTagHeader. On success, caller 
+ * must free the returned structure with id3v2DestroyExtendedTagHeader.
+ * 
+ * @param in - Pointer to byte buffer containing extended header data.
+ * @param inl - Size of input buffer in bytes.
+ * @param version - ID3v2 version (ID3V2_TAG_VERSION_3 or ID3V2_TAG_VERSION_4).
+ * @param extendedTagHeader - Output parameter receiving pointer to heap-allocated extended header structure, or NULL on failure.
+ * @return uint32_t - Number of bytes read from buffer on success, 0 on failure or unsupported version.
  */
 uint32_t id3v2ParseExtendedTagHeader(uint8_t *in, size_t inl, uint8_t version,
                                      Id3v2ExtendedTagHeader **extendedTagHeader) {
@@ -213,17 +223,29 @@ uint32_t id3v2ParseExtendedTagHeader(uint8_t *in, size_t inl, uint8_t version,
     return walk;
 }
 
-/**
- * @brief Parses an ID3 header but, not its extended header. This function will return the number
- * of bytes it read in order to correctly parse a tag header. the size of tag itself and header
- * are returned by referance. There are no error states but a tagSize of 0 and a NULL header
- * means it likely failed to retrieve anything useful.
- *
- * @param in
- * @param inl
- * @param tagHeader
- * @param tagSize
- * @return uint32_t
+ /**
+ * @brief Parses an ID3v2 tag header from a byte buffer (excluding extended header).
+ * @details Extracts and validates the 10-byte tag header structure from binary data according 
+ * to the ID3v2 specification. Verifies the "ID3" identifier and decodes version, flags, and 
+ * tag size fields. Returns the number of bytes consumed and creates a heap-allocated tag 
+ * header structure. The extended header is not parsed by this function - the returned 
+ * structure has extendedHeader set to NULL.
+ * 
+ * Header format (10 bytes):
+ * "ID3" identifier (3 bytes) + major version (1) + minor version (1) + flags (1) + 
+ * syncsafe tag size (4).
+ * 
+ * The tagSize output represents the total size of tag content (frames + extended header if 
+ * present) excluding the 10-byte header itself. On success, caller must free the returned 
+ * structure with id3v2DestroyTagHeader. Returns 0 with NULL tagHeader on complete failure. 
+ * Returns ID3V2_TAG_ID_SIZE (3) with NULL tagHeader if magic number is invalid, indicating 
+ * the buffer doesn't contain a valid ID3v2 tag.
+ * 
+ * @param in - Pointer to byte buffer containing tag header data.
+ * @param inl - Size of input buffer in bytes.
+ * @param tagHeader - Output parameter receiving pointer to heap-allocated tag header structure, or NULL on failure.
+ * @param tagSize - Output parameter receiving tag content size in bytes (excluding 10-byte header), or 0 on failure.
+ * @return uint32_t - Number of bytes read on success, or 0 on complete failure.
  */
 uint32_t id3v2ParseTagHeader(uint8_t *in, size_t inl, Id3v2TagHeader **tagHeader, uint32_t *tagSize) {
     if (in == NULL || inl == 0) {
@@ -297,18 +319,34 @@ uint32_t id3v2ParseTagHeader(uint8_t *in, size_t inl, Id3v2TagHeader **tagHeader
     return walk;
 }
 
-/**
- * @brief Parses an ID3 version 2, 3 or 4 frame header. This function returns a couple values back to the caller, first
- * it returns the number of bytes it read to create a frame header structure. The structure itself is returned as a
- * heap allocated structure which will need to be provided by the caller along with the size reported by the metadata.
- * There are no error states but a frameSize of 0 and a NULL frameHeader will likely mean nothing useful was gathered.
- *
- * @param in
- * @param inl
- * @param version
- * @param frameHeader
- * @param frameSize
- * @return uint32_t
+ /**
+ * @brief Parses an ID3v2 frame header from a byte buffer.
+ * @details Extracts and decodes frame header fields from binary data according to the 
+ * ID3v2 specification. Returns the number of bytes consumed during parsing and creates 
+ * a heap-allocated frame header structure. Supports version-specific parsing:
+ * 
+ * - ID3v2.2: Reads 3-byte frame ID + 3-byte size with no flag bytes.
+ * 
+ * - ID3v2.3: Reads 4-byte frame ID + 4-byte size + 2-byte flags. Status flags: 
+ * tag alter preservation, file alter preservation, read-only. Format flags: 
+ * compression (+4 bytes decompression size), encryption (+1 byte symbol), 
+ * grouping (+1 byte identifier).
+ * 
+ * - ID3v2.4: Reads 4-byte frame ID + 4-byte syncsafe size + 2-byte flags. 
+ * Status flags: tag alter, file alter, read-only. Format flags: grouping (+1 byte), 
+ * encryption (+1 byte), unsynchronisation, compression/data length (+syncsafe size).
+ * 
+ * The frameSize output represents the frame content size (excluding header). On success, 
+ * caller must free the returned structure with id3v2DestroyFrameHeader. Returns 0 with 
+ * NULL on complete failure, or partial byte count with appropriate NULL/non-NULL outputs 
+ * on partial parsing success.
+ * 
+ * @param in - Pointer to byte buffer containing frame header data.
+ * @param inl - Size of input buffer in bytes.
+ * @param version - ID3v2 version (ID3V2_TAG_VERSION_2, ID3V2_TAG_VERSION_3, or ID3V2_TAG_VERSION_4).
+ * @param frameHeader - Output parameter receiving pointer to heap-allocated frame header structure, or NULL on failure.
+ * @param frameSize - Output parameter receiving frame content size in bytes (excluding header), or 0 on failure.
+ * @return uint32_t - Number of bytes read from buffer on success, 0 on complete failure, or partial byte count on partial success.
  */
 uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2FrameHeader **frameHeader,
                                uint32_t *frameSize) {
@@ -495,20 +533,34 @@ uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2Fr
 }
 
 /**
- * @brief Parses an ID3 version 2, 3, or 4 frame. This function returns a couple of different values back to the caller
- * including the number of bytes needed to parse the data and a referance to a heap allocated frame structure. This is
- * the meat of the parser and requires 'hints' in the form of a context list to prase a frame successfully. There is
- * no error state for this function but a returned size of 0 or an incomplete frame such as a missing entry list may
- * indicate one.
- * @details The bit context implementation in this function is not correct and doesn't work as expected. I completely missed
- * this when I made it at the start of this project :(. I don't know how I can fix it so if legit anyone ever looks at this
- * code and wants to fix it, please do.
- * @param in
- * @param inl
- * @param context
- * @param version
- * @param frame
- * @return uint32_t
+ * @brief Parses an ID3v2 frame (header + content) from a byte buffer using context-driven interpretation.
+ * @details Extracts a complete frame by first parsing the header, then interpreting frame content 
+ * according to a context list that provides "hints" about data types and structure. The context-driven 
+ * approach allows flexible parsing of the diverse frame types in the ID3v2 specification.
+ * 
+ * **Encrypted/Compressed Frame Handling:**
+ * Frames with encryptionSymbol or decompressionSize set are parsed as raw binary using a generic 
+ * context. The caller must decrypt/decompress and reparse to access structured content.
+ * 
+ * **Context Types Supported:**
+ * - encodedString_context: Null-terminated strings with encoding determined by prior "encoding" byte 
+ * (ISO-8859-1, UTF-8, UTF-16BE/LE)
+ * - latin1Encoding_context: Null-terminated Latin-1 (ISO-8859-1) strings only
+ * - binary_context/noEncoding_context/precision_context/numeric_context: Fixed-size raw binary/numeric data
+ * - bit_context: Bit-level extraction (WARNING: incorrect implementation as of jan 13 2026)
+ * - iter_context: Loop control marker for repeated field groups
+ * - adjustment_context: Variable-length data where size comes from previously parsed "adjustment" field
+ * - unknown_context: Skip remaining content
+ * 
+ * The function creates heap-allocated content entries for each parsed field and assembles them into 
+ * a complete frame structure. On success, caller must free with id3v2DestroyFrame.
+ * 
+ * @param in - Pointer to byte buffer containing complete frame data.
+ * @param inl - Size of input buffer in bytes.
+ * @param context - List of Id3v2ContentContext structures defining frame structure and data types.
+ * @param version - ID3v2 version (ID3V2_TAG_VERSION_2, ID3V2_TAG_VERSION_3, or ID3V2_TAG_VERSION_4).
+ * @param frame - Output parameter receiving pointer to heap-allocated frame structure, or NULL on failure.
+ * @return uint32_t - Total bytes consumed on success, header size on partial success, or 0 on complete failure.
  */
 uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version, Id3v2Frame **frame) {
     if (in == NULL || inl == 0) {
@@ -795,7 +847,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
 
                 data = malloc(dataSize);
                 memset(data, 0, dataSize);
-                copyNBits(byteStreamCursor(innerStream), data, (int) concurrentBitCount, (int) nBits);
+                internal_copyNBits(byteStreamCursor(innerStream), data, (int) concurrentBitCount, (int) nBits);
 
                 if (iter.current->data != NULL) {
                     Id3v2ContentContext *nextContext = (Id3v2ContentContext *) iter.current->data;
@@ -918,18 +970,33 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
     return walk;
 }
 
-/**
- * @brief Parses an ID3 version 2, 3, or 4 tag from a buffer. This function will load the default frame
- * ID, context pairings and any user supplied ones to extract frames within a tag. If this function fails
- * it will return NULL to the caller otherwise, some form of parsed tag will be returned based on the
- * completeness of the buffer.
- * @details unsynchronisation will take a long time to parse as 0s are stripped before
- * frame parsing begins, which is incredibly expensive to do. A fast system is recommended for this
- * feature.
- * @param in
- * @param inl
- * @param userPairs
- * @return Id3v2Tag*
+ /**
+ * @brief Parses a complete ID3v2 tag from a byte buffer, including header, optional extended header, and all frames.
+ * @details Orchestrates the full tag parsing workflow by locating the "ID3" identifier, parsing headers, 
+ * processing unsynchronisation if present, and iteratively parsing all frames using a multi-pass context 
+ * resolution strategy. Returns a heap-allocated tag structure containing all successfully parsed components.
+ * 
+ * **Parsing Process:**
+ * 1. Scans buffer to locate "ID3" magic number identifier
+ * 2. Parses tag header (version, flags, size)
+ * 3. If unsynchronisation flag set: strips $00 bytes following $FF
+ * 4. If extended header flag set: parses version-specific extended header
+ * 5. Iterates through frame data, parsing each frame using 4-pass context lookup
+ * 
+ * **Frame Context Resolution (4-Pass System):**
+ * - Pass 1: Exact frame ID match in default context mappings (e.g., "TIT2", "APIC")
+ * - Pass 2: Exact frame ID match in user-supplied custom mappings (userPairs parameter)
+ * - Pass 3: Generic frame type patterns - 'T' prefix (text frames), 'W' prefix (URL frames)
+ * - Pass 4: Fallback to generic binary context ('?') for unknown frame types
+ * 
+ * Parsing continues until all frames are extracted or an unrecoverable error occurs. On partial 
+ * failure, returns a tag structure with successfully parsed frames. Returns NULL only on complete 
+ * failure. Caller must free returned structure with id3v2DestroyTag.
+ * 
+ * @param in - Pointer to byte buffer containing ID3v2 tag data (may include non-tag data before/after).
+ * @param inl - Size of input buffer in bytes.
+ * @param userPairs - Optional hash table mapping frame IDs to custom context lists (NULL for default mappings only).
+ * @return Id3v2Tag* - Heap-allocated complete tag structure on success, partial tag on partial failure, or NULL on complete failure.
  */
 Id3v2Tag *id3v2ParseTagFromBuffer(uint8_t *in, size_t inl, HashTable *userPairs) {
     if (in == NULL || inl == 0) {

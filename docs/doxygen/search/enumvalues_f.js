@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['podcast_5fgenre_0',['PODCAST_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172aa1a5455d218594f860fd17abdf40d9b7',1,'id3v1Types.h']]],
+  ['polka_5fgenre_1',['POLKA_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a73ebe3e1fcceb275471f6a2afc4efc7a',1,'id3v1Types.h']]],
+  ['polsk_5fpunk_5fgenre_2',['POLSK_PUNK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172adced2c52ee6e71c869fc4dbc56b8e6ba',1,'id3v1Types.h']]],
+  ['pop_5ffolk_5fgenre_3',['POP_FOLK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a649270cf940d18a6e255c94bdcb0766a',1,'id3v1Types.h']]],
+  ['pop_5ffunk_5fgenre_4',['POP_FUNK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172ac8f5b51d0106c33abca5d707906d0723',1,'id3v1Types.h']]],
+  ['pop_5fgenre_5',['POP_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a53848eae2db53a57b2875832e172b1b3',1,'id3v1Types.h']]],
+  ['porn_5fgroove_5fgenre_6',['PORN_GROOVE_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a1fd0b44e6cf28ec5796e4476342045bc',1,'id3v1Types.h']]],
+  ['post_5fpunk_5fgenre_7',['POST_PUNK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a56aa703d49c412d2f61bc81d761ec55b',1,'id3v1Types.h']]],
+  ['post_5frock_5fgenre_8',['POST_ROCK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172af76556fdd1ff4b16321d6be5565e6547',1,'id3v1Types.h']]],
+  ['power_5fballad_5fgenre_9',['POWER_BALLAD_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172aa8338a9fec541b971f480e21fdd7842c',1,'id3v1Types.h']]],
+  ['pranks_5fgenre_10',['PRANKS_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a619fd3a8af56550cc1b13531b21b1375',1,'id3v1Types.h']]],
+  ['precision_5fcontext_11',['precision_context',['../id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0ae13bc5bc34f2d629746252949f1bbbe6',1,'id3v2Types.h']]],
+  ['primus_5fgenre_12',['PRIMUS_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a7e51f1ecc889606b5a08f327046fe95c',1,'id3v1Types.h']]],
+  ['progressive_5frock_5fgenre_13',['PROGRESSIVE_ROCK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a3b00d0607c2a08944a422dad5cd5a524',1,'id3v1Types.h']]],
+  ['psybient_5fgenre_14',['PSYBIENT_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172aff6b81b37bd82bb0e4e31158249aea28',1,'id3v1Types.h']]],
+  ['psychedelic_5fgenre_15',['PSYCHEDELIC_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a33f9d9cfeb18ebae375d0c11501f0b73',1,'id3v1Types.h']]],
+  ['psychedelic_5frock_5fgenre_16',['PSYCHEDELIC_ROCK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a8deb44c27e88d2fe75d761f06c550693',1,'id3v1Types.h']]],
+  ['psytrance_5fgenre_17',['PSYTRANCE_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a737f52dd50c2cc5d97581efcc58f2fe8',1,'id3v1Types.h']]],
+  ['punk_5fgenre_18',['PUNK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a0ceebb01a5b3671006665a266c7d03b2',1,'id3v1Types.h']]],
+  ['punk_5frock_5fgenre_19',['PUNK_ROCK_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172ae4e21156b0f2b9bf910d6896210adb09',1,'id3v1Types.h']]]
+];

@@ -3,7 +3,7 @@ var id3v2_frame_8h =
     [ "id3v2AttachFrameToTag", "id3v2_frame_8h.html#a5a03693ad0200e63fcb83c99740f30d9", null ],
     [ "id3v2CompareContentEntry", "id3v2_frame_8h.html#aa3dbdcbf6397195d6b30941790a987f3", null ],
     [ "id3v2CompareFrame", "id3v2_frame_8h.html#a0b8f33a50a9259f03724424b236ce292", null ],
-    [ "id3v2CompareFrameId", "id3v2_frame_8h.html#aea7ba77639841465381fb371d4ae60d7", null ],
+    [ "id3v2CompareFrameId", "id3v2_frame_8h.html#ae83a2a656b876ced1024041a0172104e", null ],
     [ "id3v2CopyContentEntry", "id3v2_frame_8h.html#a261eed2452997f8d1d22fce80e3d8a69", null ],
     [ "id3v2CopyFrame", "id3v2_frame_8h.html#a7f378404139bb5c353ff9843f091e1e9", null ],
     [ "id3v2CreateContentEntry", "id3v2_frame_8h.html#a80b75362e6b90dc570b052828744d252", null ],
@@ -18,7 +18,7 @@ var id3v2_frame_8h =
     [ "id3v2DestroyFrameHeader", "id3v2_frame_8h.html#ab91805ec048706bd1b86c155017e1237", null ],
     [ "id3v2DetachFrameFromTag", "id3v2_frame_8h.html#ada9e28e22eb4e511df6476de3eda3a40", null ],
     [ "id3v2FrameHeaderSerialize", "id3v2_frame_8h.html#a508abb98a0634b9946795681913dee46", null ],
-    [ "id3v2FrameHeaderToJSON", "id3v2_frame_8h.html#a6eedc147df1cc3825d7b46e948b18702", null ],
+    [ "id3v2FrameHeaderToJSON", "id3v2_frame_8h.html#a02ee9e151ba373021604e7f5bcf360bc", null ],
     [ "id3v2FrameSerialize", "id3v2_frame_8h.html#a22c39f4d435bb9baf457382eb925caa4", null ],
     [ "id3v2FrameToJSON", "id3v2_frame_8h.html#a4927c5d22e2d225efda184ce4f5e2db4", null ],
     [ "id3v2FrameTraverse", "id3v2_frame_8h.html#afd5b58e3e1835360a851b1e0c7169b5c", null ],
@@ -29,5 +29,5 @@ var id3v2_frame_8h =
     [ "id3v2ReadFrameEntryAsU16", "id3v2_frame_8h.html#aff8ac5acff06825d79b8b6a4cce74362", null ],
     [ "id3v2ReadFrameEntryAsU32", "id3v2_frame_8h.html#a45c84693ab49e95882eed7c4ea0b3dcf", null ],
     [ "id3v2ReadFrameEntryAsU8", "id3v2_frame_8h.html#adc4c31471e6e4e683bc451613d89e1ae", null ],
-    [ "id3v2WriteFrameEntry", "id3v2_frame_8h.html#a5446ad02b91a4f325eaf71d3cc895662", null ]
+    [ "id3v2WriteFrameEntry", "id3v2_frame_8h.html#a1d4eb53b03cc87624740114698adcfc7", null ]
 ];

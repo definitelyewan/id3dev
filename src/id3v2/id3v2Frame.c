@@ -1,14 +1,15 @@
 /**
  * @file id3v2Frame.c
  * @author Ewan Jones
- * @brief Functions for creating, destroying, and manipulating ID3v2 frames
- * @version 0.1
- * @date 2024-04-11
+ * @brief Function implementation for ID3v2 frame lifecycle, traversal, serialization, and content management
  * 
- * @copyright Copyright (c) 2024
+ * @version 26.01
+ * @date 2024-04-11 - 2026-01-17
+ * 
+ * @copyright Copyright (c) 2024 - 2026
  * 
  */
-
+ 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,7 +20,7 @@
 #include "id3dependencies/ByteStream/include/byteUnicode.h"
 #include "id3dependencies/ByteStream/include/byteStream.h"
 
-static char *base64Encode(const unsigned char *input, size_t inputLength) {
+static char *internal_base64Encode(const unsigned char *input, size_t inputLength) {
     static const unsigned char base64Chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     const size_t outputLength = 4 * ((inputLength + 2) / 3);
     unsigned char *output = malloc(outputLength + 1);
@@ -47,17 +48,22 @@ static char *base64Encode(const unsigned char *input, size_t inputLength) {
 
 
 /**
- * @brief Creates an ID3v2 frame header structure
- *
- * @param id
- * @param tagAlter
- * @param fileAlter
- * @param readOnly
- * @param unsync
- * @param decompressionSize
- * @param encryptionSymbol
- * @param groupSymbol
- * @return Id3v2FrameHeader*
+ * @brief Creates an ID3v2 frame header structure with specified flags and metadata
+ * @details Allocates and initializes a frame header on the heap. The header contains a frame
+ * identifier and control flags for preservation (tag/file alter, read-only) and format 
+ * (compression, encryption, grouping, unsynchronisation). Format flags are only used in 
+ * ID3v2.3/2.4; they are ignored in v2.2 but can be set for forward compatibility.
+ * 
+ * @param id - Frame identifier array of ID3V2_FRAME_ID_MAX_SIZE. Examples: "TIT2", "TPE1", "APIC"
+ * @param tagAlter - Tag alter preservation flag meaning the tag should be preserved
+ * @param fileAlter - File alter preservation flag
+ * @param readOnly - Read-only flag
+ * @param unsync - Frame-level unsynchronisation flag (ID3v2.4 only, false sync signals removed)
+ * @param decompressionSize - Original uncompressed size in bytes (0 = no compression, ID3v2.3/2.4 only)
+ * @param encryptionSymbol - Encryption method symbol (0 = no encryption, ID3v2.3/2.4 only)
+ * @param groupSymbol - Group identifier for related frames (0 = no grouping, ID3v2.3/2.4 only)
+ * 
+ * @return Id3v2FrameHeader* - Heap-allocated Id3v2FrameHeader structure. Caller must free with id3v2DestroyFrameHeader
  */
 Id3v2FrameHeader *id3v2CreateFrameHeader(uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], bool tagAlter, bool fileAlter,
                                          bool readOnly, bool unsync, uint32_t decompressionSize,
@@ -80,9 +86,12 @@ Id3v2FrameHeader *id3v2CreateFrameHeader(uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], bo
 }
 
 /**
- * @brief Frees all the memory allocated for a frame header
- *
- * @param toDelete
+ * @brief Frees all memory allocated for a frame header and nullifies the pointer
+ * @details Safely deallocates a frame header structure created by id3v2CreateFrameHeader.
+ * Sets the pointer to NULL after freeing to prevent use-after-free errors. If the pointer
+ * is already NULL, no action is taken.
+ * 
+ * @param toDelete - Pointer to frame header pointer to be freed and nullified
  */
 void id3v2DestroyFrameHeader(Id3v2FrameHeader **toDelete) {
     if (*toDelete) {
@@ -93,11 +102,15 @@ void id3v2DestroyFrameHeader(Id3v2FrameHeader **toDelete) {
 }
 
 /**
- * @brief Allocates memory for a contextEntry and performs a deep copy of the provided entry
- *
- * @param entry
- * @param size
- * @return Id3v2ContentEntry*
+ * @brief Creates a content entry structure with a deep copy of the provided data.
+ * @details Allocates an Id3v2ContentEntry on the heap and performs a deep copy of the provided
+ * entry data. Content entries store individual field values within ID3v2 frames (e.g., encoding
+ * byte, text strings, binary data). If size is 0, creates an empty entry with NULL data.
+ * 
+ * @param entry - Pointer to data to copy into the content entry. Ignored if size is 0
+ * @param size - Size of data in bytes. If 0, creates empty entry with NULL data pointer
+ * 
+ * @return Id3v2ContentEntry * - Heap-allocated Id3v2ContentEntry containing a deep copy of the data
  */
 Id3v2ContentEntry *id3v2CreateContentEntry(void *entry, size_t size) {
     Id3v2ContentEntry *ce = malloc(sizeof(Id3v2ContentEntry));
@@ -117,22 +130,17 @@ Id3v2ContentEntry *id3v2CreateContentEntry(void *entry, size_t size) {
 }
 
 /**
- *
- * List/Hash API functions
- *
- */
-
-
-/**
- * @brief Compare two entries and returns the difference. Note, only the
- * data itself is compared and not its size. The lower of the two sizes
- * will be used to compare the held data.
- * @details This is not ideal, but it needs to be done as ive found different
- * writers Jaikoz, itunes, Mp3tag, Mp3diag, and kid3 all write strings
- * differently. This is a compatability decision when id3v2 is parsed.
- * @param first
- * @param second
- * @return int
+ * @brief Compares two content entries byte-by-byte and returns the difference
+ * @details Performs lexicographic comparison of entry data up to the smaller of the two sizes.
+ * Size differences are ignored for compatibility with various ID3v2 tag writers (Jaikoz, iTunes,
+ * Mp3tag, Mp3diag, kid3) which write strings with different padding/termination. This design
+ * prioritizes data content over exact size matching.
+ * 
+ * @param first - First content entry to compare
+ * @param second - Second content entry to compare
+ * 
+ * @return int - 0 if entries are equal up to minimum size, positive if first > second, negative if
+ * first < second, or 1 if either parameter is NULL
  */
 int id3v2CompareContentEntry(const void *first, const void *second) {
     const Id3v2ContentEntry *one = (Id3v2ContentEntry *) first;
@@ -155,10 +163,14 @@ int id3v2CompareContentEntry(const void *first, const void *second) {
 }
 
 /**
- * @brief Generates a string that represents a context
- *
- * @param toBePrinted
- * @return char*
+ * @brief Generates a string representation of a content entry for debugging.
+ * @details Creates a formatted string displaying the entry's data size and memory address.
+ * Can be used as a callback function for list printing operations. 
+ * Caller must free the returned string.
+ * 
+ * @param toBePrinted - Content entry to represent as a string
+ * 
+ * @return char* - Heap allocated string in format "Size: <size>, data: <address>\n"
  */
 char *id3v2PrintContentEntry(const void *toBePrinted) {
     const Id3v2ContentEntry *e = (Id3v2ContentEntry *) toBePrinted;
@@ -172,10 +184,14 @@ char *id3v2PrintContentEntry(const void *toBePrinted) {
 }
 
 /**
- * @brief Performs a deep copy of an entry
- *
- * @param toBeCopied
- * @return void*
+ * @brief Creates a deep copy of a content entry
+ * @details Duplicates a content entry by creating a new structure with independently allocated
+ * data. Can be used as a callback function for list copy operations.
+ * 
+ * @param toBeCopied - Content entry to copy
+ * 
+ * @return void* - Heap allocated content entry containing a deep copy of the data
+ * with id3v2DeleteContentEntry()
  */
 void *id3v2CopyContentEntry(const void *toBeCopied) {
     Id3v2ContentEntry *e = (Id3v2ContentEntry *) toBeCopied;
@@ -184,9 +200,12 @@ void *id3v2CopyContentEntry(const void *toBeCopied) {
 }
 
 /**
- * @brief Frees an entry
- *
- * @param toBeDeleted
+ * @brief Frees all memory allocated for a content entry structure.
+ * @details Safely deallocates an Id3v2ContentEntry. Frees the 
+ * internal data buffer if present, then the structure itself. Can 
+ * be used as a callback for list deletion operations.
+ * 
+ * @param toBeDeleted - Pointer to Id3v2ContentEntry to be freed
  */
 void id3v2DeleteContentEntry(void *toBeDeleted) {
     Id3v2ContentEntry *e = (Id3v2ContentEntry *) toBeDeleted;
@@ -198,9 +217,11 @@ void id3v2DeleteContentEntry(void *toBeDeleted) {
 }
 
 /**
- * @brief Frees a frame in a linked list
- *
- * @param toBeDeleted
+ * @brief Frees all memory allocated for an ID3v2 frame structure.
+ * @details Wrapper around id3v2DestroyFrame for use as a callback in list operations.
+ * Deallocates the frame header, contexts, entries, and the frame structure itself.
+ * 
+ * @param toBeDeleted - Pointer to Id3v2Frame to be freed
  */
 void id3v2DeleteFrame(void *toBeDeleted) {
     Id3v2Frame *f = (Id3v2Frame *) toBeDeleted;
@@ -208,11 +229,14 @@ void id3v2DeleteFrame(void *toBeDeleted) {
 }
 
 /**
- * @brief Compares a frame in a linked list
- *
- * @param first
- * @param second
- * @return int
+ * @brief Performs deep comparison of two ID3v2 frame structures
+ * @details Compares all frame components including header fields (ID, flags, symbols), 
+ * content entries, and contexts. Can be used as a callback for list comparison operations.
+ * 
+ * @param first - First frame to compare
+ * @param second - Second frame to compare
+ * 
+ * @return int - 0 if frames are equal, negative if first < second, positive if first > second
  */
 int id3v2CompareFrame(const void *first, const void *second) {
     const Id3v2Frame *f = (Id3v2Frame *) first;
@@ -305,10 +329,14 @@ int id3v2CompareFrame(const void *first, const void *second) {
 }
 
 /**
- * @brief Builds a string representation of a frame
- *
- * @param toBePrinted
- * @return char*
+ * @brief Generates a string representation of a frame for debugging
+ * @details Creates a formatted string displaying memory addresses of the frame's header,
+ * contexts, and entries. Can be used as a callback for list printing operations.
+ * Caller must free the returned string.
+ * 
+ * @param toBePrinted - Frame to represent as a string
+ * 
+ * @return char* - Heap allocated string in format "header : <addr>, context : <addr>, entries : <addr>"
  */
 char *id3v2PrintFrame(const void *toBePrinted) {
     const Id3v2Frame *f = (Id3v2Frame *) toBePrinted;
@@ -325,10 +353,13 @@ char *id3v2PrintFrame(const void *toBePrinted) {
 }
 
 /**
- * @brief Deep copy a frame
- *
- * @param toBeCopied
- * @return void*
+ * @brief Creates a deep copy of an ID3v2 frame structure.
+ * @details Duplicates all frame components including header, contexts, and entries with 
+ * independently allocated memory. Can be used as a callback for list copy operations.
+ * 
+ * @param toBeCopied - Frame to copy
+ * 
+ * @return void* - Heap allocated frame containing deep copies of all components
  */
 void *id3v2CopyFrame(const void *toBeCopied) {
     Id3v2Frame *f = (Id3v2Frame *) toBeCopied;
@@ -347,12 +378,15 @@ void *id3v2CopyFrame(const void *toBeCopied) {
 
 
 /**
- * @brief Creates a frame
- *
- * @param header
- * @param context
- * @param entries
- * @return Id3v2Frame*
+ * @brief Creates an ID3v2 frame structure from provided components.
+ * @details Allocates a frame on the heap and assembles it from a header, contexts list,
+ * and entries list. The frame takes ownership of all provided components.
+ * 
+ * @param header - Frame header containing ID and flags
+ * @param context - List of content contexts defining entry structures
+ * @param entries - List of content entries containing frame data
+ * 
+ * @return Id3v2Frame* - Heap allocated Id3v2Frame structure. Caller must free with id3v2DestroyFrame()
  */
 Id3v2Frame *id3v2CreateFrame(Id3v2FrameHeader *header, List *context, List *entries) {
     Id3v2Frame *frame = malloc(sizeof(Id3v2Frame));
@@ -365,9 +399,12 @@ Id3v2Frame *id3v2CreateFrame(Id3v2FrameHeader *header, List *context, List *entr
 }
 
 /**
- * @brief Destroys all memory in a frame header
- *
- * @param toDelete
+ * @brief Frees all memory allocated for an ID3v2 frame structure and nullifies the pointer.
+ * @details Completely deallocates a frame by freeing its contexts list, entries list, 
+ * frame header, and the frame structure itself. Sets the pointer to NULL after freeing 
+ * to prevent use-after-free errors. If the pointer is already NULL, no action is taken.
+ * 
+ * @param toDelete - Pointer to frame pointer to be freed and nullified
  */
 void id3v2DestroyFrame(Id3v2Frame **toDelete) {
     if (*toDelete) {
@@ -382,12 +419,18 @@ void id3v2DestroyFrame(Id3v2Frame **toDelete) {
 
 
 /**
- * @brief Creates a frame with each entry set to 0 with the correct context. default pairings will be
- * scanned first and then userPairs will be scanned. If no pairings are found this function will use a
- * generic pairing. If this function fails it will return NULL.
- *
- * @param id
- * @return Id3v2Frame*
+ * @brief Creates an empty frame structure with zero-initialized entries based on context lookup.
+ * @details Resolves frame context through cascading lookups: exact ID match in defaults, text frame
+ * fallback, URL frame fallback, and user-defined pairings,
+ * and finally a generic fallback. Creates entries initialized to single zero bytes according to the
+ * resolved context, skipping iterator contexts. Frame header is created with all flags disabled.
+ * 
+ * @param id - Frame identifier array of ID3V2_FRAME_ID_MAX_SIZE
+ * @param version - ID3v2 version for default context pairing lookup
+ * @param userPairs - Optional user-defined ID-to-context mappings
+ * 
+ * @return Id3v2Frame* - Heap allocated frame with zero-initialized entries, or NULL if id is NULL. 
+ * Caller must free with id3v2DestroyFrame()
  */
 Id3v2Frame *id3v2CreateEmptyFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], uint8_t version, HashTable *userPairs) {
     if (id == NULL) {
@@ -446,13 +489,14 @@ Id3v2Frame *id3v2CreateEmptyFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], uint8_
 }
 
 /**
- * @brief Compares a provided frame ID with the ID of a provided frame. If the IDs match
- * This function will return true otherwise, false.
- *
- * @param frame
- * @param id
- * @return true
- * @return false
+ * @brief Compares a frame's identifier with a provided ID string.
+ * @details Performs byte-by-byte comparison of the frame's header ID against the provided 
+ * ID array. Returns false if frame or frame header is NULL to ensure safe operation.
+ * 
+ * @param frame - Frame structure containing the ID to compare
+ * @param id - ID string array of ID3V2_FRAME_ID_MAX_SIZE bytes to compare against
+ * 
+ * @return bool - true if IDs match exactly, false if they differ or if frame/header is NULL
  */
 bool id3v2CompareFrameId(const Id3v2Frame *frame, const char id[ID3V2_FRAME_ID_MAX_SIZE]) {
     if (frame == NULL) {
@@ -468,10 +512,14 @@ bool id3v2CompareFrameId(const Id3v2Frame *frame, const char id[ID3V2_FRAME_ID_M
 
 
 /**
- * @brief Creates a list iter specific to frame content
- *
- * @param tag
- * @return ListIter
+ * @brief Creates a list iterator for traversing frames in an ID3v2 tag.
+ * @details Initializes an iterator for sequential access to frames within a tag structure.
+ * Returns an empty iterator with NULL current pointer if the tag or its frames list is NULL,
+ * allowing safe iteration in all cases.
+ * 
+ * @param tag - Tag structure containing the frames list to iterate over
+ * 
+ * @return ListIter - Iterator positioned at the start of the frames list, or empty iterator if tag/frames is NULL
  */
 ListIter id3v2CreateFrameTraverser(Id3v2Tag *tag) {
     ListIter e;
@@ -489,22 +537,28 @@ ListIter id3v2CreateFrameTraverser(Id3v2Tag *tag) {
 }
 
 /**
- * @brief traverse through a list of frames with the use of a list iter
- * and returns a referance to frame content while doing so. If null is
- * returned, the end of the list has been reached.
- *
- * @param traverser
- * @return Id3v2Frame*
+ * @brief Advances the iterator and returns the next frame in the list.
+ * @details Wrapper around listIteratorNext that advances the iterator position and returns 
+ * the current frame. Returns NULL when the end of the list is reached, indicating iteration 
+ * is complete.
+ * 
+ * @param traverser - List iterator to advance
+ * 
+ * @return Id3v2Frame* - Pointer to the next frame in the list, or NULL if at the end
  */
 Id3v2Frame *id3v2FrameTraverse(ListIter *traverser) {
     return (Id3v2Frame *) listIteratorNext(traverser);
 }
 
 /**
- * @brief Creates a list iterator specific to frame entries
- *
- * @param frame
- * @return ListIter
+ * @brief Creates a list iterator for traversing content entries within a frame.
+ * @details Initializes an iterator for sequential access to content entries within a frame structure.
+ * Returns an empty iterator with NULL current pointer if the frame or its entries 
+ * list is NULL, allowing safe iteration in all cases.
+ * 
+ * @param frame - Frame structure containing the entries list to iterate over
+ * 
+ * @return ListIter - Iterator positioned at the start of the entries list, or empty iterator if frame/entries is NULL
  */
 ListIter id3v2CreateFrameEntryTraverser(Id3v2Frame *frame) {
     ListIter e;
@@ -523,12 +577,16 @@ ListIter id3v2CreateFrameEntryTraverser(Id3v2Frame *frame) {
 
 
 /**
- * @brief Returns the data at the traversers current position and
- * moves onto the next entry.
- *
- * @param traverser
- * @param dataSize
- * @return void*
+ * @brief Reads and returns a deep copy of the current entry's data, advancing the iterator.
+ * @details Retrieves the content entry at the iterator's current position and creates an 
+ * independently allocated copy of its data. Advances the iterator to the next entry. Returns 
+ * NULL and sets dataSize to 0 if the traverser is NULL, the current entry is NULL, or the 
+ * entry has zero size.
+ * 
+ * @param traverser - Iterator positioned at the entry to read
+ * @param dataSize - Output parameter receiving the size of returned data in bytes, or 0 on failure
+ * 
+ * @return void* - Heap allocated copy of the entry data. Caller must free. NULL on failure
  */
 void *id3v2ReadFrameEntry(ListIter *traverser, size_t *dataSize) {
     if (traverser == NULL) {
@@ -560,14 +618,16 @@ void *id3v2ReadFrameEntry(ListIter *traverser, size_t *dataSize) {
 
 
 /**
- * @brief Returns a UTF8 representation of the data held at the traversers current
- * position. the size of the returned data is returned though dataSize and a UTF8
- * string is returned to the caller if successful. If this function fails it will
- * return NULL and a dataSize of 0.
- *
- * @param traverser
- * @param dataSize
- * @return char*
+ * @brief Reads a frame entry as a UTF-8 encoded string with escaped special characters, advancing the iterator.
+ * @details Retrieves the content entry at the iterator's current position, automatically detects its encoding, 
+ * and converts it to UTF-8. Strips UTF-8 BOM if present and escapes quotes and backslashes for JSON/C std 
+ * compatibility. Advances the iterator to the next entry. Returns NULL and sets dataSize to 0 if the traverser 
+ * is NULL, the current entry is NULL, memory allocation fails, or encoding conversion fails.
+ * 
+ * @param traverser - Iterator positioned at the entry to read and convert
+ * @param dataSize - Output parameter receiving the final escaped string length in bytes, or 0 on failure
+ * 
+ * @return char* - Heap allocated UTF-8 string with escaped quotes and backslashes. Caller must free. NULL on failure
  */
 char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize) {
     unsigned char *tmp = NULL;
@@ -676,11 +736,14 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize) {
 }
 
 /**
- * @brief Returns an 8-bit integer representation of the data held at the traversers
- * current position. If this function fails it will return 0.
- *
- * @param traverser
- * @return uint8_t
+ * @brief Reads the first byte of the current entry as an 8-bit unsigned integer, advancing the iterator.
+ * @details Retrieves the content entry at the iterator's current position and extracts the first byte. 
+ * Advances the iterator to the next entry. Returns 0 if the traverser is NULL, the current entry is NULL, 
+ * or the entry has zero size. The remaining bytes in multi-byte entries are discarded.
+ * 
+ * @param traverser - Iterator positioned at the entry to read
+ * 
+ * @return uint8_t - First byte of the entry data, or 0 on failure
  */
 uint8_t id3v2ReadFrameEntryAsU8(ListIter *traverser) {
     uint8_t *tmp = NULL;
@@ -701,11 +764,16 @@ uint8_t id3v2ReadFrameEntryAsU8(ListIter *traverser) {
 }
 
 /**
- * @brief Returns a 16-bit integer representation of the data held at the traversers
- * current position. If this function fails it will return 0.
- *
- * @param traverser
- * @return uint16_t
+ * @brief Reads the current entry as a 16-bit unsigned integer, advancing the iterator.
+ * @details Retrieves the content entry at the iterator's current position and interprets 
+ * it as a uint16_t. For entries with 2+ bytes, constructs the value from the first two 
+ * bytes. For single-byte entries, zero-extends the byte to 16 bits. Advances the iterator 
+ * to the next entry. Returns 0 if the traverser is NULL, the current entry is NULL, or the 
+ * entry has zero size.
+ * 
+ * @param traverser - Iterator positioned at the entry to read
+ * 
+ * @return uint16_t - 16-bit unsigned integer value from entry data, or 0 on failure
  */
 uint16_t id3v2ReadFrameEntryAsU16(ListIter *traverser) {
     unsigned char *tmp = NULL;
@@ -731,11 +799,15 @@ uint16_t id3v2ReadFrameEntryAsU16(ListIter *traverser) {
 }
 
 /**
- * @brief Returns a 32-bit integer representation of the data held at the traversers
- * current position. If this function fails it will return 0.
- *
- * @param traverser
- * @return uint32_t
+ * @brief Reads the current entry as a 32-bit unsigned integer, advancing the iterator.
+ * @details Retrieves the content entry at the iterator's current position and interprets it as a uint32_t. 
+ * Entries larger than 4 bytes are clamped to use only the first 4 bytes. Advances the iterator to the 
+ * next entry. Returns 0 if the traverser is NULL 
+ * or the current entry is NULL.
+ * 
+ * @param traverser - Iterator positioned at the entry to read
+ * 
+ * @return uint32_t - 32-bit unsigned integer value from entry data, or 0 on failure
  */
 uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser) {
     unsigned char *tmp = NULL;
@@ -776,19 +848,19 @@ uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser) {
 }
 
 /**
- * @brief Writes entrySize bytes of entry at the current position of the traverser.
- * However, the data provided will be truncated as to not violate the entries' context.
- * It's recommended to not change the context to make your data fit but instead create a
- * new pairing with a new frame ID. This is to best ensure compatability with other
- * ID3v2 readers. You wouldn't want to break your cars metadata reader because it can no
- * longer read a songs title. If this function fails it will return false otherwise, true.
- *
- * @param frame
- * @param entries
- * @param entrySize
- * @param entry
- * @return true
- * @return false
+ * @brief Writes data to the entry at the iterator's current position, clamping size to context constraints.
+ * @details Locates the entry referenced by the iterator within the frame's entries list, finds its corresponding 
+ * context definition, and replaces the entry's data with a deep copy of the provided data. The written size is 
+ * clamped to the context's min/max bounds to maintain frame structure integrity. The iterator position is not 
+ * advanced. Returns false if any parameter is NULL, entrySize is 0, the iterator's current position is invalid, 
+ * the entry cannot be located, or the corresponding context cannot be found.
+ * 
+ * @param frame - Frame containing the entry to modify
+ * @param entries - Iterator positioned at the entry to write. Iterator position is not advanced
+ * @param entrySize - Desired size of data to write in bytes. Will be clamped to context min/max
+ * @param entry - Source data to copy into the entry
+ * 
+ * @return bool - true on successful write, false on failure
  */
 bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize, const void *entry) {
     if (frame == NULL || entries == NULL || entrySize == 0 || entry == NULL) {
@@ -866,13 +938,17 @@ bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize
 
 
 /**
- * @brief Inserts a frame into the tag. This function returns true on success and false
- * otherwise.
- *
- * @param tag
- * @param frame
- * @return true
- * @return false
+ * @brief Inserts a frame at the end of a tag's frames list.
+ * @details Appends the provided frame to the back of the tag's frames list. Validates that the tag 
+ * structure and frame structure are complete before insertion. Does not create a copy of the frame; 
+ * the tag takes ownership of the frame pointer. Returns false if the tag is NULL, the frame is NULL, 
+ * the tag's frames list is NULL, or any of the frame's required components (contexts, entries, header) 
+ * are NULL.
+ * 
+ * @param tag - Tag structure to receive the frame
+ * @param frame - Frame to insert. Tag takes ownership of this pointer
+ * 
+ * @return bool - true on successful insertion, false on failure
  */
 bool id3v2AttachFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame) {
     if (tag == NULL || frame == NULL) {
@@ -888,11 +964,16 @@ bool id3v2AttachFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame) {
 
 
 /**
- * @brief Removes a frame from a tag and returns it to the caller otherwise, NULL.
- *
- * @param tag
- * @param frame
- * @return Id3v2Frame*
+ * @brief Removes a frame from a tag's frames list and returns it to the caller.
+ * @details Searches the tag's frames list for a matching frame, removes it from the list, and 
+ * returns the frame pointer. Does not deallocate the frame; ownership transfers to the caller 
+ * who must eventually free it with id3v2DestroyFrame(). Returns NULL if the tag is NULL, the 
+ * frame is NULL, or the frame is not found in the tag's frames list.
+ * 
+ * @param tag - Tag structure containing the frame to remove
+ * @param frame - Frame to locate and remove from the tag
+ * 
+ * @return Id3v2Frame* - Pointer to the removed frame or NULL on failure
  */
 Id3v2Frame *id3v2DetachFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame) {
     if (tag == NULL || frame == NULL) {
@@ -904,14 +985,19 @@ Id3v2Frame *id3v2DetachFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame) {
 
 
 /**
- * @brief Converts a frame header into its binary representation. If this
- * function fails it will return NULL otherwise, an uint8_t pointer.
- *
- * @param header
- * @param version
- * @param frameSize
- * @param outl
- * @return ByteStream*
+ * @brief Serializes a frame header to binary format according to the specified ID3v2 version.
+ * @details Converts a frame header structure into its binary representation following version-specific 
+ * formats. v2.2 produces a 6-byte header. v2.3 and v2.4 produce 10+ byte headers with optional extended 
+ * data fields. v2.4 uses syncsafe encoding for the frame size, extended data is conditionally appended 
+ * when their values are non-zero. Returns NULL and sets outl to 0 if the header is NULL or version 
+ * is invalid (greater than ID3V2_TAG_VERSION_4).
+ * 
+ * @param header - Frame header structure to serialize
+ * @param version - ID3v2 version (ID3V2_TAG_VERSION_2, ID3V2_TAG_VERSION_3, or ID3V2_TAG_VERSION_4)
+ * @param frameSize - Size of frame content in bytes (excludes header). Encoded as syncsafe in v2.4
+ * @param outl - Output parameter receiving the serialized header size in bytes, or 0 on failure
+ * 
+ * @return uint8_t* - Heap allocated binary header data. Caller must free. NULL on failure
  */
 uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, uint32_t frameSize, size_t *outl) {
     unsigned char *tmp = NULL;
@@ -1031,11 +1117,21 @@ uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, ui
 }
 
 /**
- * @brief Converts a frame header structure into its representation as JSON.
- *
- * @param header
- * @param version
- * @return char*
+ * @brief Converts a frame header structure to its JSON representation based on ID3v2 version.
+ * @details Serializes frame header metadata into a JSON string with version-specific fields. v2.2 includes 
+ * only the 3-character frame ID. v2.3 adds preservation flags, compression, encryption, and grouping metadata. 
+ * v2.4 additionally includes the unsynchronisation flag. Returns an empty JSON object "{}" if the header is 
+ * NULL or the version is unsupported.
+ * 
+ * Example outputs:
+ * - v2.2: {"id":"TIT"}
+ * - v2.3: {"id":"TIT2","tagAlterPreservation":false,"fileAlterPreservation":false,"readOnly":false,"decompressionSize":0,"encryptionSymbol":0,"groupSymbol":0}
+ * - v2.4: {"id":"TIT2","tagAlterPreservation":false,"fileAlterPreservation":false,"readOnly":false,"unsynchronisation":false,"decompressionSize":0,"encryptionSymbol":0,"groupSymbol":0}
+ * 
+ * @param header - Frame header structure to convert to JSON
+ * @param version - ID3v2 version (ID3V2_TAG_VERSION_2, ID3V2_TAG_VERSION_3, or ID3V2_TAG_VERSION_4)
+ * 
+ * @return char* - Heap allocated JSON string. Caller must free. Returns "{}" if header is NULL or version is unsupported
  */
 char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, uint8_t version) {
     char *json = NULL;
@@ -1145,13 +1241,21 @@ char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, uint8_t version) {
 }
 
 /**
- * @brief Converts a frame structure into its binary representation. If this
- * function fails it will return NULL otherwise, an uint8_t structure.
- *
- * @param frame
- * @param version
- * @param outl
- * @return ByteStream*
+ * @brief Serializes a complete ID3v2 frame to binary format according to the specified version.
+ * @details Converts a frame structure into its binary representation by serializing the header and 
+ * processing each content entry according to its context type. Handles encoding conversions (UTF-8, 
+ * UTF-16LE/BE, Latin-1), null terminator insertion, bit-packing, and size adjustments. The serialization 
+ * process iterates through frame contexts and applies type-specific transformations: encoded strings are 
+ * converted to their target encoding with BOM prepending where required, binary/numeric data is written 
+ * directly, bit contexts are packed into compact byte representations, and adjustment contexts modify 
+ * data sizes dynamically. Returns NULL and sets outl to 0 if the frame is NULL, version is invalid 
+ * (greater than ID3V2_TAG_VERSION_4), or memory allocation fails during processing.
+ * 
+ * @param frame - Frame structure containing header, contexts, and entries to serialize
+ * @param version - ID3v2 version (ID3V2_TAG_VERSION_2, ID3V2_TAG_VERSION_3, or ID3V2_TAG_VERSION_4)
+ * @param outl - Output parameter receiving the total serialized frame size in bytes (header + content), or 0 on failure
+ * 
+ * @return uint8_t* - Heap allocated binary frame data ready for writing to file. Caller must free. NULL on failure
  */
 uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
     ByteStream *stream = NULL;
@@ -1704,11 +1808,37 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
 }
 
 /**
- * @brief Converts a frame structure into its JSON representation.
- *
- * @param frame
- * @param version
- * @return char*
+ * @brief Converts a complete ID3v2 frame structure to its JSON representation.
+ * @details Serializes frame metadata and content entries into a JSON object with header information 
+ * and an array of content values. String entries are converted to UTF-8 with escaped special characters, 
+ * binary data is base64-encoded, numeric values are represented as strings, and floating-point values 
+ * are formatted with decimal precision. Returns an empty JSON object "{}" if the frame is NULL or 
+ * version is invalid (greater than ID3V2_TAG_VERSION_4).
+ * 
+ * Example output for a TIT2 (title) frame in ID3v2.4:
+ * ```json
+ * {
+ *   "header": {
+ *     "id":"TIT2",
+ *     "tagAlterPreservation":false,
+ *     "fileAlterPreservation":false,
+ *     "readOnly":false,
+ *     "unsynchronisation":false,
+ *     "decompressionSize":0,
+ *     "encryptionSymbol":0,
+ *     "groupSymbol":0
+ *   },
+ *   "content": [
+ *     {"value":"3","size":1},
+ *     {"value":"Beetlebum","size":9}
+ *   ]
+ * }
+ * ```
+ * 
+ * @param frame - Frame structure to convert to JSON
+ * @param version - ID3v2 version (ID3V2_TAG_VERSION_2, ID3V2_TAG_VERSION_3, or ID3V2_TAG_VERSION_4)
+ * 
+ * @return char* - Heap allocated JSON string. Caller must free. Returns "{}" if frame is NULL or version is invalid
  */
 char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version) {
     char *json = NULL;
@@ -1754,7 +1884,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version) {
                 }
 
 
-                b64 = base64Encode(tmp, readSize);
+                b64 = internal_base64Encode(tmp, readSize);
 
                 contentMemCount += snprintf(NULL, 0,
                                             "{\"value\":\"%s\",\"size\":%zu}",
@@ -2039,7 +2169,7 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version) {
                 }
 
 
-                b64 = base64Encode(tmp, readSize);
+                b64 = internal_base64Encode(tmp, readSize);
                 free(tmp);
 
 

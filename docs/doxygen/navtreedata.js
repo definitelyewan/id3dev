@@ -38,9 +38,10 @@ var NAVTREE =
       [ "Globals", "globals.html", [
         [ "All", "globals.html", "globals_dup" ],
         [ "Functions", "globals_func.html", "globals_func" ],
+        [ "Variables", "globals_vars.html", null ],
         [ "Typedefs", "globals_type.html", null ],
         [ "Enumerations", "globals_enum.html", null ],
-        [ "Enumerator", "globals_eval.html", null ],
+        [ "Enumerator", "globals_eval.html", "globals_eval" ],
         [ "Macros", "globals_defs.html", null ]
       ] ]
     ] ],
@@ -53,9 +54,11 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "../standard.html",
-"id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172acec27b4ce6030b1310dd81a9653c3af4",
-"id3v2_frame_8h.html#a504b765cc1addeb5541ac2666b63fb38"
+"id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a33f9d9cfeb18ebae375d0c11501f0b73",
+"id3v2_context_8c.html#a5bd10812965548c550a90761e270591a",
+"id3v2_types_8h.html#a632a0a92f37060c749ceb7b8959dd2db"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';
 var SYNCOFFMSG = 'click to enable panel synchronization';
+var LISTOFALLMEMBERS = 'List of all members';

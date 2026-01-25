@@ -1,22 +1,24 @@
 <map id="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2.h" name="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2.h">
-<area shape="rect" id="Node000001" title="Declarations used by utility functions." alt="" coords="139,5,328,46"/>
-<area shape="rect" id="Node000002" href="$id3v2_types_8h.html" title="Definitions and types for id3v2 types." alt="" coords="184,168,283,193"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="226,47,214,81,211,100,212,119,223,153,218,154,207,120,206,100,209,80,221,45"/>
-<area shape="rect" id="Node000009" href="$id3v2_tag_identity_8h.html" title="Declarations for id3v2 tag headers and extended headers." alt="" coords="222,94,347,120"/>
-<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="248,45,270,79,266,82,244,48"/>
-<area shape="rect" id="Node000003" href="$id3v1_types_8h.html" title="Definitions and types for id3v1 types." alt="" coords="26,249,159,274"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="213,196,129,243,126,239,211,191"/>
+<area shape="rect" id="Node000001" title="Declarations of ID3v2 tag operations including reading/writing metadata frames, tag serialization,..." alt="" coords="178,5,367,46"/>
+<area shape="rect" id="Node000002" href="$id3v2_types_8h.html" title="Definitions for ID3v2.x tag structure, constants, and genre enumeration." alt="" coords="223,168,322,193"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="265,47,253,81,250,100,251,119,262,153,257,154,246,120,245,100,248,80,260,45"/>
+<area shape="rect" id="Node000010" href="$id3v2_tag_identity_8h.html" title="Function definitions of ID3v2 tag header and tag structure creation, manipulation,..." alt="" coords="261,94,386,120"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="287,45,309,79,305,82,283,48"/>
+<area shape="rect" id="Node000003" href="$id3v1_types_8h.html" title="Definitions for ID3v1 tag structure, constants, and genre enumeration." alt="" coords="26,249,159,274"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="246,196,135,245,133,240,244,191"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="6,330,80,356"/>
-<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="185,191,85,210,42,225,26,234,16,243,9,260,10,279,17,299,27,316,23,319,12,301,5,280,4,259,11,240,23,229,40,220,84,205,184,186"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="109,330,174,356"/>
-<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="229,195,158,318,154,315,224,193"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="233,249,311,274"/>
-<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="242,193,262,234,257,236,237,195"/>
-<area shape="rect" id="Node000007" title=" " alt="" coords="335,241,516,282"/>
-<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="264,191,365,233,363,237,262,196"/>
-<area shape="rect" id="Node000008" title=" " alt="" coords="540,241,724,282"/>
-<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="284,189,525,237,524,242,283,194"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="87,276,61,318,56,315,82,274"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="102,274,128,315,124,318,97,276"/>
-<area shape="poly" id="edge11_Node000009_Node000002" title=" " alt="" coords="278,121,253,156,249,153,274,118"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="223,189,166,196,103,207,49,223,29,232,16,243,9,260,10,279,17,298,27,316,23,319,12,301,5,280,4,259,12,240,26,228,47,218,102,202,165,190,222,183"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="110,330,174,356"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="264,195,224,243,162,319,158,316,220,240,260,192"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="233,249,312,274"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="275,194,275,233,270,233,270,194"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="335,241,517,282"/>
+<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="297,191,376,232,373,236,295,196"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="540,241,725,282"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="323,190,528,235,527,240,322,195"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="749,241,940,282"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="322,185,500,206,734,238,733,244,499,211,322,190"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="87,276,61,318,56,315,83,274"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="102,274,129,315,124,318,98,276"/>
+<area shape="poly" id="edge12_Node000010_Node000002" title=" " alt="" coords="317,121,292,156,288,153,313,118"/>
 </map>

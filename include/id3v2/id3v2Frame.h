@@ -1,14 +1,15 @@
-/**
+x/**
  * @file id3v2Frame.h
  * @author Ewan Jones
- * @brief function declarations for frame operations
- * @version 0.1
- * @date 2024-02-26
+ * @brief Function definitions for ID3v2 frame lifecycle, traversal, serialization, and content management
  * 
- * @copyright Copyright (c) 2024
+ * @version 26.01
+ * @date 2024-04-11 - 2026-01-17
+ * 
+ * @copyright Copyright (c) 2024 - 2026
  * 
  */
-
+ 
 #ifndef ID3V2_FRAME
 #define ID3V2_FRAME
 

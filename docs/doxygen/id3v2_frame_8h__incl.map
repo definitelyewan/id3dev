@@ -1,19 +1,21 @@
 <map id="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2Frame.h" name="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2Frame.h">
-<area shape="rect" id="Node000001" title="function declarations for frame operations" alt="" coords="169,5,396,46"/>
-<area shape="rect" id="Node000002" href="$id3v2_types_8h.html" title="Definitions and types for id3v2 types." alt="" coords="233,94,332,120"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="285,46,285,78,280,78,280,46"/>
-<area shape="rect" id="Node000003" href="$id3v1_types_8h.html" title="Definitions and types for id3v1 types." alt="" coords="74,175,208,201"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="262,122,177,170,175,165,260,118"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="5,256,80,282"/>
-<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="233,110,192,114,146,123,102,141,82,154,65,169,54,185,47,204,43,241,38,241,42,203,49,183,60,166,79,150,99,136,145,118,191,108,233,105"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="161,256,225,282"/>
-<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="278,121,210,244,205,241,273,119"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="282,175,360,201"/>
-<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="291,119,311,160,306,162,286,121"/>
-<area shape="rect" id="Node000007" title=" " alt="" coords="384,168,565,208"/>
-<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="313,118,414,159,412,164,311,123"/>
-<area shape="rect" id="Node000008" title=" " alt="" coords="589,168,773,208"/>
-<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="333,115,574,163,573,168,332,121"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="128,203,71,249,68,244,125,199"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="151,200,179,242,175,245,147,203"/>
+<area shape="rect" id="Node000001" title="Function definitions for ID3v2 frame lifecycle, traversal, serialization, and content management." alt="" coords="159,5,386,46"/>
+<area shape="rect" id="Node000002" href="$id3v2_types_8h.html" title="Definitions for ID3v2.x tag structure, constants, and genre enumeration." alt="" coords="223,94,322,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="275,46,275,78,270,78,270,46"/>
+<area shape="rect" id="Node000003" href="$id3v1_types_8h.html" title="Definitions for ID3v1 tag structure, constants, and genre enumeration." alt="" coords="26,175,159,201"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="246,123,135,171,133,166,244,118"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="6,256,80,282"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="223,115,166,122,103,133,49,149,29,159,16,169,9,186,10,205,17,225,27,243,23,245,12,227,5,206,4,185,12,166,26,154,47,144,102,128,165,117,222,110"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="110,256,174,282"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="264,122,224,169,162,246,158,242,220,166,260,118"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="233,175,312,201"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="275,120,275,159,270,159,270,120"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="335,168,517,208"/>
+<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="297,118,376,158,373,163,295,122"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="540,168,725,208"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="323,116,528,161,527,166,322,122"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="749,168,940,208"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="322,111,500,133,734,165,733,170,499,138,322,116"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="87,203,61,245,56,242,83,200"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="102,200,129,242,124,245,98,203"/>
 </map>
