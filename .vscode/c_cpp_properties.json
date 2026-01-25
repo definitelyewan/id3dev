@@ -4,6 +4,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/include",
+                "${workspaceFolder}/include/id3v1",
+                "${workspaceFolder}/include/id3v2",
                 "${workspaceFolder}/modules/cmocka/include",
                 "${workspaceFolder}/modules/LinkedListLib/include",
                 "${workspaceFolder}/modules/ByteStream/include",

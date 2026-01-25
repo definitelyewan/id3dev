@@ -9,7 +9,6 @@
  * 
  */
 #include <stdio.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <setjmp.h>
 #include <cmocka.h>
@@ -19,8 +18,8 @@
 #include "byteStream.h"
 #include "id3v2/id3v2Parser.h"
 
-static void id3v2TagFromFile_v3(void **state){
-
+static void id3v2TagFromFile_v3(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     assert_non_null(tag);
@@ -29,25 +28,30 @@ static void id3v2TagFromFile_v3(void **state){
     Id3v2Frame *f = NULL;
 
     int c = 0;
-    while((f = id3v2FrameTraverse(&frames)) != NULL){
-        c++;
+
+    for (c = 0; ; c++) {
+        f = id3v2FrameTraverse(&frames);
+        if (f == NULL) {
+            break;
+        }
     }
-    
+
+
     assert_int_equal(c, 15);
 
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2TagFromFile_null(void **state){
-
+static void id3v2TagFromFile_null(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile(NULL);
 
     assert_null(tag);
 }
 
 
-static void id3v2CopyTag_v3(void **state){
-
+static void id3v2CopyTag_v3(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     Id3v2Tag *copy = id3v2CopyTag(tag);
@@ -66,7 +70,7 @@ static void id3v2CopyTag_v3(void **state){
     Id3v2Frame *f = NULL;
 
 
-    for(int i = 0; i < 15; i++){
+    for (int i = 0; i < 15; i++) {
         f = id3v2FrameTraverse(&frames);
         listFindElement(tag->frames, id3v2CompareFrame, f);
         assert_non_null(f);
@@ -77,8 +81,8 @@ static void id3v2CopyTag_v3(void **state){
 }
 
 
-static void id3v2CompareTag_v3v4(void **state){
-
+static void id3v2CompareTag_v3v4(void **state) {
+    (void) state;
     Id3v2Tag *tag1 = id3v2TagFromFile("assets/sorry4dying.mp3");
     Id3v2Tag *tag2 = id3v2TagFromFile("assets/OnGP.mp3");
 
@@ -86,11 +90,10 @@ static void id3v2CompareTag_v3v4(void **state){
 
     id3v2DestroyTag(&tag1);
     id3v2DestroyTag(&tag2);
-
 }
 
-static void id3v2CompareTag_v3same(void **state){
-
+static void id3v2CompareTag_v3same(void **state) {
+    (void) state;
     Id3v2Tag *tag1 = id3v2TagFromFile("assets/sorry4dying.mp3");
     Id3v2Tag *tag2 = id3v2TagFromFile("assets/sorry4dying.mp3");
 
@@ -98,11 +101,10 @@ static void id3v2CompareTag_v3same(void **state){
 
     id3v2DestroyTag(&tag1);
     id3v2DestroyTag(&tag2);
-
 }
 
-static void id3v2ReadFrameByID_v3(void **state){
-
+static void id3v2ReadFrameByID_v3(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     Id3v2Frame *frame = id3v2ReadFrameByID("TIT2", tag);
@@ -118,11 +120,10 @@ static void id3v2ReadFrameByID_v3(void **state){
 
 
     id3v2DestroyTag(&tag);
-
 }
 
-static void id3v2ReadFrameByID_v3MultiTXXX(void **state){
-
+static void id3v2ReadFrameByID_v3MultiTXXX(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
     Id3v2Frame *frame = NULL;
     ListIter entries = {0};
@@ -172,36 +173,33 @@ static void id3v2ReadFrameByID_v3MultiTXXX(void **state){
 
     id3v2DestroyFrame(&frame);
     id3v2DestroyTag(&tag);
-
 }
 
-static void id3v2ReadFrameByID_v2Null(void **state){
-
+static void id3v2ReadFrameByID_v2Null(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     Id3v2Frame *frame = id3v2ReadFrameByID("XXX", tag);
     assert_null(frame);
 
     id3v2DestroyTag(&tag);
-
 }
 
-static void id3v2RemoveFrameByID_v3EveryFrame(void **state){
-
+static void id3v2RemoveFrameByID_v3EveryFrame(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
-    int total = tag->frames->length;
+    size_t total = tag->frames->length;
 
     assert_true(id3v2RemoveFrameByID("APIC", tag));
     total--;
     assert_int_equal(total, tag->frames->length);
     assert_false(id3v2RemoveFrameByID("APIC", tag));
 
-    for(int i = 0; i < 3; i++){
+    for (int i = 0; i < 3; i++) {
         assert_true(id3v2RemoveFrameByID("TXXX", tag));
         total--;
         assert_int_equal(total, tag->frames->length);
-        
     }
     assert_false(id3v2RemoveFrameByID("TXXX", tag));
 
@@ -263,23 +261,20 @@ static void id3v2RemoveFrameByID_v3EveryFrame(void **state){
     assert_int_equal(0, tag->frames->length);
 
     id3v2DestroyTag(&tag);
-
 }
 
-static void id3v2RemoveFrameByID_Null(void **state){
-
+static void id3v2RemoveFrameByID_Null(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     assert_false(id3v2RemoveFrameByID("ASWA", tag));
 
     id3v2DestroyTag(&tag);
-
-
 }
 
 
-static void id3v2ReadTextFrameContent_TRK(void **state){
-
+static void id3v2ReadTextFrameContent_TRK(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     char *str = id3v2ReadTextFrameContent("TRK", tag);
@@ -290,11 +285,10 @@ static void id3v2ReadTextFrameContent_TRK(void **state){
     free(str);
 
     id3v2DestroyTag(&tag);
-
 }
 
-static void id3v2ReadTextFrameContent_TXX(void **state){
-
+static void id3v2ReadTextFrameContent_TXX(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     char *str = id3v2ReadTextFrameContent("TXX", tag);
@@ -302,11 +296,10 @@ static void id3v2ReadTextFrameContent_TXX(void **state){
     assert_null(str);
 
     id3v2DestroyTag(&tag);
-
 }
 
-static void id3v2ReadTextFrameContent_PIC(void **state){
-
+static void id3v2ReadTextFrameContent_PIC(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     char *str = id3v2ReadTextFrameContent("PIC", tag);
@@ -314,11 +307,10 @@ static void id3v2ReadTextFrameContent_PIC(void **state){
     assert_null(str);
 
     id3v2DestroyTag(&tag);
-
 }
 
-static void id3v2ReadTitle_TT2(void **state){
-
+static void id3v2ReadTitle_TT2(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     char *str = id3v2ReadTitle(tag);
@@ -330,8 +322,8 @@ static void id3v2ReadTitle_TT2(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadTitle_TIT2(void **state){
-
+static void id3v2ReadTitle_TIT2(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     char *str = id3v2ReadTitle(tag);
@@ -343,8 +335,8 @@ static void id3v2ReadTitle_TIT2(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadArtist_TP1(void **state){
-
+static void id3v2ReadArtist_TP1(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     char *str = id3v2ReadArtist(tag);
@@ -356,8 +348,8 @@ static void id3v2ReadArtist_TP1(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadArtist_TPE1(void **state){
-
+static void id3v2ReadArtist_TPE1(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     char *str = id3v2ReadArtist(tag);
@@ -369,8 +361,8 @@ static void id3v2ReadArtist_TPE1(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadArtist_TP2(void **state){
-
+static void id3v2ReadArtist_TP2(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     char *str = id3v2ReadAlbumArtist(tag);
@@ -382,8 +374,8 @@ static void id3v2ReadArtist_TP2(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadArtist_TPE2(void **state){
-
+static void id3v2ReadArtist_TPE2(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     char *str = id3v2ReadAlbumArtist(tag);
@@ -395,8 +387,8 @@ static void id3v2ReadArtist_TPE2(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadArtist_TAL(void **state){
-
+static void id3v2ReadArtist_TAL(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     char *str = id3v2ReadAlbum(tag);
@@ -408,8 +400,8 @@ static void id3v2ReadArtist_TAL(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadArtist_TALB(void **state){
-
+static void id3v2ReadArtist_TALB(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     char *str = id3v2ReadAlbum(tag);
@@ -421,8 +413,8 @@ static void id3v2ReadArtist_TALB(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadYear_TYE(void **state){
-
+static void id3v2ReadYear_TYE(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     char *str = id3v2ReadYear(tag);
@@ -434,8 +426,8 @@ static void id3v2ReadYear_TYE(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadYear_TYER(void **state){
-
+static void id3v2ReadYear_TYER(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     char *str = id3v2ReadYear(tag);
@@ -447,34 +439,37 @@ static void id3v2ReadYear_TYER(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadGenre_TCO(void **state){
-
+static void id3v2ReadGenre_TCO(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     char *str = id3v2ReadGenre(tag);
 
     assert_non_null(str);
 
-    assert_string_equal(str, "Experimental Hip-Hop, Hardcore Hip-Hop, Abstract Hip-Hop, Industrial Hip-Hop & Post-Punk");
+    assert_string_equal(
+        str, "Experimental Hip-Hop, Hardcore Hip-Hop, Abstract Hip-Hop, Industrial Hip-Hop & Post-Punk");
     free(str);
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadGenre_TCON(void **state){
-
+static void id3v2ReadGenre_TCON(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     char *str = id3v2ReadGenre(tag);
 
     assert_non_null(str);
 
-    assert_string_equal(str, "Art Pop, Folktronica Glitch Pop, Ambient Pop, Experimental Hip-Hop, Neo-Psychedelia, Alternative R&B, Emo Rap & Chamber Pop");
+    assert_string_equal(
+        str,
+        "Art Pop, Folktronica Glitch Pop, Ambient Pop, Experimental Hip-Hop, Neo-Psychedelia, Alternative R&B, Emo Rap & Chamber Pop");
     free(str);
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadTrack_TRK(void **state){
-
+static void id3v2ReadTrack_TRK(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     char *str = id3v2ReadTrack(tag);
@@ -486,8 +481,8 @@ static void id3v2ReadTrack_TRK(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadTrack_TRCK(void **state){
-
+static void id3v2ReadTrack_TRCK(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     char *str = id3v2ReadTrack(tag);
@@ -499,8 +494,8 @@ static void id3v2ReadTrack_TRCK(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadComposer_TCM(void **state){
-
+static void id3v2ReadComposer_TCM(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     char *str = id3v2ReadComposer(tag);
@@ -512,8 +507,8 @@ static void id3v2ReadComposer_TCM(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadComposer_TCOM(void **state){
-
+static void id3v2ReadComposer_TCOM(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     char *str = id3v2ReadComposer(tag);
@@ -525,8 +520,8 @@ static void id3v2ReadComposer_TCOM(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadDisc_TPA(void **state){
-
+static void id3v2ReadDisc_TPA(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     char *str = id3v2ReadDisc(tag);
@@ -538,8 +533,8 @@ static void id3v2ReadDisc_TPA(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadDisc_TPOS(void **state){
-
+static void id3v2ReadDisc_TPOS(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     char *str = id3v2ReadDisc(tag);
@@ -551,22 +546,24 @@ static void id3v2ReadDisc_TPOS(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadLyrics_ULT(void **state){
-
+static void id3v2ReadLyrics_ULT(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     char *str = id3v2ReadLyrics(tag);
 
     assert_non_null(str);
 
-    assert_string_equal(str, "haBDJHAsbdjkHASBDJahbsdkAHBSDHAbsdHBDUAHSBDUBAUIBFOASIUBDFOIAUBFOIAUWBFOAWBFAOUWEBFUOYBOUBUOBUOboubouboubouboubouboigndoignoisnjgsdfjnglksjdfngslkjfngskdjfnglskdnfgiserugisugnvfkdxjnvxlkjnijxdngixjdhfgoiserhgiusdng spoerijgsoergjnposeirhgposergn reigjosperijgsodfkgkldfmvxc.,vbm");
+    assert_string_equal(
+        str,
+        "haBDJHAsbdjkHASBDJahbsdkAHBSDHAbsdHBDUAHSBDUBAUIBFOASIUBDFOIAUBFOIAUWBFOAWBFAOUWEBFUOYBOUBUOBUOboubouboubouboubouboigndoignoisnjgsdfjnglksjdfngslkjfngskdjfnglskdnfgiserugisugnvfkdxjnvxlkjnijxdngixjdhfgoiserhgiusdng spoerijgsoergjnposeirhgposergn reigjosperijgsodfkgkldfmvxc.,vbm");
     free(str);
     id3v2DestroyTag(&tag);
 }
 
 
-static void id3v2ReadLyrics_Null(void **state){
-
+static void id3v2ReadLyrics_Null(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     char *str = id3v2ReadLyrics(tag);
@@ -576,8 +573,8 @@ static void id3v2ReadLyrics_Null(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadComment_COM(void **state){
-
+static void id3v2ReadComment_COM(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     char *str = id3v2ReadComment(tag);
@@ -589,8 +586,8 @@ static void id3v2ReadComment_COM(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadComment_Null(void **state){
-
+static void id3v2ReadComment_Null(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     char *str = id3v2ReadComment(tag);
@@ -599,8 +596,8 @@ static void id3v2ReadComment_Null(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadPicture_PIC(void **state){
-
+static void id3v2ReadPicture_PIC(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     size_t dataSize = 0;
@@ -620,8 +617,8 @@ static void id3v2ReadPicture_PIC(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2ReadPicture_APIC(void **state){
-
+static void id3v2ReadPicture_APIC(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
 
     size_t dataSize = 0;
@@ -639,8 +636,8 @@ static void id3v2ReadPicture_APIC(void **state){
 }
 
 
-static void id3v2WriteTextFrameContent_TIT2(void **state){
-
+static void id3v2WriteTextFrameContent_TIT2(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
 
     assert_true(id3v2WriteTextFrameContent("TIT2", "test", tag));
@@ -653,8 +650,8 @@ static void id3v2WriteTextFrameContent_TIT2(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteTextFrameContent_TCOM(void **state){
-
+static void id3v2WriteTextFrameContent_TCOM(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
 
     assert_true(id3v2WriteTextFrameContent("TCOM", "test", tag));
@@ -662,8 +659,8 @@ static void id3v2WriteTextFrameContent_TCOM(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteTitle_TT2(void **state){
-
+static void id3v2WriteTitle_TT2(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
 
     assert_true(id3v2WriteTitle("death breast", tag));
@@ -676,8 +673,8 @@ static void id3v2WriteTitle_TT2(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteTitle_TIT2(void **state){
-
+static void id3v2WriteTitle_TIT2(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     assert_true(id3v2WriteTitle("title", tag));
@@ -690,8 +687,8 @@ static void id3v2WriteTitle_TIT2(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteArtist_TP1(void **state){
-
+static void id3v2WriteArtist_TP1(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
 
     assert_true(id3v2WriteArtist("good winter", tag));
@@ -704,8 +701,8 @@ static void id3v2WriteArtist_TP1(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteArtist_TEP1(void **state){
-
+static void id3v2WriteArtist_TEP1(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     assert_true(id3v2WriteArtist("ab", tag));
@@ -718,8 +715,8 @@ static void id3v2WriteArtist_TEP1(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteAlbumArtist_TP2(void **state){
-
+static void id3v2WriteAlbumArtist_TP2(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
 
     assert_true(id3v2WriteAlbumArtist("justin", tag));
@@ -732,8 +729,8 @@ static void id3v2WriteAlbumArtist_TP2(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteAlbumArtist_TEP2(void **state){
-
+static void id3v2WriteAlbumArtist_TEP2(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     assert_true(id3v2WriteAlbumArtist("ben", tag));
@@ -746,8 +743,8 @@ static void id3v2WriteAlbumArtist_TEP2(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteAlbum_TAL(void **state){
-
+static void id3v2WriteAlbum_TAL(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
 
     assert_false(id3v2WriteAlbum("", tag));
@@ -755,8 +752,8 @@ static void id3v2WriteAlbum_TAL(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteAlbum_TALB(void **state){
-
+static void id3v2WriteAlbum_TALB(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     assert_true(id3v2WriteAlbum("SCRAPYARD", tag));
@@ -769,8 +766,8 @@ static void id3v2WriteAlbum_TALB(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteYear_TYE(void **state){
-
+static void id3v2WriteYear_TYE(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
 
     assert_true(id3v2WriteYear("1910", tag));
@@ -783,8 +780,8 @@ static void id3v2WriteYear_TYE(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteYear_TYER(void **state){
-
+static void id3v2WriteYear_TYER(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     assert_true(id3v2WriteYear("0", tag));
@@ -797,8 +794,8 @@ static void id3v2WriteYear_TYER(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteGenre_TCO(void **state){
-
+static void id3v2WriteGenre_TCO(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
 
     assert_true(id3v2WriteGenre("Bossa Nova", tag));
@@ -811,8 +808,8 @@ static void id3v2WriteGenre_TCO(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteGenre_TCON(void **state){
-
+static void id3v2WriteGenre_TCON(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     assert_true(id3v2WriteGenre("Death Metal", tag));
@@ -825,8 +822,8 @@ static void id3v2WriteGenre_TCON(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteTrack_TRK(void **state){
-
+static void id3v2WriteTrack_TRK(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
 
     assert_true(id3v2WriteTrack("99/99", tag));
@@ -839,8 +836,8 @@ static void id3v2WriteTrack_TRK(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteTrack_TRCK(void **state){
-
+static void id3v2WriteTrack_TRCK(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     assert_true(id3v2WriteTrack("1/40", tag));
@@ -853,8 +850,8 @@ static void id3v2WriteTrack_TRCK(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteDisc_TPA(void **state){
-
+static void id3v2WriteDisc_TPA(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
 
     assert_true(id3v2WriteDisc("1/1", tag));
@@ -867,8 +864,8 @@ static void id3v2WriteDisc_TPA(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteDisc_TPOS(void **state){
-
+static void id3v2WriteDisc_TPOS(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     assert_true(id3v2WriteDisc("10/100", tag));
@@ -881,8 +878,8 @@ static void id3v2WriteDisc_TPOS(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteComposer_TCM(void **state){
-
+static void id3v2WriteComposer_TCM(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
 
     assert_true(id3v2WriteComposer("justion vernon", tag));
@@ -895,8 +892,8 @@ static void id3v2WriteComposer_TCM(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteComposer_TCOM(void **state){
-
+static void id3v2WriteComposer_TCOM(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     assert_true(id3v2WriteComposer("Lasky", tag));
@@ -909,12 +906,12 @@ static void id3v2WriteComposer_TCOM(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteLyrics_ULT(void **state){
-
+static void id3v2WriteLyrics_ULT(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
 
     assert_true(id3v2WriteLyrics("there is no lyrics frame", tag));
-    
+
     char *str = id3v2ReadLyrics(tag);
     assert_non_null(str);
     assert_string_equal(str, "there is no lyrics frame");
@@ -923,22 +920,27 @@ static void id3v2WriteLyrics_ULT(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteLyrics_ULT2(void **state){
-
+static void id3v2WriteLyrics_ULT2(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
-    assert_true(id3v2WriteLyrics("Verbal couture, parkour with the metaphors The flow house of horror, dead bolted with metal doors Grinch bitch, six sense with a nose drip Mind skydive, sniffing bumps in the cockpit Locksmith of hip-hop, appraisal the wrist watch The rocks 'bout the size as the teeth in Chris Rock's mouth Sock out the mic, prototype for Adderall Your work's killing fiends 'cause you cut it with Fentanyl So much coke just to sniff, need a ski lift Flip your table over if you cut it with the bullshit Nosebleed on red carpets, but it just blend in Snapping pictures feeling my chest being sunk in Live a fast life, seen many die slowly Unhappy when they left so I try to seize the moment Funny how it happens who ever would imagine That joke's on you but Satan the one laughing Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? I can sell honey to a bee In the fall time, make trees, take back they leaves Octopus in a straight jacket, savage with bad habits Broke, serving fiends, got rich, became a addict Ain't it funny how it happens, who would ever would imagine? Nose running right now, could ya pass me a napkin? Managed to somehow to have the upper advantage Panic when the drugs are gone and nobody is answering Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? No way to mask it, a lot became has-beens Rolling up that hundred dollar bill 'til they cash in Think it's gon' last, going too fast Man, it's fucked up, ain't it funny how it happens? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Upcoming heavy traffic Say you need to slow down 'cause you feel yourself crashing Staring in the devil face but you can't stop laughing Staring in the devil face but you can't stop laughing It's a living nightmare, that most of us might share Inherited in our blood, it's why we stuck in the mud Can't quit the drug use or the alcohol abuse Even if I wanted to, tell you what I'm gonna do I'ma wash away my problems with a bottle of Henny Anxiety got the best of me so I'm popping them Xannies Might need rehab but to me that shit pussy Pray for me y'all, 'cause I don't know what coming to me Bought a 8-ball of coke and my nigga on the way Got three hoes with him and they all tryna play Ain't it funny how it happens, ever would imagine Joke's on you but Satan the one laughing Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it?", tag));
+    assert_true(
+        id3v2WriteLyrics(
+            "Verbal couture, parkour with the metaphors The flow house of horror, dead bolted with metal doors Grinch bitch, six sense with a nose drip Mind skydive, sniffing bumps in the cockpit Locksmith of hip-hop, appraisal the wrist watch The rocks 'bout the size as the teeth in Chris Rock's mouth Sock out the mic, prototype for Adderall Your work's killing fiends 'cause you cut it with Fentanyl So much coke just to sniff, need a ski lift Flip your table over if you cut it with the bullshit Nosebleed on red carpets, but it just blend in Snapping pictures feeling my chest being sunk in Live a fast life, seen many die slowly Unhappy when they left so I try to seize the moment Funny how it happens who ever would imagine That joke's on you but Satan the one laughing Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? I can sell honey to a bee In the fall time, make trees, take back they leaves Octopus in a straight jacket, savage with bad habits Broke, serving fiends, got rich, became a addict Ain't it funny how it happens, who would ever would imagine? Nose running right now, could ya pass me a napkin? Managed to somehow to have the upper advantage Panic when the drugs are gone and nobody is answering Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? No way to mask it, a lot became has-beens Rolling up that hundred dollar bill 'til they cash in Think it's gon' last, going too fast Man, it's fucked up, ain't it funny how it happens? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Upcoming heavy traffic Say you need to slow down 'cause you feel yourself crashing Staring in the devil face but you can't stop laughing Staring in the devil face but you can't stop laughing It's a living nightmare, that most of us might share Inherited in our blood, it's why we stuck in the mud Can't quit the drug use or the alcohol abuse Even if I wanted to, tell you what I'm gonna do I'ma wash away my problems with a bottle of Henny Anxiety got the best of me so I'm popping them Xannies Might need rehab but to me that shit pussy Pray for me y'all, 'cause I don't know what coming to me Bought a 8-ball of coke and my nigga on the way Got three hoes with him and they all tryna play Ain't it funny how it happens, ever would imagine Joke's on you but Satan the one laughing Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it?"
+            , tag));
 
     char *str = id3v2ReadLyrics(tag);
     assert_non_null(str);
-    assert_string_equal(str, "Verbal couture, parkour with the metaphors The flow house of horror, dead bolted with metal doors Grinch bitch, six sense with a nose drip Mind skydive, sniffing bumps in the cockpit Locksmith of hip-hop, appraisal the wrist watch The rocks 'bout the size as the teeth in Chris Rock's mouth Sock out the mic, prototype for Adderall Your work's killing fiends 'cause you cut it with Fentanyl So much coke just to sniff, need a ski lift Flip your table over if you cut it with the bullshit Nosebleed on red carpets, but it just blend in Snapping pictures feeling my chest being sunk in Live a fast life, seen many die slowly Unhappy when they left so I try to seize the moment Funny how it happens who ever would imagine That joke's on you but Satan the one laughing Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? I can sell honey to a bee In the fall time, make trees, take back they leaves Octopus in a straight jacket, savage with bad habits Broke, serving fiends, got rich, became a addict Ain't it funny how it happens, who would ever would imagine? Nose running right now, could ya pass me a napkin? Managed to somehow to have the upper advantage Panic when the drugs are gone and nobody is answering Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? No way to mask it, a lot became has-beens Rolling up that hundred dollar bill 'til they cash in Think it's gon' last, going too fast Man, it's fucked up, ain't it funny how it happens? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Upcoming heavy traffic Say you need to slow down 'cause you feel yourself crashing Staring in the devil face but you can't stop laughing Staring in the devil face but you can't stop laughing It's a living nightmare, that most of us might share Inherited in our blood, it's why we stuck in the mud Can't quit the drug use or the alcohol abuse Even if I wanted to, tell you what I'm gonna do I'ma wash away my problems with a bottle of Henny Anxiety got the best of me so I'm popping them Xannies Might need rehab but to me that shit pussy Pray for me y'all, 'cause I don't know what coming to me Bought a 8-ball of coke and my nigga on the way Got three hoes with him and they all tryna play Ain't it funny how it happens, ever would imagine Joke's on you but Satan the one laughing Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it?");
+    assert_string_equal(
+        str,
+        "Verbal couture, parkour with the metaphors The flow house of horror, dead bolted with metal doors Grinch bitch, six sense with a nose drip Mind skydive, sniffing bumps in the cockpit Locksmith of hip-hop, appraisal the wrist watch The rocks 'bout the size as the teeth in Chris Rock's mouth Sock out the mic, prototype for Adderall Your work's killing fiends 'cause you cut it with Fentanyl So much coke just to sniff, need a ski lift Flip your table over if you cut it with the bullshit Nosebleed on red carpets, but it just blend in Snapping pictures feeling my chest being sunk in Live a fast life, seen many die slowly Unhappy when they left so I try to seize the moment Funny how it happens who ever would imagine That joke's on you but Satan the one laughing Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? I can sell honey to a bee In the fall time, make trees, take back they leaves Octopus in a straight jacket, savage with bad habits Broke, serving fiends, got rich, became a addict Ain't it funny how it happens, who would ever would imagine? Nose running right now, could ya pass me a napkin? Managed to somehow to have the upper advantage Panic when the drugs are gone and nobody is answering Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? No way to mask it, a lot became has-beens Rolling up that hundred dollar bill 'til they cash in Think it's gon' last, going too fast Man, it's fucked up, ain't it funny how it happens? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Upcoming heavy traffic Say you need to slow down 'cause you feel yourself crashing Staring in the devil face but you can't stop laughing Staring in the devil face but you can't stop laughing It's a living nightmare, that most of us might share Inherited in our blood, it's why we stuck in the mud Can't quit the drug use or the alcohol abuse Even if I wanted to, tell you what I'm gonna do I'ma wash away my problems with a bottle of Henny Anxiety got the best of me so I'm popping them Xannies Might need rehab but to me that shit pussy Pray for me y'all, 'cause I don't know what coming to me Bought a 8-ball of coke and my nigga on the way Got three hoes with him and they all tryna play Ain't it funny how it happens, ever would imagine Joke's on you but Satan the one laughing Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it? Ain't it funny how it happens? Ain't it?");
 
     free(str);
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteComment_COM(void **state){
-
+static void id3v2WriteComment_COM(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
 
     assert_true(id3v2WriteComment("not a test", tag));
@@ -951,8 +953,8 @@ static void id3v2WriteComment_COM(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WriteComment_COMM(void **state){
-
+static void id3v2WriteComment_COMM(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
 
     assert_true(id3v2WriteComment("not a test", tag));
@@ -965,22 +967,22 @@ static void id3v2WriteComment_COMM(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WritePicture_PIC(void **state){
-
+static void id3v2WritePicture_PIC(void **state) {
+    (void) state;
     FILE *fp = NULL;
     size_t sz = 0;
     size_t charsz = 0;
     uint8_t *data = NULL;
 
     fp = fopen("assets/cat.png", "rb");
-    
-    fseek(fp, 0L, SEEK_END);
+    // NOLINTNEXTLINE
+    (void) fseek(fp, 0L, SEEK_END);
     sz = ftell(fp);
-    fseek(fp, 0L, SEEK_SET);
+    (void) fseek(fp, 0L, SEEK_SET);
     data = malloc(sz);
-    fread(data, 1, sz, fp);
-    fclose(fp);
-    
+    (void) fread(data, 1, sz, fp);
+    (void) fclose(fp);
+
     assert_non_null(data);
 
     Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
@@ -1011,8 +1013,8 @@ static void id3v2WritePicture_PIC(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2WritePictureFromFile_PIC(void **state){
-
+static void id3v2WritePictureFromFile_PIC(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/boniver.mp3");
     assert_true(id3v2WritePictureFromFile("assets/cat.png", "PNG", 0x00, tag));
 
@@ -1034,12 +1036,13 @@ static void id3v2WritePictureFromFile_PIC(void **state){
 
     FILE *fp = NULL;
     fp = fopen("assets/cat.png", "rb");
-    fseek(fp, 0L, SEEK_END);
+    // NOLINTNEXTLINE
+    (void) fseek(fp, 0L, SEEK_END);
     size_t sz = ftell(fp);
-    fseek(fp, 0L, SEEK_SET);
+    (void) fseek(fp, 0L, SEEK_SET);
     uint8_t *test = malloc(sz);
-    fread(test, 1, sz, fp);
-    fclose(fp);
+    (void) fread(test, 1, sz, fp);
+    (void) fclose(fp);
 
 
     assert_memory_equal(data, test, sz);
@@ -1050,8 +1053,8 @@ static void id3v2WritePictureFromFile_PIC(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2InsertTextFrame_TSOA(void **state){
-
+static void id3v2InsertTextFrame_TSOA(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
 
     assert_true(id3v2InsertTextFrame("TSOA", BYTE_UTF16LE, "test", tag));
@@ -1068,14 +1071,14 @@ static void id3v2InsertTextFrame_TSOA(void **state){
     char *str = id3v2ReadFrameEntryAsChar(&i, &charsz);
 
     assert_string_equal(str, "test");
-    
+
     free(str);
     id3v2DestroyFrame(&f);
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2InsertTextFrame_TSOAnoString(void **state){
-
+static void id3v2InsertTextFrame_TSOAnoString(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
 
     assert_false(id3v2InsertTextFrame("TSOA", BYTE_UTF16LE, NULL, tag));
@@ -1088,8 +1091,8 @@ static void id3v2InsertTextFrame_TSOAnoString(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2InsertTextFrame_NoID(void **state){
-
+static void id3v2InsertTextFrame_NoID(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
 
     assert_false(id3v2InsertTextFrame(NULL, BYTE_UTF16LE, "test", tag));
@@ -1097,8 +1100,8 @@ static void id3v2InsertTextFrame_NoID(void **state){
     id3v2DestroyTag(&tag);
 }
 
-static void id3v2TagSerialize_v3(void **state){
-    
+static void id3v2TagSerialize_v3(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
     size_t outl = 0;
     uint8_t *out = id3v2TagSerialize(tag, &outl);
@@ -1117,13 +1120,13 @@ static void id3v2TagSerialize_v3(void **state){
     assert_true(v);
 }
 
-static void id3v2TagSerialize_v2(void **state){
-    
+static void id3v2TagSerialize_v2(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
     size_t outl = 0;
     uint8_t *out = id3v2TagSerialize(tag, &outl);
     ByteStream *stream = byteStreamCreate(out, outl);
-    
+
     assert_non_null(stream);
 
     Id3v2Tag *tag2 = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
@@ -1137,18 +1140,18 @@ static void id3v2TagSerialize_v2(void **state){
     assert_true(v);
 }
 
-static void id3v2TagSerialize_v4(void **state){
-    
+static void id3v2TagSerialize_v4(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
     size_t outl = 0;
     uint8_t *out = id3v2TagSerialize(tag, &outl);
     ByteStream *stream = byteStreamCreate(out, outl);
-    
+
     assert_non_null(stream);
 
     Id3v2Tag *tag2 = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     bool v = id3v2CompareTag(tag, tag2);
-    
+
 
     byteStreamDestroy(stream);
     free(out);
@@ -1158,12 +1161,12 @@ static void id3v2TagSerialize_v4(void **state){
     assert_true(v);
 }
 
-static void id3v2TagSerialize_v3ext(void **state){
-    
+static void id3v2TagSerialize_v3ext(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
     tag->header->extendedHeader = id3v2CreateExtendedTagHeader(0, 0x74657374, 0, 0, 0); // crc is equal to test in hex
     id3v2WriteExtendedHeaderIndicator(tag->header, true);
-    
+
     size_t outl = 0;
     uint8_t *out = id3v2TagSerialize(tag, &outl);
     ByteStream *stream = byteStreamCreate(out, outl);
@@ -1182,8 +1185,8 @@ static void id3v2TagSerialize_v3ext(void **state){
     assert_true(v);
 }
 
-static void id3v2TagSerialize_v4ext(void **state){
-    
+static void id3v2TagSerialize_v4ext(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
     tag->header->extendedHeader = id3v2CreateExtendedTagHeader(0, 0, 0, 1, 0);
     id3v2WriteExtendedHeaderIndicator(tag->header, true);
@@ -1205,8 +1208,8 @@ static void id3v2TagSerialize_v4ext(void **state){
     assert_true(v);
 }
 
-static void id3v2TagSerialize_v4footer(void **state){
-    
+static void id3v2TagSerialize_v4footer(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
     id3v2WriteFooterIndicator(tag->header, true);
 
@@ -1233,7 +1236,7 @@ static void id3v2TagSerialize_v4footer(void **state){
  */
 
 // static void id3v2TagToStream_v4unsync(void **state){
-    
+
 //     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
 //     id3v2WriteUnsynchronisationIndicator(tag->header, true);
 
@@ -1252,8 +1255,8 @@ static void id3v2TagSerialize_v4footer(void **state){
 // }
 
 
-static void id3v2TagToJSON_v2(void **state){
-
+static void id3v2TagToJSON_v2(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
     FILE *fp = NULL;
     char *str = NULL;
@@ -1267,23 +1270,24 @@ static void id3v2TagToJSON_v2(void **state){
     fp = fopen("assets/danybrown2.json", "rb");
     assert_non_null(fp);
 
-    fseek(fp, 0L, SEEK_END);
+    // NOLINTNEXTLINE
+    (void) fseek(fp, 0L, SEEK_END);
     sz = ftell(fp);
-    fseek(fp, 0L, SEEK_SET);
+    (void) fseek(fp, 0L, SEEK_SET);
 
+    // NOLINTNEXTLINE
     fileJson = calloc(sizeof(char), sz + 1);
-    fread(fileJson, 1, sz, fp);
-    fclose(fp);
-    
+    (void) fread(fileJson, 1, sz, fp);
+    (void) fclose(fp);
+
     assert_string_equal(str, fileJson);
 
     free(fileJson);
     free(str);
-
 }
 
-static void id3v2TagToJSON_v3(void **state){
-
+static void id3v2TagToJSON_v3(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
     FILE *fp = NULL;
     char *str = NULL;
@@ -1297,25 +1301,26 @@ static void id3v2TagToJSON_v3(void **state){
     fp = fopen("assets/sorry4dying.json", "rb");
     assert_non_null(fp);
 
-    fseek(fp, 0L, SEEK_END);
+    // NOLINTNEXTLINE
+    (void) fseek(fp, 0L, SEEK_END);
     sz = ftell(fp);
-    fseek(fp, 0L, SEEK_SET);
+    (void) fseek(fp, 0L, SEEK_SET);
 
+    // NOLINTNEXTLINE
     fileJson = calloc(sizeof(char), sz + 1);
-    fread(fileJson, 1, sz, fp);
-    fclose(fp);
-    
+    (void) fread(fileJson, 1, sz, fp);
+    (void) fclose(fp);
+
     assert_string_equal(str, fileJson);
 
     free(fileJson);
     free(str);
-
 }
 
-static void id3v2WriteTagToFile_v2NoFile(void **state){
-
+static void id3v2WriteTagToFile_v2NoFile(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
-    
+
 
     int v = id3v2WriteTagToFile("assets/tmp", tag);
     assert_true(v);
@@ -1326,11 +1331,11 @@ static void id3v2WriteTagToFile_v2NoFile(void **state){
     assert_true(v2);
     id3v2DestroyTag(&tag);
     id3v2DestroyTag(&tag2);
-    remove("assets/tmp");
+    (void) remove("assets/tmp");
 }
 
-static void id3v2WriteTagToFile_v3Overwrite(void **state){
-
+static void id3v2WriteTagToFile_v3Overwrite(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
     Id3v2Tag *tag2 = NULL;
     FILE *fp = NULL;
@@ -1340,34 +1345,37 @@ static void id3v2WriteTagToFile_v3Overwrite(void **state){
     id3v2WriteAlbum("SCRAPYARD", tag);
 
     fp = fopen("assets/sorry4dying.mp3", "rb");
-    fseek(fp, 0L, SEEK_END);
+    // NOLINTNEXTLINE
+    (void) fseek(fp, 0L, SEEK_END);
     sz = ftell(fp);
-    fseek(fp, 0L, SEEK_SET);
+    (void) fseek(fp, 0L, SEEK_SET);
     data = malloc(sz);
-    fread(data, 1, sz, fp);
-    fclose(fp);
+    (void) fread(data, 1, sz, fp);
+    (void) fclose(fp);
 
     fp = fopen("assets/tmp", "wb");
-    fwrite(data, 1, sz, fp);
+
+    assert_non_null(fp);
+    // NOLINTNEXTLINE
+    (void) fwrite(data, 1, sz, fp);
     free(data);
-    fclose(fp);
+    (void) fclose(fp);
 
     id3v2WriteTagToFile("assets/tmp", tag);
 
     tag2 = id3v2TagFromFile("assets/tmp");
 
-    remove("assets/tmp");
+    (void) remove("assets/tmp");
 
     char *str = id3v2ReadAlbum(tag2);
     assert_string_equal("SCRAPYARD", str);
     free(str);
     id3v2DestroyTag(&tag2);
     id3v2DestroyTag(&tag);
-
 }
 
-static void id3v2WriteTagToFile_v4OverwriteNoPictures(void **state){
-
+static void id3v2WriteTagToFile_v4OverwriteNoPictures(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
     Id3v2Tag *tag2 = NULL;
     FILE *fp = NULL;
@@ -1378,33 +1386,38 @@ static void id3v2WriteTagToFile_v4OverwriteNoPictures(void **state){
     assert_true(id3v2RemoveFrameByID("APIC", tag));
 
     fp = fopen("assets/OnGP.mp3", "rb");
-    fseek(fp, 0L, SEEK_END);
+
+    assert_non_null(fp);
+    // NOLINTNEXTLINE
+    (void) fseek(fp, 0L, SEEK_END);
     sz = ftell(fp);
-    fseek(fp, 0L, SEEK_SET);
+    (void) fseek(fp, 0L, SEEK_SET);
     data = malloc(sz);
-    fread(data, 1, sz, fp);
-    fclose(fp);
+    (void) fread(data, 1, sz, fp);
+    (void) fclose(fp);
 
     fp = fopen("assets/tmp", "wb");
-    fwrite(data, 1, sz, fp);
+
+    assert_non_null(fp);
+    // NOLINTNEXTLINE
+    (void) fwrite(data, 1, sz, fp);
     free(data);
-    fclose(fp);
+    (void) fclose(fp);
 
     id3v2WriteTagToFile("assets/tmp", tag);
 
     tag2 = id3v2TagFromFile("assets/tmp");
 
-    remove("assets/tmp");
+    (void) remove("assets/tmp");
 
     assert_false(id3v2ReadFrameByID("APIC", tag2));
 
     id3v2DestroyTag(&tag2);
     id3v2DestroyTag(&tag);
-
 }
 
-static void id3v2WriteTagToFile_v4OverwriteNoPicturesAsUpdate(void **state){
-
+static void id3v2WriteTagToFile_v4OverwriteNoPicturesAsUpdate(void **state) {
+    (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
     Id3v2Tag *tag2 = NULL;
     FILE *fp = NULL;
@@ -1418,17 +1431,27 @@ static void id3v2WriteTagToFile_v4OverwriteNoPicturesAsUpdate(void **state){
 
 
     fp = fopen("assets/OnGP.mp3", "rb");
-    fseek(fp, 0L, SEEK_END);
+
+    if (fp == NULL) {
+        fail_msg("Failed to open file assets/OnGP.mp3");
+    }
+
+    (void) fseek(fp, 0L, SEEK_END);
     sz = ftell(fp);
-    fseek(fp, 0L, SEEK_SET);
+    (void) fseek(fp, 0L, SEEK_SET);
     data = malloc(sz);
-    fread(data, 1, sz, fp);
-    fclose(fp);
+    (void) fread(data, 1, sz, fp);
+    (void) fclose(fp);
 
     fp = fopen("assets/tmp", "wb");
-    fwrite(data, 1, sz, fp);
+
+    if (fp == NULL) {
+        fail_msg("Failed to open file assets/tmp for writing");
+    }
+
+    (void) fwrite(data, 1, sz, fp);
     free(data);
-    fclose(fp);
+    (void) fclose(fp);
 
     id3v2WriteTagToFile("assets/tmp", tag);
 
@@ -1438,7 +1461,7 @@ static void id3v2WriteTagToFile_v4OverwriteNoPicturesAsUpdate(void **state){
     byteStreamSeek(stream, 6, SEEK_SET);
     uint32_t size = byteStreamReturnSyncInt(stream);
     byteStreamSeek(stream, size, SEEK_CUR);
-    
+
     assert_int_equal(byteStreamGetCh(stream), 'I');
     byteStreamSeek(stream, 1, SEEK_CUR);
     assert_int_equal(byteStreamGetCh(stream), 'D');
@@ -1446,18 +1469,17 @@ static void id3v2WriteTagToFile_v4OverwriteNoPicturesAsUpdate(void **state){
     assert_int_equal(byteStreamGetCh(stream), '3');
 
 
-    remove("assets/tmp");
+    (void) remove("assets/tmp");
 
     assert_false(id3v2ReadFrameByID("APIC", tag2));
     byteStreamDestroy(stream);
     id3v2DestroyTag(&tag2);
     id3v2DestroyTag(&tag);
-
 }
 
-int main(){
+int main() {
     const struct CMUnitTest tests[] = {
-        
+
         // id3v2TagFromFile
         cmocka_unit_test(id3v2TagFromFile_v3),
         cmocka_unit_test(id3v2TagFromFile_null),
@@ -1597,7 +1619,7 @@ int main(){
         cmocka_unit_test(id3v2TagSerialize_v3ext),
         cmocka_unit_test(id3v2TagSerialize_v4ext),
         cmocka_unit_test(id3v2TagSerialize_v4footer),
-        
+
         // outdated!
         // cmocka_unit_test(id3v2TagToStream_v4unsync),
 

@@ -1,6 +1,6 @@
 <map id="/Users/ewanjones/projects/id3dev/include/id3v1/id3v1Parser.h" name="/Users/ewanjones/projects/id3dev/include/id3v1/id3v1Parser.h">
-<area shape="rect" id="Node000001" title="Declarations for the id3v1 parser." alt="" coords="5,5,232,46"/>
-<area shape="rect" id="Node000002" href="$id3v1_types_8h.html" title="Definitions and types for id3v1 types." alt="" coords="69,94,168,120"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,232,46"/>
+<area shape="rect" id="Node000002" href="$id3v1_types_8h.html" title="Definitions for ID3v1 tag structure, constants, and genre enumeration." alt="" coords="69,94,168,120"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,46,121,78,116,78,116,46"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="35,168,109,193"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="113,121,90,156,86,153,109,118"/>

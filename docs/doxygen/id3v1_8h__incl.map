@@ -1,6 +1,6 @@
 <map id="/Users/ewanjones/projects/id3dev/include/id3v1/id3v1.h" name="/Users/ewanjones/projects/id3dev/include/id3v1/id3v1.h">
-<area shape="rect" id="Node000001" title="Declarations used by utility functions." alt="" coords="5,5,195,46"/>
-<area shape="rect" id="Node000002" href="$id3v1_types_8h.html" title="Definitions and types for id3v1 types." alt="" coords="51,94,149,120"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,5,195,46"/>
+<area shape="rect" id="Node000002" href="$id3v1_types_8h.html" title="Definitions for ID3v1 tag structure, constants, and genre enumeration." alt="" coords="51,94,149,120"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="103,46,103,78,97,78,97,46"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="16,168,90,193"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="95,121,72,156,67,153,90,118"/>

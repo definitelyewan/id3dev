@@ -1,5 +1,19 @@
 var searchData=
 [
-  ['binary_5fcontext_0',['binary_context',['../id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0abff99d3f3111c80023ac4bdc8c5b3747',1,'id3v2Types.h']]],
-  ['bit_5fcontext_1',['bit_context',['../id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0ac138e995190318025d0ed2d40d9f0350',1,'id3v2Types.h']]]
+  ['ballad_5fgenre_0',['BALLAD_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a5712b8b08745cb8b1ad6973d34b6db75',1,'id3v1Types.h']]],
+  ['baroque_5fgenre_1',['BAROQUE_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a50d00abfdae7f9528f2683849b95ba4e',1,'id3v1Types.h']]],
+  ['bass_5fgenre_2',['BASS_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a9c61e25a778a7e9ffd88de367da96de1',1,'id3v1Types.h']]],
+  ['beat_5fgenre_3',['BEAT_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a4a29fd2de54a642345da225d70f4556b',1,'id3v1Types.h']]],
+  ['bebop_5fgenre_4',['BEBOP_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172aa4cbc99f80d739f744e270c79de4e435',1,'id3v1Types.h']]],
+  ['bhangra_5fgenre_5',['BHANGRA_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a7f8b0e82f4e2c57752d1a91c94e39c79',1,'id3v1Types.h']]],
+  ['big_5fband_5fgenre_6',['BIG_BAND_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172afc19d287587e0db900eddad35d71494d',1,'id3v1Types.h']]],
+  ['big_5fbeat_5fgenre_7',['BIG_BEAT_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a35a57462987979b793d714890222c2a6',1,'id3v1Types.h']]],
+  ['binary_5fcontext_8',['binary_context',['../id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0abff99d3f3111c80023ac4bdc8c5b3747',1,'id3v2Types.h']]],
+  ['bit_5fcontext_9',['bit_context',['../id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0ac138e995190318025d0ed2d40d9f0350',1,'id3v2Types.h']]],
+  ['black_5fmetal_5fgenre_10',['BLACK_METAL_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a4a9b122edf9594c0d185b109aadb26db',1,'id3v1Types.h']]],
+  ['bluegrass_5fgenre_11',['BLUEGRASS_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a4efc31c09c6a96bd4082e9b6fea1cce6',1,'id3v1Types.h']]],
+  ['blues_5fgenre_12',['BLUES_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172aff4e074eae8ab682ee0ff14a9f264c86',1,'id3v1Types.h']]],
+  ['booty_5fbass_5fgenre_13',['BOOTY_BASS_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172ae7ddd6f74d94cfe12482145d430b1cfb',1,'id3v1Types.h']]],
+  ['breakbeat_5fgenre_14',['BREAKBEAT_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a73484aa327f70bec4855cf3dd8be97c1',1,'id3v1Types.h']]],
+  ['britpop_5fgenre_15',['BRITPOP_GENRE',['../id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a6b18a6a1a5884b957695c5a88d2f1117',1,'id3v1Types.h']]]
 ];

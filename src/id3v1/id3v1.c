@@ -1,11 +1,10 @@
 /**
  * @file id3v1.c
  * @author Ewan Jones
- * @brief Function definitions for utility
- * @version 2.0
- * @date 2023-10-03
- * 
- * @copyright Copyright (c) 2023
+ * @brief Implementation of ID3v1 tag manipulation, file I/O, and utility functions
+ * @version 26.01
+ * @date 2023-10-03 - 2026-01-11
+ * @copyright Copyright (c) 2023 - 2026
  * 
  */
 #include <stdio.h>
@@ -19,8 +18,13 @@
 
 /**
  * @brief Creates an Id3v1Tag from a provided file path.
- * @param filePath 
- * @return Id3v1Tag* 
+ * @details Reads the last 128 bytes from the specified file to extract ID3v1 metadata.
+ * The function opens the file in binary read mode, seeks to the position 128 bytes from
+ * the end of the file, reads the metadata bytes, and then delegates to id3v1TagFromBuffer
+ * for parsing.
+ * @param filePath - The path to the audio file containing ID3v1 metadata. Must not be NULL.
+ * @return Id3v1Tag* - Pointer to the parsed ID3v1 tag structure, or NULL if the file cannot
+ * be opened, read operations fail, or the filePath parameter is NULL.
  */
 Id3v1Tag *id3v1TagFromFile(const char *filePath) {
     if (filePath == NULL) {
@@ -52,9 +56,10 @@ Id3v1Tag *id3v1TagFromFile(const char *filePath) {
 }
 
 /**
- * @brief Deep copies an Id3v1Tag structure.
- * @param toCopy
- * @return Id3v1Tag*
+ * @brief Creates a deep copy of an Id3v1Tag structure.
+ * @details Uses id3v1CreateTag to allocate and initialize a new tag with copied member values.
+ * @param toCopy - The tag to copy. May be NULL.
+ * @return Id3v1Tag* - New copy of the tag, or NULL if toCopy is NULL.
  */
 Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy) {
     if (toCopy == NULL) {
@@ -72,7 +77,7 @@ Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy) {
  * @param dest
  * @return int
  */
-static int id3v1CharsToStructUint8(const char *src, uint8_t *dest) {
+static int internal_id3v1CharsToStructUint8(const char *src, uint8_t *dest) {
     memset(dest, 0, ID3V1_FIELD_SIZE);
 
     if (src != NULL) {
@@ -86,40 +91,44 @@ static int id3v1CharsToStructUint8(const char *src, uint8_t *dest) {
 }
 
 /**
- * @brief Writes a title to tag.
- * @param title
- * @param tag
- * @return int
+ * @brief Writes a title to an Id3v1Tag.
+ * @details Copies up to ID3V1_FIELD_SIZE bytes from the title string to the tag's title member.
+ * @param title - The title string to write
+ * @param tag - The tag to write to
+ * @return int - 1 on success, 0 on failure.
  */
 int id3v1WriteTitle(const char *title, Id3v1Tag *tag) {
-    return (tag == NULL) ? 0 : id3v1CharsToStructUint8(title, tag->title);
+    return (tag == NULL) ? 0 : internal_id3v1CharsToStructUint8(title, tag->title);
 }
 
 /**
- * @brief Writes an artist to tag.
- * @param artist
- * @param tag
- * @return int
+ * @brief Writes an artist to an Id3v1Tag.
+ * @details Copies up to ID3V1_FIELD_SIZE bytes from the artist string to the tag's artist member.
+ * @param artist - The artist string to write
+ * @param tag - The tag to write to
+ * @return int - 1 on success, 0 on failure.
  */
 int id3v1WriteArtist(const char *artist, Id3v1Tag *tag) {
-    return (tag == NULL) ? 0 : id3v1CharsToStructUint8(artist, tag->artist);
+    return (tag == NULL) ? 0 : internal_id3v1CharsToStructUint8(artist, tag->artist);
 }
 
 /**
- * @brief Writes an album to tag.
- * @param album
- * @param tag
- * @return int
+ * @brief Writes an album to an Id3v1Tag.
+ * @details Copies up to ID3V1_FIELD_SIZE bytes from the album string to the tag's album member.
+ * @param album - The album string to write
+ * @param tag - The tag to write to
+ * @return int - 1 on success, 0 on failure.
  */
 int id3v1WriteAlbum(const char *album, Id3v1Tag *tag) {
-    return (tag == NULL) ? 0 : id3v1CharsToStructUint8(album, tag->albumTitle);
+    return (tag == NULL) ? 0 : internal_id3v1CharsToStructUint8(album, tag->albumTitle);
 }
 
 /**
- * @brief Writes a year to tag.
- * @param year
- * @param tag
- * @return int
+ * @brief Writes a year to an Id3v1Tag.
+ * @details Copies a provided year to the tag's year member.
+ * @param year - The year as a signed number
+ * @param tag - The tag to write to
+ * @return int - 1 on success, 0 on failure.
  */
 int id3v1WriteYear(int year, Id3v1Tag *tag) {
     if (tag == NULL) {
@@ -131,20 +140,22 @@ int id3v1WriteYear(int year, Id3v1Tag *tag) {
 }
 
 /**
- * @brief Writes a comment to tag.
- * @param comment
- * @param tag
- * @return int
+ * @brief Writes a comment to an Id3v1Tag.
+ * @details Copies up to ID3V1_FIELD_SIZE bytes from the comment string to the tag's comment member.
+ * @param comment - The comment string to write
+ * @param tag - The tag to write to
+ * @return int - 1 on success, 0 on failure.
  */
 int id3v1WriteComment(const char *comment, Id3v1Tag *tag) {
-    return (tag == NULL) ? 0 : id3v1CharsToStructUint8(comment, tag->comment);
+    return (tag == NULL) ? 0 : internal_id3v1CharsToStructUint8(comment, tag->comment);
 }
 
 /**
- * @brief Writes a genere to tag.
- * @param genre
- * @param tag
- * @return int
+ * @brief Writes a Genre to an Id3v1Tag.
+ * @details Assigns the provided genre value to the tag's genre member.
+ * @param genre - The genre value to write
+ * @param tag - The tag to write to
+ * @return int - 1 on success, 0 on failure.
  */
 int id3v1WriteGenre(Genre genre, Id3v1Tag *tag) {
     if (tag == NULL) {
@@ -156,10 +167,11 @@ int id3v1WriteGenre(Genre genre, Id3v1Tag *tag) {
 }
 
 /**
- * @brief Writes a track to tag.
- * @param track
- * @param tag
- * @return int
+ * @brief Writes a track number to an Id3v1Tag.
+ * @details Assigns the provided track number to the tag's track member.
+ * @param track - The track number to write
+ * @param tag - The tag to write to
+ * @return int - 1 on success, 0 on failure.
  */
 int id3v1WriteTrack(int track, Id3v1Tag *tag) {
     if (tag == NULL) {
@@ -171,12 +183,11 @@ int id3v1WriteTrack(int track, Id3v1Tag *tag) {
 }
 
 /**
- * @brief Compares two different tags.
- * @details Returns true if the provided tags are equal otherwise, false.
- * @param tag1
- * @param tag2
- * @return true
- * @return false
+ * @brief Compares two Id3v1Tag structures for equality.
+ * @details Performs a field-by-field comparison of all tag members (title, artist, album, year, track, comment, genre).
+ * @param tag1 - The first tag to compare
+ * @param tag2 - The second tag to compare
+ * @return bool - true if all fields match, false if tags differ in any way.
  */
 bool id3v1CompareTag(const Id3v1Tag *tag1, const Id3v1Tag *tag2) {
     if (tag1 == NULL || tag2 == NULL) {
@@ -215,10 +226,11 @@ bool id3v1CompareTag(const Id3v1Tag *tag1, const Id3v1Tag *tag2) {
 }
 
 /**
- * @brief Provides a string equivalent to the genere enum.
- * @details Values outside the genre enum will be reported as other and return "Other".
- * @param val
- * @return char*
+ * @brief Converts a Genre enum value to it's string representation.
+ * @details Maps genre enum values to their corresponding string names. Returns "Other" for 
+ * unrecognized values as specified by the ID3v1 standard
+ * @param val - The genre enum value to convert
+ * @return char* - String representation of the genre, never NULL.
  */
 char *id3v1GenreFromTable(Genre val) {
     //int to string
@@ -613,10 +625,10 @@ char *id3v1GenreFromTable(Genre val) {
 }
 
 /**
- * @brief Reads a title from a tag.
- * @details Mainly for compatibility and use in ffi.
- * @param tag
- * @return char*
+ * @brief Reads the title member from an Id3v1Tag.
+ * @details Allocates and returns a null-terminated string copy of the tags title to the caller.
+ * @param tag - The tag to read from
+ * @return char* Newly allocated string containing the title.
  */
 char *id3v1ReadTitle(const Id3v1Tag *tag) {
     char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
@@ -625,10 +637,10 @@ char *id3v1ReadTitle(const Id3v1Tag *tag) {
 }
 
 /**
- * @brief Reads an artist from a tag.
- * @details Mainly for compatibility and use in ffi.
- * @param tag
- * @return char*
+ * @brief Reads the artist member from an Id3v1Tag.
+ * @details Allocates and returns a null-terminated string copy of the tags artist to the caller.
+ * @param tag - The tag to read from
+ * @return char* - Newly allocated string containing the artist.
  */
 char *id3v1ReadArtist(const Id3v1Tag *tag) {
     char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
@@ -637,10 +649,10 @@ char *id3v1ReadArtist(const Id3v1Tag *tag) {
 }
 
 /**
- * @brief Reads an album from a tag.
- * @details Mainly for compatibility and use in ffi.
- * @param tag
- * @return char*
+ * @brief Reads the album member from an Id3v1Tag.
+ * @details Allocates and returns a null-terminated string copy of the tags album to the caller.
+ * @param tag - The tag to read from
+ * @return char* - Newly allocated string containing the album.
  */
 char *id3v1ReadAlbum(const Id3v1Tag *tag) {
     char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
@@ -649,20 +661,20 @@ char *id3v1ReadAlbum(const Id3v1Tag *tag) {
 }
 
 /**
- * @brief Reads a year from a tag.
- * @details Mainly for compatibility and use in ffi.
- * @param tag
- * @return char*
+ * @brief Reads the year member from an Id3v1Tag.
+ * @details Returns the year value directly. Mainly, for compatibility for ffi or abi in other languages.
+ * @param tag - The tag to read from
+ * @return int - The year value from the tag.
  */
 int id3v1ReadYear(const Id3v1Tag *tag) {
     return tag->year;
 }
 
 /**
- * @brief Reads a comment from a tag.
- * @details Mainly for compatibility and use in ffi.
- * @param tag
- * @return char*
+ * @brief Reads the comment member from an Id3v1Tag.
+ * @details Allocates and returns a null-terminated string copy of the tags comment to the caller.
+ * @param tag - The tag to read from
+ * @return char* - Newly allocated string containing the comment.
  */
 char *id3v1ReadComment(const Id3v1Tag *tag) {
     char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
@@ -671,29 +683,32 @@ char *id3v1ReadComment(const Id3v1Tag *tag) {
 }
 
 /**
- * @brief Reads a genere from a tag
- * @details Mainly for compatibility and use in ffi
- * @param tag
- * @return char*
+ * @brief Reads a Genre from a tag
+ * @details Returns the year value directly. Mainly, for compatibility for ffi or abi in other languages.
+ * @param tag - The tag to read from
+ * @return Genre - The Genre value from the tag.
  */
 Genre id3v1ReadGenre(const Id3v1Tag *tag) {
     return tag->genre;
 }
 
 /**
- * @brief Reads a track from a tag
- * @details Mainly for compatibility and use in ffi
- * @param tag
- * @return char*
+ * @brief Reads a track number from a tag
+ * @details Returns the track number value directly. Mainly, for compatibility for ffi or abi in other languages.
+ * @param tag - The tag to read from
+ * @return int - The track number value from the tag.
  */
 int id3v1ReadTrack(const Id3v1Tag *tag) {
     return tag->track;
 }
 
 /**
- * @brief Converts an Id3v1Tag to a JSON string.
- * @param tag
- * @return char*
+ * @brief Converts an Id3v1Tag to a JSON string representation.
+ * @details Allocates and returns a JSON-formatted string containing all tag fields. Returns "{}" if tag is NULL. 
+ * The JSON format is: {"title":"...","artist":"...","album":"...","year":n,"track":n,"comment":"...","genreNumber":n,"genre":"..."}.
+ * Caller must free the returned string.
+ * @param tag - The tag to convert.
+ * @return char* - Newly allocated JSON string, never NULL.
  */
 char *id3v1ToJSON(const Id3v1Tag *tag) {
     char *json = NULL;
@@ -734,11 +749,12 @@ char *id3v1ToJSON(const Id3v1Tag *tag) {
 }
 
 /**
- * @brief Writes a Id3v1Tag structure to a file located at file path.
- * @details If the file does not exist it will be created. otherwise, if a tag is found it will be overwritten and if not it will be appended.
- * @param filePath
- * @param tag
- * @return int
+ * @brief Writes/Overwrites an Id3v1Tag to the bottom of a file .
+ * @details Serializes the tag to ID3v1 binary format and writes it to the file. Creates the file if it doesn't exist,
+ * overwrites existing ID3v1 tags if present, or appends to files without tags.
+ * @param filePath - The file path to write to. Must not be NULL.
+ * @param tag - The tag to write. Must not be NULL.
+ * @return int - 1 on success, 0 on failure.
  */
 int id3v1WriteTagToFile(const char *filePath, const Id3v1Tag *tag) {
     if (filePath == NULL || tag == NULL) {

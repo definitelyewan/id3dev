@@ -1,11 +1,11 @@
 /**
  * @file id3v2.h
  * @author Ewan Jones
- * @brief Declarations used by utility functions
+ * @brief Declarations of ID3v2 tag operations including reading/writing metadata frames, tag serialization, and file I/O.
  * @version 2.0
- * @date 2023-12-13
+ * @date 2023-12-13 - 2026-01-25
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) 2023 - 2026
  * 
  */
 
@@ -22,7 +22,7 @@ extern "C"{
 
 Id3v2Tag *id3v2TagFromFile(const char *filename);
 
-Id3v2Tag *id3v2CopyTag(Id3v2Tag *toCopy);
+Id3v2Tag *id3v2CopyTag(const Id3v2Tag *toCopy);
 
 // util functions
 
@@ -35,7 +35,7 @@ int id3v2RemoveFrameByID(const char *id, Id3v2Tag *tag);
 int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t encoding, const char *string,
                          Id3v2Tag *tag);
 
-int id3v2ReadTagVersion(Id3v2Tag *tag);
+int id3v2ReadTagVersion(const Id3v2Tag *tag);
 
 // compatability functions a.k.a getters
 
@@ -63,7 +63,7 @@ char *id3v2ReadLyrics(Id3v2Tag *tag);
 
 char *id3v2ReadComment(Id3v2Tag *tag);
 
-uint8_t *id3v2ReadPicture(uint8_t type, Id3v2Tag *tag, size_t *dataSize);
+uint8_t *id3v2ReadPicture(uint8_t type, const Id3v2Tag *tag, size_t *dataSize);
 
 // change values within an id3v2 structure
 

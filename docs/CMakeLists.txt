@@ -6,7 +6,10 @@ if(DOXYGEN_FOUND)
 
 
     set(ID3DEV_DOC_FILES
+            "${CMAKE_CURRENT_SOURCE_DIR}/mainpage.dox"
+
             "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3dev.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../src/id3dev.c"
 
             "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3v1/id3v1.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3v1/id3v1Parser.h"
@@ -27,10 +30,7 @@ if(DOXYGEN_FOUND)
             "${CMAKE_CURRENT_SOURCE_DIR}/../src/id3v2/id3v2Frame.c"
             "${CMAKE_CURRENT_SOURCE_DIR}/../src/id3v2/id3v2Parser.c"
             "${CMAKE_CURRENT_SOURCE_DIR}/../src/id3v2/id3v2TagIdentity.c"
-
-
     )
-
 
     set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
     set(DOXYGEN_PROJECT_NUMBER ${PROJECT_VERSION})
@@ -38,17 +38,22 @@ if(DOXYGEN_FOUND)
 
     set(DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)
     set(DOXYGEN_MARKDOWN_SUPPORT YES)
+    set(DOXYGEN_EXTRACT_ALL YES)
+    set(DOXYGEN_EXTRACT_PRIVATE YES)
+    set(DOXYGEN_EXTRACT_STATIC YES)
+    set(DOXYGEN_ALWAYS_DETAILED_SEC YES)
+    set(DOXYGEN_REPEAT_BRIEF YES)
+    set(DOXYGEN_JAVADOC_AUTOBRIEF YES)
+    set(DOXYGEN_SOURCE_BROWSER YES)
+    set(DOXYGEN_INLINE_SOURCES NO)
+    set(DOXYGEN_EXCLUDE_SYMBOLS "internal_*")
 
     set(DOXYGEN_LAYOUT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/DoxygenLayout.xml)
+    set(DOXYGEN_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doxygen)
 
-
-    set(_doxyfile_template "${CMAKE_BINARY_DIR}/CMakeDoxyfile.in")
-    set(_target_doxyfile "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.docs")
-    configure_file("${_doxyfile_template}" "${_target_doxyfile}")
-
-    doxygen_add_docs(docsfiles
-                    ${CMAKE_CURRENT_SOURCE_DIR} 
-                    ${ID3DEV_DOC_FILES})
+    doxygen_add_docs(docs
+                    ${ID3DEV_DOC_FILES}
+                    COMMENT "Generating API documentation with Doxygen")
 
 
 endif()

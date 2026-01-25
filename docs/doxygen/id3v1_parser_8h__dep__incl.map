@@ -1,7 +1,9 @@
 <map id="/Users/ewanjones/projects/id3dev/include/id3v1/id3v1Parser.h" name="/Users/ewanjones/projects/id3dev/include/id3v1/id3v1Parser.h">
-<area shape="rect" id="Node000001" title="Declarations for the id3v1 parser." alt="" coords="87,5,313,46"/>
-<area shape="rect" id="Node000002" href="$id3v1_8c.html" title="Function definitions for utility." alt="" coords="5,94,182,135"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="166,58,119,96,116,91,163,54"/>
-<area shape="rect" id="Node000003" href="$id3v1_parser_8c.html" title="Function definitions for the parser." alt="" coords="205,94,408,135"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="238,54,284,91,281,96,234,58"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="180,5,407,46"/>
+<area shape="rect" id="Node000002" href="$id3dev_8c.html" title="Function implementations for reading, writing, converting, and comparing ID3v1 and ID3v2 metadata tag..." alt="" coords="5,94,182,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="235,55,140,96,138,91,233,50"/>
+<area shape="rect" id="Node000003" href="$id3v1_8c.html" title="Definitions of ID3v1 tag manipulation, file I/O, and utility functions." alt="" coords="205,94,382,135"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="296,62,296,94,291,94,291,62"/>
+<area shape="rect" id="Node000004" href="$id3v1_parser_8c.html" title="Declarations of ID3v1 tag parsing and memory management functions." alt="" coords="405,94,608,135"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="357,50,459,91,457,96,355,55"/>
 </map>

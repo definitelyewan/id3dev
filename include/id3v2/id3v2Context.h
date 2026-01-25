@@ -1,13 +1,14 @@
 /**
  * @file id3v2Context.h
  * @author Ewan Jones
- * @brief provides the ability to generate a context and a list of contexts that represent the ruleset of a frame
- * @version 0.1
- * @date 2024-01-19
+ * @brief Function definitions for ID3v2 frame context definitions and parsing configuration
+ * @version 26.01
+ * @date 2024-01-19 - 2026-01-19
  * 
- * @copyright Copyright (c) 2024
+ * @copyright Copyright (c) 2024 - 2026
  * 
  */
+
 #ifndef ID3V2_CONTEXT
 #define ID3V2_CONTEXT
 
@@ -17,7 +18,7 @@ extern "C"{
 
 #include "id3v2Types.h"
 
-unsigned long id3v2djb2(char *str);
+unsigned long id3v2djb2(const char *str);
 
 //mem
 
@@ -124,7 +125,7 @@ bool id3v2InsertIdentifierContextPair(HashTable *identifierContextPairs, char ke
 
 uint8_t *id3v2ContextSerialize(Id3v2ContentContext *cc, size_t *outl);
 
-char *id3v2ContextToJSON(Id3v2ContentContext *cc);
+char *id3v2ContextToJSON(const Id3v2ContentContext *cc);
 
 #ifdef __cplusplus
 } //extern c end

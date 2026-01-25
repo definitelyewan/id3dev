@@ -1,7 +1,7 @@
 var id3v2_8h =
 [
     [ "id3v2CompareTag", "id3v2_8h.html#a1719a513274f8844c541a74c2d5f5b32", null ],
-    [ "id3v2CopyTag", "id3v2_8h.html#a7a4b18f1124cfe2e4b1cea17da148390", null ],
+    [ "id3v2CopyTag", "id3v2_8h.html#ab6344910fa27bc78e4d945fd439eeb49", null ],
     [ "id3v2InsertTextFrame", "id3v2_8h.html#a9f6919ee1c433289282d42c4beace116", null ],
     [ "id3v2ReadAlbum", "id3v2_8h.html#a09a418433767d695781ce883a8338c17", null ],
     [ "id3v2ReadAlbumArtist", "id3v2_8h.html#a530250132d61d29f4b5458cdbb5eb5a7", null ],
@@ -12,8 +12,8 @@ var id3v2_8h =
     [ "id3v2ReadFrameByID", "id3v2_8h.html#ac0c521548eb8da37ef258a36980f5874", null ],
     [ "id3v2ReadGenre", "id3v2_8h.html#a3b1795d0f27d7924e7adb55a0649de89", null ],
     [ "id3v2ReadLyrics", "id3v2_8h.html#af58c4d08646ec75aee2664e914818b5b", null ],
-    [ "id3v2ReadPicture", "id3v2_8h.html#afa416723aa99d9611ec6953c00592ba2", null ],
-    [ "id3v2ReadTagVersion", "id3v2_8h.html#a4bc552d243dae1971fa5d7ddf51a76e9", null ],
+    [ "id3v2ReadPicture", "id3v2_8h.html#a5ebd8ea2498203713493ea1127f09d6a", null ],
+    [ "id3v2ReadTagVersion", "id3v2_8h.html#a93349493d23b2b4c9bba19c1a9429806", null ],
     [ "id3v2ReadTextFrameContent", "id3v2_8h.html#a6051f87ec9734cb650527b3e9b60d968", null ],
     [ "id3v2ReadTitle", "id3v2_8h.html#a4664547e5295c38f23c494ba52bbc311", null ],
     [ "id3v2ReadTrack", "id3v2_8h.html#a3c84045f05241789567247d87bfc12c4", null ],

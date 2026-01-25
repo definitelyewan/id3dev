@@ -1,5 +1,5 @@
 <map id="/Users/ewanjones/projects/id3dev/include/id3v1/id3v1Types.h" name="/Users/ewanjones/projects/id3dev/include/id3v1/id3v1Types.h">
-<area shape="rect" id="Node000001" title="Definitions and types for id3v1 types." alt="" coords="5,5,230,46"/>
+<area shape="rect" id="Node000001" title="Definitions for ID3v1 tag structure, constants, and genre enumeration." alt="" coords="5,5,230,46"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="34,94,108,120"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,48,88,82,84,79,104,45"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="132,94,196,120"/>

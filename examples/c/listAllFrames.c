@@ -14,9 +14,8 @@
 #include <id3dev.h> // id3FromFile, id3Destroy, ListIter
 #include <id3v2/id3v2Frame.h> // Id3v2Frame, id3v2CreateFrameTraverser, id3v2FrameTraverse
 
-int main(int argc, char *argv[]){
-
-    if(argc < 2){
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
         printf("USAGE: <mp3 file>\n");
         return EXIT_FAILURE;
     }
@@ -30,7 +29,7 @@ int main(int argc, char *argv[]){
     id3 = id3FromFile(argv[1]);
 
     // Check if the file contains any ID3v2.x versions
-    if(id3->id3v2 == NULL){
+    if (id3->id3v2 == NULL) {
         printf("ERROR: %s does not contain any ID3v2.x tags\n", argv[1]);
         id3Destroy(&id3);
         return EXIT_FAILURE;
@@ -41,12 +40,11 @@ int main(int argc, char *argv[]){
     frames = id3v2CreateFrameTraverser(id3->id3v2);
 
     // Traverse the frames and print the frame id
-    while((f = id3v2FrameTraverse(&frames)) != NULL){
+    while ((f = id3v2FrameTraverse(&frames)) != NULL) {
         n++;
-        printf("frame %d: %s\n", n, (char *)f->header->id);
-
+        printf("frame %d: %s\n", n, (char *) f->header->id);
     }
 
     id3Destroy(&id3);
-    return EXIT_SUCCESS;    
+    return EXIT_SUCCESS;
 }

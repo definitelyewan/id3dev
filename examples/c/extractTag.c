@@ -1,7 +1,7 @@
 /**
  * @file extractTag.c
  * @author Ewan Jones
- * @brief extracts a tag from a file, ptints it as JSON and writes it to another file.
+ * @brief extracts a tag from a file, prints it as JSON and writes it to another file.
  * @version 0.1
  * @date 2024-04-23
  * 
@@ -14,10 +14,8 @@
 #include <stdlib.h> // EXIT_SUCCESS, EXIT_FAILURE
 #include <id3dev.h> // id3FromFile, id3ToJSON, id3WriteToFile, id3Destroy
 
-int main(int argc, char *argv[]){
-
-
-    if(argc < 3){
+int main(int argc, char *argv[]) {
+    if (argc < 3) {
         printf("USAGE: <mp3 file> <output file>\n");
         return EXIT_FAILURE;
     }

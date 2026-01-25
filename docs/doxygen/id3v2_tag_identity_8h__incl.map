@@ -1,19 +1,21 @@
 <map id="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2TagIdentity.h" name="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2TagIdentity.h">
-<area shape="rect" id="Node000001" title="Declarations for id3v2 tag headers and extended headers." alt="" coords="183,5,382,61"/>
-<area shape="rect" id="Node000002" href="$id3v2_types_8h.html" title="Definitions and types for id3v2 types." alt="" coords="233,109,332,135"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="285,61,285,93,280,93,280,61"/>
-<area shape="rect" id="Node000003" href="$id3v1_types_8h.html" title="Definitions and types for id3v1 types." alt="" coords="74,190,208,216"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="262,137,177,185,175,180,260,133"/>
-<area shape="rect" id="Node000004" title=" " alt="" coords="5,271,80,297"/>
-<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="233,125,192,129,146,138,102,156,82,169,65,184,54,200,47,219,43,256,38,256,42,218,49,198,60,181,79,165,99,151,145,133,191,123,233,120"/>
-<area shape="rect" id="Node000005" title=" " alt="" coords="161,271,225,297"/>
-<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="278,136,210,259,205,256,273,134"/>
-<area shape="rect" id="Node000006" title=" " alt="" coords="282,190,360,216"/>
-<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="291,134,311,175,306,177,286,136"/>
-<area shape="rect" id="Node000007" title=" " alt="" coords="384,183,565,223"/>
-<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="313,133,414,174,412,179,311,138"/>
-<area shape="rect" id="Node000008" title=" " alt="" coords="589,183,773,223"/>
-<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="333,130,574,178,573,183,332,136"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="128,218,71,264,68,259,125,214"/>
-<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="151,215,179,257,175,260,147,218"/>
+<area shape="rect" id="Node000001" title="Function definitions of ID3v2 tag header and tag structure creation, manipulation,..." alt="" coords="173,5,372,61"/>
+<area shape="rect" id="Node000002" href="$id3v2_types_8h.html" title="Definitions for ID3v2.x tag structure, constants, and genre enumeration." alt="" coords="223,109,322,135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="275,61,275,93,270,93,270,61"/>
+<area shape="rect" id="Node000003" href="$id3v1_types_8h.html" title="Definitions for ID3v1 tag structure, constants, and genre enumeration." alt="" coords="26,190,159,216"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="246,138,135,186,133,181,244,133"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="6,271,80,297"/>
+<area shape="poly" id="edge5_Node000002_Node000004" title=" " alt="" coords="223,130,166,137,103,148,49,164,29,174,16,184,9,201,10,220,17,240,27,258,23,260,12,242,5,221,4,200,12,181,26,169,47,159,102,143,165,132,222,125"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="110,271,174,297"/>
+<area shape="poly" id="edge6_Node000002_Node000005" title=" " alt="" coords="264,137,224,184,162,261,158,257,220,181,260,133"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="233,190,312,216"/>
+<area shape="poly" id="edge7_Node000002_Node000006" title=" " alt="" coords="275,135,275,174,270,174,270,135"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="335,183,517,223"/>
+<area shape="poly" id="edge8_Node000002_Node000007" title=" " alt="" coords="297,133,376,173,373,178,295,137"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="540,183,725,223"/>
+<area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="323,131,528,176,527,181,322,137"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="749,183,940,223"/>
+<area shape="poly" id="edge10_Node000002_Node000009" title=" " alt="" coords="322,126,500,148,734,180,733,185,499,153,322,131"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="87,218,61,260,56,257,83,215"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="102,215,129,257,124,260,98,218"/>
 </map>

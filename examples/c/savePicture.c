@@ -14,9 +14,8 @@
 #include <stdint.h> // uint8_t
 #include <id3dev.h> // id3FromFile, id3ReadPicture, id3Destroy
 
-int main(int argc, char *argv[]){
-
-    if(argc < 3){
+int main(int argc, char *argv[]) {
+    if (argc < 3) {
         printf("USAGE: <mp3 file> <output file>\n");
         return EXIT_FAILURE;
     }
@@ -42,21 +41,21 @@ int main(int argc, char *argv[]){
      * with a size of 0.
      * 
      */
-    if(picture == NULL || pictureSize == 0){
+    if (picture == NULL || pictureSize == 0) {
         printf("No picture found\n");
         return EXIT_SUCCESS;
     }
 
     // create a new file and write the picture to it
     fp = fopen(argv[2], "wb");
-    
-    if(fp == NULL){
+
+    if (fp == NULL) {
         printf("Failed to open file\n");
         return EXIT_FAILURE;
     }
 
-    fwrite(picture, 1, pictureSize, fp);
-
+    (void) fwrite(picture, 1, pictureSize, fp);
+    (void) fclose(fp);
 
     return EXIT_SUCCESS;
 }

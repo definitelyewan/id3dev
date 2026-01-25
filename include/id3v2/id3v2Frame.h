@@ -1,14 +1,15 @@
-/**
+x/**
  * @file id3v2Frame.h
  * @author Ewan Jones
- * @brief function declarations for frame operations
- * @version 0.1
- * @date 2024-02-26
+ * @brief Function definitions for ID3v2 frame lifecycle, traversal, serialization, and content management
  * 
- * @copyright Copyright (c) 2024
+ * @version 26.01
+ * @date 2024-04-11 - 2026-01-17
+ * 
+ * @copyright Copyright (c) 2024 - 2026
  * 
  */
-
+ 
 #ifndef ID3V2_FRAME
 #define ID3V2_FRAME
 
@@ -62,7 +63,7 @@ Id3v2Frame *id3v2CreateEmptyFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], uint8_
     Frame access
 */
 
-bool id3v2CompareFrameId(Id3v2Frame *frame, const char id[ID3V2_FRAME_ID_MAX_SIZE]);
+bool id3v2CompareFrameId(const Id3v2Frame *frame, const char id[ID3V2_FRAME_ID_MAX_SIZE]);
 
 ListIter id3v2CreateFrameTraverser(Id3v2Tag *tag);
 
@@ -81,7 +82,7 @@ uint16_t id3v2ReadFrameEntryAsU16(ListIter *traverser);
 
 uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser);
 
-bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize, void *entry);
+bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize, const void *entry);
 
 bool id3v2AttachFrameToTag(Id3v2Tag *tag, Id3v2Frame *frame);
 
@@ -94,7 +95,7 @@ Id3v2Frame *id3v2DetachFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame);
 
 uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, uint32_t frameSize, size_t *outl);
 
-char *id3v2FrameHeaderToJSON(Id3v2FrameHeader *header, uint8_t version);
+char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, uint8_t version);
 
 uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl);
 

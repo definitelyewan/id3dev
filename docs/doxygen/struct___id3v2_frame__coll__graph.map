@@ -1,5 +1,5 @@
 <map id="_Id3v2Frame" name="_Id3v2Frame">
-<area shape="rect" id="Node000001" title="A representation of an ID3v2 frame." alt="" coords="26,94,124,120"/>
-<area shape="rect" id="Node000002" href="$struct___id3v2_frame_header.html" title="Vital information used to parse and define a frames content." alt="" coords="5,5,145,31"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="78,47,78,94,72,94,72,47"/>
+<area shape="rect" id="Node000001" title="Complete ID3v2 frame structure with header, parsing contexts, and data." alt="" coords="26,102,124,128"/>
+<area shape="rect" id="Node000002" href="$struct___id3v2_frame_header.html" title="ID3v2 frame header containing identification and processing flags." alt="" coords="5,5,145,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="78,46,78,101,72,101,72,46"/>
 </map>
