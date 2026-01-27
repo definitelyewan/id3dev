@@ -34,6 +34,9 @@ static uint8_t id3PreferredStandard = ID3V2_TAG_VERSION_3;
  */
 ID3 *id3Create(Id3v2Tag *id3v2, Id3v1Tag *id3v1) {
     ID3 *metadata = malloc(sizeof(ID3));
+    if (metadata == NULL) {
+        return NULL;
+    }
 
     metadata->id3v2 = id3v2;
     metadata->id3v1 = id3v1;
@@ -1284,8 +1287,13 @@ char *id3ToJSON(const ID3 *metadata) {
     id3v2 = id3v2TagToJSON(metadata->id3v2);
 
     memCount += snprintf(NULL, 0, "{\"id3v1\":%s,\"id3v2\":%s}", id3v1, id3v2);
-    json = calloc(memCount, sizeof(char));
-    (void) snprintf(json, memCount, "{\"ID3v1\":%s,\"ID3v2\":%s}", id3v1, id3v2);
+    json = calloc(memCount + 1, sizeof(char));
+    if (json == NULL) {
+        free(id3v1);
+        free(id3v2);
+        return NULL;
+    }
+    (void) snprintf(json, memCount + 1, "{\"ID3v1\":%s,\"ID3v2\":%s}", id3v1, id3v2);
 
     free(id3v1);
     free(id3v2);
