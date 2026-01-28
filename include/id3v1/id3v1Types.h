@@ -40,6 +40,8 @@ extern "C" {
  * @see https://en.wikipedia.org/wiki/List_of_ID3v1_Genres
  */
 typedef enum _Genre {
+    //! Unknown or invalid genre (used for error cases)
+    GENRE_UNKNOWN = -1,
     //! Blues Audio
     BLUES_GENRE,
     //! Classic Rock
