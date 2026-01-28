@@ -807,6 +807,9 @@ char *id3v2ExtendedTagHeaderToJSON(const Id3v2ExtendedTagHeader *ext, uint8_t ve
 
     if (ext == NULL) {
         json = calloc(memCount, sizeof(char));
+        if (json == NULL) {
+            return NULL;
+        }
         memcpy(json, "{}\0", memCount);
         return json;
     }
@@ -820,8 +823,11 @@ char *id3v2ExtendedTagHeaderToJSON(const Id3v2ExtendedTagHeader *ext, uint8_t ve
                                  ext->crc);
 
             json = calloc(memCount + 1, sizeof(char)); // NOLINT(clang-analyzer-unix.Malloc)
+            if (json == NULL) {
+                return NULL;
+            }
 
-            (void) snprintf(json, memCount,
+            (void) snprintf(json, memCount + 1,
                             "{\"padding\":%"PRIu32",\"crc\":%"PRIu32"}",
                             ext->padding,
                             ext->crc);
@@ -839,8 +845,11 @@ char *id3v2ExtendedTagHeaderToJSON(const Id3v2ExtendedTagHeader *ext, uint8_t ve
                                  ext->restrictions);
 
             json = calloc(memCount + 1, sizeof(char)); // NOLINT(clang-analyzer-unix.Malloc)
+            if (json == NULL) {
+                return NULL;
+            }
 
-            (void) snprintf(json, memCount,
+            (void) snprintf(json, memCount + 1,
                             "{\"padding\":%"PRIu32",\"crc\":%"PRIu32
                             ",\"update\":%s,\"tagRestrictions\":%s,\"restrictions\":%d}",
                             ext->padding,

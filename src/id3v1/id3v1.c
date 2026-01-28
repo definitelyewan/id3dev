@@ -631,7 +631,13 @@ char *id3v1GenreFromTable(Genre val) {
  * @return char* Newly allocated string containing the title.
  */
 char *id3v1ReadTitle(const Id3v1Tag *tag) {
-    char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
+    if (tag == NULL) {
+        return NULL;
+    }
+    char *r = calloc(ID3V1_FIELD_SIZE + 1, sizeof(char));
+    if (r == NULL) {
+        return NULL;
+    }
     memcpy(r, tag->title, ID3V1_FIELD_SIZE);
     return r;
 }
@@ -643,7 +649,13 @@ char *id3v1ReadTitle(const Id3v1Tag *tag) {
  * @return char* - Newly allocated string containing the artist.
  */
 char *id3v1ReadArtist(const Id3v1Tag *tag) {
-    char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
+    if (tag == NULL) {
+        return NULL;
+    }
+    char *r = calloc(ID3V1_FIELD_SIZE + 1, sizeof(char));
+    if (r == NULL) {
+        return NULL;
+    }
     memcpy(r, tag->artist, ID3V1_FIELD_SIZE);
     return r;
 }
@@ -655,7 +667,13 @@ char *id3v1ReadArtist(const Id3v1Tag *tag) {
  * @return char* - Newly allocated string containing the album.
  */
 char *id3v1ReadAlbum(const Id3v1Tag *tag) {
-    char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
+    if (tag == NULL) {
+        return NULL;
+    }
+    char *r = calloc(ID3V1_FIELD_SIZE + 1, sizeof(char));
+    if (r == NULL) {
+        return NULL;
+    }
     memcpy(r, tag->albumTitle, ID3V1_FIELD_SIZE);
     return r;
 }
@@ -667,6 +685,9 @@ char *id3v1ReadAlbum(const Id3v1Tag *tag) {
  * @return int - The year value from the tag.
  */
 int id3v1ReadYear(const Id3v1Tag *tag) {
+    if (tag == NULL) {
+        return 0;
+    }
     return tag->year;
 }
 
@@ -677,7 +698,13 @@ int id3v1ReadYear(const Id3v1Tag *tag) {
  * @return char* - Newly allocated string containing the comment.
  */
 char *id3v1ReadComment(const Id3v1Tag *tag) {
-    char *r = calloc(sizeof(char), ID3V1_FIELD_SIZE + 1);
+    if (tag == NULL) {
+        return NULL;
+    }
+    char *r = calloc(ID3V1_FIELD_SIZE + 1, sizeof(char));
+    if (r == NULL) {
+        return NULL;
+    }
     memcpy(r, tag->comment, ID3V1_FIELD_SIZE);
     return r;
 }
@@ -689,6 +716,9 @@ char *id3v1ReadComment(const Id3v1Tag *tag) {
  * @return Genre - The Genre value from the tag.
  */
 Genre id3v1ReadGenre(const Id3v1Tag *tag) {
+    if (tag == NULL) {
+        return GENRE_UNKNOWN;
+    }
     return tag->genre;
 }
 
@@ -699,6 +729,9 @@ Genre id3v1ReadGenre(const Id3v1Tag *tag) {
  * @return int - The track number value from the tag.
  */
 int id3v1ReadTrack(const Id3v1Tag *tag) {
+    if (tag == NULL) {
+        return 0;
+    }
     return tag->track;
 }
 
@@ -733,7 +766,10 @@ char *id3v1ToJSON(const Id3v1Tag *tag) {
         id3v1GenreFromTable(tag->genre));
 
     json = calloc(memCount + 1, sizeof(char));
-    (void) snprintf(json, memCount,
+    if (json == NULL) {
+        return NULL;
+    }
+    (void) snprintf(json, memCount + 1,
                     "{\"title\":\"%s\",\"artist\":\"%s\",\"album\":\"%s\",\"year\":%d,\"track\":%d,\"comment\":\"%s\",\"genreNumber\":%d,\"genre\":\"%s\"}",
                     (char *) tag->title,
                     (char *) tag->artist,
@@ -773,10 +809,19 @@ int id3v1WriteTagToFile(const char *filePath, const Id3v1Tag *tag) {
     byteStreamWrite(stream, (unsigned char *) tag->artist, ID3V1_FIELD_SIZE);
     byteStreamWrite(stream, (unsigned char *) tag->albumTitle, ID3V1_FIELD_SIZE);
 
-    //int to string
-    n = (int) log10(tag->year) + 1;
-    yearW = tag->year;
+    //int to string - handle edge cases for log10
+    if (tag->year <= 0) {
+        n = 1;
+        yearW = 0;
+    } else {
+        n = (int) log10(tag->year) + 1;
+        yearW = tag->year;
+    }
     tmp = calloc(n, sizeof(char));
+    if (tmp == NULL) {
+        byteStreamDestroy(stream);
+        return 0;
+    }
 
     for (int i = n - 1; i >= 0; --i, yearW /= 10) {
         tmp[i] = (char) ((yearW % 10) + '0');
