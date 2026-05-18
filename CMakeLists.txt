@@ -15,6 +15,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 if(DEBUG_ID3_SYMBOLS)
     add_compile_options("-Wall")
     add_compile_options("-g")
+#-fno-omit-frame-pointer -fno-optimize-sibling-calls
+#add_compile_options(-Wall -g3 -fsanitize=address,undefined)
+#add_link_options(-fsanitize=address,undefined)
 endif()
 
 # Enable shared lib

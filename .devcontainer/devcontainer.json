@@ -1,0 +1,26 @@
+{
+  "name": "id3dev-debian-gcc-make",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "workspaceFolder": "/workspaces/id3dev",
+  "remoteUser": "root",
+  "containerUser": "root",
+  "runArgs": [
+    "--cap-add=SYS_PTRACE",
+    "--security-opt",
+    "seccomp=unconfined"
+  ],
+  "mounts": [
+    "source=id3dev-ccache,target=/root/.cache/ccache,type=volume",
+    "source=id3dev-cmake-cache,target=/root/.cache/cmake,type=volume"
+  ],
+  "onCreateCommand": "git config --global --add safe.directory /workspaces/id3dev",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "customizations": {
+    "jetbrains": {
+      "backend": "CLion"
+    }
+  }
+}

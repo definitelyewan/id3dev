@@ -533,6 +533,91 @@ uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2Fr
 }
 
 /**
+ * @brief Parses a frame entry of a fixed size using a provided context as parameters for interpretation.
+ * @param streamSource - stream containing the data source to read from
+ * @param cc - context parameters for the frame entry
+ * @param upperBound - maximum allowed size for the resulting data
+ * @param data - output parameter containing the parsed blob content
+ * @return size_t
+ */
+static size_t internal_id3v2ParseFrameBlobContent(ByteStream *streamSource, const Id3v2ContentContext *cc,
+                                                  const uint32_t upperBound, uint8_t **data) {
+
+     size_t dataSize = 0;
+
+     if (cc->min >= cc->max) {
+         // no trust
+         dataSize = cc->min;
+     } else {
+         dataSize = cc->max;
+     }
+
+     if (dataSize > upperBound) {
+         dataSize = upperBound;
+     }
+
+     *data = calloc(sizeof(uint8_t), dataSize);
+
+     if (!byteStreamRead(streamSource, *data, dataSize)) {
+         memset(*data, 0, dataSize);
+     }
+
+     return dataSize;
+}
+
+/**
+ * @brief Parses a latin1 encoded frame entry of a fixed size using a provided context as parameters for interpretation.
+ * @param streamSource - stream containing the data source to read from
+ * @param cc - context parameters for the frame entry
+ * @param upperBound - the maximum allowed size for the resulting parsed data
+ * @param data - output parameter containing the parsed latin1 encoded content
+ * @return
+ */
+static size_t internal_id3v2ParseFramelatin1Content(ByteStream * streamSource, const Id3v2ContentContext *cc,
+                                                    const uint32_t upperBound, uint8_t **data) {
+
+    size_t dataSize = 0;
+    *data = byteStreamReturnLatin1(streamSource, &dataSize);
+    // catch when the parsed size is greater than the contexts specified max
+    if (dataSize > cc->max) {
+        dataSize = cc->max;
+        uint8_t *reallocPtr = realloc(*data, dataSize);
+        if (reallocPtr == NULL) {
+            free(*data);
+            return 0;
+        }
+        *data = reallocPtr;
+
+    // for when the parsed size is less than the minimum allowed by context
+    } else if (cc->min > dataSize) {
+        uint8_t *reallocPtr = realloc(*data, cc->min);
+        if (reallocPtr == NULL) {
+            free(*data);
+            return 0;
+        }
+        *data = reallocPtr;
+        memset(*data + dataSize, 0, cc->min - dataSize);
+        dataSize = cc->min;
+
+    // for when the parsed data is higher than the maximum upper bound
+    } else if (dataSize > upperBound) {
+        dataSize = upperBound;
+        uint8_t *reallocPtr = realloc(*data, dataSize);
+        if (reallocPtr == NULL) {
+            free(*data);
+            return 0;
+        }
+        *data = reallocPtr;
+    }
+
+    return dataSize;
+}
+
+static size_t internal_id3v2ParseFrameEncodedContent(ByteStream *stream, const Id3v2ContentContext *cc, ListIter *context, ListIter *entries, uint8_t *data) {
+
+}
+
+/**
  * @brief Parses an ID3v2 frame (header + content) from a byte buffer using context-driven interpretation.
  * @details Extracts a complete frame by first parsing the header, then interpreting frame content 
  * according to a context list that provides "hints" about data types and structure. The context-driven 
@@ -762,43 +847,24 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                 uint8_t *data = NULL;
                 size_t dataSize = 0;
 
-                data = byteStreamReturnLatin1(innerStream, &dataSize);
+                dataSize = internal_id3v2ParseFramelatin1Content(innerStream, cc, expectedContentSize, &data);
 
-                if (dataSize > cc->max) {
-                    dataSize = cc->max;
-                    uint8_t *reallocPtr = realloc(data, dataSize);
-                    if (reallocPtr == NULL) {
-                        free(data);
-                        listFree(entries);
-                        byteStreamDestroy(innerStream);
-                        byteStreamDestroy(stream);
-                        id3v2DestroyFrameHeader(&header);
-                        *frame = NULL;
-                        return 0;
-                    }
-                    data = reallocPtr;
-                } else if (cc->min > dataSize) {
-                    uint8_t *reallocPtr = realloc(data, cc->min);
-                    if (reallocPtr == NULL) {
-                        free(data);
-                        listFree(entries);
-                        byteStreamDestroy(innerStream);
-                        byteStreamDestroy(stream);
-                        id3v2DestroyFrameHeader(&header);
-                        *frame = NULL;
-                        return 0;
-                    }
-                    data = reallocPtr;
-                    memset(data + dataSize, 0, cc->min - dataSize);
-                    dataSize = cc->min;
+                // parsing or memmory error
+                if (data == NULL && dataSize == 0) {
+                    free(data);
+                    listFree(entries);
+                    byteStreamDestroy(innerStream);
+                    byteStreamDestroy(stream);
+                    id3v2DestroyFrameHeader(&header);
+                    *frame = NULL;
+                    return 0;
                 }
-
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
                 free(data);
 
                 expectedContentSize = ((expectedContentSize < dataSize) ? 0 : expectedContentSize - dataSize);
+                break;
             }
-            break;
             // numbers (handled the same way)
             case binary_context:
             case noEncoding_context:
@@ -806,23 +872,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
             case numeric_context: {
                 uint8_t *data = NULL;
                 size_t dataSize = 0;
-
-                if (cc->min >= cc->max) {
-                    // no trust
-                    dataSize = cc->min;
-                } else {
-                    dataSize = cc->max;
-                }
-
-                if (dataSize > expectedContentSize) {
-                    dataSize = expectedContentSize;
-                }
-
-                data = calloc(sizeof(uint8_t), dataSize);
-
-                if (!byteStreamRead(innerStream, data, dataSize)) {
-                    memset(data, 0, dataSize);
-                }
+                dataSize = internal_id3v2ParseFrameBlobContent(innerStream, cc, expectedContentSize, &data);
 
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
                 free(data);
@@ -1082,13 +1132,14 @@ Id3v2Tag *id3v2ParseTagFromBuffer(uint8_t *in, size_t inl, HashTable *userPairs)
         while (tagSize) {
             Id3v2Frame *frame = NULL;
             List *context = NULL;
-            uint8_t frameId[ID3V2_FRAME_ID_MAX_SIZE] = {0};
+            uint8_t frameId[ID3V2_FRAME_ID_MAX_SIZE + 1] = {0};
 
             if (header->majorVersion == ID3V2_TAG_VERSION_3 || header->majorVersion == ID3V2_TAG_VERSION_4) {
                 if (!byteStreamRead(stream, frameId, ID3V2_FRAME_ID_MAX_SIZE)) {
                     exit = true;
                     break;
                 }
+                frameId[ID3V2_FRAME_ID_MAX_SIZE] = '\0';
 
                 stream->cursor = stream->cursor - ID3V2_FRAME_ID_MAX_SIZE;
             } else if (header->majorVersion == ID3V2_TAG_VERSION_2) {
@@ -1096,6 +1147,7 @@ Id3v2Tag *id3v2ParseTagFromBuffer(uint8_t *in, size_t inl, HashTable *userPairs)
                     exit = true;
                     break;
                 }
+                frameId[ID3V2_FRAME_ID_MAX_SIZE - 1] = '\0';
 
                 stream->cursor = stream->cursor - (ID3V2_FRAME_ID_MAX_SIZE - 1);
             }
