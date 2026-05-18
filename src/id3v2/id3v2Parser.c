@@ -613,8 +613,104 @@ static size_t internal_id3v2ParseFramelatin1Content(ByteStream * streamSource, c
     return dataSize;
 }
 
-static size_t internal_id3v2ParseFrameEncodedContent(ByteStream *stream, const Id3v2ContentContext *cc, ListIter *context, ListIter *entries, uint8_t *data) {
+/**
+ * @brief Parses an encoded string field from an ID3v2 frame's inner byte stream.
+ * @details Looks up the encoding byte from previously parsed content entries, then reads
+ * a null-terminated string in the appropriate encoding (UTF-8/Latin-1 or UTF-16).
+ * Clamps the result to [cc->min, cc->max] bytes, zero-padding if too short or truncating
+ * if too long.
+ *
+ * @param innerStream     - Stream positioned at the start of the string field.
+ * @param context         - The full context list for this frame (used to locate "encoding").
+ * @param entries         - Content entries parsed so far (used to read the encoding byte value).
+ * @param cc              - The context descriptor for this field (carries min/max size bounds).
+ * @param data            - Output parameter receiving a heap-allocated buffer with the string bytes.
+ *                          Caller must free. Set to NULL on failure.
+ * @return size_t         - Number of bytes consumed on success, 0 on failure. Note that a
+ *                          genuinely empty string will also return 0 — callers should check
+ *                          that *data is non-NULL to distinguish the two cases.
+ */
+static size_t internal_id3v2ParseFrameEncodedStringContent(ByteStream *innerStream, List *context, List *entries,
+                                                            Id3v2ContentContext *cc, uint8_t **data) {
+    *data = NULL;
+    size_t dataSize = 0;
 
+    // Find the position of the "encoding" key in the context list,
+    // skipping iter_context entries as they don't map to real content entries.
+    size_t poscc = 0;
+    ListIter contentContextIter = listCreateIterator(context);
+    void *tmp = NULL;
+    while ((tmp = listIteratorNext(&contentContextIter)) != NULL) {
+        if (((Id3v2ContentContext *) tmp)->type == iter_context) {
+            poscc--;
+        }
+        if (((Id3v2ContentContext *) tmp)->key == id3v2djb2("encoding")) {
+            break;
+        }
+        poscc++;
+    }
+
+    // Walk the already-parsed entries to find the encoding byte at poscc.
+    uint8_t encoding = 0;
+    size_t posce = 0;
+    ListIter contentEntryIter = listCreateIterator(entries);
+    while ((tmp = listIteratorNext(&contentEntryIter)) != NULL) {
+        if (poscc == posce) {
+            encoding = ((uint8_t *) ((Id3v2ContentEntry *) tmp)->entry)[0];
+        }
+        posce++;
+    }
+
+    // Read string bytes according to encoding.
+    switch (encoding) {
+        case ID3V2_ENCODING_ISO_8859_1:
+        case ID3V2_ENCODING_ASCII:
+        case ID3V2_ENCODING_UTF8:
+            *data = byteStreamReturnUtf8(innerStream, &dataSize);
+            if (*data == NULL && dataSize == 0) {
+                byteStreamSeek(innerStream, 1, SEEK_CUR);
+                *data = calloc(sizeof(unsigned char), 1);
+                if (*data == NULL) { return 0; }
+                dataSize = 1;
+            }
+            break;
+        case ID3V2_ENCODING_UTF16BE:
+        case ID3V2_ENCODING_UTF16LE:
+            *data = byteStreamReturnUtf16(innerStream, &dataSize);
+            if (*data == NULL && dataSize == 0) {
+                byteStreamSeek(innerStream, 2, SEEK_CUR);
+                *data = calloc(sizeof(unsigned char), 2);
+                if (*data == NULL) { return 0; }
+                dataSize = 2;
+            }
+            break;
+        default:
+            break;
+    }
+
+    // Clamp to [cc->min, cc->max].
+    if (dataSize > cc->max) {
+        uint8_t *reallocPtr = realloc(*data, cc->max);
+        if (reallocPtr == NULL) {
+            free(*data);
+            *data = NULL;
+            return 0;
+        }
+        dataSize = cc->max;
+        *data = reallocPtr;
+    } else if (cc->min > dataSize) {
+        uint8_t *reallocPtr = realloc(*data, cc->min);
+        if (reallocPtr == NULL) {
+            free(*data);
+            *data = NULL;
+            return 0;
+        }
+        memset(reallocPtr + dataSize, 0, cc->min - dataSize);
+        *data = reallocPtr;
+        dataSize = cc->min;
+    }
+
+    return dataSize;
 }
 
 /**
@@ -752,88 +848,15 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                 uint8_t *data = NULL;
                 size_t dataSize = 0;
 
-                size_t posce = 0;
-                size_t poscc = 0;
-                uint8_t encoding = 0;
-                ListIter contentContextIter = listCreateIterator(context);
-                ListIter contentEntryIter = listCreateIterator(entries);
-                void *tmp = NULL;
+                dataSize = internal_id3v2ParseFrameEncodedStringContent(innerStream, context, entries, cc, &data);
 
-                while ((tmp = listIteratorNext(&contentContextIter)) != NULL) {
-                    if (((Id3v2ContentContext *) tmp)->type == iter_context) {
-                        poscc--;
-                    }
-
-                    if (((Id3v2ContentContext *) tmp)->key == id3v2djb2("encoding")) {
-                        break;
-                    }
-
-                    poscc++;
-                }
-
-                while ((tmp = listIteratorNext(&contentEntryIter)) != NULL) {
-                    if (poscc == posce) {
-                        encoding = ((uint8_t *) ((Id3v2ContentEntry *) tmp)->entry)[0];
-                    }
-
-                    posce++;
-                }
-
-                switch (encoding) {
-                    case BYTE_ISO_8859_1:
-                    case BYTE_ASCII:
-                    case BYTE_UTF8:
-                        data = byteStreamReturnUtf8(innerStream, &dataSize);
-
-                        if (data == NULL && dataSize == 0) {
-                            byteStreamSeek(innerStream, 1, SEEK_CUR);
-                            data = calloc(sizeof(unsigned char), 1);
-                            memset(data, 0, 1);
-                            dataSize = 1;
-                        }
-                        break;
-                    case BYTE_UTF16BE:
-                    case BYTE_UTF16LE:
-                        data = byteStreamReturnUtf16(innerStream, &dataSize);
-
-                        if (data == NULL && dataSize == 0) {
-                            byteStreamSeek(innerStream, 2, SEEK_CUR);
-                            data = calloc(sizeof(unsigned char), 2);
-                            memset(data, 0, 2);
-                            dataSize = 2;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-
-                if (dataSize > cc->max) {
-                    uint8_t *reallocPtr = realloc(data, cc->max);
-                    if (reallocPtr == NULL) {
-                        free(data);
-                        listFree(entries);
-                        byteStreamDestroy(innerStream);
-                        byteStreamDestroy(stream);
-                        id3v2DestroyFrameHeader(&header);
-                        *frame = NULL;
-                        return 0;
-                    }
-                    dataSize = cc->max;
-                    data = reallocPtr;
-                } else if (cc->min > dataSize) {
-                    uint8_t *reallocPtr = realloc(data, cc->min);
-                    if (reallocPtr == NULL) {
-                        free(data);
-                        listFree(entries);
-                        byteStreamDestroy(innerStream);
-                        byteStreamDestroy(stream);
-                        id3v2DestroyFrameHeader(&header);
-                        *frame = NULL;
-                        return 0;
-                    }
-                    data = reallocPtr;
-                    memset(data + dataSize, 0, cc->min - dataSize);
-                    dataSize = cc->min;
+                if (data == NULL) {
+                    listFree(entries);
+                    byteStreamDestroy(innerStream);
+                    byteStreamDestroy(stream);
+                    id3v2DestroyFrameHeader(&header);
+                    *frame = NULL;
+                    return 0;
                 }
 
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
