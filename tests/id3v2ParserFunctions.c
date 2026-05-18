@@ -880,8 +880,8 @@ static void id3v2ParseFrame_parseWCOM(void **state) {
 
     Id3v2ContentEntry *e = (Id3v2ContentEntry *) f->entries->head->data;
 
-    assert_memory_equal(e->entry, "https://bandcamp.com/", 22);
-    assert_int_equal(e->size, 22);
+    assert_memory_equal(e->entry, "https://bandcamp.com/", 21);
+    assert_int_equal(e->size, 21);
 
     listFree(context);
     byteStreamDestroy(stream);
@@ -1750,7 +1750,7 @@ static void id3v2ParseTagFromStream_v4(void **state) {
     ce = (Id3v2ContentEntry *) f->entries->head->data;
 
     testFrameHeader(f, "WCOM", 0, 0, 0, 0, 0, 0, 0);
-    testEntry(ce, 45, (uint8_t *) "The Powers That Butf8\xdb>2gH I J K L M N Outf8");
+    testEntry(ce, 44, (uint8_t *) "The Powers That Butf8\xdb>2gH I J K L M N Outf8");
 
     // ETCO
     f = (Id3v2Frame *) tag->frames->head->next->next->next->next->next->next->next->next->next->next->next->next->next->

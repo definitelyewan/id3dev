@@ -859,7 +859,8 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                     *frame = NULL;
                     return 0;
                 }
-                listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
+
+                listInsertBack(entries, (void *) id3v2CreateContentEntry(data, dataSize));
                 free(data);
 
                 expectedContentSize = ((expectedContentSize < dataSize) ? 0 : expectedContentSize - dataSize);
