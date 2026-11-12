@@ -21,32 +21,6 @@
 #include "id3dependencies/ByteStream/include/byteInt.h"
 #include "id3dependencies/ByteStream/include/byteUnicode.h"
 
-// static void internal_copyNBits(const unsigned char *src, unsigned char *dest, int startBit, int nBits) {
-//     int byteIndex = startBit / CHAR_BIT;
-//     int bitIndex = startBit % CHAR_BIT;
-//     int remainingBits = nBits;
-//
-//     if (dest == NULL) {
-//         return;
-//     }
-//
-//     while (remainingBits > 0) {
-//         unsigned char mask = 0xFF >> (CHAR_BIT - remainingBits);
-//         unsigned char shiftedMask = mask << bitIndex;
-//
-//         // clear the destination bits
-//         dest[byteIndex] &= ~shiftedMask;
-//
-//         // copy the bits from source to destination
-//         dest[byteIndex] |= (src[byteIndex] & shiftedMask) >> bitIndex;
-//
-//         // update the counters
-//         remainingBits -= (CHAR_BIT - bitIndex);
-//         byteIndex++;
-//         bitIndex = 0;
-//     }
-// }
-
 /**
  * @brief Parses an ID3v2 extended tag header from a byte buffer.
  * @details Extracts and decodes extended header fields from binary data according to the 
@@ -928,6 +902,16 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
     entries = listCreate(id3v2PrintContentEntry, id3v2DeleteContentEntry, id3v2CompareContentEntry,
                          id3v2CopyContentEntry);
 
+    // v2.4 frame sizes count the stored (unsynchronised) bytes, so advance by that
+    // but parse the content from the resynchronised bytes
+    const uint32_t storedContentSize = expectedContentSize;
+    const bool frameUnsync = (version == ID3V2_TAG_VERSION_4 && header->unsynchronisation);
+
+    if (frameUnsync && innerStream != NULL) {
+        innerStream->bufferSize = id3v2RemoveUnsynchronisation(innerStream->buffer, innerStream->bufferSize);
+        expectedContentSize = (uint32_t) innerStream->bufferSize;
+    }
+
 
     // is a frame compressed or encrypted?
     // if so a generic context will be used meaning it's not up to me to decompress or unencrypted + if it's a text frame none
@@ -958,7 +942,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
         listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
         free(data);
 
-        walk += innerStream->cursor;
+        walk += frameUnsync ? storedContentSize : innerStream->cursor;
         *frame = id3v2CreateFrame(header, gContext, entries);
         byteStreamDestroy(innerStream);
         byteStreamDestroy(stream);
@@ -1112,7 +1096,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
 
 
     // enforce frame size from header parsing
-    walk += innerStream->bufferSize;
+    walk += frameUnsync ? storedContentSize : innerStream->bufferSize;
 
     *frame = id3v2CreateFrame(header, listDeepCopy(context), entries);
     byteStreamDestroy(innerStream);
@@ -1120,7 +1104,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
     return walk;
 }
 
- /**
+/**
  * @brief Parses a complete ID3v2 tag from a byte buffer, including header, optional extended header, and all frames.
  * @details Orchestrates the full tag parsing workflow by locating the "ID3" identifier, parsing headers, 
  * processing unsynchronisation if present, and iteratively parsing all frames using a multi-pass context 
@@ -1193,21 +1177,17 @@ Id3v2Tag *id3v2ParseTagFromBuffer(uint8_t *in, size_t inl, HashTable *userPairs)
         }
 
         // shorten to exclude none tag data
-        byteStreamResize(stream, tagSize + read);
+        byteStreamResize(stream, stream->cursor + tagSize);
 
-        if (id3v2ReadUnsynchronisationIndicator(header) == 1) {
-            size_t readCount = 0;
-            tagSize = tagSize / 2; // format is $xx $00 ...
-            while (readCount < tagSize) {
-                byteStreamSeek(stream, 1, SEEK_CUR);
-                if (!byteStreamDeleteCh(stream)) {
-                    break;
-                }
+        // v2.4 unsynchronisation is applied per frame and frame sizes describe the stored bytes,
+        // so only v2.2/v2.3 undo it over the whole tag body
+        if (id3v2ReadUnsynchronisationIndicator(header) == 1 &&
+            (header->majorVersion == ID3V2_TAG_VERSION_2 || header->majorVersion == ID3V2_TAG_VERSION_3)) {
+            size_t bodySize = stream->bufferSize - stream->cursor;
+            size_t decodedSize = id3v2RemoveUnsynchronisation(byteStreamCursor(stream), bodySize);
 
-                readCount++;
-            }
-
-            byteStreamSeek(stream, 10, SEEK_SET);
+            stream->bufferSize = stream->cursor + decodedSize;
+            tagSize = (uint32_t) decodedSize;
         }
 
         if ((header->majorVersion == ID3V2_TAG_VERSION_3 || header->majorVersion == ID3V2_TAG_VERSION_4) &&

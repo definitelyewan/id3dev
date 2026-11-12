@@ -1661,6 +1661,20 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
 
             break;
         case ID3V2_TAG_VERSION_4:
+            // v2.4 unsynchronises per frame and the frame size counts the stored bytes
+            if (frame->header->unsynchronisation && stream->bufferSize > headerSize) {
+                size_t unsyncl = 0;
+                uint8_t *unsync = id3v2ApplyUnsynchronisation(stream->buffer + headerSize,
+                                                              stream->bufferSize - headerSize, &unsyncl);
+
+                if (unsync != NULL) {
+                    byteStreamResize(stream, headerSize + unsyncl);
+                    memcpy(stream->buffer + headerSize, unsync, unsyncl);
+                    contentSize = unsyncl;
+                    free(unsync);
+                }
+            }
+
             tmp = u32tob(byteSyncintEncode(contentSize));
             byteStreamSeek(stream, ID3V2_FRAME_ID_MAX_SIZE, SEEK_SET);
             byteStreamWrite(stream, tmp, ID3V2_FRAME_ID_MAX_SIZE);
@@ -2144,4 +2158,111 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version) {
     }
 
     return json;
+}
+
+/**
+ * @brief Applies ID3v2 unsynchronisation to a buffer.
+ * @details A $00 is inserted after every $FF that is followed by $00 or by a byte >= $E0 (a false MPEG sync
+ * or something that could be mistaken for one), and after a $FF in the last position. Used on the whole tag
+ * body for ID3v2.2/2.3 and on each frame's content for ID3v2.4. Runs in two linear passes, one to size the
+ * output and one to write it, using memchr to jump between $FF bytes.
+ * @param in - Data to unsynchronise.
+ * @param inl - Number of bytes in in.
+ * @param outl - Receives the size of the returned buffer, or 0 on failure.
+ * @return uint8_t* - Heap allocated unsynchronised copy of in, or NULL if in is NULL, inl is 0 or allocation fails.
+ * Caller must free.
+ */
+uint8_t *id3v2ApplyUnsynchronisation(const uint8_t *in, size_t inl, size_t *outl) {
+    size_t extra = 0;
+    size_t r = 0;
+    size_t w = 0;
+    uint8_t *out = NULL;
+
+    if (outl == NULL) {
+        return NULL;
+    }
+
+    *outl = 0;
+
+    if (in == NULL || inl == 0) {
+        return NULL;
+    }
+
+    // count insertions
+    for (const uint8_t *p = memchr(in, 0xFF, inl); p != NULL;
+         p = memchr(p + 1, 0xFF, inl - (size_t) (p + 1 - in))) {
+        const size_t i = (size_t) (p - in);
+
+        if (i + 1 == inl || in[i + 1] == 0x00 || in[i + 1] >= 0xE0) {
+            extra++;
+        }
+
+        if (i + 1 == inl) {
+            break;
+        }
+    }
+
+    out = malloc(inl + extra);
+
+    if (out == NULL) {
+        return NULL;
+    }
+
+    if (extra == 0) {
+        memcpy(out, in, inl);
+        *outl = inl;
+        return out;
+    }
+
+    while (r < inl) {
+        const uint8_t *ff = memchr(in + r, 0xFF, inl - r);
+        const size_t end = (ff == NULL) ? inl : (size_t) (ff - in) + 1; // copy up to and including the $FF
+
+        memcpy(out + w, in + r, end - r);
+        w += end - r;
+        r = end;
+
+        if (ff != NULL && (r == inl || in[r] == 0x00 || in[r] >= 0xE0)) {
+            out[w++] = 0x00;
+        }
+    }
+
+    *outl = w;
+    return out;
+}
+
+/**
+ * @brief Reverses ID3v2 unsynchronisation in place by replacing every $FF $00 pair with $FF.
+ * @details Single pass with no allocation. memchr jumps between $FF bytes and the clean runs
+ * in between are shifted down with memmove, so data without any $FF costs one scan.
+ * @param buf - Buffer to decode in place.
+ * @param len - Number of bytes in buf.
+ * @return size_t - Number of bytes in buf after decoding (always <= len), 0 if buf is NULL.
+ */
+size_t id3v2RemoveUnsynchronisation(uint8_t *buf, size_t len) {
+    size_t r = 0;
+    size_t w = 0;
+
+    if (buf == NULL) {
+        return 0;
+    }
+
+    while (r < len) {
+        const uint8_t *ff = memchr(buf + r, 0xFF, len - r);
+        const size_t end = (ff == NULL) ? len : (size_t) (ff - buf) + 1; // keep the $FF itself
+
+        if (w != r) {
+            memmove(buf + w, buf + r, end - r);
+        }
+
+        w += end - r;
+        r = end;
+
+        // drop the $00 stuffed after an $FF
+        if (ff != NULL && r < len && buf[r] == 0x00) {
+            r++;
+        }
+    }
+
+    return w;
 }

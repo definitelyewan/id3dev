@@ -1790,14 +1790,16 @@ static void id3v2ParseTagFromStream_v4(void **state) {
 
 static void id3v2ParseTagFromStream_v2unsync(void **state) {
     (void) state;
-    uint8_t data[43] = {
-        'I', 'D', '3', 0x02, 0x01, 0x80, 0x00, 0x00, 0x00, 0x21,
-        'T', 0x00, 'A', 0x00, 'L', 0x00, 0x00, 0x00, 0x00, 0x00, 0x0b, 0x00,
-        0x00, 0x00,
-        'F', 0x00, 'a', 0x00, 'm', 0x00, 'i', 0x00, 'l', 0x00, 'y', 0x00, ' ', 0x00, 'G', 0x00, 'u', 0x00, 'y'
+    // tag body is 18 bytes once decoded, 19 as stored: the $FF at the end of the text
+    // was followed by a stuffed $00 that the parser must strip
+    uint8_t data[29] = {
+        'I', 'D', '3', 0x02, 0x01, 0x80, 0x00, 0x00, 0x00, 0x13,
+        'T', 'A', 'L', 0x00, 0x00, 0x0c,
+        0x00,
+        'F', 'a', 'm', 'i', 'l', 'y', ' ', 'G', 'u', 'y', 0xFF, 0x00
     };
 
-    ByteStream *stream = byteStreamCreate(data, 43);
+    ByteStream *stream = byteStreamCreate(data, 29);
     Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     uint8_t encoding = 0;
 
@@ -1815,10 +1817,44 @@ static void id3v2ParseTagFromStream_v2unsync(void **state) {
     testEntry(ce, 1, &encoding);
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
-    testEntry(ce, 11, (uint8_t *) "Family Guy");
+    testEntry(ce, 12, (uint8_t *) "Family Guy\xFF");
+
+    assert_null(f->entries->head->next->next);
 
     id3v2DestroyTag(&tag);
     byteStreamDestroy(stream);
+}
+
+// v2.4 frame level unsync: TALB is flagged and stored with a stuffed $00, TIT2 after it
+// is not, so this also checks the parser advances by the stored frame size
+static void id3v2ParseTagFromStream_v4frameUnsync(void **state) {
+    (void) state;
+    uint8_t data[46] = {
+        'I', 'D', '3', 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x24,
+        'T', 'A', 'L', 'B', 0x00, 0x00, 0x00, 0x0d, 0x00, 0x02,
+        0x00,
+        'F', 'a', 'm', 'i', 'l', 'y', ' ', 'G', 'u', 'y', 0xFF, 0x00,
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x03, 0x00, 0x00,
+        0x00, 'H', 'i'
+    };
+
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(data, sizeof(data), NULL);
+    uint8_t encoding = 0;
+
+    assert_non_null(tag);
+    assert_int_equal(tag->header->majorVersion, 4);
+
+    Id3v2Frame *f = (Id3v2Frame *) tag->frames->head->data;
+    testFrameHeader(f, "TALB", 1, 0, 0, 0, 0, 0, 0);
+    testEntry((Id3v2ContentEntry *) f->entries->head->data, 1, &encoding);
+    testEntry((Id3v2ContentEntry *) f->entries->head->next->data, 12, (uint8_t *) "Family Guy\xFF");
+
+    assert_non_null(tag->frames->head->next);
+    f = (Id3v2Frame *) tag->frames->head->next->data;
+    testFrameHeader(f, "TIT2", 0, 0, 0, 0, 0, 0, 0);
+    testEntry((Id3v2ContentEntry *) f->entries->head->next->data, 3, (uint8_t *) "Hi");
+
+    id3v2DestroyTag(&tag);
 }
 
 static void id3v2ParseTagFromStream_v3ext(void **state) {
@@ -1954,6 +1990,7 @@ int main() {
         cmocka_unit_test(id3v2ParseTagFromStream_v4),
         cmocka_unit_test(id3v2ParseTagFromStream_v2unsync),
         cmocka_unit_test(id3v2ParseTagFromStream_v3ext),
+        cmocka_unit_test(id3v2ParseTagFromStream_v4frameUnsync),
         cmocka_unit_test(id3v2ParseTagFromStream_v2ULTWithMissingDesc)
 
     };

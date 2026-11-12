@@ -13,6 +13,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
+#include <string.h>
 #include "id3v2/id3v2.h"
 #include "id3v2/id3v2Frame.h"
 #include "byteStream.h"
@@ -1230,30 +1231,115 @@ static void id3v2TagSerialize_v4footer(void **state) {
     assert_true(v);
 }
 
-/**
- * This test is so computationally expensive that it is not worth running unless its 100% necessary
- * This can take past an hour to run on an M3 with 16gb of ram.
- */
+// true if any $FF is followed by a byte >= $E0, i.e. the data still holds a false MPEG sync
+static bool internal_hasFalseSync(const uint8_t *data, size_t len) {
+    for (size_t i = 0; i + 1 < len; i++) {
+        if (data[i] == 0xFF && data[i + 1] >= 0xE0) {
+            return true;
+        }
+    }
 
-// static void id3v2TagToStream_v4unsync(void **state){
+    return false;
+}
 
-//     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
-//     id3v2WriteUnsynchronisationIndicator(tag->header, true);
+static void internal_tagSerializeUnsyncRoundTrip(const char *file) {
+    Id3v2Tag *tag = id3v2TagFromFile(file);
+    assert_non_null(tag);
+    assert_false(id3v2ReadUnsynchronisationIndicator(tag->header));
+    id3v2WriteUnsynchronisationIndicator(tag->header, true);
 
-//     ByteStream *stream = id3v2TagToStream(tag);
-//     assert_non_null(stream);
+    size_t outl = 0;
+    uint8_t *out = id3v2TagSerialize(tag, &outl);
+    assert_non_null(out);
+    assert_true(outl > 10);
+    assert_false(internal_hasFalseSync(out + 10, outl - 10));
 
-//     Id3v2Tag *tag2 = id3v2ParseTagFromStream(stream, NULL);
+    Id3v2Tag *tag2 = id3v2ParseTagFromBuffer(out, outl, NULL);
+    bool v = id3v2CompareTag(tag, tag2);
 
-//     bool v = id3v2CompareTag(tag, tag2);
+    free(out);
+    id3v2DestroyTag(&tag);
+    id3v2DestroyTag(&tag2);
 
-//     byteStreamDestroy(stream);
-//     id3v2DestroyTag(&tag);
-//     id3v2DestroyTag(&tag2);
+    assert_true(v);
+}
 
-//     assert_true(v);
-// }
+static void id3v2TagSerialize_v2unsync(void **state) {
+    (void) state;
+    internal_tagSerializeUnsyncRoundTrip("assets/danybrown2.mp3");
+}
 
+static void id3v2TagSerialize_v3unsync(void **state) {
+    (void) state;
+    internal_tagSerializeUnsyncRoundTrip("assets/sorry4dying.mp3");
+}
+
+// v2.4 tag flag: every frame is unsynchronised and flagged on write, tag header stays clean
+static void id3v2TagSerialize_v4unsync(void **state) {
+    (void) state;
+    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+    assert_non_null(tag);
+    id3v2WriteUnsynchronisationIndicator(tag->header, true);
+
+    size_t outl = 0;
+    uint8_t *out = id3v2TagSerialize(tag, &outl);
+    assert_non_null(out);
+    assert_false(internal_hasFalseSync(out, outl));
+
+    Id3v2Tag *tag2 = id3v2ParseTagFromBuffer(out, outl, NULL);
+    assert_non_null(tag2);
+
+    // serializing must not have changed the caller's frames
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+    while ((f = id3v2FrameTraverse(&frames)) != NULL) {
+        assert_false(f->header->unsynchronisation);
+        f->header->unsynchronisation = true;
+    }
+
+    frames = id3v2CreateFrameTraverser(tag2);
+    while ((f = id3v2FrameTraverse(&frames)) != NULL) {
+        assert_true(f->header->unsynchronisation);
+    }
+
+    bool v = id3v2CompareTag(tag, tag2);
+
+    free(out);
+    id3v2DestroyTag(&tag);
+    id3v2DestroyTag(&tag2);
+
+    assert_true(v);
+}
+
+// v2.4 frame flag only: just that frame is unsynchronised
+static void id3v2TagSerialize_v4frameUnsync(void **state) {
+    (void) state;
+    Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
+    assert_non_null(tag);
+
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+    while ((f = id3v2FrameTraverse(&frames)) != NULL) {
+        if (memcmp(f->header->id, "APIC", 4) == 0) {
+            f->header->unsynchronisation = true;
+            break;
+        }
+    }
+    assert_non_null(f);
+
+    size_t outl = 0;
+    uint8_t *out = id3v2TagSerialize(tag, &outl);
+    assert_non_null(out);
+
+    Id3v2Tag *tag2 = id3v2ParseTagFromBuffer(out, outl, NULL);
+    bool v = id3v2CompareTag(tag, tag2);
+
+    free(out);
+    id3v2DestroyTag(&tag);
+    id3v2DestroyTag(&tag2);
+
+    assert_true(v);
+}
 
 static void id3v2TagToJSON_v2(void **state) {
     (void) state;
@@ -1621,7 +1707,10 @@ int main() {
         cmocka_unit_test(id3v2TagSerialize_v4footer),
 
         // outdated!
-        // cmocka_unit_test(id3v2TagToStream_v4unsync),
+        cmocka_unit_test(id3v2TagSerialize_v2unsync),
+        cmocka_unit_test(id3v2TagSerialize_v3unsync),
+        cmocka_unit_test(id3v2TagSerialize_v4unsync),
+        cmocka_unit_test(id3v2TagSerialize_v4frameUnsync),
 
         // id3v2TagToJSON
         cmocka_unit_test(id3v2TagToJSON_v2),

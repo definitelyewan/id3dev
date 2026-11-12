@@ -994,6 +994,77 @@ static void id3v2CompareFrameId_EQU(void **state) {
     id3v2DestroyFrame(&f);
 }
 
+static void internal_unsyncCase(const uint8_t *in, size_t inl, const uint8_t *expected, size_t expectedl) {
+    size_t outl = 0;
+    uint8_t *out = id3v2ApplyUnsynchronisation(in, inl, &outl);
+
+    assert_non_null(out);
+    assert_int_equal(outl, expectedl);
+    assert_memory_equal(out, expected, expectedl);
+
+    // decoding must give back the original
+    assert_int_equal(id3v2RemoveUnsynchronisation(out, outl), inl);
+    assert_memory_equal(out, in, inl);
+    free(out);
+}
+
+static void id3v2ApplyUnsynchronisation_noSync(void **state) {
+    (void) state;
+    const uint8_t in[] = {0x00, 0x01, 0xFE, 0xDF, 'a'};
+    internal_unsyncCase(in, sizeof(in), in, sizeof(in));
+}
+
+static void id3v2ApplyUnsynchronisation_falseSyncs(void **state) {
+    (void) state;
+    // $FF $E0, $FF $00 and $FF $FF all need a $00; $FF $DF and $FF $12 do not
+    const uint8_t in[] = {0xFF, 0xE0, 0xFF, 0x00, 0xFF, 0xDF, 0xFF, 0xFF, 0x12};
+    const uint8_t expected[] = {0xFF, 0x00, 0xE0, 0xFF, 0x00, 0x00, 0xFF, 0xDF, 0xFF, 0x00, 0xFF, 0x12};
+    internal_unsyncCase(in, sizeof(in), expected, sizeof(expected));
+}
+
+static void id3v2ApplyUnsynchronisation_trailingFF(void **state) {
+    (void) state;
+    const uint8_t in[] = {'a', 0xFF};
+    const uint8_t expected[] = {'a', 0xFF, 0x00};
+    internal_unsyncCase(in, sizeof(in), expected, sizeof(expected));
+}
+
+static void id3v2ApplyUnsynchronisation_allFF(void **state) {
+    (void) state;
+    uint8_t in[64];
+    uint8_t expected[128];
+
+    memset(in, 0xFF, sizeof(in));
+    for (size_t i = 0; i < sizeof(expected); i += 2) {
+        expected[i] = 0xFF;
+        expected[i + 1] = 0x00;
+    }
+
+    internal_unsyncCase(in, sizeof(in), expected, sizeof(expected));
+}
+
+static void id3v2ApplyUnsynchronisation_badArgs(void **state) {
+    (void) state;
+    const uint8_t in[] = {0xFF};
+    size_t outl = 1;
+
+    assert_null(id3v2ApplyUnsynchronisation(NULL, 1, &outl));
+    assert_int_equal(outl, 0);
+    assert_null(id3v2ApplyUnsynchronisation(in, 0, &outl));
+    assert_null(id3v2ApplyUnsynchronisation(in, 1, NULL));
+}
+
+static void id3v2RemoveUnsynchronisation_lenientInput(void **state) {
+    (void) state;
+    // a lone $FF $E0 (not properly unsynchronised) and a trailing $FF are kept as-is
+    uint8_t buf[] = {0xFF, 0xE0, 0xFF, 0x00, 0x00, 0xFF};
+    const uint8_t expected[] = {0xFF, 0xE0, 0xFF, 0x00, 0xFF};
+
+    assert_int_equal(id3v2RemoveUnsynchronisation(buf, sizeof(buf)), sizeof(expected));
+    assert_memory_equal(buf, expected, sizeof(expected));
+    assert_int_equal(id3v2RemoveUnsynchronisation(NULL, 4), 0);
+}
+
 int main() {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(id3v2CreateAndDestroyFrameHeader_allInOne),
@@ -1039,6 +1110,14 @@ int main() {
         cmocka_unit_test(id3v2FrameToJSON_v3TXXX),
         cmocka_unit_test(id3v2FrameToJSON_v3APIC),
         cmocka_unit_test(id3v2FrameToJSON_v4ETCO),
+
+        // unsynchronisation
+        cmocka_unit_test(id3v2ApplyUnsynchronisation_noSync),
+        cmocka_unit_test(id3v2ApplyUnsynchronisation_falseSyncs),
+        cmocka_unit_test(id3v2ApplyUnsynchronisation_trailingFF),
+        cmocka_unit_test(id3v2ApplyUnsynchronisation_allFF),
+        cmocka_unit_test(id3v2ApplyUnsynchronisation_badArgs),
+        cmocka_unit_test(id3v2RemoveUnsynchronisation_lenientInput),
 
         // id3v2CreateEmptyFrame
         cmocka_unit_test(id3v2CreateEmptyFrame_noID),

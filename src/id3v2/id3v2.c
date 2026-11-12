@@ -1975,7 +1975,8 @@ int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t ty
  * @details Converts the tag back to raw bytes by serializing all frames, applying unsynchronization if enabled, encoding the header and optional footer,
  * calculating total size (including padding from extended header), and combining all components into a single binary buffer.
  * For ID3v2.4 tags with footer indicator set, generates a footer (10-byte header copy with "3DI" identifier).
- * Unsynchronization doubles buffer size to accommodate potential expansion. Size fields are encoded as synchsafe integers.
+ * Unsynchronisation ($00 inserted after false syncs) is applied to the whole body after the tag header for ID3v2.2/2.3,
+ * and per frame for ID3v2.4, where the tag flag forces it on every frame. Size fields are encoded as synchsafe integers.
  * Returns NULL on validation failures (null tag/header/frames, frame serialization errors, or header serialization errors) and sets outl to 0 without allocating memory.
  * @param tag - Tag structure to serialize.
  * @param outl - Pointer to size_t to receive the output buffer size in bytes.
@@ -2005,13 +2006,30 @@ uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl) {
     uint8_t *out = NULL;
     size_t headerOutl = 0;
 
+    // v2.2/2.3 unsynchronise the whole tag body after the 10 byte header; v2.4 does it per frame
+    // and a set tag flag means every frame must be unsynchronised
+    const bool unsync = id3v2ReadUnsynchronisationIndicator(tag->header) == 1;
+    const bool tagLevelUnsync = unsync && (tag->header->majorVersion == ID3V2_TAG_VERSION_2 ||
+                                           tag->header->majorVersion == ID3V2_TAG_VERSION_3);
+    const bool forceFrameUnsync = unsync && tag->header->majorVersion == ID3V2_TAG_VERSION_4;
+
     // frame stream
     while ((f = id3v2FrameTraverse(&frames)) != NULL) {
         ByteStream *tmp = NULL;
         size_t frameOutl = 0;
         uint8_t *frameOut = NULL;
+        bool frameFlag = false;
+
+        if (forceFrameUnsync && f->header != NULL) {
+            frameFlag = f->header->unsynchronisation;
+            f->header->unsynchronisation = true;
+        }
 
         frameOut = id3v2FrameSerialize(f, tag->header->majorVersion, &frameOutl);
+
+        if (forceFrameUnsync && f->header != NULL) {
+            f->header->unsynchronisation = frameFlag;
+        }
 
         if (frameOut == NULL && frameOutl == 0) {
             break;
@@ -2042,26 +2060,22 @@ uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl) {
 
     byteStreamRewind(frameStream);
 
-    // unsync?
-    if (id3v2ReadUnsynchronisationIndicator(tag->header)) {
-        ByteStream *tmp = NULL;
+    if (tagLevelUnsync) {
+        size_t unsyncl = 0;
+        uint8_t *unsyncOut = id3v2ApplyUnsynchronisation(frameStream->buffer, frameStream->bufferSize, &unsyncl);
 
-        tmp = byteStreamCreate(NULL, frameStream->bufferSize * 2);
-
-        for (size_t i = 0; i < frameStream->bufferSize; i++) {
-            byteStreamWrite(tmp, byteStreamCursor(frameStream), 1);
-
-            byteStreamSeek(tmp, 1, SEEK_CUR);
-            byteStreamSeek(frameStream, 1, SEEK_CUR);
+        if (unsyncOut == NULL) {
+            byteStreamDestroy(frameStream);
+            *outl = 0;
+            return NULL;
         }
 
         byteStreamDestroy(frameStream);
-        frameStream = tmp;
-        fsize = frameStream->bufferSize;
-        byteStreamRewind(frameStream);
-    } else {
-        fsize = frameStream->bufferSize;
+        frameStream = byteStreamCreate(unsyncOut, unsyncl);
+        free(unsyncOut);
     }
+
+    fsize = frameStream->bufferSize;
 
     // header stream
     headerOut = id3v2TagHeaderSerialize(tag->header, 0, &headerOutl);
@@ -2075,33 +2089,25 @@ uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl) {
     headerStream = byteStreamCreate(headerOut, headerOutl);
     free(headerOut);
 
-    // unsync?
-    if (id3v2ReadUnsynchronisationIndicator(tag->header) && headerStream->bufferSize > 10) {
-        ByteStream *tmp = NULL;
-        uint32_t size = 0;
+    // the v2.3 extended header is part of the unsynchronised body, the 10 byte tag header never is
+    if (tagLevelUnsync && headerStream->bufferSize > 10) {
+        size_t unsyncl = 0;
+        uint8_t *unsyncOut = id3v2ApplyUnsynchronisation(headerStream->buffer + 10,
+                                                         headerStream->bufferSize - 10, &unsyncl);
 
-        // ext size
-        size = (headerStream->bufferSize - 10) * 2;
-
-        tmp = byteStreamCreate(NULL, 10 + size);
-
-        // write header back
-        byteStreamWrite(tmp, byteStreamCursor(headerStream), 10);
-        byteStreamSeek(headerStream, 10, SEEK_SET);
-
-        for (uint32_t i = 0; i < size; i++) {
-            byteStreamWrite(tmp, byteStreamCursor(headerStream), 1);
-
-            byteStreamSeek(tmp, 1, SEEK_CUR);
-            byteStreamSeek(headerStream, 1, SEEK_CUR);
+        if (unsyncOut == NULL) {
+            byteStreamDestroy(headerStream);
+            byteStreamDestroy(frameStream);
+            *outl = 0;
+            return NULL;
         }
 
-        byteStreamDestroy(headerStream);
-        headerStream = tmp;
-        fsize += size;
-    } else {
-        fsize += ((headerStream->bufferSize > 10) ? headerStream->bufferSize - 10 : 0);
+        byteStreamResize(headerStream, 10 + unsyncl);
+        memcpy(headerStream->buffer + 10, unsyncOut, unsyncl);
+        free(unsyncOut);
     }
+
+    fsize += ((headerStream->bufferSize > 10) ? headerStream->bufferSize - 10 : 0);
 
     byteStreamRewind(headerStream);
 
