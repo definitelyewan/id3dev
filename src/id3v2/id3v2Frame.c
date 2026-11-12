@@ -1277,7 +1277,6 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
     uint8_t *out = NULL;
     unsigned char *tmp = NULL;
     bool exit = false;
-    bool bitFlag = false;
 
     // the frame size will be updated later as it cannot be calculated
     // before processing frame entries
@@ -1517,196 +1516,70 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
                  */
             }
             break;
-            // wildly long and probably inefficient, but it works for now and is the best I can do with my current knowledge
+            /**
+             * Packs a run of consecutive bit_contexts MSB-first in context order (the inverse of
+             * internal_id3v2ParseFrameBitContent). Each entry holds a right-justified big-endian value
+             * of nBits bits. The run is written as ceil(totalBits / 8) bytes.
+             */
             case bit_context: {
-                // there is another bit context next
-                if (listIteratorHasNext(context)) {
-                    if (((Id3v2ContentContext *) context.current->data)->type != bit_context) {
-                        bitFlag = false;
-                    } else {
-                        bitFlag = true;
-                    }
-                }
+                uint8_t *bitBuff = NULL;
+                size_t bitBuffSize = 0;
+                size_t totalBits = 0;
 
-
-                // at least 1 or more bit contexts in a row
-                if (bitFlag == true) {
-                    unsigned char *bitBuff = NULL;
-                    unsigned char **byteDataArr = NULL;
-                    size_t *byteDataSizeArr = NULL;
-                    size_t *nbits = NULL;
-
-                    size_t arrSize = 0;
-                    size_t totalBits = 0;
-                    size_t totalBytes = 0;
-                    size_t bitBuffSize = 0;
-
-                    // copy values
-                    while (true) {
-                        tmp = id3v2ReadFrameEntry(&trav, &readSize);
-
-                        if (tmp == NULL) {
-                            exit = true;
-                            break;
-                        }
-
-                        if (byteDataSizeArr == NULL) {
-                            byteDataSizeArr = malloc(sizeof(size_t));
-                            byteDataSizeArr[0] = readSize;
-
-                            nbits = malloc(sizeof(size_t));
-                            nbits[0] = cc->max;
-
-                            byteDataArr = (unsigned char **) malloc(sizeof(unsigned char *));
-                            byteDataArr[0] = malloc(readSize);
-
-                            for (size_t i = 0; i < readSize; i++) {
-                                byteDataArr[0][i] = tmp[i];
-                            }
-
-                            arrSize++;
-                        } else {
-                            arrSize++;
-                            byteDataSizeArr = realloc(byteDataSizeArr, arrSize * sizeof(size_t));
-                            byteDataSizeArr[arrSize - 1] = readSize;
-
-                            nbits = realloc(nbits, arrSize * sizeof(size_t));
-                            nbits[arrSize - 1] = cc->max;
-
-                            byteDataArr = realloc(byteDataArr, arrSize * sizeof(unsigned char *));
-                            byteDataArr[arrSize - 1] = malloc(readSize);
-
-                            for (size_t i = 0; i < readSize; i++) {
-                                byteDataArr[arrSize - 1][i] = tmp[i];
-                            }
-                        }
-
-                        totalBits += cc->max;
-
-                        free(tmp);
-
-
-                        if (listIteratorHasNext(context)) {
-                            if (((Id3v2ContentContext *) context.current->data)->type != bit_context) {
-                                break;
-
-                                // seek to the next context
-                            } else {
-                                cc = listIteratorNext(&context);
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-
-                    totalBytes = ((totalBits / CHAR_BIT) % 2) ? (totalBits / CHAR_BIT) + 1 : totalBits / CHAR_BIT;
-                    // ? odd : even
-
-                    bitBuff = malloc(totalBytes);
-                    memset(bitBuff, 0, totalBytes);
-                    bitBuffSize = totalBytes;
-
-                    // reverse the byte data
-                    for (size_t i = 0; i < arrSize; i++) {
-                        size_t dataSize = byteDataSizeArr[i];
-                        size_t halfSize = dataSize / 2;
-                        for (size_t j = 0; j < halfSize; j++) {
-                            unsigned char temp = byteDataArr[i][j];
-                            byteDataArr[i][j] = byteDataArr[i][dataSize - j - 1];
-                            byteDataArr[i][dataSize - j - 1] = temp;
-                        }
-                    }
-
-                    int step = 0;
-                    int offset = 0;
-                    int bitIndex = 0;
-                    for (size_t i = totalBytes; i > 0; i--) {
-                        if (step >= arrSize || totalBytes == 0) {
-                            break;
-                        }
-
-                        size_t nBit = nbits[step];
-                        size_t nBytes = byteDataSizeArr[step];
-                        unsigned char *data = byteDataArr[step];
-                        int counter = 0;
-
-                        while (nBit > 0) {
-                            if (counter == nBytes) {
-                                break;
-                            }
-
-                            int j = 0;
-                            for (j = 0; j < CHAR_BIT; j++) {
-                                if (nBit == 0) {
-                                    break;
-                                }
-
-                                // switch to the next byte
-                                if (j + offset >= CHAR_BIT) {
-                                    offset = 0;
-                                    totalBytes--;
-                                    bitIndex = 0;
-                                }
-
-                                bitBuff[totalBytes - 1] = setBit(bitBuff[totalBytes - 1], bitIndex,
-                                                                 readBit(data[counter], j) > 0 ? true : false);
-                                bitIndex++;
-
-                                nBit--;
-                            }
-
-                            if (j < CHAR_BIT) {
-                                offset = j;
-                            } else {
-                                offset = 0;
-                            }
-                            counter++;
-                        }
-
-                        step++;
-                    }
-
-                    byteStreamResize(stream, stream->bufferSize + bitBuffSize);
-                    byteStreamWrite(stream, bitBuff, bitBuffSize);
-                    contentSize += bitBuffSize;
-
-                    for (size_t i = 0; i < arrSize; i++) {
-                        free(byteDataArr[i]);
-                    }
-
-                    free(bitBuff);
-                    free(nbits);
-                    free(byteDataArr);
-                    free(byteDataSizeArr);
-
-                    bitFlag = false;
-
-                    // read a single and only bit context
-                } else {
-                    int totalBytesNeeded = (cc->max / CHAR_BIT) + 1;
-                    int nBit = CHAR_BIT - 1;
+                while (true) {
+                    size_t nBits = (cc->min >= cc->max) ? cc->min : cc->max;
 
                     tmp = id3v2ReadFrameEntry(&trav, &readSize);
-
                     if (tmp == NULL) {
                         exit = true;
                         break;
                     }
 
-                    while (totalBytesNeeded > 0) {
-                        byteStreamResize(stream, stream->bufferSize + 1);
-
-                        while (nBit >= 0) {
-                            byteStreamWriteBit(stream, (readBit(tmp[readSize - 1], nBit) > 0) ? true : false, nBit);
-                            nBit--;
+                    size_t needed = (totalBits + nBits + (CHAR_BIT - 1)) / CHAR_BIT;
+                    if (needed > bitBuffSize) {
+                        uint8_t *reallocPtr = realloc(bitBuff, needed);
+                        if (reallocPtr == NULL) {
+                            free(tmp);
+                            free(bitBuff);
+                            byteStreamDestroy(stream);
+                            *outl = 0;
+                            return NULL;
                         }
-
-                        byteStreamSeek(stream, 1, SEEK_CUR);
-                        totalBytesNeeded--;
+                        bitBuff = reallocPtr;
+                        memset(bitBuff + bitBuffSize, 0, needed - bitBuffSize);
+                        bitBuffSize = needed;
                     }
 
-                    contentSize += readSize;
+                    for (size_t k = 0; k < nBits; k++) {
+                        size_t srcBit = nBits - 1 - k; // field bit index, 0 = LSB
+                        size_t srcByteFromEnd = srcBit / CHAR_BIT;
+                        uint8_t bit = 0;
+
+                        if (srcByteFromEnd < readSize) {
+                            bit = (tmp[readSize - 1 - srcByteFromEnd] >> (srcBit % CHAR_BIT)) & 0x01;
+                        }
+
+                        size_t dst = totalBits + k;
+                        bitBuff[dst / CHAR_BIT] |= (uint8_t) (bit << ((CHAR_BIT - 1) - (dst % CHAR_BIT)));
+                    }
+
+                    totalBits += nBits;
                     free(tmp);
+
+                    // continue the run only if the next context is also a bit_context
+                    if (context.current && context.current->data &&
+                        ((Id3v2ContentContext *) context.current->data)->type == bit_context) {
+                        cc = listIteratorNext(&context);
+                    } else {
+                        break;
+                    }
+                }
+
+                if (bitBuff != NULL) {
+                    byteStreamResize(stream, stream->bufferSize + bitBuffSize);
+                    byteStreamWrite(stream, bitBuff, bitBuffSize);
+                    contentSize += bitBuffSize;
+                    free(bitBuff);
                 }
 
                 break;

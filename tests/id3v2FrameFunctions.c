@@ -247,7 +247,7 @@ static void id3v2WriteFrameEntry_greatestHits(void **state) {
             char *tmp = NULL;
 
             while ((tmp = id3v2ReadFrameEntryAsChar(&entries, &s)) != NULL) {
-                if (memcmp("IS_GREATEST_HITS", tmp, s) == 0) {
+                if (s >= 16 && memcmp("IS_GREATEST_HITS", tmp, 16) == 0) {
                     uint8_t zero = 0;
                     id3v2WriteFrameEntry(f, &entries, 1, (void *) &zero);
 
@@ -732,9 +732,9 @@ static void id3v2FrameSerialize_v2EQU(void **state) {
     uint8_t equ[15] = {
         'E', 'Q', 'U', 0x00, 0x00, 0x09,
         2U,
-        0x03, 0xe9, // 000000111110100 1  inc/dec
+        0x03, 0xe9, // 0 000001111101001  inc/dec (MSB) + frequency
         0x40, 0x00,
-        0x00, 0x28, // 000000000010100 0  inc/dec
+        0x80, 0x28, // 1 000000000101000  inc/dec (MSB) + frequency
         0xfc, 0x00
     };
 
@@ -761,17 +761,21 @@ static void id3v2FrameSerialize_v2EQU(void **state) {
     assert_memory_equal(byteStreamCursor(rep), "\x02", 1);
     byteStreamSeek(rep, 1, SEEK_CUR);
 
-    assert_memory_equal(byteStreamCursor(rep), "\x01\xd3", 2);
+    assert_memory_equal(byteStreamCursor(rep), "\x03\xe9", 2);
     byteStreamSeek(rep, 2, SEEK_CUR);
 
     assert_memory_equal(byteStreamCursor(rep), "\x40\x00", 2);
     byteStreamSeek(rep, 2, SEEK_CUR);
 
-    assert_memory_equal(byteStreamCursor(rep), "\x00\x50", 2);
+    assert_memory_equal(byteStreamCursor(rep), "\x80\x28", 2);
     byteStreamSeek(rep, 2, SEEK_CUR);
 
     assert_memory_equal(byteStreamCursor(rep), "\xfc\x00", 2);
     byteStreamSeek(rep, 2, SEEK_CUR);
+
+    // full round trip
+    assert_int_equal(outl, 15);
+    assert_memory_equal(out, equ, 15);
 
     free(out);
     listFree(context);

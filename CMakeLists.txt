@@ -11,13 +11,24 @@ option(BUILD_ID3_C_EXAMPLES "builds examples" OFF)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+set(ID3_SANITIZER "" CACHE STRING "Sanitizer to build with: address (ASan+UBSan) or thread (TSan)")
+set_property(CACHE ID3_SANITIZER PROPERTY STRINGS "" address thread)
+
 # Enable debugging
 if(DEBUG_ID3_SYMBOLS)
     add_compile_options("-Wall")
     add_compile_options("-g")
-#-fno-omit-frame-pointer -fno-optimize-sibling-calls
-#add_compile_options(-Wall -g3 -fsanitize=address,undefined)
-#add_link_options(-fsanitize=address,undefined)
+endif()
+
+if(ID3_SANITIZER STREQUAL "address")
+    set(ID3_SAN_FLAGS -fsanitize=address,undefined)
+elseif(ID3_SANITIZER STREQUAL "thread")
+    set(ID3_SAN_FLAGS -fsanitize=thread)
+endif()
+
+if(ID3_SAN_FLAGS)
+    add_compile_options(${ID3_SAN_FLAGS} -fno-omit-frame-pointer -fno-optimize-sibling-calls -g)
+    add_link_options(${ID3_SAN_FLAGS})
 endif()
 
 # Enable shared lib

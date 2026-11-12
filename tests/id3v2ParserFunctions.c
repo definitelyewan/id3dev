@@ -881,7 +881,7 @@ static void id3v2ParseFrame_parseWCOM(void **state) {
     Id3v2ContentEntry *e = (Id3v2ContentEntry *) f->entries->head->data;
 
     assert_memory_equal(e->entry, "https://bandcamp.com/", 21);
-    assert_int_equal(e->size, 21);
+    assert_int_equal(e->size, 22);
 
     listFree(context);
     byteStreamDestroy(stream);
@@ -1136,9 +1136,9 @@ static void id3v2ParseFrame_parseEQU(void **state) {
     uint8_t equ[15] = {
         'E', 'Q', 'U', 0x00, 0x00, 0x09,
         2U,
-        0x03, 0xe9, // 000000111110100 1  inc/dec
+        0x03, 0xe9, // 0000001111101001  inc/dec
         0x40, 0x00,
-        0x00, 0x28, // 000000000010100 0  inc/dec
+        0x80, 0x28, // 1000000000101000  inc/dec
         0xfc, 0x00
     };
 
@@ -1169,11 +1169,11 @@ static void id3v2ParseFrame_parseEQU(void **state) {
     assert_int_equal(e->size, 1);
 
     e = (Id3v2ContentEntry *) f->entries->head->next->data;
-    assert_int_equal(((uint8_t *)e->entry)[0], 1);
+    assert_int_equal(((uint8_t *)e->entry)[0], 0);
     assert_int_equal(e->size, 1);
 
     e = (Id3v2ContentEntry *) f->entries->head->next->next->data;
-    assert_int_equal(((uint8_t *)e->entry)[0], 0);
+    assert_int_equal(((uint8_t *)e->entry)[0], 0x03);
     assert_int_equal(((uint8_t *)e->entry)[1], 0xe9);
     assert_int_equal(e->size, 2);
 
@@ -1183,7 +1183,7 @@ static void id3v2ParseFrame_parseEQU(void **state) {
     assert_int_equal(e->size, 2);
 
     e = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->data;
-    assert_int_equal(((uint8_t *)e->entry)[0], 0x00);
+    assert_int_equal(((uint8_t *)e->entry)[0], 0x01);
     assert_int_equal(e->size, 1);
 
     e = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->next->data;
@@ -1750,7 +1750,7 @@ static void id3v2ParseTagFromStream_v4(void **state) {
     ce = (Id3v2ContentEntry *) f->entries->head->data;
 
     testFrameHeader(f, "WCOM", 0, 0, 0, 0, 0, 0, 0);
-    testEntry(ce, 44, (uint8_t *) "The Powers That Butf8\xdb>2gH I J K L M N Outf8");
+    testEntry(ce, 45, (uint8_t *) "The Powers That Butf8\xdb>2gH I J K L M N Outf8");
 
     // ETCO
     f = (Id3v2Frame *) tag->frames->head->next->next->next->next->next->next->next->next->next->next->next->next->next->
