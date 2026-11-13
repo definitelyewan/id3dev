@@ -3,9 +3,9 @@ requires = ["setuptools>=69", "cffi>=1.17"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "id3pairs"
+name = "id3dev"
 version = "2026.11"
-description = "Python bindings for C HashTableLib meant for Id3dev"
+description = "Python bindings for id3dev, a C library for ID3v1 and ID3v2 tags"
 requires-python = ">=3.9"
 dependencies = ["cffi>=1.17"]
 

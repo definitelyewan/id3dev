@@ -1,0 +1,3 @@
+include build_ffi.py
+recursive-include csrc *.c *.h
+recursive-include vendor *.c *.h LICENSE

@@ -1,5 +1,0 @@
-include build_ffi.py
-recursive-include csrc *.c *.h
-recursive-include vendor/HashTableLib/include *.h
-recursive-include vendor/HashTableLib/src *.c
-include vendor/HashTableLib/LICENSE

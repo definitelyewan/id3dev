@@ -2483,7 +2483,7 @@ int id3v2WriteTagToFile(const char *filePath, Id3v2Tag *tag) {
             // no need to read the old tag
             fileSize = fileSize - ((long) (oldTagSize + offset)) - (long) upperBytes;
 
-            if (fwrite(tmp + upperBytes + oldTagSize + offset, 1, fileSize, fp)) {
+            if (fwrite(tmp + upperBytes + oldTagSize + offset, 1, fileSize, fp) != (size_t) fileSize) {
                 free(tmp);
                 (void) fclose(fp);
                 byteStreamDestroy(stream);
