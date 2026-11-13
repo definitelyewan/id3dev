@@ -220,11 +220,13 @@ A couple examples on how to use this project are located in the `example` folder
 ### Tests
 There are well over 100 test cases located in the test folder for proof of functionallity. to build and run these tests cmocka must be installed on your system for `python3 ./scripts/test.py`.
 
-### FFI
+## FFI
 As of version 2026.11 ID3dev works with more than just C/C++ projects
 
-#### Python
+### Python
 As of version 2026.11 ID3dev now supports Python bindings and can be found in the `./interfaces/python` directory. Yippie!
 #### Building
-To build the wheel you will need to have a valid version of at least python 3.9 and pip available in your user/system paths. Once available the provided `wheel.py` file located in `./scripts` can be used to generate a wheel file for your host systems architecture (arm or x86). For documentation on how to use ID3dev as a python wheel please view https://definitelyewan.github.io/id3dev/ or take a look at the examples found in `./examples/python`.
+To build the wheel you will need to have a valid version of at least python 3.9 and pip available in your user/system paths. Once available the provided `wheel.py` file located in `./scripts` can be used to generate a wheel file for your host systems architecture (arm or x86). 
+### Documentation
+For documentation on how to use ID3dev as a python wheel please view https://definitelyewan.github.io/id3dev/ or take a look at the examples found in `./examples/python`.
 
