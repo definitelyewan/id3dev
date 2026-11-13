@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=69", "cffi>=1.17"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "id3pairs"
+version = "2026.11"
+description = "Python bindings for C HashTableLib meant for Id3dev"
+requires-python = ">=3.9"
+dependencies = ["cffi>=1.17"]
+
+[project.optional-dependencies]
+test = ["pytest", "build"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

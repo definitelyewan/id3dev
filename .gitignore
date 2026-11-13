@@ -15,3 +15,12 @@ scripts/common/__pycache__
 cmake-build-*
 Debug*
 .idea
+
+# python library
+interfaces/python/id3pairs/build
+interfaces/python/id3pairs/vendor/
+interfaces/python/.venv
+interfaces/python/id3pairs/src/id3pairs.egg-info
+interfaces/python/id3pairs/dist
+interfaces/python/id3pairs/__pycache__
+interfaces/python/id3pairs/src/id3pairs/_id3pairs.abi3.so

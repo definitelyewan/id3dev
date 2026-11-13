@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10...3.27)
 
-project(id3dev VERSION 26.01)
+project(id3dev VERSION 26.11)
 
 # Build options
 option(BUILD_ID3_SHARED_LIBS "building a shared lib" OFF)
