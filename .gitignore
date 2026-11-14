@@ -18,3 +18,4 @@ Debug*
 
 # python library
 interfaces/python/id3dev/dist
+interfaces/python/id3dev/src/__pycache__

@@ -1,38 +1,38 @@
 <map id="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2Types.h" name="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2Types.h">
 <area shape="rect" id="Node000001" title="Definitions for ID3v2.x tag structure, constants, and genre enumeration." alt="" coords="573,5,798,46"/>
 <area shape="rect" id="Node000002" href="$id3dev_8h.html" title="Decleations for reading, writing, converting, and comparing ID3v1 and ID3v2 metadata tags." alt="" coords="5,102,182,142"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="559,43,388,66,201,97,168,104,167,98,200,91,387,60,558,38"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="556,42,388,66,201,97,169,103,167,99,200,91,387,60,561,40"/>
 <area shape="rect" id="Node000004" href="$id3v2_8h.html" title="Declarations of ID3v2 tag operations including reading/writing metadata frames, tag serialization,..." alt="" coords="966,198,1155,238"/>
-<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="733,52,909,147,1014,195,1012,199,907,152,731,57"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="733,52,909,147,1015,197,1010,197,907,152,731,57"/>
 <area shape="rect" id="Node000006" href="$id3v2_context_8h.html" title="Function definitions for ID3v2 frame context definitions and parsing configuration." alt="" coords="490,102,726,142"/>
-<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="662,60,626,103,622,99,658,56"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="662,57,626,103,623,99,658,60"/>
 <area shape="rect" id="Node000010" href="$id3v2_frame_8h.html" title="Function definitions for ID3v2 frame lifecycle, traversal, serialization, and content management." alt="" coords="212,102,439,142"/>
-<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="596,53,402,104,400,98,595,48"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="593,52,402,103,400,98,598,49"/>
 <area shape="rect" id="Node000011" href="$id3v2_parser_8h.html" title="Definitions for binary parsing of ID3v2 tags, headers, frames, and complete tag structures from byte ..." alt="" coords="1144,102,1371,142"/>
-<area shape="poly" id="edge16_Node000001_Node000011" title=" " alt="" coords="814,41,1133,91,1168,98,1167,104,1132,97,813,47"/>
+<area shape="poly" id="edge16_Node000001_Node000011" title=" " alt="" coords="813,41,1133,91,1171,101,1165,101,1132,97,813,47"/>
 <area shape="rect" id="Node000012" href="$id3v2_tag_identity_8h.html" title="Function definitions of ID3v2 tag header and tag structure creation, manipulation,..." alt="" coords="920,94,1120,150"/>
-<area shape="poly" id="edge19_Node000001_Node000012" title=" " alt="" coords="771,48,924,91,923,96,770,53"/>
+<area shape="poly" id="edge19_Node000001_Node000012" title=" " alt="" coords="771,48,926,93,921,94,770,53"/>
 <area shape="rect" id="Node000003" href="$id3dev_8c.html" title="Function implementations for reading, writing, converting, and comparing ID3v1 and ID3v2 metadata tag..." alt="" coords="48,286,224,327"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="103,157,120,238,133,285,128,287,115,239,97,158"/>
-<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="950,241,743,265,541,282,225,303,225,298,541,277,742,259,950,236"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="102,156,120,238,133,287,128,286,115,239,98,160"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="953,238,743,265,541,282,225,303,225,298,541,277,742,259,947,239"/>
 <area shape="rect" id="Node000005" href="$id3v2_8c.html" title="Function implementation of ID3v2 tag operations including reading/writing metadata frames,..." alt="" coords="972,286,1148,327"/>
-<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="1063,254,1063,286,1058,286,1058,254"/>
-<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="550,152,519,171,495,192,487,203,483,214,485,225,491,236,514,248,557,259,686,277,837,290,972,299,971,304,836,296,685,283,556,265,512,253,488,240,480,227,478,214,482,201,491,189,516,166,548,147"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="1062,252,1062,288,1058,284,1058,256"/>
+<area shape="poly" id="edge7_Node000006_Node000005" title=" " alt="" coords="552,149,519,171,495,192,487,203,483,214,485,225,491,236,514,248,557,259,686,277,837,290,974,301,969,301,836,296,685,283,556,265,512,253,488,240,480,227,478,214,482,201,491,189,516,166,547,151"/>
 <area shape="rect" id="Node000007" href="$id3v2_context_8c.html" title="Function implementation of ID3v2 frame context definitions and parsing configuration." alt="" coords="502,198,714,238"/>
-<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="611,158,611,197,606,197,606,158"/>
+<area shape="poly" id="edge8_Node000006_Node000007" title=" " alt="" coords="610,156,610,199,606,196,606,160"/>
 <area shape="rect" id="Node000008" href="$id3v2_frame_8c.html" title="Function implementation for ID3v2 frame lifecycle, traversal, serialization, and content management." alt="" coords="224,198,427,238"/>
-<area shape="poly" id="edge9_Node000006_Node000008" title=" " alt="" coords="536,150,386,200,384,195,534,145"/>
+<area shape="poly" id="edge9_Node000006_Node000008" title=" " alt="" coords="532,148,386,200,384,195,537,147"/>
 <area shape="rect" id="Node000009" href="$id3v2_parser_8c.html" title="Implementations for binary parsing of ID3v2 tags, headers, frames, and complete tag structures from b..." alt="" coords="738,198,942,238"/>
-<area shape="poly" id="edge10_Node000006_Node000009" title=" " alt="" coords="672,146,793,195,791,200,670,151"/>
-<area shape="poly" id="edge12_Node000010_Node000003" title=" " alt="" coords="241,151,203,171,170,199,157,220,148,243,140,286,135,285,143,242,152,218,166,196,200,167,238,146"/>
-<area shape="poly" id="edge13_Node000010_Node000005" title=" " alt="" coords="271,152,240,171,216,193,209,204,206,215,207,226,214,236,228,246,252,254,324,269,420,280,533,289,773,299,972,302,972,308,773,304,533,294,420,286,323,274,250,259,226,250,210,240,202,227,200,214,204,202,212,189,237,167,268,148"/>
-<area shape="poly" id="edge14_Node000010_Node000008" title=" " alt="" coords="328,158,328,197,323,197,323,158"/>
-<area shape="poly" id="edge15_Node000010_Node000009" title=" " alt="" coords="449,143,739,196,738,201,448,148"/>
-<area shape="poly" id="edge17_Node000011_Node000005" title=" " alt="" coords="1360,145,1405,161,1441,182,1453,195,1459,209,1458,224,1449,240,1429,256,1400,269,1323,288,1233,299,1149,305,1148,300,1233,294,1322,283,1398,264,1426,251,1445,237,1453,223,1454,210,1449,198,1438,186,1403,166,1359,150"/>
-<area shape="poly" id="edge18_Node000011_Node000009" title=" " alt="" coords="1156,149,928,200,927,194,1154,144"/>
-<area shape="poly" id="edge20_Node000012_Node000004" title=" " alt="" coords="1040,163,1054,196,1049,198,1035,165"/>
+<area shape="poly" id="edge10_Node000006_Node000009" title=" " alt="" coords="671,146,794,197,789,197,670,151"/>
+<area shape="poly" id="edge12_Node000010_Node000003" title=" " alt="" coords="237,150,203,171,170,199,157,220,148,243,140,287,135,285,143,242,152,218,166,196,200,167,242,147"/>
+<area shape="poly" id="edge13_Node000010_Node000005" title=" " alt="" coords="267,151,240,171,216,193,209,204,206,215,207,226,214,236,228,246,252,254,324,269,420,280,533,289,773,299,974,305,969,305,773,304,533,294,420,286,323,274,250,259,226,250,210,240,202,227,200,214,204,202,212,189,237,167,271,148"/>
+<area shape="poly" id="edge14_Node000010_Node000008" title=" " alt="" coords="327,156,328,199,323,196,324,160"/>
+<area shape="poly" id="edge15_Node000010_Node000009" title=" " alt="" coords="449,143,741,197,736,199,448,148"/>
+<area shape="poly" id="edge17_Node000011_Node000005" title=" " alt="" coords="1360,144,1405,161,1441,182,1453,195,1459,209,1458,224,1449,240,1429,256,1400,269,1323,288,1233,299,1149,305,1149,300,1233,294,1322,283,1398,264,1426,251,1445,237,1453,223,1454,210,1449,198,1438,186,1403,166,1359,150"/>
+<area shape="poly" id="edge18_Node000011_Node000009" title=" " alt="" coords="1158,146,928,200,927,194,1152,147"/>
+<area shape="poly" id="edge20_Node000012_Node000004" title=" " alt="" coords="1039,162,1054,199,1050,196,1036,166"/>
 <area shape="poly" id="edge21_Node000012_Node000005" title=" " alt="" coords="1135,147,1209,153,1294,158,1371,170,1401,180,1422,196,1434,213,1439,228,1438,242,1431,255,1404,274,1363,288,1312,298,1257,304,1149,309,1148,304,1256,299,1312,293,1361,283,1401,269,1427,251,1432,241,1433,229,1429,215,1418,200,1399,185,1370,175,1293,163,1209,158,1135,152"/>
-<area shape="poly" id="edge22_Node000012_Node000009" title=" " alt="" coords="956,160,879,199,877,195,953,155"/>
+<area shape="poly" id="edge22_Node000012_Node000009" title=" " alt="" coords="957,156,879,200,877,195,952,158"/>
 <area shape="rect" id="Node000013" href="$id3v2_tag_identity_8c.html" title="Function implementations of ID3v2 tag header and tag structure creation, manipulation,..." alt="" coords="1179,198,1408,238"/>
-<area shape="poly" id="edge23_Node000012_Node000013" title=" " alt="" coords="1114,153,1237,195,1235,200,1113,158"/>
+<area shape="poly" id="edge23_Node000012_Node000013" title=" " alt="" coords="1114,152,1239,197,1234,197,1113,158"/>
 </map>

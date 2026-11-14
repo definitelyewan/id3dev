@@ -1667,9 +1667,11 @@ int id3v2WriteComment(const char *comment, Id3v2Tag *tag) {
 }
 
 // internal function ---------------------------------------------------------------------------------------------------------
+// Creates a UTF-16LE PIC/APIC frame with an empty description, the given picture type and image, and appends it to tag.
+// type is expected to be clamped by the caller (0x00-0x14).
 // NOLINTNEXTLINE
-static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *image, size_t imageSize, const char *kind,
-                                                        Id3v2Tag *tag) {
+static int internal_id3v2CreatePictureFrameUTF16LE(uint8_t v, uint8_t *image, size_t imageSize, const char *kind,
+                                                   uint8_t type, Id3v2Tag *tag) {
     // check for legal args
     // NOLINTNEXTLINE
     if (image == NULL || imageSize == 0 || kind == NULL || tag == NULL) {
@@ -1722,6 +1724,7 @@ static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *imag
             }
 
             if (!id3v2WriteFrameEntry(f, &entries, kindLen, (void *) kind)) {
+                id3v2DestroyFrame(&f);
                 return false;
             }
 
@@ -1739,6 +1742,7 @@ static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *imag
 
             if (!id3v2WriteFrameEntry(f, &entries, strlen(mime), (void *) mime)) {
                 free(mime);
+                id3v2DestroyFrame(&f);
                 return false;
             }
 
@@ -1752,7 +1756,7 @@ static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *imag
     id3v2ReadFrameEntryAsU8(&entries); // mime type skip
 
     // add type
-    if (!id3v2WriteFrameEntry(f, &entries, 1, (void *) "\0")) {
+    if (!id3v2WriteFrameEntry(f, &entries, 1, (void *) &type)) {
         id3v2DestroyFrame(&f);
         return false;
     }
@@ -1773,14 +1777,18 @@ static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *imag
     id3v2ReadFrameEntryAsU8(&entries);
 
 
-    listInsertBack(tag->frames, (void *) f);
+    if (!listInsertBack(tag->frames, (void *) f)) {
+        id3v2DestroyFrame(&f);
+        return false;
+    }
+
     return true;
 }
 
 /**
  * @brief Writes a picture to the appropriate attached picture frame in a tag.
  * @details Updates the first picture frame (PIC for ID3v2.2, APIC for ID3v2.3/2.4) that matches the specified picture type.
- * If no matching frame exists, creates a new UTF-16LE frame with type 0. For ID3v2.2, writes up to 3 characters of kind as the image format;
+ * If no matching frame exists, creates a new UTF-16LE frame with the specified picture type and an empty description. For ID3v2.2, writes up to 3 characters of kind as the image format;
  * for ID3v2.3/2.4, prepends "image/" to kind as the MIME type. Validates frame structure (5 contexts/entries with correct types).
  * Picture type values are clamped to the valid range (0x00-0x14).
  * Returns false on validation failures (null parameters, zero imageSize, empty kind string, invalid frame structure, or write errors) without modifying the tag.
@@ -1834,7 +1842,8 @@ int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_
         }
 
         if (f == NULL) {
-            return internal_id3v2CreatePictureFrameUTF16LEtype0(tag->header->majorVersion, image, imageSize, kind, tag);
+            return internal_id3v2CreatePictureFrameUTF16LE(tag->header->majorVersion, image, imageSize, kind, usableType,
+                                                           tag);
         }
 
         // verify frame via context
@@ -1921,7 +1930,7 @@ int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_
 /**
  * @brief Reads a picture from a file and writes it to the appropriate attached picture frame in a tag.
  * @details Loads binary image data from the specified file and delegates to id3v2WritePicture to update the first picture frame (PIC for ID3v2.2, APIC for ID3v2.3/2.4) matching the specified picture type.
- * If no matching frame exists, creates a new UTF-16LE frame with type 0. For ID3v2.2, writes up to 3 characters of kind as the image format; for ID3v2.3/2.4, prepends "image/" to kind as the MIME type.
+ * If no matching frame exists, creates a new UTF-16LE frame with the specified picture type and an empty description. For ID3v2.2, writes up to 3 characters of kind as the image format; for ID3v2.3/2.4, prepends "image/" to kind as the MIME type.
  * Returns false on validation failures (null parameters, empty strings, file open/read errors, or frame write errors) without modifying the tag. Frees allocated memory on all paths.
  * @param filename - Null-terminated string containing the path to the image file to read (must not be empty).
  * @param kind - Null-terminated string specifying image format (e.g., "jpeg", "png") used as MIME type suffix (must not be empty).

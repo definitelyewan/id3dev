@@ -1,5 +1,5 @@
  /**
- * @file id3v1Parser.c
+ * @file id3v1Parser.h
  * @author Ewan Jones
  * @brief Declarations of ID3v1 tag parsing and memory management functions
  * @version 26.01

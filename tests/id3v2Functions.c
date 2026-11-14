@@ -1054,6 +1054,77 @@ static void id3v2WritePictureFromFile_PIC(void **state) {
     id3v2DestroyTag(&tag);
 }
 
+// no APIC in the tag, so id3v2WritePicture has to create one with the requested type and store the whole image
+static void id3v2WritePicture_newAPIC(void **state) {
+    (void) state;
+    FILE *fp = NULL;
+    size_t sz = 0;
+    size_t charsz = 0;
+    uint8_t *data = NULL;
+
+    fp = fopen("assets/cat.png", "rb");
+    // NOLINTNEXTLINE
+    (void) fseek(fp, 0L, SEEK_END);
+    sz = ftell(fp);
+    (void) fseek(fp, 0L, SEEK_SET);
+    data = malloc(sz);
+    (void) fread(data, 1, sz, fp);
+    (void) fclose(fp);
+
+    assert_non_null(data);
+
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+    assert_non_null(tag);
+    assert_int_equal(tag->header->majorVersion, ID3V2_TAG_VERSION_3);
+
+    while (id3v2RemoveFrameByID("APIC", tag)) {}
+    assert_null(id3v2ReadFrameByID("APIC", tag));
+
+    assert_true(id3v2WritePicture(data, sz, "png", 0x03, tag));
+
+    Id3v2Frame *f = id3v2ReadFrameByID("APIC", tag);
+    assert_non_null(f);
+
+    ListIter i = id3v2CreateFrameEntryTraverser(f);
+
+    assert_int_equal(id3v2ReadFrameEntryAsU8(&i), BYTE_UTF16LE); // encoding
+
+    char *str = id3v2ReadFrameEntryAsChar(&i, &charsz); // mime type
+    assert_non_null(str);
+    assert_string_equal(str, "image/png");
+    free(str);
+
+    assert_int_equal(id3v2ReadFrameEntryAsU8(&i), 0x03); // picture type
+    id3v2ReadFrameEntryAsU8(&i); // description
+
+    uint8_t *test = (uint8_t *) id3v2ReadFrameEntry(&i, &charsz);
+    assert_non_null(test);
+    assert_int_equal(charsz, sz);
+    assert_memory_equal(test, data, sz);
+    free(test);
+    id3v2DestroyFrame(&f);
+
+    // a different type adds a second picture and leaves the first alone
+    assert_true(id3v2WritePicture(data, 4, "jpeg", 0x04, tag));
+
+    size_t frontSize = 0;
+    size_t backSize = 0;
+    uint8_t *front = id3v2ReadPicture(0x03, tag, &frontSize);
+    uint8_t *back = id3v2ReadPicture(0x04, tag, &backSize);
+    assert_non_null(front);
+    assert_non_null(back);
+    assert_int_equal(frontSize, sz);
+    assert_int_equal(backSize, 4);
+    assert_memory_equal(front, data, sz);
+    assert_memory_equal(back, data, 4);
+    assert_null(id3v2ReadPicture(0x00, tag, &charsz));
+
+    free(front);
+    free(back);
+    free(data);
+    id3v2DestroyTag(&tag);
+}
+
 static void id3v2InsertTextFrame_TSOA(void **state) {
     (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
@@ -1689,6 +1760,7 @@ int main() {
 
         // id3v2WritePicture
         cmocka_unit_test(id3v2WritePicture_PIC),
+        cmocka_unit_test(id3v2WritePicture_newAPIC),
 
         // id3v2WritePictureFromFile
         cmocka_unit_test(id3v2WritePictureFromFile_PIC),

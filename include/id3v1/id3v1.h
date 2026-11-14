@@ -1,5 +1,5 @@
 /**
- * @file id3v1.c
+ * @file id3v1.h
  * @author Ewan Jones
  * @brief Definitions of ID3v1 tag manipulation, file I/O, and utility functions
  * @version 26.01

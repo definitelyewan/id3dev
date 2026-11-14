@@ -1,0 +1,7 @@
+/**
+@mainpage Python bindings
+ID3dev as of version 2026.11 now features python bindings allowing Python users to edit, view, and create ID3v1, ID3v2.2,
+ID3v2.3, and Id3v2.4 tags. Moreover, you are required to generate these bindings yourself via the provided wheel.py script
+located in the scripts directory. please ensure you have at least python 3.9 installed for cffi and setuptools.
+
+*/

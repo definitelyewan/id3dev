@@ -45,6 +45,7 @@ var NAVTREE =
         [ "Macros", "globals_defs.html", null ]
       ] ]
     ] ],
+    [ "Python API", "../python/index.html", null ],
     [ "Standard Documentation", "../standard.html", null ],
     [ "Repo", "^https://github.com/definitelyewan/id3dev", null ],
     [ "Official Source", "^https://id3.org/", null ]
@@ -53,12 +54,12 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"../standard.html",
-"id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a33f9d9cfeb18ebae375d0c11501f0b73",
-"id3v2_context_8c.html#a5bd10812965548c550a90761e270591a",
-"id3v2_types_8h.html#a632a0a92f37060c749ceb7b8959dd2db"
+"../python/index.html",
+"id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a33a624b4b1456e54a3315e63c06cd6d3",
+"id3v2_context_8c.html#a54be319a151243bd71b3ad0a0ae39558",
+"id3v2_types_8h.html#a5952924cb986144f1228a28505ce4bc0ac138e995190318025d0ed2d40d9f0350"
 ];
 
-var SYNCONMSG = 'click to disable panel synchronization';
-var SYNCOFFMSG = 'click to enable panel synchronization';
-var LISTOFALLMEMBERS = 'List of all members';
+const SYNCONMSG = 'click to disable panel synchronization';
+const SYNCOFFMSG = 'click to enable panel synchronization';
+const LISTOFALLMEMBERS = 'List of all members';

@@ -1,0 +1,21 @@
+var searchData=
+[
+  ['ballad_0',['BALLAD',['../classid3dev_1_1__genre_1_1_genre.html#a1b8b13faa58f02362c8087e05e51b5cd',1,'id3dev::_genre::Genre']]],
+  ['baroque_1',['BAROQUE',['../classid3dev_1_1__genre_1_1_genre.html#ae53f572f4d088160207b859030031234',1,'id3dev::_genre::Genre']]],
+  ['bass_2',['BASS',['../classid3dev_1_1__genre_1_1_genre.html#a062377511c74ec0e74785617647ca8a1',1,'id3dev::_genre::Genre']]],
+  ['beat_3',['BEAT',['../classid3dev_1_1__genre_1_1_genre.html#a9706f71840ea4d2d4a007285aca3a4a1',1,'id3dev::_genre::Genre']]],
+  ['bebop_4',['BEBOP',['../classid3dev_1_1__genre_1_1_genre.html#a487eabbd77cd3ca9bc44f70094716e86',1,'id3dev::_genre::Genre']]],
+  ['bhangra_5',['BHANGRA',['../classid3dev_1_1__genre_1_1_genre.html#a6f6b276e9a25e0b887f876f752ee8d44',1,'id3dev::_genre::Genre']]],
+  ['big_5fband_6',['BIG_BAND',['../classid3dev_1_1__genre_1_1_genre.html#a854925bedade9c6cd025828952279e9f',1,'id3dev::_genre::Genre']]],
+  ['big_5fbeat_7',['BIG_BEAT',['../classid3dev_1_1__genre_1_1_genre.html#ad28776a621777f40f3c7bdf6ef5edec9',1,'id3dev::_genre::Genre']]],
+  ['binary_8',['BINARY',['../classid3dev_1_1__context_1_1_context_type.html#ae314fc10d4b6c2101ea9f4852c84c113',1,'id3dev::_context::ContextType']]],
+  ['bindings_9',['Python bindings',['../index.html',1,'']]],
+  ['bit_10',['BIT',['../classid3dev_1_1__context_1_1_context_type.html#a55da8e2b0b29d56dc3c1e6a9ec73e83d',1,'id3dev::_context::ContextType']]],
+  ['black_5fmetal_11',['BLACK_METAL',['../classid3dev_1_1__genre_1_1_genre.html#ac462abc818be4375c5044b755f2059a8',1,'id3dev::_genre::Genre']]],
+  ['bluegrass_12',['BLUEGRASS',['../classid3dev_1_1__genre_1_1_genre.html#a8f32f9c53ca161ec6947adf1b1a49f27',1,'id3dev::_genre::Genre']]],
+  ['blues_13',['BLUES',['../classid3dev_1_1__genre_1_1_genre.html#ae269dc26d27ed4fe4a540ff6c37650b5',1,'id3dev::_genre::Genre']]],
+  ['booty_5fbass_14',['BOOTY_BASS',['../classid3dev_1_1__genre_1_1_genre.html#a950570a4f50f4e51855e0cde1805857a',1,'id3dev::_genre::Genre']]],
+  ['breakbeat_15',['BREAKBEAT',['../classid3dev_1_1__genre_1_1_genre.html#a8fb0a1278bf9bc33d09cf0ed5750eb7a',1,'id3dev::_genre::Genre']]],
+  ['britpop_16',['BRITPOP',['../classid3dev_1_1__genre_1_1_genre.html#ae9130ee54d5a15e468073177ca4e4c0d',1,'id3dev::_genre::Genre']]],
+  ['bytes_17',['bytes',['../classid3dev_1_1__frame_1_1_entry_reader.html#a06469d2e6dbb0db8bbddb3f71ff082bb',1,'id3dev::_frame::EntryReader']]]
+];

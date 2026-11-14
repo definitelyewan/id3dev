@@ -1,4 +1,5 @@
 import webbrowser
+from pathlib import Path
 from common.buildHelpers import *
 from common.InformUser import Inform
 
@@ -14,14 +15,7 @@ cmake_build(".", "build", ["-DBUILD_ID3_DOCS=ON"])
 
 # where are the docs
 update.message("moving to docs dir")
-docDir = ""
-
-if platform == "linux" or platform == "linux2" or "darwin":
-    docDir = "build/docs"
-elif platform == "win32":
-    docDir = "build\\doc"
-else:
-    quit()
+docDir = os.path.join("build", "docs")
 
 if os.path.exists(docDir):
     os.chdir(docDir)
@@ -31,7 +25,10 @@ else:
 # Run doxygen
 update.message("Running doxygen")
 try:
-    subprocess.call(["doxygen", "Doxyfile.docs"])
+    # C library docs -> build/docs/doxygen/doxygen
+    # Python binding docs -> build/docs/doxygen/python (each site links to the other)
+    for doxyfile in ["Doxyfile.docs", "Doxyfile.docs_python"]:
+        subprocess.call(["doxygen", doxyfile])
 except OSError as e:
     if e.errno == errno.ENOENT:
         # program was not found
@@ -43,10 +40,6 @@ except OSError as e:
 
 # open the doc
 update.message("Attempting to open docs in a browser tab")
-if platform == "linux" or platform == "linux2" or platform == "darwin":
-    webbrowser.open_new_tab("html/index.html") 
-elif platform == "win32":
-    webbrowser.open_new_tab(".\\html\\index.html")
-
+webbrowser.open_new_tab(Path("doxygen", "doxygen", "index.html").resolve().as_uri())
 
 update.message("Done!")

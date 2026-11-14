@@ -767,7 +767,8 @@ uint8_t id3v2ReadFrameEntryAsU8(ListIter *traverser) {
  * @brief Reads the current entry as a 16-bit unsigned integer, advancing the iterator.
  * @details Retrieves the content entry at the iterator's current position and interprets 
  * it as a uint16_t. For entries with 2+ bytes, constructs the value from the first two 
- * bytes. For single-byte entries, zero-extends the byte to 16 bits. Advances the iterator 
+ * bytes in big-endian order, matching ID3v2 and id3v2ReadFrameEntryAsU32. For single-byte
+ * entries, zero-extends the byte to 16 bits. Advances the iterator 
  * to the next entry. Returns 0 if the traverser is NULL, the current entry is NULL, or the 
  * entry has zero size.
  * 
@@ -789,7 +790,7 @@ uint16_t id3v2ReadFrameEntryAsU16(ListIter *traverser) {
     }
 
     if (dataSize >= sizeof(uint16_t)) {
-        ret = (uint16_t) tmp[1] << 8 | (uint16_t) tmp[0];
+        ret = (uint16_t) ((uint16_t) tmp[0] << 8 | (uint16_t) tmp[1]); // big-endian
     } else if (dataSize == sizeof(uint8_t)) {
         ret = (uint16_t) tmp[0];
     }
@@ -851,7 +852,8 @@ uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser) {
  * @brief Writes data to the entry at the iterator's current position, clamping size to context constraints.
  * @details Locates the entry referenced by the iterator within the frame's entries list, finds its corresponding 
  * context definition, and replaces the entry's data with a deep copy of the provided data. The written size is 
- * clamped to the context's min/max bounds to maintain frame structure integrity. The iterator position is not 
+ * clamped to the context's min/max bounds to maintain frame structure integrity: data longer than max is truncated and
+ * data shorter than min is copied in full then padded with zero bytes up to min. The iterator position is not 
  * advanced. Returns false if any parameter is NULL, entrySize is 0, the iterator's current position is invalid, 
  * the entry cannot be located, or the corresponding context cannot be found.
  * 
@@ -882,10 +884,10 @@ bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize
     void *newData = 0;
 
     // locate the entries position in the frame
+    // match by identity: comparing contents finds the first entry with the same bytes,
+    // e.g. a 1 byte picture type instead of an empty picture data entry
     while ((ce = (Id3v2ContentEntry *) listIteratorNext(&entriesIter)) != NULL) {
-        const int comp = frame->entries->compareData((void *) ce, entries->current->data);
-
-        if (comp == 0) {
+        if (ce == entries->current->data) {
             break;
         }
 
@@ -925,9 +927,12 @@ bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize
     }
 
 
-    newData = malloc(newSize);
-    memset(newData, 0, newSize);
-    memcpy(newData, entry, newSize);
+    // when padded up to min, only entrySize bytes exist in entry; the rest stay zero
+    newData = calloc(newSize, 1);
+    if (newData == NULL) {
+        return false;
+    }
+    memcpy(newData, entry, (entrySize < newSize) ? entrySize : newSize);
 
     free(((Id3v2ContentEntry *) entries->current->data)->entry);
     ((Id3v2ContentEntry *) entries->current->data)->entry = newData;

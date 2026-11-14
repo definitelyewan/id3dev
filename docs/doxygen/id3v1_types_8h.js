@@ -9,6 +9,7 @@ var id3v1_types_8h =
     [ "Genre", "id3v1_types_8h.html#aa6d6dd12fa3caefc5ad3b07dd45b0219", null ],
     [ "Id3v1Tag", "id3v1_types_8h.html#ab3193d6a17696f20a16e5e2d14fb997e", null ],
     [ "_Genre", "id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172", [
+      [ "GENRE_UNKNOWN", "id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172ac945a2ab62ecf4f678c56dd4471c9f99", null ],
       [ "BLUES_GENRE", "id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172aff4e074eae8ab682ee0ff14a9f264c86", null ],
       [ "CLASSIC_ROCK_GENRE", "id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172ab7251d51c1a3400dcd93557cc354711a", null ],
       [ "COUNTRY_GENRE", "id3v1_types_8h.html#a85887bb775946bd65a25b0af1c27f172a8c2e68fcf77818b6451d01175481b745", null ],

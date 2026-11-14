@@ -1,14 +1,14 @@
 <map id="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2TagIdentity.h" name="/Users/ewanjones/projects/id3dev/include/id3v2/id3v2TagIdentity.h">
 <area shape="rect" id="Node000001" title="Function definitions of ID3v2 tag header and tag structure creation, manipulation,..." alt="" coords="263,5,462,61"/>
 <area shape="rect" id="Node000002" href="$id3v2_8h.html" title="Declarations of ID3v2 tag operations including reading/writing metadata frames, tag serialization,..." alt="" coords="67,109,256,150"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="292,70,205,111,202,106,290,65"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="289,69,205,111,202,106,293,66"/>
 <area shape="rect" id="Node000004" href="$id3v2_8c.html" title="Function implementation of ID3v2 tag operations including reading/writing metadata frames,..." alt="" coords="205,198,382,238"/>
-<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="339,76,321,110,307,157,299,198,294,197,302,155,316,108,334,73"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="338,73,321,110,307,157,298,199,294,195,302,155,316,108,334,76"/>
 <area shape="rect" id="Node000005" href="$id3v2_parser_8c.html" title="Implementations for binary parsing of ID3v2 tags, headers, frames, and complete tag structures from b..." alt="" coords="330,109,534,150"/>
-<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="394,72,420,107,416,110,390,75"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="393,71,420,109,415,108,391,76"/>
 <area shape="rect" id="Node000006" href="$id3v2_tag_identity_8c.html" title="Function implementations of ID3v2 tag header and tag structure creation, manipulation,..." alt="" coords="558,109,786,150"/>
-<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="467,63,608,106,607,111,466,68"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="467,63,610,108,605,109,466,68"/>
 <area shape="rect" id="Node000003" href="$id3dev_8c.html" title="Function implementations for reading, writing, converting, and comparing ID3v1 and ID3v2 metadata tag..." alt="" coords="5,198,182,238"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="139,164,111,199,107,196,135,160"/>
-<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="206,156,265,195,262,199,203,161"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="139,161,111,199,107,195,134,163"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="205,156,266,197,261,197,204,161"/>
 </map>

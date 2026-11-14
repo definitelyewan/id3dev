@@ -1,0 +1,22 @@
+var searchData=
+[
+  ['cabaret_0',['CABARET',['../classid3dev_1_1__genre_1_1_genre.html#a23ebb93e26c1f659bc68f8870581689a',1,'id3dev::_genre::Genre']]],
+  ['celtic_1',['CELTIC',['../classid3dev_1_1__genre_1_1_genre.html#adc131552e78dda6969e19b556b7633c5',1,'id3dev::_genre::Genre']]],
+  ['chamber_5fmusic_2',['CHAMBER_MUSIC',['../classid3dev_1_1__genre_1_1_genre.html#a3fcdfd4d433007dc2e80fcb84232ef56',1,'id3dev::_genre::Genre']]],
+  ['chanson_3',['CHANSON',['../classid3dev_1_1__genre_1_1_genre.html#a37d5d3dab326455331807dd8e7e29fd8',1,'id3dev::_genre::Genre']]],
+  ['chillout_4',['CHILLOUT',['../classid3dev_1_1__genre_1_1_genre.html#aecab7570b28e4ed4cddd5422a681195f',1,'id3dev::_genre::Genre']]],
+  ['chorus_5',['CHORUS',['../classid3dev_1_1__genre_1_1_genre.html#a9005c506e7203df0871f32a2571893a9',1,'id3dev::_genre::Genre']]],
+  ['christian_5fgangsta_5frap_6',['CHRISTIAN_GANGSTA_RAP',['../classid3dev_1_1__genre_1_1_genre.html#aba6ee5f1a5c9a63d0b622263759825b0',1,'id3dev::_genre::Genre']]],
+  ['christian_5frap_7',['CHRISTIAN_RAP',['../classid3dev_1_1__genre_1_1_genre.html#a505cdd1d491c46d4322b71a48073cae5',1,'id3dev::_genre::Genre']]],
+  ['christian_5frock_8',['CHRISTIAN_ROCK',['../classid3dev_1_1__genre_1_1_genre.html#a3374f5f387913377e4b147ca286a47fb',1,'id3dev::_genre::Genre']]],
+  ['christmas_9',['CHRISTMAS',['../classid3dev_1_1__genre_1_1_genre.html#aa77f4a9c16d2e53a9c05a2edd22840b0',1,'id3dev::_genre::Genre']]],
+  ['classic_5frock_10',['CLASSIC_ROCK',['../classid3dev_1_1__genre_1_1_genre.html#a58ca5e09a62fed883ee5aa789a9db7c5',1,'id3dev::_genre::Genre']]],
+  ['classical_11',['CLASSICAL',['../classid3dev_1_1__genre_1_1_genre.html#a104627be19f0155953530208b2217b6a',1,'id3dev::_genre::Genre']]],
+  ['club_12',['CLUB',['../classid3dev_1_1__genre_1_1_genre.html#a3a59eded54c5fdf1d349084408724463',1,'id3dev::_genre::Genre']]],
+  ['club_5fhouse_13',['CLUB_HOUSE',['../classid3dev_1_1__genre_1_1_genre.html#a65916d5724e14d26cfd07441ba8e049c',1,'id3dev::_genre::Genre']]],
+  ['comedy_14',['COMEDY',['../classid3dev_1_1__genre_1_1_genre.html#a07f666100bc85fb341d47e5324f11e1a',1,'id3dev::_genre::Genre']]],
+  ['contemporary_5fchristian_15',['CONTEMPORARY_CHRISTIAN',['../classid3dev_1_1__genre_1_1_genre.html#aebda9992a0e946e30662beb43a9c4508',1,'id3dev::_genre::Genre']]],
+  ['country_16',['COUNTRY',['../classid3dev_1_1__genre_1_1_genre.html#a46d1689aff551832f1ce371e0abe964d',1,'id3dev::_genre::Genre']]],
+  ['crossover_17',['CROSSOVER',['../classid3dev_1_1__genre_1_1_genre.html#a14195bda2d008cb7d3001c942ec4a4a8',1,'id3dev::_genre::Genre']]],
+  ['cult_18',['CULT',['../classid3dev_1_1__genre_1_1_genre.html#a13ab1afc9c3c5155f0ab27546fa1801b',1,'id3dev::_genre::Genre']]]
+];

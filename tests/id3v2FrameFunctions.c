@@ -302,6 +302,88 @@ static void id3v2WriteFrameEntry_updateTitle(void **state) {
     byteStreamDestroy(stream);
 }
 
+// entry shorter than the context's min: copied then zero padded, never read past entrySize
+static void id3v2WriteFrameEntry_padToMin(void **state) {
+    (void) state;
+    HashTable *pairs = hashTableCreate(4, id3v2DeleteContentContextList, id3v2PrintContentContextList,
+                                       id3v2CopyContentContextList);
+    List *context = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                               id3v2CopyContentContext);
+    assert_true(listInsertBack(context, id3v2CreateContentContext(binary_context, id3v2djb2("data"), 32, 16)));
+    assert_int_equal(hashTableInsert(pairs, "XMIN", context), 0);
+
+    Id3v2Frame *f = id3v2CreateEmptyFrame("XMIN", ID3V2_TAG_VERSION_3, pairs);
+    assert_non_null(f);
+
+    // heap allocated and exactly 1 byte so ASan reports any over read
+    uint8_t *one = malloc(1);
+    assert_non_null(one);
+    one[0] = 0xAB;
+
+    ListIter entries = id3v2CreateFrameEntryTraverser(f);
+    assert_true(id3v2WriteFrameEntry(f, &entries, 1, one));
+    free(one);
+
+    size_t s = 0;
+    uint8_t expected[16] = {0xAB};
+    uint8_t *data = id3v2ReadFrameEntry(&entries, &s);
+    assert_non_null(data);
+    assert_int_equal(s, 16);
+    assert_memory_equal(data, expected, 16);
+    free(data);
+
+    // longer than max is still cut to max
+    uint8_t big[40];
+    memset(big, 0x11, sizeof(big));
+    entries = id3v2CreateFrameEntryTraverser(f);
+    assert_true(id3v2WriteFrameEntry(f, &entries, sizeof(big), big));
+    data = id3v2ReadFrameEntry(&entries, &s);
+    assert_non_null(data);
+    assert_int_equal(s, 32);
+    assert_memory_equal(data, big, 32);
+    free(data);
+
+    id3v2DestroyFrame(&f);
+    listFree(context);
+    hashTableFree(pairs);
+}
+
+// AsU16 and AsU32 both read big-endian, as ID3v2 stores numbers; 1 byte entries zero extend
+static void id3v2ReadFrameEntryAsU16U32_bigEndian(void **state) {
+    (void) state;
+    HashTable *pairs = hashTableCreate(4, id3v2DeleteContentContextList, id3v2PrintContentContextList,
+                                       id3v2CopyContentContextList);
+    List *context = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                               id3v2CopyContentContext);
+    assert_true(listInsertBack(context, id3v2CreateContentContext(numeric_context, id3v2djb2("a"), 2, 2)));
+    assert_true(listInsertBack(context, id3v2CreateContentContext(numeric_context, id3v2djb2("b"), 4, 4)));
+    assert_true(listInsertBack(context, id3v2CreateContentContext(numeric_context, id3v2djb2("c"), 1, 1)));
+    assert_int_equal(hashTableInsert(pairs, "XNUM", context), 0);
+
+    Id3v2Frame *f = id3v2CreateEmptyFrame("XNUM", ID3V2_TAG_VERSION_3, pairs);
+    assert_non_null(f);
+
+    uint8_t u16[2] = {0x01, 0x02};
+    uint8_t u32[4] = {0x01, 0x02, 0x03, 0x04};
+    uint8_t one = 0xAB;
+
+    ListIter entries = id3v2CreateFrameEntryTraverser(f);
+    assert_true(id3v2WriteFrameEntry(f, &entries, sizeof(u16), u16));
+    id3v2ReadFrameEntryAsU8(&entries);
+    assert_true(id3v2WriteFrameEntry(f, &entries, sizeof(u32), u32));
+    id3v2ReadFrameEntryAsU8(&entries);
+    assert_true(id3v2WriteFrameEntry(f, &entries, 1, &one));
+
+    entries = id3v2CreateFrameEntryTraverser(f);
+    assert_int_equal(id3v2ReadFrameEntryAsU16(&entries), 0x0102);
+    assert_int_equal(id3v2ReadFrameEntryAsU32(&entries), 0x01020304);
+    assert_int_equal(id3v2ReadFrameEntryAsU16(&entries), 0x00AB);
+
+    id3v2DestroyFrame(&f);
+    listFree(context);
+    hashTableFree(pairs);
+}
+
 static void id3v2AttachFrameFromTag_TSOA(void **state) {
     (void) state;
     ByteStream *stream = byteStreamFromFile("assets/OnGP.mp3");
@@ -1078,6 +1160,8 @@ int main() {
         cmocka_unit_test(id3v2ReadFrameEntry_checkETCO),
 
         cmocka_unit_test(id3v2WriteFrameEntry_greatestHits),
+        cmocka_unit_test(id3v2WriteFrameEntry_padToMin),
+        cmocka_unit_test(id3v2ReadFrameEntryAsU16U32_bigEndian),
         cmocka_unit_test(id3v2WriteFrameEntry_updateTitle),
         cmocka_unit_test(id3v2AttachFrameFromTag_TSOA),
         cmocka_unit_test(id3v2DetachFrameFromTag_TIT2),

@@ -41,6 +41,7 @@
       <tab type="globals" visible="yes" title="" intro=""/>
     </tab>
     <tab type="examples" visible="yes" title="" intro=""/>
+    <tab type="user" url="../python/index.html" title="Python API"/>
     <tab type="user" url="../standard.html" title="Standard Documentation"/>
     <tab type="user" url="https://github.com/definitelyewan/id3dev" title="Repo"/>
     <tab type="user" url="https://id3.org/" title="Official Source"/>

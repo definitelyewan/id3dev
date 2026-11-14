@@ -2,6 +2,8 @@
 #include "id3py.h"
 #include "id3v1/id3v1Parser.h"
 #include "id3v2/id3v2Parser.h"
+#include "id3v2/id3v2Frame.h"
+#include "id3v2/id3v2TagIdentity.h"
 
 HashTable *id3py_pairs_create(size_t size) {
     return hashTableCreate(size, id3v2DeleteContentContextList, id3v2PrintContentContextList,
@@ -51,4 +53,34 @@ ID3 *id3py_from_buffer(uint8_t *buf, size_t len, HashTable *userPairs) {
     }
 
     return id3Create(v2, v1);
+}
+
+Id3v2Tag *id3py_v2_tag_new(uint8_t version) {
+    if (version != ID3V2_TAG_VERSION_2 && version != ID3V2_TAG_VERSION_3 && version != ID3V2_TAG_VERSION_4) {
+        return NULL;
+    }
+
+    Id3v2TagHeader *header = id3v2CreateTagHeader(version, 0, 0, NULL);
+    if (header == NULL) {
+        return NULL;
+    }
+
+    List *frames = listCreate(id3v2PrintFrame, id3v2DeleteFrame, id3v2CompareFrame, id3v2CopyFrame);
+    if (frames == NULL) {
+        id3v2DestroyTagHeader(&header);
+        return NULL;
+    }
+
+    Id3v2Tag *tag = id3v2CreateTag(header, frames);
+    if (tag == NULL) {
+        id3v2DestroyTagHeader(&header);
+        listFree(frames);
+        return NULL;
+    }
+
+    return tag;
+}
+
+Id3v1Tag *id3py_v1_tag_new(void) {
+    return id3v1CreateTag(NULL, NULL, NULL, 0, 0, NULL, OTHER_GENRE);
 }

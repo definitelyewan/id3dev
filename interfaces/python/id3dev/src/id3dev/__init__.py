@@ -1,12 +1,16 @@
 """Python bindings for id3dev: read and write ID3v1 and ID3v2 tags."""
 
-from ._context import Context
-from ._frame import Frame
+from ._context import Context, ContextType
+from ._encoding import Encoding
+from ._frame import EntryReader, Frame
+from ._genre import Genre
 from ._id3 import ID3
 from ._id3dev import lib as _lib
 from ._pairs import Id3Pairs
+from ._tags import ID3v1Tag, ID3v2Tag
 
-__all__ = ["ID3", "Frame", "Context", "Id3Pairs", "set_preferred_standard", "get_preferred_standard"]
+__all__ = ["ID3", "ID3v1Tag", "ID3v2Tag", "Frame", "EntryReader", "Context", "ContextType",
+           "Encoding", "Genre", "Id3Pairs", "set_preferred_standard", "get_preferred_standard"]
 
 ID3V1 = _lib.ID3V1_TAG_VERSION
 ID3V2_2 = _lib.ID3V2_TAG_VERSION_2

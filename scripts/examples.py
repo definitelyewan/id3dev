@@ -37,5 +37,6 @@ compile_code("id3dev_listAllFrames_c_example")
 compile_code("id3dev_displayAllText_c_example")
 compile_code("id3dev_buildTag_c_example")
 compile_code("id3dev_extractTag_c_example")
+compile_code("id3dev_customTag_c_example")
 
 update.message("Done! check ./build/examples/ for executables or scripts")

@@ -25,3 +25,7 @@ target_link_libraries(id3dev_buildTag_c_example PRIVATE id3dev)
 add_executable(id3dev_extractTag_c_example "${CMAKE_CURRENT_SOURCE_DIR}/c/extractTag.c")
 set_target_properties(id3dev_extractTag_c_example PROPERTIES C_STANDARD 99)
 target_link_libraries(id3dev_extractTag_c_example PRIVATE id3dev)
+
+add_executable(id3dev_customTag_c_example "${CMAKE_CURRENT_SOURCE_DIR}/c/customTag.c")
+set_target_properties(id3dev_customTag_c_example PROPERTIES C_STANDARD 99)
+target_link_libraries(id3dev_customTag_c_example PRIVATE id3dev)

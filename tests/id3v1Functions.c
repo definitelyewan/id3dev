@@ -846,6 +846,21 @@ static void id3v1GenreFromTable_checkForHipHopGenre(void **state) {
     assert_string_equal(id3v1GenreFromTable(HIP_HOP_GENRE), "Hip-Hop");
 }
 
+// every genre except OTHER_GENRE has its own name, so no enum value falls through to "Other"
+static void id3v1GenreFromTable_everyGenreNamed(void **state) {
+    (void) state; /* unused */
+
+    for (int i = BLUES_GENRE; i <= PSYBIENT_GENRE; i++) {
+        if (i == OTHER_GENRE) {
+            continue;
+        }
+        assert_string_not_equal(id3v1GenreFromTable(i), "Other");
+    }
+
+    assert_string_equal(id3v1GenreFromTable(CHRISTMAS_GENRE), "Christmas");
+    assert_string_equal(id3v1GenreFromTable(BHANGRA_GENRE), "Bhangra");
+}
+
 static void id3v1ToJSON_fullTag(void **state) {
     (void) state; /* unused */
 
@@ -978,6 +993,29 @@ static void id3v1WriteTagToFile_CreateFile(void **state) {
     id3v1DestroyTag(&tag2);
 
     (void) remove("test.mp3");
+}
+
+// years with fewer than 4 digits (including 0, no year) must not read past the converted digits
+static void id3v1WriteTagToFile_shortYears(void **state) {
+    (void) state; /* unused */
+
+    const int years[] = {0, 7, 999, 2024, 12345};
+    const int expected[] = {0, 7, 999, 2024, 1234};
+
+    for (size_t i = 0; i < sizeof(years) / sizeof(years[0]); i++) {
+        Id3v1Tag *tag = id3v1CreateTag((uint8_t *) "title", NULL, NULL, years[i], 0, NULL, OTHER_GENRE);
+        assert_non_null(tag);
+
+        assert_true(id3v1WriteTagToFile("year.mp3", tag));
+        Id3v1Tag *read = id3v1TagFromFile("year.mp3");
+        assert_non_null(read);
+        assert_int_equal(read->year, expected[i]);
+        assert_string_equal((char *) read->title, "title");
+
+        id3v1DestroyTag(&tag);
+        id3v1DestroyTag(&read);
+        (void) remove("year.mp3");
+    }
 }
 
 static void id3v1WriteTagToFile_editExistingFile(void **state) {
@@ -1169,6 +1207,7 @@ int main() {
         //id3v1GenreFromTable tests
         cmocka_unit_test(id3v1GenreFromTable_checkNoNull),
         cmocka_unit_test(id3v1GenreFromTable_checkForHipHopGenre),
+        cmocka_unit_test(id3v1GenreFromTable_everyGenreNamed),
 
         //id3v1ToJSON
         cmocka_unit_test(id3v1ToJSON_fullTag),
@@ -1179,6 +1218,7 @@ int main() {
         //id3v1WriteTagToFile
         cmocka_unit_test(id3v1WriteTagToFile_noInputs),
         cmocka_unit_test(id3v1WriteTagToFile_CreateFile),
+        cmocka_unit_test(id3v1WriteTagToFile_shortYears),
         cmocka_unit_test(id3v1WriteTagToFile_editExistingFile),
         cmocka_unit_test(id3v1WriteTagToFile_appendFile),
         cmocka_unit_test(id3v1WriteTagToFile_appendFileBig),

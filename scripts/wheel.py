@@ -108,5 +108,6 @@ subprocess.run(
 
 cleanup()
 
+update.message("Done!")
 print("Check /interfaces/python/id3dev/dist for a wheel")
 

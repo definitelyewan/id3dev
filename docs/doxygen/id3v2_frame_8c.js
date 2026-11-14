@@ -1,5 +1,6 @@
 var id3v2_frame_8c =
 [
+    [ "id3v2ApplyUnsynchronisation", "id3v2_frame_8c.html#ae8700e5d97d7d8520ff76b56598be581", null ],
     [ "id3v2AttachFrameToTag", "id3v2_frame_8c.html#a5a03693ad0200e63fcb83c99740f30d9", null ],
     [ "id3v2CompareContentEntry", "id3v2_frame_8c.html#aa3dbdcbf6397195d6b30941790a987f3", null ],
     [ "id3v2CompareFrame", "id3v2_frame_8c.html#a0b8f33a50a9259f03724424b236ce292", null ],
@@ -29,5 +30,6 @@ var id3v2_frame_8c =
     [ "id3v2ReadFrameEntryAsU16", "id3v2_frame_8c.html#aff8ac5acff06825d79b8b6a4cce74362", null ],
     [ "id3v2ReadFrameEntryAsU32", "id3v2_frame_8c.html#a45c84693ab49e95882eed7c4ea0b3dcf", null ],
     [ "id3v2ReadFrameEntryAsU8", "id3v2_frame_8c.html#adc4c31471e6e4e683bc451613d89e1ae", null ],
+    [ "id3v2RemoveUnsynchronisation", "id3v2_frame_8c.html#a46172a9c5da5b82e8e32dc626774655b", null ],
     [ "id3v2WriteFrameEntry", "id3v2_frame_8c.html#a1d4eb53b03cc87624740114698adcfc7", null ]
 ];
