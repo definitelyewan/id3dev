@@ -1474,6 +1474,135 @@ static void id3v2TagToJSON_v3(void **state) {
     free(str);
 }
 
+// test helpers for id3v2WriteTagToFile: read or write a whole file
+static uint8_t *readWholeFile(const char *path, size_t *len) {
+    FILE *fp = fopen(path, "rb");
+    uint8_t *data = NULL;
+    long sz = 0;
+
+    assert_non_null(fp);
+    (void) fseek(fp, 0L, SEEK_END);
+    sz = ftell(fp);
+    (void) fseek(fp, 0L, SEEK_SET);
+    data = malloc(sz > 0 ? (size_t) sz : 1);
+    assert_non_null(data);
+    *len = fread(data, 1, (size_t) sz, fp);
+    (void) fclose(fp);
+    return data;
+}
+
+static void writeWholeFile(const char *path, const uint8_t *data, size_t len) {
+    FILE *fp = fopen(path, "wb");
+
+    assert_non_null(fp);
+    assert_int_equal(fwrite(data, 1, len, fp), len);
+    (void) fclose(fp);
+}
+
+static Id3v2Tag *smallV3Tag(void) {
+    Id3v2Tag *tag = id3v2CreateTag(id3v2CreateTagHeader(ID3V2_TAG_VERSION_3, 0, 0, NULL),
+                                   listCreate(id3v2PrintFrame, id3v2DeleteFrame, id3v2CompareFrame, id3v2CopyFrame));
+    assert_true(id3v2WriteTitle("short", tag));
+    return tag;
+}
+
+// replacing a big tag with a small one must leave exactly new tag + the original audio
+static void id3v2WriteTagToFile_smallerTagKeepsAudio(void **state) {
+    (void) state;
+    size_t assetLen = 0, origLen = 0, outLen = 0, tagLen = 0, audioLen = 50000;
+    uint8_t *asset = readWholeFile("assets/sorry4dying.mp3", &assetLen);
+    size_t oldTagEnd = 10 + (size_t) (((asset[6] & 0x7F) << 21) | ((asset[7] & 0x7F) << 14) |
+                                      ((asset[8] & 0x7F) << 7) | (asset[9] & 0x7F));
+    uint32_t seed = 777;
+    Id3v2Tag *tag = smallV3Tag();
+    uint8_t *tagBytes = id3v2TagSerialize(tag, &tagLen);
+
+    // the asset is only tags, so put stand-in audio between its ID3v2 and ID3v1 tags
+    origLen = assetLen + audioLen;
+    uint8_t *orig = malloc(origLen);
+    assert_non_null(orig);
+    memcpy(orig, asset, oldTagEnd);
+    for (size_t i = 0; i < audioLen; i++) {
+        seed = seed * 1103515245u + 12345u;
+        orig[oldTagEnd + i] = (uint8_t) (seed >> 16);
+    }
+    memcpy(orig + oldTagEnd + audioLen, asset + oldTagEnd, assetLen - oldTagEnd);
+    free(asset);
+
+    writeWholeFile("assets/tmp", orig, origLen);
+    assert_true(id3v2WriteTagToFile("assets/tmp", tag));
+
+    uint8_t *out = readWholeFile("assets/tmp", &outLen);
+    (void) remove("assets/tmp");
+
+    assert_true(tagLen < oldTagEnd);
+    assert_int_equal(outLen, tagLen + (origLen - oldTagEnd));
+    assert_memory_equal(out, tagBytes, tagLen);
+    assert_memory_equal(out + tagLen, orig + oldTagEnd, origLen - oldTagEnd);
+
+    free(out);
+    free(tagBytes);
+    free(orig);
+    id3v2DestroyTag(&tag);
+}
+
+// a file with no tag must keep every byte, even when "ID3" appears inside the audio
+static void id3v2WriteTagToFile_noTagID3InAudio(void **state) {
+    (void) state;
+    size_t audioLen = 30000, outLen = 0, tagLen = 0;
+    uint8_t *audio = malloc(audioLen);
+    uint32_t seed = 12345;
+    Id3v2Tag *tag = smallV3Tag();
+    uint8_t *tagBytes = id3v2TagSerialize(tag, &tagLen);
+
+    assert_non_null(audio);
+    for (size_t i = 0; i < audioLen; i++) {
+        seed = seed * 1103515245u + 12345u;
+        audio[i] = (uint8_t) (seed >> 16);
+    }
+    audio[0] = 0xFF; // not a tag at the start
+    memcpy(audio + 15000, "ID3\x03\x00\x00\x00\x00\x01\x00", 10); // looks like a tag mid-file
+
+    writeWholeFile("assets/tmp", audio, audioLen);
+    assert_true(id3v2WriteTagToFile("assets/tmp", tag));
+
+    uint8_t *out = readWholeFile("assets/tmp", &outLen);
+    (void) remove("assets/tmp");
+
+    assert_int_equal(outLen, tagLen + audioLen);
+    assert_memory_equal(out, tagBytes, tagLen);
+    assert_memory_equal(out + tagLen, audio, audioLen);
+
+    free(out);
+    free(tagBytes);
+    free(audio);
+    id3v2DestroyTag(&tag);
+}
+
+// an existing tag whose size can't be trusted must leave the file untouched
+static void id3v2WriteTagToFile_badExistingHeaderUntouched(void **state) {
+    (void) state;
+    size_t len = 4096, outLen = 0;
+    uint8_t *data = calloc(len, 1);
+    Id3v2Tag *tag = smallV3Tag();
+
+    assert_non_null(data);
+    memcpy(data, "ID3\x03\x00\x00\x7F\x7F\x7F\x7F", 10); // claims a ~256MB tag in a 4KB file
+
+    writeWholeFile("assets/tmp", data, len);
+    assert_false(id3v2WriteTagToFile("assets/tmp", tag));
+
+    uint8_t *out = readWholeFile("assets/tmp", &outLen);
+    (void) remove("assets/tmp");
+
+    assert_int_equal(outLen, len);
+    assert_memory_equal(out, data, len);
+
+    free(out);
+    free(data);
+    id3v2DestroyTag(&tag);
+}
+
 static void id3v2WriteTagToFile_v2NoFile(void **state) {
     (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/danybrown2.mp3");
@@ -1792,7 +1921,10 @@ int main() {
         cmocka_unit_test(id3v2WriteTagToFile_v2NoFile),
         cmocka_unit_test(id3v2WriteTagToFile_v3Overwrite),
         cmocka_unit_test(id3v2WriteTagToFile_v4OverwriteNoPictures),
-        cmocka_unit_test(id3v2WriteTagToFile_v4OverwriteNoPicturesAsUpdate)
+        cmocka_unit_test(id3v2WriteTagToFile_v4OverwriteNoPicturesAsUpdate),
+        cmocka_unit_test(id3v2WriteTagToFile_smallerTagKeepsAudio),
+        cmocka_unit_test(id3v2WriteTagToFile_noTagID3InAudio),
+        cmocka_unit_test(id3v2WriteTagToFile_badExistingHeaderUntouched)
 
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
