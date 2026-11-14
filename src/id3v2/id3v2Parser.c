@@ -691,42 +691,58 @@ static size_t internal_id3v2ParseFrameEncodedStringContent(ByteStream *innerStre
     return dataSize;
 }
 
-static size_t internal_id3v2ParseFrameAdjustmentContent(ByteStream *innerStream, List *context, List *entries,
-                                                        Id3v2ContentContext *cc, size_t upperBound, uint8_t **data) {
+/**
+ * @brief Reads a big-endian unsigned value from an entry's bytes.
+ * @details Used to read the bit count stored in a field keyed "adjustment". Only the trailing
+ * sizeof(size_t) bytes are used, which is far beyond any bit count the standard allows.
+ *
+ * @param data - Entry bytes, may be NULL when size is 0.
+ * @param size - Number of bytes in data.
+ * @return size_t - The decoded value, 0 when data is NULL or size is 0.
+ */
+static size_t internal_id3v2AdjustmentBits(const uint8_t *data, size_t size) {
+    size_t value = 0;
 
-    size_t dataSize = 0;
-    size_t posce = 0;
-    size_t poscc = 0;
-    ListIter contentContextIter = listCreateIterator(context);
-    ListIter contentEntryIter = listCreateIterator(entries);
-    void *tmp = NULL;
-
-    while ((tmp = listIteratorNext(&contentContextIter)) != NULL) {
-        if (((Id3v2ContentContext *) tmp)->type == iter_context) {
-             poscc--;
-        }
-
-        if (((Id3v2ContentContext *) tmp)->key == id3v2djb2("adjustment")) {
-            break;
-        }
-
-        poscc++;
+    if (data == NULL) {
+        return 0;
     }
 
-    while ((tmp = listIteratorNext(&contentEntryIter)) != NULL) {
-        if (poscc == posce) {
-            dataSize = btoi((unsigned char *) ((Id3v2ContentEntry *) tmp)->entry,
-                            (int) ((Id3v2ContentEntry *) tmp)->size);
-        }
-
-        posce++;
+    for (size_t i = (size > sizeof(size_t)) ? size - sizeof(size_t) : 0; i < size; i++) {
+        value = (value << CHAR_BIT) | data[i];
     }
 
+    return value;
+}
+
+/**
+ * @brief Parses an adjustment_context field from the inner stream.
+ * @details The field is adjustmentBits bits wide and, as the standard requires, is stored in whole
+ * bytes padded at the most significant end, so ceil(adjustmentBits / 8) bytes are read. A width of 0
+ * yields no bytes (e.g. RVA2 "bits representing peak" of $00). The read is clamped to upperBound.
+ *
+ * @param innerStream - Stream to read from.
+ * @param adjustmentBits - Width of the field in bits, taken from the most recent field keyed "adjustment".
+ * @param upperBound - Remaining content bytes in the frame.
+ * @param data - Out. Heap-allocated field bytes, or NULL when 0 bytes are read. Caller must free.
+ * @return size_t - Number of bytes read.
+ */
+static size_t internal_id3v2ParseFrameAdjustmentContent(ByteStream *innerStream, size_t adjustmentBits,
+                                                        size_t upperBound, uint8_t **data) {
+    size_t dataSize = (adjustmentBits / CHAR_BIT) + ((adjustmentBits % CHAR_BIT) ? 1 : 0);
+
+    *data = NULL;
     dataSize = (dataSize > upperBound) ? upperBound : dataSize;
 
-    *data = malloc(dataSize);
-    memset(*data, 0, dataSize); //ensure data exists
-    byteStreamRead(innerStream, *data, dataSize); // no need to check error code do to above memset
+    if (dataSize == 0) {
+        return 0;
+    }
+
+    *data = calloc(dataSize, 1);
+    if (*data == NULL) {
+        return 0;
+    }
+
+    byteStreamRead(innerStream, *data, dataSize); // no need to check error code due to above calloc
     return dataSize;
 }
 
@@ -832,7 +848,8 @@ static size_t internal_id3v2ParseFrameBitContent(ByteStream *innerStream, const 
  * - binary_context/noEncoding_context/precision_context/numeric_context: Fixed-size raw binary/numeric data
  * - bit_context: Bit-level extraction, MSB-first across consecutive bit_contexts
  * - iter_context: Loop control marker for repeated field groups
- * - adjustment_context: Variable-length data where size comes from previously parsed "adjustment" field
+ * - adjustment_context: Field whose width in bits comes from the most recently parsed "adjustment" field,
+ * stored in ceil(bits / 8) bytes
  * - unknown_context: Skip remaining content
  * 
  * The function creates heap-allocated content entries for each parsed field and assembles them into 
@@ -867,6 +884,9 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
     size_t walk = 0;
     size_t currIterations = 0;
     size_t concurrentBitCount = 0;
+    size_t adjustmentBits = 0;
+    const size_t adjustmentKey = id3v2djb2("adjustment");
+    size_t iterStartCursor = 0;
     uint32_t expectedHeaderSize = 0;
     uint32_t expectedContentSize = 0;
     ByteStream *innerStream = NULL;
@@ -1011,6 +1031,11 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                 size_t dataSize = 0;
                 dataSize = internal_id3v2ParseFrameBlobContent(innerStream, cc, expectedContentSize, &data);
 
+                // the most recent "adjustment" field sets the width of later adjustment_contexts
+                if (cc->key == adjustmentKey) {
+                    adjustmentBits = internal_id3v2AdjustmentBits(data, dataSize);
+                }
+
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
                 free(data);
 
@@ -1038,6 +1063,14 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
             }
             break;
             case iter_context: {
+                // an iteration that read nothing would repeat forever (e.g. only 0 bit wide fields),
+                // so leave the loop and carry on with whatever follows the iter_context
+                if (currIterations != 0 && innerStream->cursor == iterStartCursor) {
+                    iter = iterStorage;
+                    currIterations = 0;
+                    break;
+                }
+
                 if (!currIterations) {
                     iterStorage = iter;
 
@@ -1068,13 +1101,14 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
                 }
 
                 currIterations++;
+                iterStartCursor = innerStream->cursor;
             }
             break;
             case adjustment_context: {
 
                 size_t dataSize = 0;
                 uint8_t *data = NULL;
-                dataSize = internal_id3v2ParseFrameAdjustmentContent(innerStream, context, entries, cc,
+                dataSize = internal_id3v2ParseFrameAdjustmentContent(innerStream, adjustmentBits,
                                                                     expectedContentSize, &data);
                 listInsertBack(entries, id3v2CreateContentEntry(data, dataSize));
                 free(data);
@@ -1090,6 +1124,14 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
         }
 
         if (expectedContentSize == 0 || byteStreamGetCh(innerStream) == EOF) {
+            const Id3v2ContentContext *next = (iter.current != NULL) ? (Id3v2ContentContext *) iter.current->data : NULL;
+
+            // a field declared 0 bits wide is present but empty (e.g. the last RVA2 channel with no peak),
+            // so emit its entry before stopping. Fields wider than 0 bits with no data left are omitted.
+            if (next != NULL && next->type == adjustment_context && adjustmentBits == 0) {
+                continue;
+            }
+
             break;
         }
     }

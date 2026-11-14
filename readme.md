@@ -47,7 +47,7 @@ Keep in mind that not all frames are supported in every version.
 | Popularimeter                                    |     |     | POP | POPM | POPM | ✅ |
 | Position synchronisation frame                   |     |     |     | POSS | POSS | ✅ |
 | Recommended buffer size                          |     |     | BUF | RBUF | RBUF | ✅ |
-| Relative volume adjustment                       |     |     | RVA | RVAD | RVA2 | 🟡 |
+| Relative volume adjustment                       |     |     | RVA | RVAD | RVA2 | ✅ |
 | Reverb                                           |     |     | REV | RVRB | RVRB | ✅ |
 | Seek                                             |     |     |     |      | SEEK | ✅ |
 | Signature                                        |     |     |     |      | SIGN | ✅ |

@@ -9,7 +9,7 @@ class ContextType(IntEnum):
     """! @brief The type of a Context field: how id3dev reads and writes it.
 
     Values come from the compiled Id3v2ContextType enum in id3v2Types.h. For every
-    type except BIT and ITER, a field's max and min are sizes in bytes.
+    type except BIT, ITER and ADJUSTMENT, a field's max and min are sizes in bytes.
     These are ints, so they can be passed anywhere id3dev expects one.
 
     @code{.py}
@@ -35,7 +35,8 @@ class ContextType(IntEnum):
     BIT = lib.bit_context
     ## Repeats earlier fields: min is the index to start from, max how many times to repeat (iter_context).
     ITER = lib.iter_context
-    ## Field whose max size is taken from an earlier field keyed "adjustment" (adjustment_context).
+    ## Field whose width in bits is taken from the most recent field keyed "adjustment", stored in
+    ## ceil(bits / 8) bytes and empty when the width is 0; max/min are not used (adjustment_context).
     ADJUSTMENT = lib.adjustment_context
 
 
@@ -52,8 +53,9 @@ class Context:
 
     @par Special keys
     A field keyed "encoding" sets the text encoding for later ENCODED_STRING
-    fields, and a field keyed "adjustment" sets the max size of a later
-    ADJUSTMENT field.
+    fields, and a field keyed "adjustment" sets the width in bits of later
+    ADJUSTMENT fields. The most recent "adjustment" field is used, so one
+    inside a repeated (ITER) block applies only to its own repetition.
 
     @code{.py}
     from id3dev import Context, ContextType, Id3Pairs

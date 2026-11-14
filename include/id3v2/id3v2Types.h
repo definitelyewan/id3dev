@@ -221,8 +221,11 @@ typedef enum _Id3v2ContextType {
     iter_context,
 
     /**
-     * @brief Dynamic upper bound adjustment based on prior context with key 'adjustment'.
-     * @details Allows runtime modification of context max value using data from previous context labeled 'adjustment'.
+     * @brief Field whose width in bits is set by a prior context with key 'adjustment'.
+     * @details The most recently parsed field keyed 'adjustment' gives the width in bits. The field is stored
+     * in ceil(bits / 8) whole bytes, padded at the most significant end, and is empty when the width is 0.
+     * Because the most recent value is used, an 'adjustment' field inside an iter_context applies only to
+     * its own iteration. The 'adjustment' field must be a numeric, binary, noEncoding or precision context.
      */
     adjustment_context
 } Id3v2ContextType;

@@ -46,6 +46,29 @@ static char *internal_base64Encode(const unsigned char *input, size_t inputLengt
     return (char *) output;
 }
 
+/**
+ * @brief Reads a big-endian unsigned value from an entry's bytes.
+ * @details Used to read the bit count stored in a field keyed "adjustment". Only the trailing
+ * sizeof(size_t) bytes are used, which is far beyond any bit count the standard allows.
+ *
+ * @param data - Entry bytes, may be NULL when size is 0.
+ * @param size - Number of bytes in data.
+ * @return size_t - The decoded value, 0 when data is NULL or size is 0.
+ */
+static size_t internal_id3v2AdjustmentBits(const uint8_t *data, size_t size) {
+    size_t value = 0;
+
+    if (data == NULL) {
+        return 0;
+    }
+
+    for (size_t i = (size > sizeof(size_t)) ? size - sizeof(size_t) : 0; i < size; i++) {
+        value = (value << CHAR_BIT) | data[i];
+    }
+
+    return value;
+}
+
 
 /**
  * @brief Creates an ID3v2 frame header structure with specified flags and metadata
@@ -850,18 +873,28 @@ uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser) {
 
 /**
  * @brief Writes data to the entry at the iterator's current position, clamping size to context constraints.
- * @details Locates the entry referenced by the iterator within the frame's entries list, finds its corresponding 
- * context definition, and replaces the entry's data with a deep copy of the provided data. The written size is 
- * clamped to the context's min/max bounds to maintain frame structure integrity: data longer than max is truncated and
- * data shorter than min is copied in full then padded with zero bytes up to min. The iterator position is not 
- * advanced. Returns false if any parameter is NULL, entrySize is 0, the iterator's current position is invalid, 
- * the entry cannot be located, or the corresponding context cannot be found.
- * 
+ * @details Locates the entry referenced by the iterator within the frame's entries list, finds the context that
+ * produced it, and replaces the entry's data with a deep copy of the provided data. The context is found by walking
+ * the frame's contexts the same way the parser does, following each iter_context back to its start index, so entries
+ * from any iteration of a repeated block (e.g. the second EQU band or a later RVA2 channel) can be written.
+ *
+ * The written size is clamped to keep the frame structure intact. For most contexts data longer than max is
+ * truncated and data shorter than min is copied in full then padded with zero bytes up to min. Fields measured in
+ * bits are sized to whole bytes instead: a bit_context takes ceil(bits / 8) bytes from its own min/max, and an
+ * adjustment_context takes the ceil(bits / 8) bytes declared by the most recent "adjustment" field before the entry.
+ * Their data is right-aligned into that width, so shorter data is zero padded in front and longer data keeps its
+ * least significant bytes. Writing to an adjustment_context declared 0 bits wide fails. Changing an "adjustment"
+ * field does not resize the entries that depend on it; those are fitted to the new width when serialized.
+ *
+ * The iterator position is not advanced. Returns false if any parameter is NULL, entrySize is 0, the iterator's
+ * current position is invalid, the entry cannot be located, no context produced it, or the target is a 0 bit wide
+ * adjustment_context.
+ *
  * @param frame - Frame containing the entry to modify
  * @param entries - Iterator positioned at the entry to write. Iterator position is not advanced
- * @param entrySize - Desired size of data to write in bytes. Will be clamped to context min/max
+ * @param entrySize - Desired size of data to write in bytes. Will be clamped as described above
  * @param entry - Source data to copy into the entry
- * 
+ *
  * @return bool - true on successful write, false on failure
  */
 bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize, const void *entry) {
@@ -873,66 +906,126 @@ bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize
         return false;
     }
 
-
+    const void *target = entries->current->data;
+    const size_t adjustmentKey = id3v2djb2("adjustment");
     ListIter contextIter = listCreateIterator(frame->contexts);
     ListIter entriesIter = listCreateIterator(frame->entries);
-    Id3v2ContentEntry *ce = NULL;
+    ListIter iterStorage = contextIter;
     Id3v2ContentContext *cc = NULL;
-    size_t posce = 0;
-    size_t poscc = 0;
+    Id3v2ContentEntry *ce = NULL;
+    size_t currIterations = 0;
+    size_t adjustmentBits = 0;
+    bool entrySinceIter = true;
     size_t newSize = 0;
-    void *newData = 0;
+    void *newData = NULL;
 
-    // locate the entries position in the frame
-    // match by identity: comparing contents finds the first entry with the same bytes,
-    // e.g. a 1 byte picture type instead of an empty picture data entry
-    while ((ce = (Id3v2ContentEntry *) listIteratorNext(&entriesIter)) != NULL) {
-        if (ce == entries->current->data) {
-            break;
-        }
-
-        posce++;
-    }
-
-    if (ce == NULL) {
-        return false;
-    }
-
-    // locate the context for the entry
+    /**
+     * Walk contexts and entries in lockstep as the parser produced them. Every context except iter_context and
+     * unknown_context produced exactly one entry. Match the entry by identity: comparing contents would find the
+     * first entry with the same bytes, e.g. a 1 byte picture type instead of an empty picture data entry.
+     */
     while ((cc = (Id3v2ContentContext *) listIteratorNext(&contextIter)) != NULL) {
         if (cc->type == iter_context) {
-            // in case an iter is the first context
-            poscc = (poscc == 0) ? 0 : poscc - 1;
+            // a repeated block that produced no entries would never reach the target
+            if (!entrySinceIter) {
+                cc = NULL;
+                break;
+            }
+            entrySinceIter = false;
+
+            // mirrors the iteration in id3v2ParseFrame and id3v2FrameSerialize
+            if (currIterations == 0) {
+                iterStorage = contextIter;
+                contextIter = listCreateIterator(frame->contexts);
+
+                for (size_t i = 0; i < cc->min; i++) {
+                    listIteratorNext(&contextIter);
+                }
+            }
+
+            if (currIterations != cc->max && currIterations != 0) {
+                contextIter = listCreateIterator(frame->contexts);
+
+                for (size_t i = 0; i < cc->min; i++) {
+                    listIteratorNext(&contextIter);
+                }
+            }
+
+            if (currIterations >= cc->max) {
+                contextIter = iterStorage;
+
+                for (size_t i = 0; i < currIterations; i++) {
+                    listIteratorNext(&contextIter);
+                }
+
+                currIterations = 0;
+            }
+
+            currIterations++;
+            continue;
         }
 
-        if (poscc == posce) {
+        if (cc->type == unknown_context) {
+            cc = NULL;
             break;
         }
 
-        poscc++;
+        ce = (Id3v2ContentEntry *) listIteratorNext(&entriesIter);
+        if (ce == NULL) {
+            cc = NULL;
+            break;
+        }
+        entrySinceIter = true;
+
+        if (ce == target) {
+            break;
+        }
+
+        // the most recent "adjustment" field sets the width of later adjustment_contexts
+        if (cc->key == adjustmentKey && cc->type != adjustment_context) {
+            adjustmentBits = internal_id3v2AdjustmentBits((const uint8_t *) ce->entry, ce->size);
+        }
     }
 
     if (cc == NULL) {
         return false;
     }
 
-    newSize = entrySize;
+    if (cc->type == adjustment_context || cc->type == bit_context) {
+        // both hold a right-justified value whose width is counted in bits
+        const size_t nBits = (cc->type == bit_context) ? ((cc->min >= cc->max) ? cc->min : cc->max) : adjustmentBits;
+        newSize = (nBits / CHAR_BIT) + ((nBits % CHAR_BIT) ? 1 : 0);
 
-    if (entrySize > cc->max) {
-        newSize = cc->max;
+        if (newSize == 0) {
+            return false;
+        }
+
+        newData = calloc(newSize, 1);
+        if (newData == NULL) {
+            return false;
+        }
+
+        // right-align: pad the most significant end, or keep the least significant bytes
+        const size_t copySize = (entrySize < newSize) ? entrySize : newSize;
+        memcpy((uint8_t *) newData + (newSize - copySize), (const uint8_t *) entry + (entrySize - copySize), copySize);
+    } else {
+        newSize = entrySize;
+
+        if (entrySize > cc->max) {
+            newSize = cc->max;
+        }
+
+        if (entrySize < cc->min) {
+            newSize = cc->min;
+        }
+
+        // when padded up to min, only entrySize bytes exist in entry; the rest stay zero
+        newData = calloc(newSize, 1);
+        if (newData == NULL) {
+            return false;
+        }
+        memcpy(newData, entry, (entrySize < newSize) ? entrySize : newSize);
     }
-
-    if (entrySize < cc->min) {
-        newSize = cc->min;
-    }
-
-
-    // when padded up to min, only entrySize bytes exist in entry; the rest stay zero
-    newData = calloc(newSize, 1);
-    if (newData == NULL) {
-        return false;
-    }
-    memcpy(newData, entry, (entrySize < newSize) ? entrySize : newSize);
 
     free(((Id3v2ContentEntry *) entries->current->data)->entry);
     ((Id3v2ContentEntry *) entries->current->data)->entry = newData;
@@ -1282,6 +1375,8 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
     uint8_t *out = NULL;
     unsigned char *tmp = NULL;
     bool exit = false;
+    size_t adjustmentBits = 0;
+    const size_t adjustmentKey = id3v2djb2("adjustment");
 
     // the frame size will be updated later as it cannot be calculated
     // before processing frame entries
@@ -1421,6 +1516,11 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
                 if (tmp == NULL) {
                     exit = true;
                     break;
+                }
+
+                // the most recent "adjustment" field sets the width of later adjustment_contexts
+                if (cc->key == adjustmentKey) {
+                    adjustmentBits = internal_id3v2AdjustmentBits(tmp, readSize);
                 }
 
                 byteStreamResize(stream, stream->bufferSize + readSize);
@@ -1590,51 +1690,42 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
                 break;
             }
 
+            /**
+             * The field is adjustmentBits bits wide and stored in ceil(adjustmentBits / 8) bytes, padded
+             * at the most significant end. The entry is right-aligned into that width: a short entry is
+             * zero padded in front and a long one keeps its least significant bytes, so the written size
+             * always matches what the "adjustment" field declares. A width of 0 writes nothing.
+             */
             case adjustment_context: {
-                ListIter contentContextIter = listCreateIterator(frame->contexts);
-                ListIter contentEntryIter = listCreateIterator(frame->entries);
-                size_t poscc = 0;
-                size_t posce = 0;
-                uint32_t rSize = 0;
-                void *iterNext = NULL;
+                const size_t fieldSize = (adjustmentBits / CHAR_BIT) + ((adjustmentBits % CHAR_BIT) ? 1 : 0);
+                Id3v2ContentEntry *ce = (Id3v2ContentEntry *) listIteratorNext(&trav);
 
-
-                // hunt down "adjustment" key
-                while ((iterNext = listIteratorNext(&contentContextIter)) != NULL) {
-                    if (((Id3v2ContentContext *) iterNext)->type == iter_context) {
-                        poscc--;
-                    }
-
-                    if (((Id3v2ContentContext *) iterNext)->key == id3v2djb2("adjustment")) {
-                        break;
-                    }
-
-                    poscc++;
-                }
-
-                // hunt down adjustment value
-                while ((iterNext = listIteratorNext(&contentEntryIter)) != NULL) {
-                    if (poscc == posce) {
-                        rSize = btou32((uint8_t *) ((Id3v2ContentEntry *) iterNext)->entry,
-                                       (int) ((Id3v2ContentEntry *) iterNext)->size);
-                        break;
-                    }
-
-                    posce++;
-                }
-
-                tmp = id3v2ReadFrameEntry(&trav, &readSize);
-
-                if (tmp == NULL) {
+                if (ce == NULL) {
                     exit = true;
                     break;
                 }
 
-                byteStreamResize(stream, stream->bufferSize + rSize);
-                byteStreamWrite(stream, tmp, rSize);
+                if (fieldSize == 0) {
+                    break;
+                }
 
-                contentSize += rSize;
-                free(tmp);
+                uint8_t *field = calloc(fieldSize, 1);
+                if (field == NULL) {
+                    byteStreamDestroy(stream);
+                    *outl = 0;
+                    return NULL;
+                }
+
+                const size_t copySize = (ce->size < fieldSize) ? ce->size : fieldSize;
+                if (copySize > 0 && ce->entry != NULL) {
+                    memcpy(field + (fieldSize - copySize), (uint8_t *) ce->entry + (ce->size - copySize), copySize);
+                }
+
+                byteStreamResize(stream, stream->bufferSize + fieldSize);
+                byteStreamWrite(stream, field, fieldSize);
+
+                contentSize += fieldSize;
+                free(field);
                 break;
             }
             case unknown_context:
@@ -2017,58 +2108,31 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version) {
             break;
 
             // base 64 again but concatenated
+            // the entry already holds exactly the bytes that were parsed or written, an empty entry is valid
             case adjustment_context: {
-                ListIter contentContextIter = listCreateIterator(frame->contexts);
-                ListIter contentEntryIter = listCreateIterator(frame->entries);
-                size_t poscc = 0;
-                size_t posce = 0;
                 size_t readSize = 0;
                 size_t contentMemCount = 0;
-                void *iterNext = NULL;
                 char *b64 = NULL;
+                Id3v2ContentEntry *ce = (Id3v2ContentEntry *) listIteratorNext(&trav);
 
-
-                // hunt down "adjustment" key
-                while ((iterNext = listIteratorNext(&contentContextIter)) != NULL) {
-                    if (((Id3v2ContentContext *) iterNext)->type == iter_context) {
-                        poscc--;
-                    }
-
-                    if (((Id3v2ContentContext *) iterNext)->key == id3v2djb2("adjustment")) {
-                        break;
-                    }
-
-                    poscc++;
+                if (ce == NULL) {
+                    exit = true;
+                    break;
                 }
 
-                // hunt down adjustment value
-                while ((iterNext = listIteratorNext(&contentEntryIter)) != NULL) {
-                    if (poscc == posce) {
-                        readSize = btou32((uint8_t *) ((Id3v2ContentEntry *) iterNext)->entry,
-                                          (int) ((Id3v2ContentEntry *) iterNext)->size);
-                        break;
-                    }
+                readSize = ce->size;
+                b64 = internal_base64Encode((const unsigned char *) ce->entry, readSize);
 
-                    posce++;
-                }
-
-
-                tmp = id3v2ReadFrameEntry(&trav, &readSize);
-
-                if (tmp == NULL || readSize == 0) {
+                if (b64 == NULL) {
                     exit = true;
                     break;
                 }
 
 
-                b64 = internal_base64Encode(tmp, readSize);
-                free(tmp);
-
-
                 contentMemCount = snprintf(NULL, 0,
                                            "{\"value\":\"%s\",\"size\":%zu}",
                                            b64,
-                                           strlen(b64));
+                                           readSize) + 1;
 
                 contentJsonSize++;
                 if (contentJson == NULL) {
