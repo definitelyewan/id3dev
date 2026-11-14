@@ -2015,10 +2015,14 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version) {
             }
             break;
 
+            /**
+             * An entry of 8 or more bytes is read as a double and one of 4 or more as a float, in the host's byte
+             * order. A shorter entry is copied into a zeroed float so nothing past the entry is read.
+             */
             case precision_context: {
                 size_t readSize = 0;
                 size_t contentMemCount = 0;
-                float value = 0;
+                double value = 0;
 
                 tmp = id3v2ReadFrameEntry(&trav, &readSize);
 
@@ -2027,14 +2031,23 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version) {
                     break;
                 }
 
+                if (readSize >= sizeof(double)) {
+                    double d = 0;
+                    memcpy(&d, tmp, sizeof(d));
+                    value = d;
+                } else {
+                    float f = 0;
+                    memcpy(&f, tmp, (readSize < sizeof(f)) ? readSize : sizeof(f));
+                    value = f;
+                }
 
-                memcpy(&value, tmp, sizeof(value));
                 free(tmp);
 
+                // + 1 for the NUL, snprintf's size includes it
                 contentMemCount = snprintf(NULL, 0,
                                            "{\"value\":\"%f\",\"size\":%zu}",
                                            value,
-                                           readSize);
+                                           readSize) + 1;
 
                 contentJsonSize++;
                 if (contentJson == NULL) {
