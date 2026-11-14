@@ -20,3 +20,5 @@ Debug*
 interfaces/python/id3dev/dist
 interfaces/python/id3dev/src/__pycache__
 interfaces/python/id3dev/src/id3dev/__pycache__
+interfaces/python/id3dev/src/id3dev/_id3dev.pyd
+interfaces/python/id3dev/tests/__pycache__
