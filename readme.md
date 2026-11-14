@@ -17,6 +17,7 @@ ID3dev is a library crafted to support all versions of the ID3 standard includin
     + [Doxygen](#doxygen)
     + [Examples](#examples)
     + [Tests](#tests)
+- [FFI](#FFI)
 
 ## What Can It Do?
 ID3dev is capable of reading, manipulating, converting, and outputting all supported frames found within the ID3v2.x specifications with only a couple of exceptions when it comes to features (see below table). Additionally, it supports all previously mentioned features for ID3v1.x with the ability to dynamically switch between ID3v2.x and ID3v1.x standards.
