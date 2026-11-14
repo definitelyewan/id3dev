@@ -46,6 +46,29 @@ static char *internal_base64Encode(const unsigned char *input, size_t inputLengt
     return (char *) output;
 }
 
+/**
+ * @brief Reads a big-endian unsigned value from an entry's bytes.
+ * @details Used to read the bit count stored in a field keyed "adjustment". Only the trailing
+ * sizeof(size_t) bytes are used, which is far beyond any bit count the standard allows.
+ *
+ * @param data - Entry bytes, may be NULL when size is 0.
+ * @param size - Number of bytes in data.
+ * @return size_t - The decoded value, 0 when data is NULL or size is 0.
+ */
+static size_t internal_id3v2AdjustmentBits(const uint8_t *data, size_t size) {
+    size_t value = 0;
+
+    if (data == NULL) {
+        return 0;
+    }
+
+    for (size_t i = (size > sizeof(size_t)) ? size - sizeof(size_t) : 0; i < size; i++) {
+        value = (value << CHAR_BIT) | data[i];
+    }
+
+    return value;
+}
+
 
 /**
  * @brief Creates an ID3v2 frame header structure with specified flags and metadata
@@ -767,7 +790,8 @@ uint8_t id3v2ReadFrameEntryAsU8(ListIter *traverser) {
  * @brief Reads the current entry as a 16-bit unsigned integer, advancing the iterator.
  * @details Retrieves the content entry at the iterator's current position and interprets 
  * it as a uint16_t. For entries with 2+ bytes, constructs the value from the first two 
- * bytes. For single-byte entries, zero-extends the byte to 16 bits. Advances the iterator 
+ * bytes in big-endian order, matching ID3v2 and id3v2ReadFrameEntryAsU32. For single-byte
+ * entries, zero-extends the byte to 16 bits. Advances the iterator 
  * to the next entry. Returns 0 if the traverser is NULL, the current entry is NULL, or the 
  * entry has zero size.
  * 
@@ -789,7 +813,7 @@ uint16_t id3v2ReadFrameEntryAsU16(ListIter *traverser) {
     }
 
     if (dataSize >= sizeof(uint16_t)) {
-        ret = (uint16_t) tmp[1] << 8 | (uint16_t) tmp[0];
+        ret = (uint16_t) ((uint16_t) tmp[0] << 8 | (uint16_t) tmp[1]); // big-endian
     } else if (dataSize == sizeof(uint8_t)) {
         ret = (uint16_t) tmp[0];
     }
@@ -849,17 +873,28 @@ uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser) {
 
 /**
  * @brief Writes data to the entry at the iterator's current position, clamping size to context constraints.
- * @details Locates the entry referenced by the iterator within the frame's entries list, finds its corresponding 
- * context definition, and replaces the entry's data with a deep copy of the provided data. The written size is 
- * clamped to the context's min/max bounds to maintain frame structure integrity. The iterator position is not 
- * advanced. Returns false if any parameter is NULL, entrySize is 0, the iterator's current position is invalid, 
- * the entry cannot be located, or the corresponding context cannot be found.
- * 
+ * @details Locates the entry referenced by the iterator within the frame's entries list, finds the context that
+ * produced it, and replaces the entry's data with a deep copy of the provided data. The context is found by walking
+ * the frame's contexts the same way the parser does, following each iter_context back to its start index, so entries
+ * from any iteration of a repeated block (e.g. the second EQU band or a later RVA2 channel) can be written.
+ *
+ * The written size is clamped to keep the frame structure intact. For most contexts data longer than max is
+ * truncated and data shorter than min is copied in full then padded with zero bytes up to min. Fields measured in
+ * bits are sized to whole bytes instead: a bit_context takes ceil(bits / 8) bytes from its own min/max, and an
+ * adjustment_context takes the ceil(bits / 8) bytes declared by the most recent "adjustment" field before the entry.
+ * Their data is right-aligned into that width, so shorter data is zero padded in front and longer data keeps its
+ * least significant bytes. Writing to an adjustment_context declared 0 bits wide fails. Changing an "adjustment"
+ * field does not resize the entries that depend on it; those are fitted to the new width when serialized.
+ *
+ * The iterator position is not advanced. Returns false if any parameter is NULL, entrySize is 0, the iterator's
+ * current position is invalid, the entry cannot be located, no context produced it, or the target is a 0 bit wide
+ * adjustment_context.
+ *
  * @param frame - Frame containing the entry to modify
  * @param entries - Iterator positioned at the entry to write. Iterator position is not advanced
- * @param entrySize - Desired size of data to write in bytes. Will be clamped to context min/max
+ * @param entrySize - Desired size of data to write in bytes. Will be clamped as described above
  * @param entry - Source data to copy into the entry
- * 
+ *
  * @return bool - true on successful write, false on failure
  */
 bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize, const void *entry) {
@@ -871,63 +906,126 @@ bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize
         return false;
     }
 
-
+    const void *target = entries->current->data;
+    const size_t adjustmentKey = id3v2djb2("adjustment");
     ListIter contextIter = listCreateIterator(frame->contexts);
     ListIter entriesIter = listCreateIterator(frame->entries);
-    Id3v2ContentEntry *ce = NULL;
+    ListIter iterStorage = contextIter;
     Id3v2ContentContext *cc = NULL;
-    size_t posce = 0;
-    size_t poscc = 0;
+    Id3v2ContentEntry *ce = NULL;
+    size_t currIterations = 0;
+    size_t adjustmentBits = 0;
+    bool entrySinceIter = true;
     size_t newSize = 0;
-    void *newData = 0;
+    void *newData = NULL;
 
-    // locate the entries position in the frame
-    while ((ce = (Id3v2ContentEntry *) listIteratorNext(&entriesIter)) != NULL) {
-        const int comp = frame->entries->compareData((void *) ce, entries->current->data);
-
-        if (comp == 0) {
-            break;
-        }
-
-        posce++;
-    }
-
-    if (ce == NULL) {
-        return false;
-    }
-
-    // locate the context for the entry
+    /**
+     * Walk contexts and entries in lockstep as the parser produced them. Every context except iter_context and
+     * unknown_context produced exactly one entry. Match the entry by identity: comparing contents would find the
+     * first entry with the same bytes, e.g. a 1 byte picture type instead of an empty picture data entry.
+     */
     while ((cc = (Id3v2ContentContext *) listIteratorNext(&contextIter)) != NULL) {
         if (cc->type == iter_context) {
-            // in case an iter is the first context
-            poscc = (poscc == 0) ? 0 : poscc - 1;
+            // a repeated block that produced no entries would never reach the target
+            if (!entrySinceIter) {
+                cc = NULL;
+                break;
+            }
+            entrySinceIter = false;
+
+            // mirrors the iteration in id3v2ParseFrame and id3v2FrameSerialize
+            if (currIterations == 0) {
+                iterStorage = contextIter;
+                contextIter = listCreateIterator(frame->contexts);
+
+                for (size_t i = 0; i < cc->min; i++) {
+                    listIteratorNext(&contextIter);
+                }
+            }
+
+            if (currIterations != cc->max && currIterations != 0) {
+                contextIter = listCreateIterator(frame->contexts);
+
+                for (size_t i = 0; i < cc->min; i++) {
+                    listIteratorNext(&contextIter);
+                }
+            }
+
+            if (currIterations >= cc->max) {
+                contextIter = iterStorage;
+
+                for (size_t i = 0; i < currIterations; i++) {
+                    listIteratorNext(&contextIter);
+                }
+
+                currIterations = 0;
+            }
+
+            currIterations++;
+            continue;
         }
 
-        if (poscc == posce) {
+        if (cc->type == unknown_context) {
+            cc = NULL;
             break;
         }
 
-        poscc++;
+        ce = (Id3v2ContentEntry *) listIteratorNext(&entriesIter);
+        if (ce == NULL) {
+            cc = NULL;
+            break;
+        }
+        entrySinceIter = true;
+
+        if (ce == target) {
+            break;
+        }
+
+        // the most recent "adjustment" field sets the width of later adjustment_contexts
+        if (cc->key == adjustmentKey && cc->type != adjustment_context) {
+            adjustmentBits = internal_id3v2AdjustmentBits((const uint8_t *) ce->entry, ce->size);
+        }
     }
 
     if (cc == NULL) {
         return false;
     }
 
-    newSize = entrySize;
+    if (cc->type == adjustment_context || cc->type == bit_context) {
+        // both hold a right-justified value whose width is counted in bits
+        const size_t nBits = (cc->type == bit_context) ? ((cc->min >= cc->max) ? cc->min : cc->max) : adjustmentBits;
+        newSize = (nBits / CHAR_BIT) + ((nBits % CHAR_BIT) ? 1 : 0);
 
-    if (entrySize > cc->max) {
-        newSize = cc->max;
+        if (newSize == 0) {
+            return false;
+        }
+
+        newData = calloc(newSize, 1);
+        if (newData == NULL) {
+            return false;
+        }
+
+        // right-align: pad the most significant end, or keep the least significant bytes
+        const size_t copySize = (entrySize < newSize) ? entrySize : newSize;
+        memcpy((uint8_t *) newData + (newSize - copySize), (const uint8_t *) entry + (entrySize - copySize), copySize);
+    } else {
+        newSize = entrySize;
+
+        if (entrySize > cc->max) {
+            newSize = cc->max;
+        }
+
+        if (entrySize < cc->min) {
+            newSize = cc->min;
+        }
+
+        // when padded up to min, only entrySize bytes exist in entry; the rest stay zero
+        newData = calloc(newSize, 1);
+        if (newData == NULL) {
+            return false;
+        }
+        memcpy(newData, entry, (entrySize < newSize) ? entrySize : newSize);
     }
-
-    if (entrySize < cc->min) {
-        newSize = cc->min;
-    }
-
-
-    newData = malloc(newSize);
-    memset(newData, 0, newSize);
-    memcpy(newData, entry, newSize);
 
     free(((Id3v2ContentEntry *) entries->current->data)->entry);
     ((Id3v2ContentEntry *) entries->current->data)->entry = newData;
@@ -1277,7 +1375,8 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
     uint8_t *out = NULL;
     unsigned char *tmp = NULL;
     bool exit = false;
-    bool bitFlag = false;
+    size_t adjustmentBits = 0;
+    const size_t adjustmentKey = id3v2djb2("adjustment");
 
     // the frame size will be updated later as it cannot be calculated
     // before processing frame entries
@@ -1419,6 +1518,11 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
                     break;
                 }
 
+                // the most recent "adjustment" field sets the width of later adjustment_contexts
+                if (cc->key == adjustmentKey) {
+                    adjustmentBits = internal_id3v2AdjustmentBits(tmp, readSize);
+                }
+
                 byteStreamResize(stream, stream->bufferSize + readSize);
                 byteStreamWrite(stream, tmp, readSize);
                 free(tmp);
@@ -1517,246 +1621,111 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
                  */
             }
             break;
-            // wildly long and probably inefficient, but it works for now and is the best I can do with my current knowledge
+            /**
+             * Packs a run of consecutive bit_contexts MSB-first in context order (the inverse of
+             * internal_id3v2ParseFrameBitContent). Each entry holds a right-justified big-endian value
+             * of nBits bits. The run is written as ceil(totalBits / 8) bytes.
+             */
             case bit_context: {
-                // there is another bit context next
-                if (listIteratorHasNext(context)) {
-                    if (((Id3v2ContentContext *) context.current->data)->type != bit_context) {
-                        bitFlag = false;
-                    } else {
-                        bitFlag = true;
-                    }
-                }
+                uint8_t *bitBuff = NULL;
+                size_t bitBuffSize = 0;
+                size_t totalBits = 0;
 
-
-                // at least 1 or more bit contexts in a row
-                if (bitFlag == true) {
-                    unsigned char *bitBuff = NULL;
-                    unsigned char **byteDataArr = NULL;
-                    size_t *byteDataSizeArr = NULL;
-                    size_t *nbits = NULL;
-
-                    size_t arrSize = 0;
-                    size_t totalBits = 0;
-                    size_t totalBytes = 0;
-                    size_t bitBuffSize = 0;
-
-                    // copy values
-                    while (true) {
-                        tmp = id3v2ReadFrameEntry(&trav, &readSize);
-
-                        if (tmp == NULL) {
-                            exit = true;
-                            break;
-                        }
-
-                        if (byteDataSizeArr == NULL) {
-                            byteDataSizeArr = malloc(sizeof(size_t));
-                            byteDataSizeArr[0] = readSize;
-
-                            nbits = malloc(sizeof(size_t));
-                            nbits[0] = cc->max;
-
-                            byteDataArr = (unsigned char **) malloc(sizeof(unsigned char *));
-                            byteDataArr[0] = malloc(readSize);
-
-                            for (size_t i = 0; i < readSize; i++) {
-                                byteDataArr[0][i] = tmp[i];
-                            }
-
-                            arrSize++;
-                        } else {
-                            arrSize++;
-                            byteDataSizeArr = realloc(byteDataSizeArr, arrSize * sizeof(size_t));
-                            byteDataSizeArr[arrSize - 1] = readSize;
-
-                            nbits = realloc(nbits, arrSize * sizeof(size_t));
-                            nbits[arrSize - 1] = cc->max;
-
-                            byteDataArr = realloc(byteDataArr, arrSize * sizeof(unsigned char *));
-                            byteDataArr[arrSize - 1] = malloc(readSize);
-
-                            for (size_t i = 0; i < readSize; i++) {
-                                byteDataArr[arrSize - 1][i] = tmp[i];
-                            }
-                        }
-
-                        totalBits += cc->max;
-
-                        free(tmp);
-
-
-                        if (listIteratorHasNext(context)) {
-                            if (((Id3v2ContentContext *) context.current->data)->type != bit_context) {
-                                break;
-
-                                // seek to the next context
-                            } else {
-                                cc = listIteratorNext(&context);
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-
-                    totalBytes = ((totalBits / CHAR_BIT) % 2) ? (totalBits / CHAR_BIT) + 1 : totalBits / CHAR_BIT;
-                    // ? odd : even
-
-                    bitBuff = malloc(totalBytes);
-                    memset(bitBuff, 0, totalBytes);
-                    bitBuffSize = totalBytes;
-
-                    // reverse the byte data
-                    for (size_t i = 0; i < arrSize; i++) {
-                        size_t dataSize = byteDataSizeArr[i];
-                        size_t halfSize = dataSize / 2;
-                        for (size_t j = 0; j < halfSize; j++) {
-                            unsigned char temp = byteDataArr[i][j];
-                            byteDataArr[i][j] = byteDataArr[i][dataSize - j - 1];
-                            byteDataArr[i][dataSize - j - 1] = temp;
-                        }
-                    }
-
-                    int step = 0;
-                    int offset = 0;
-                    int bitIndex = 0;
-                    for (size_t i = totalBytes; i > 0; i--) {
-                        if (step >= arrSize || totalBytes == 0) {
-                            break;
-                        }
-
-                        size_t nBit = nbits[step];
-                        size_t nBytes = byteDataSizeArr[step];
-                        unsigned char *data = byteDataArr[step];
-                        int counter = 0;
-
-                        while (nBit > 0) {
-                            if (counter == nBytes) {
-                                break;
-                            }
-
-                            int j = 0;
-                            for (j = 0; j < CHAR_BIT; j++) {
-                                if (nBit == 0) {
-                                    break;
-                                }
-
-                                // switch to the next byte
-                                if (j + offset >= CHAR_BIT) {
-                                    offset = 0;
-                                    totalBytes--;
-                                    bitIndex = 0;
-                                }
-
-                                bitBuff[totalBytes - 1] = setBit(bitBuff[totalBytes - 1], bitIndex,
-                                                                 readBit(data[counter], j) > 0 ? true : false);
-                                bitIndex++;
-
-                                nBit--;
-                            }
-
-                            if (j < CHAR_BIT) {
-                                offset = j;
-                            } else {
-                                offset = 0;
-                            }
-                            counter++;
-                        }
-
-                        step++;
-                    }
-
-                    byteStreamResize(stream, stream->bufferSize + bitBuffSize);
-                    byteStreamWrite(stream, bitBuff, bitBuffSize);
-                    contentSize += bitBuffSize;
-
-                    for (size_t i = 0; i < arrSize; i++) {
-                        free(byteDataArr[i]);
-                    }
-
-                    free(bitBuff);
-                    free(nbits);
-                    free(byteDataArr);
-                    free(byteDataSizeArr);
-
-                    bitFlag = false;
-
-                    // read a single and only bit context
-                } else {
-                    int totalBytesNeeded = (cc->max / CHAR_BIT) + 1;
-                    int nBit = CHAR_BIT - 1;
+                while (true) {
+                    size_t nBits = (cc->min >= cc->max) ? cc->min : cc->max;
 
                     tmp = id3v2ReadFrameEntry(&trav, &readSize);
-
                     if (tmp == NULL) {
                         exit = true;
                         break;
                     }
 
-                    while (totalBytesNeeded > 0) {
-                        byteStreamResize(stream, stream->bufferSize + 1);
-
-                        while (nBit >= 0) {
-                            byteStreamWriteBit(stream, (readBit(tmp[readSize - 1], nBit) > 0) ? true : false, nBit);
-                            nBit--;
+                    size_t needed = (totalBits + nBits + (CHAR_BIT - 1)) / CHAR_BIT;
+                    if (needed > bitBuffSize) {
+                        uint8_t *reallocPtr = realloc(bitBuff, needed);
+                        if (reallocPtr == NULL) {
+                            free(tmp);
+                            free(bitBuff);
+                            byteStreamDestroy(stream);
+                            *outl = 0;
+                            return NULL;
                         }
-
-                        byteStreamSeek(stream, 1, SEEK_CUR);
-                        totalBytesNeeded--;
+                        bitBuff = reallocPtr;
+                        memset(bitBuff + bitBuffSize, 0, needed - bitBuffSize);
+                        bitBuffSize = needed;
                     }
 
-                    contentSize += readSize;
+                    for (size_t k = 0; k < nBits; k++) {
+                        size_t srcBit = nBits - 1 - k; // field bit index, 0 = LSB
+                        size_t srcByteFromEnd = srcBit / CHAR_BIT;
+                        uint8_t bit = 0;
+
+                        if (srcByteFromEnd < readSize) {
+                            bit = (tmp[readSize - 1 - srcByteFromEnd] >> (srcBit % CHAR_BIT)) & 0x01;
+                        }
+
+                        size_t dst = totalBits + k;
+                        bitBuff[dst / CHAR_BIT] |= (uint8_t) (bit << ((CHAR_BIT - 1) - (dst % CHAR_BIT)));
+                    }
+
+                    totalBits += nBits;
                     free(tmp);
+
+                    // continue the run only if the next context is also a bit_context
+                    if (context.current && context.current->data &&
+                        ((Id3v2ContentContext *) context.current->data)->type == bit_context) {
+                        cc = listIteratorNext(&context);
+                    } else {
+                        break;
+                    }
+                }
+
+                if (bitBuff != NULL) {
+                    byteStreamResize(stream, stream->bufferSize + bitBuffSize);
+                    byteStreamWrite(stream, bitBuff, bitBuffSize);
+                    contentSize += bitBuffSize;
+                    free(bitBuff);
                 }
 
                 break;
             }
 
+            /**
+             * The field is adjustmentBits bits wide and stored in ceil(adjustmentBits / 8) bytes, padded
+             * at the most significant end. The entry is right-aligned into that width: a short entry is
+             * zero padded in front and a long one keeps its least significant bytes, so the written size
+             * always matches what the "adjustment" field declares. A width of 0 writes nothing.
+             */
             case adjustment_context: {
-                ListIter contentContextIter = listCreateIterator(frame->contexts);
-                ListIter contentEntryIter = listCreateIterator(frame->entries);
-                size_t poscc = 0;
-                size_t posce = 0;
-                uint32_t rSize = 0;
-                void *iterNext = NULL;
+                const size_t fieldSize = (adjustmentBits / CHAR_BIT) + ((adjustmentBits % CHAR_BIT) ? 1 : 0);
+                Id3v2ContentEntry *ce = (Id3v2ContentEntry *) listIteratorNext(&trav);
 
-
-                // hunt down "adjustment" key
-                while ((iterNext = listIteratorNext(&contentContextIter)) != NULL) {
-                    if (((Id3v2ContentContext *) iterNext)->type == iter_context) {
-                        poscc--;
-                    }
-
-                    if (((Id3v2ContentContext *) iterNext)->key == id3v2djb2("adjustment")) {
-                        break;
-                    }
-
-                    poscc++;
-                }
-
-                // hunt down adjustment value
-                while ((iterNext = listIteratorNext(&contentEntryIter)) != NULL) {
-                    if (poscc == posce) {
-                        rSize = btou32((uint8_t *) ((Id3v2ContentEntry *) iterNext)->entry,
-                                       (int) ((Id3v2ContentEntry *) iterNext)->size);
-                        break;
-                    }
-
-                    posce++;
-                }
-
-                tmp = id3v2ReadFrameEntry(&trav, &readSize);
-
-                if (tmp == NULL) {
+                if (ce == NULL) {
                     exit = true;
                     break;
                 }
 
-                byteStreamResize(stream, stream->bufferSize + rSize);
-                byteStreamWrite(stream, tmp, rSize);
+                if (fieldSize == 0) {
+                    break;
+                }
 
-                contentSize += rSize;
-                free(tmp);
+                uint8_t *field = calloc(fieldSize, 1);
+                if (field == NULL) {
+                    byteStreamDestroy(stream);
+                    *outl = 0;
+                    return NULL;
+                }
+
+                const size_t copySize = (ce->size < fieldSize) ? ce->size : fieldSize;
+                if (copySize > 0 && ce->entry != NULL) {
+                    memcpy(field + (fieldSize - copySize), (uint8_t *) ce->entry + (ce->size - copySize), copySize);
+                }
+
+                byteStreamResize(stream, stream->bufferSize + fieldSize);
+                byteStreamWrite(stream, field, fieldSize);
+
+                contentSize += fieldSize;
+                free(field);
                 break;
             }
             case unknown_context:
@@ -1788,6 +1757,20 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
 
             break;
         case ID3V2_TAG_VERSION_4:
+            // v2.4 unsynchronises per frame and the frame size counts the stored bytes
+            if (frame->header->unsynchronisation && stream->bufferSize > headerSize) {
+                size_t unsyncl = 0;
+                uint8_t *unsync = id3v2ApplyUnsynchronisation(stream->buffer + headerSize,
+                                                              stream->bufferSize - headerSize, &unsyncl);
+
+                if (unsync != NULL) {
+                    byteStreamResize(stream, headerSize + unsyncl);
+                    memcpy(stream->buffer + headerSize, unsync, unsyncl);
+                    contentSize = unsyncl;
+                    free(unsync);
+                }
+            }
+
             tmp = u32tob(byteSyncintEncode(contentSize));
             byteStreamSeek(stream, ID3V2_FRAME_ID_MAX_SIZE, SEEK_SET);
             byteStreamWrite(stream, tmp, ID3V2_FRAME_ID_MAX_SIZE);
@@ -2032,10 +2015,14 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version) {
             }
             break;
 
+            /**
+             * An entry of 8 or more bytes is read as a double and one of 4 or more as a float, in the host's byte
+             * order. A shorter entry is copied into a zeroed float so nothing past the entry is read.
+             */
             case precision_context: {
                 size_t readSize = 0;
                 size_t contentMemCount = 0;
-                float value = 0;
+                double value = 0;
 
                 tmp = id3v2ReadFrameEntry(&trav, &readSize);
 
@@ -2044,14 +2031,23 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version) {
                     break;
                 }
 
+                if (readSize >= sizeof(double)) {
+                    double d = 0;
+                    memcpy(&d, tmp, sizeof(d));
+                    value = d;
+                } else {
+                    float f = 0;
+                    memcpy(&f, tmp, (readSize < sizeof(f)) ? readSize : sizeof(f));
+                    value = f;
+                }
 
-                memcpy(&value, tmp, sizeof(value));
                 free(tmp);
 
+                // + 1 for the NUL, snprintf's size includes it
                 contentMemCount = snprintf(NULL, 0,
                                            "{\"value\":\"%f\",\"size\":%zu}",
                                            value,
-                                           readSize);
+                                           readSize) + 1;
 
                 contentJsonSize++;
                 if (contentJson == NULL) {
@@ -2125,58 +2121,31 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version) {
             break;
 
             // base 64 again but concatenated
+            // the entry already holds exactly the bytes that were parsed or written, an empty entry is valid
             case adjustment_context: {
-                ListIter contentContextIter = listCreateIterator(frame->contexts);
-                ListIter contentEntryIter = listCreateIterator(frame->entries);
-                size_t poscc = 0;
-                size_t posce = 0;
                 size_t readSize = 0;
                 size_t contentMemCount = 0;
-                void *iterNext = NULL;
                 char *b64 = NULL;
+                Id3v2ContentEntry *ce = (Id3v2ContentEntry *) listIteratorNext(&trav);
 
-
-                // hunt down "adjustment" key
-                while ((iterNext = listIteratorNext(&contentContextIter)) != NULL) {
-                    if (((Id3v2ContentContext *) iterNext)->type == iter_context) {
-                        poscc--;
-                    }
-
-                    if (((Id3v2ContentContext *) iterNext)->key == id3v2djb2("adjustment")) {
-                        break;
-                    }
-
-                    poscc++;
+                if (ce == NULL) {
+                    exit = true;
+                    break;
                 }
 
-                // hunt down adjustment value
-                while ((iterNext = listIteratorNext(&contentEntryIter)) != NULL) {
-                    if (poscc == posce) {
-                        readSize = btou32((uint8_t *) ((Id3v2ContentEntry *) iterNext)->entry,
-                                          (int) ((Id3v2ContentEntry *) iterNext)->size);
-                        break;
-                    }
+                readSize = ce->size;
+                b64 = internal_base64Encode((const unsigned char *) ce->entry, readSize);
 
-                    posce++;
-                }
-
-
-                tmp = id3v2ReadFrameEntry(&trav, &readSize);
-
-                if (tmp == NULL || readSize == 0) {
+                if (b64 == NULL) {
                     exit = true;
                     break;
                 }
 
 
-                b64 = internal_base64Encode(tmp, readSize);
-                free(tmp);
-
-
                 contentMemCount = snprintf(NULL, 0,
                                            "{\"value\":\"%s\",\"size\":%zu}",
                                            b64,
-                                           strlen(b64));
+                                           readSize) + 1;
 
                 contentJsonSize++;
                 if (contentJson == NULL) {
@@ -2271,4 +2240,111 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version) {
     }
 
     return json;
+}
+
+/**
+ * @brief Applies ID3v2 unsynchronisation to a buffer.
+ * @details A $00 is inserted after every $FF that is followed by $00 or by a byte >= $E0 (a false MPEG sync
+ * or something that could be mistaken for one), and after a $FF in the last position. Used on the whole tag
+ * body for ID3v2.2/2.3 and on each frame's content for ID3v2.4. Runs in two linear passes, one to size the
+ * output and one to write it, using memchr to jump between $FF bytes.
+ * @param in - Data to unsynchronise.
+ * @param inl - Number of bytes in in.
+ * @param outl - Receives the size of the returned buffer, or 0 on failure.
+ * @return uint8_t* - Heap allocated unsynchronised copy of in, or NULL if in is NULL, inl is 0 or allocation fails.
+ * Caller must free.
+ */
+uint8_t *id3v2ApplyUnsynchronisation(const uint8_t *in, size_t inl, size_t *outl) {
+    size_t extra = 0;
+    size_t r = 0;
+    size_t w = 0;
+    uint8_t *out = NULL;
+
+    if (outl == NULL) {
+        return NULL;
+    }
+
+    *outl = 0;
+
+    if (in == NULL || inl == 0) {
+        return NULL;
+    }
+
+    // count insertions
+    for (const uint8_t *p = memchr(in, 0xFF, inl); p != NULL;
+         p = memchr(p + 1, 0xFF, inl - (size_t) (p + 1 - in))) {
+        const size_t i = (size_t) (p - in);
+
+        if (i + 1 == inl || in[i + 1] == 0x00 || in[i + 1] >= 0xE0) {
+            extra++;
+        }
+
+        if (i + 1 == inl) {
+            break;
+        }
+    }
+
+    out = malloc(inl + extra);
+
+    if (out == NULL) {
+        return NULL;
+    }
+
+    if (extra == 0) {
+        memcpy(out, in, inl);
+        *outl = inl;
+        return out;
+    }
+
+    while (r < inl) {
+        const uint8_t *ff = memchr(in + r, 0xFF, inl - r);
+        const size_t end = (ff == NULL) ? inl : (size_t) (ff - in) + 1; // copy up to and including the $FF
+
+        memcpy(out + w, in + r, end - r);
+        w += end - r;
+        r = end;
+
+        if (ff != NULL && (r == inl || in[r] == 0x00 || in[r] >= 0xE0)) {
+            out[w++] = 0x00;
+        }
+    }
+
+    *outl = w;
+    return out;
+}
+
+/**
+ * @brief Reverses ID3v2 unsynchronisation in place by replacing every $FF $00 pair with $FF.
+ * @details Single pass with no allocation. memchr jumps between $FF bytes and the clean runs
+ * in between are shifted down with memmove, so data without any $FF costs one scan.
+ * @param buf - Buffer to decode in place.
+ * @param len - Number of bytes in buf.
+ * @return size_t - Number of bytes in buf after decoding (always <= len), 0 if buf is NULL.
+ */
+size_t id3v2RemoveUnsynchronisation(uint8_t *buf, size_t len) {
+    size_t r = 0;
+    size_t w = 0;
+
+    if (buf == NULL) {
+        return 0;
+    }
+
+    while (r < len) {
+        const uint8_t *ff = memchr(buf + r, 0xFF, len - r);
+        const size_t end = (ff == NULL) ? len : (size_t) (ff - buf) + 1; // keep the $FF itself
+
+        if (w != r) {
+            memmove(buf + w, buf + r, end - r);
+        }
+
+        w += end - r;
+        r = end;
+
+        // drop the $00 stuffed after an $FF
+        if (ff != NULL && r < len && buf[r] == 0x00) {
+            r++;
+        }
+    }
+
+    return w;
 }

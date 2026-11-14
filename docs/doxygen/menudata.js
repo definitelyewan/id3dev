@@ -118,6 +118,7 @@ var menudata={children:[
 {text:"v",url:"globals_eval_v.html#index_v"},
 {text:"w",url:"globals_eval_w.html#index_w"}]},
 {text:"Macros",url:"globals_defs.html"}]}]},
+{text:"Python API",url:"../python/index.html"},
 {text:"Standard Documentation",url:"../standard.html"},
 {text:"Repo",url:"^https://github.com/definitelyewan/id3dev"},
 {text:"Official Source",url:"^https://id3.org/"}]}

@@ -1667,9 +1667,11 @@ int id3v2WriteComment(const char *comment, Id3v2Tag *tag) {
 }
 
 // internal function ---------------------------------------------------------------------------------------------------------
+// Creates a UTF-16LE PIC/APIC frame with an empty description, the given picture type and image, and appends it to tag.
+// type is expected to be clamped by the caller (0x00-0x14).
 // NOLINTNEXTLINE
-static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *image, size_t imageSize, const char *kind,
-                                                        Id3v2Tag *tag) {
+static int internal_id3v2CreatePictureFrameUTF16LE(uint8_t v, uint8_t *image, size_t imageSize, const char *kind,
+                                                   uint8_t type, Id3v2Tag *tag) {
     // check for legal args
     // NOLINTNEXTLINE
     if (image == NULL || imageSize == 0 || kind == NULL || tag == NULL) {
@@ -1722,6 +1724,7 @@ static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *imag
             }
 
             if (!id3v2WriteFrameEntry(f, &entries, kindLen, (void *) kind)) {
+                id3v2DestroyFrame(&f);
                 return false;
             }
 
@@ -1739,6 +1742,7 @@ static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *imag
 
             if (!id3v2WriteFrameEntry(f, &entries, strlen(mime), (void *) mime)) {
                 free(mime);
+                id3v2DestroyFrame(&f);
                 return false;
             }
 
@@ -1752,7 +1756,7 @@ static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *imag
     id3v2ReadFrameEntryAsU8(&entries); // mime type skip
 
     // add type
-    if (!id3v2WriteFrameEntry(f, &entries, 1, (void *) "\0")) {
+    if (!id3v2WriteFrameEntry(f, &entries, 1, (void *) &type)) {
         id3v2DestroyFrame(&f);
         return false;
     }
@@ -1773,14 +1777,18 @@ static int internal_id3v2CreatePictureFrameUTF16LEtype0(uint8_t v, uint8_t *imag
     id3v2ReadFrameEntryAsU8(&entries);
 
 
-    listInsertBack(tag->frames, (void *) f);
+    if (!listInsertBack(tag->frames, (void *) f)) {
+        id3v2DestroyFrame(&f);
+        return false;
+    }
+
     return true;
 }
 
 /**
  * @brief Writes a picture to the appropriate attached picture frame in a tag.
  * @details Updates the first picture frame (PIC for ID3v2.2, APIC for ID3v2.3/2.4) that matches the specified picture type.
- * If no matching frame exists, creates a new UTF-16LE frame with type 0. For ID3v2.2, writes up to 3 characters of kind as the image format;
+ * If no matching frame exists, creates a new UTF-16LE frame with the specified picture type and an empty description. For ID3v2.2, writes up to 3 characters of kind as the image format;
  * for ID3v2.3/2.4, prepends "image/" to kind as the MIME type. Validates frame structure (5 contexts/entries with correct types).
  * Picture type values are clamped to the valid range (0x00-0x14).
  * Returns false on validation failures (null parameters, zero imageSize, empty kind string, invalid frame structure, or write errors) without modifying the tag.
@@ -1834,7 +1842,8 @@ int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_
         }
 
         if (f == NULL) {
-            return internal_id3v2CreatePictureFrameUTF16LEtype0(tag->header->majorVersion, image, imageSize, kind, tag);
+            return internal_id3v2CreatePictureFrameUTF16LE(tag->header->majorVersion, image, imageSize, kind, usableType,
+                                                           tag);
         }
 
         // verify frame via context
@@ -1921,7 +1930,7 @@ int id3v2WritePicture(uint8_t *image, size_t imageSize, const char *kind, uint8_
 /**
  * @brief Reads a picture from a file and writes it to the appropriate attached picture frame in a tag.
  * @details Loads binary image data from the specified file and delegates to id3v2WritePicture to update the first picture frame (PIC for ID3v2.2, APIC for ID3v2.3/2.4) matching the specified picture type.
- * If no matching frame exists, creates a new UTF-16LE frame with type 0. For ID3v2.2, writes up to 3 characters of kind as the image format; for ID3v2.3/2.4, prepends "image/" to kind as the MIME type.
+ * If no matching frame exists, creates a new UTF-16LE frame with the specified picture type and an empty description. For ID3v2.2, writes up to 3 characters of kind as the image format; for ID3v2.3/2.4, prepends "image/" to kind as the MIME type.
  * Returns false on validation failures (null parameters, empty strings, file open/read errors, or frame write errors) without modifying the tag. Frees allocated memory on all paths.
  * @param filename - Null-terminated string containing the path to the image file to read (must not be empty).
  * @param kind - Null-terminated string specifying image format (e.g., "jpeg", "png") used as MIME type suffix (must not be empty).
@@ -1975,7 +1984,8 @@ int id3v2WritePictureFromFile(const char *filename, const char *kind, uint8_t ty
  * @details Converts the tag back to raw bytes by serializing all frames, applying unsynchronization if enabled, encoding the header and optional footer,
  * calculating total size (including padding from extended header), and combining all components into a single binary buffer.
  * For ID3v2.4 tags with footer indicator set, generates a footer (10-byte header copy with "3DI" identifier).
- * Unsynchronization doubles buffer size to accommodate potential expansion. Size fields are encoded as synchsafe integers.
+ * Unsynchronisation ($00 inserted after false syncs) is applied to the whole body after the tag header for ID3v2.2/2.3,
+ * and per frame for ID3v2.4, where the tag flag forces it on every frame. Size fields are encoded as synchsafe integers.
  * Returns NULL on validation failures (null tag/header/frames, frame serialization errors, or header serialization errors) and sets outl to 0 without allocating memory.
  * @param tag - Tag structure to serialize.
  * @param outl - Pointer to size_t to receive the output buffer size in bytes.
@@ -2005,13 +2015,30 @@ uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl) {
     uint8_t *out = NULL;
     size_t headerOutl = 0;
 
+    // v2.2/2.3 unsynchronise the whole tag body after the 10 byte header; v2.4 does it per frame
+    // and a set tag flag means every frame must be unsynchronised
+    const bool unsync = id3v2ReadUnsynchronisationIndicator(tag->header) == 1;
+    const bool tagLevelUnsync = unsync && (tag->header->majorVersion == ID3V2_TAG_VERSION_2 ||
+                                           tag->header->majorVersion == ID3V2_TAG_VERSION_3);
+    const bool forceFrameUnsync = unsync && tag->header->majorVersion == ID3V2_TAG_VERSION_4;
+
     // frame stream
     while ((f = id3v2FrameTraverse(&frames)) != NULL) {
         ByteStream *tmp = NULL;
         size_t frameOutl = 0;
         uint8_t *frameOut = NULL;
+        bool frameFlag = false;
+
+        if (forceFrameUnsync && f->header != NULL) {
+            frameFlag = f->header->unsynchronisation;
+            f->header->unsynchronisation = true;
+        }
 
         frameOut = id3v2FrameSerialize(f, tag->header->majorVersion, &frameOutl);
+
+        if (forceFrameUnsync && f->header != NULL) {
+            f->header->unsynchronisation = frameFlag;
+        }
 
         if (frameOut == NULL && frameOutl == 0) {
             break;
@@ -2042,26 +2069,22 @@ uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl) {
 
     byteStreamRewind(frameStream);
 
-    // unsync?
-    if (id3v2ReadUnsynchronisationIndicator(tag->header)) {
-        ByteStream *tmp = NULL;
+    if (tagLevelUnsync) {
+        size_t unsyncl = 0;
+        uint8_t *unsyncOut = id3v2ApplyUnsynchronisation(frameStream->buffer, frameStream->bufferSize, &unsyncl);
 
-        tmp = byteStreamCreate(NULL, frameStream->bufferSize * 2);
-
-        for (size_t i = 0; i < frameStream->bufferSize; i++) {
-            byteStreamWrite(tmp, byteStreamCursor(frameStream), 1);
-
-            byteStreamSeek(tmp, 1, SEEK_CUR);
-            byteStreamSeek(frameStream, 1, SEEK_CUR);
+        if (unsyncOut == NULL) {
+            byteStreamDestroy(frameStream);
+            *outl = 0;
+            return NULL;
         }
 
         byteStreamDestroy(frameStream);
-        frameStream = tmp;
-        fsize = frameStream->bufferSize;
-        byteStreamRewind(frameStream);
-    } else {
-        fsize = frameStream->bufferSize;
+        frameStream = byteStreamCreate(unsyncOut, unsyncl);
+        free(unsyncOut);
     }
+
+    fsize = frameStream->bufferSize;
 
     // header stream
     headerOut = id3v2TagHeaderSerialize(tag->header, 0, &headerOutl);
@@ -2075,33 +2098,25 @@ uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl) {
     headerStream = byteStreamCreate(headerOut, headerOutl);
     free(headerOut);
 
-    // unsync?
-    if (id3v2ReadUnsynchronisationIndicator(tag->header) && headerStream->bufferSize > 10) {
-        ByteStream *tmp = NULL;
-        uint32_t size = 0;
+    // the v2.3 extended header is part of the unsynchronised body, the 10 byte tag header never is
+    if (tagLevelUnsync && headerStream->bufferSize > 10) {
+        size_t unsyncl = 0;
+        uint8_t *unsyncOut = id3v2ApplyUnsynchronisation(headerStream->buffer + 10,
+                                                         headerStream->bufferSize - 10, &unsyncl);
 
-        // ext size
-        size = (headerStream->bufferSize - 10) * 2;
-
-        tmp = byteStreamCreate(NULL, 10 + size);
-
-        // write header back
-        byteStreamWrite(tmp, byteStreamCursor(headerStream), 10);
-        byteStreamSeek(headerStream, 10, SEEK_SET);
-
-        for (uint32_t i = 0; i < size; i++) {
-            byteStreamWrite(tmp, byteStreamCursor(headerStream), 1);
-
-            byteStreamSeek(tmp, 1, SEEK_CUR);
-            byteStreamSeek(headerStream, 1, SEEK_CUR);
+        if (unsyncOut == NULL) {
+            byteStreamDestroy(headerStream);
+            byteStreamDestroy(frameStream);
+            *outl = 0;
+            return NULL;
         }
 
-        byteStreamDestroy(headerStream);
-        headerStream = tmp;
-        fsize += size;
-    } else {
-        fsize += ((headerStream->bufferSize > 10) ? headerStream->bufferSize - 10 : 0);
+        byteStreamResize(headerStream, 10 + unsyncl);
+        memcpy(headerStream->buffer + 10, unsyncOut, unsyncl);
+        free(unsyncOut);
     }
+
+    fsize += ((headerStream->bufferSize > 10) ? headerStream->bufferSize - 10 : 0);
 
     byteStreamRewind(headerStream);
 
@@ -2303,192 +2318,139 @@ char *id3v2TagToJSON(Id3v2Tag *tag) {
 }
 
 /**
- * @brief Writes an ID3v2 tag to a file, creating, prepending, or replacing as needed.
- * @details Serializes the tag and handles three scenarios: (1) If file doesn't exist, creates it and writes the tag; 
- * (2) If file exists without a tag or with the update flag set in the extended header, prepends the new tag to the file; 
- * (3) If file exists with a tag and no update flag, replaces the old tag by reading existing tag size, writing new tag at file start, 
- * and appending remaining file data. Accounts for footer (10 bytes for ID3v2.4) and padding from extended header when calculating offsets.
- * Returns false on validation failures (null parameters, serialization errors, file open/read/write errors, or memory allocation failures) without modifying the file.
- * Frees all allocated memory on both success and failure paths.
+ * @brief Writes an ID3v2 tag to the start of a file, creating, prepending, or replacing as needed.
+ * @details Serializes the tag, then:
+ * (1) if the file doesn't exist, creates it holding only the tag;
+ * (2) if the file doesn't start with an ID3v2 tag, or the new tag's extended header has the update flag set,
+ * puts the new tag in front of the existing contents;
+ * (3) if the file starts with an ID3v2 tag, replaces that tag. The old tag's length comes from its own header:
+ * 10 bytes, plus its syncsafe size, plus a 10 byte footer when an ID3v2.4 header says it has one.
+ * Only a tag at offset 0 is replaced; "ID3" bytes anywhere else are audio and are kept. Every byte after the old
+ * tag is kept and the file is rewritten to its new length, so a smaller tag leaves no stale bytes at the end.
+ * The existing file is read into memory and rewritten in full. If the existing tag's header can't be trusted (size
+ * bytes that aren't syncsafe, or a size past the end of the file), returns false and leaves the file untouched.
+ * If a write fails part way, the original contents are written back. The rewrite is not atomic: a crash or power
+ * loss during it can leave the file incomplete, so callers needing that guarantee should write a copy and rename it
+ * over the original.
  * @param filePath - Null-terminated string containing the path to the file to write.
  * @param tag - Tag structure to write to the file.
  * @return int - 1 (true) if tag written successfully, 0 (false) on failure.
  */
 int id3v2WriteTagToFile(const char *filePath, Id3v2Tag *tag) {
-    if (filePath == NULL || tag == NULL) {
-        return false;
-    }
-
+    const size_t headerSize = 10; // "ID3", version (2), flags (1), syncsafe size (4)
     FILE *fp = NULL;
     uint8_t *out = NULL;
     size_t outl = 0;
-    ByteStream *stream = NULL;
+    uint8_t *old = NULL;
+    long oldl = 0;
+    size_t keepFrom = 0; // offset of the first byte of the old file to keep
+    bool update = false;
+    int ok = false;
 
-    out = id3v2TagSerialize(tag, &outl);
-
-    if (out == NULL && outl == 0) {
+    if (filePath == NULL || tag == NULL || tag->header == NULL) {
         return false;
     }
 
-    stream = byteStreamCreate(out, outl);
-    free(out);
+    out = id3v2TagSerialize(tag, &outl);
 
-    fp = fopen(filePath, "r+b");
+    if (out == NULL || outl == 0) {
+        free(out);
+        return false;
+    }
 
-    // write to a new file
+    fp = fopen(filePath, "rb");
+
+    // 1. no file: create one holding only the tag
     if (fp == NULL) {
-        // create a new file and write the bytes to it
         fp = fopen(filePath, "wb");
 
         if (fp == NULL) {
-            byteStreamDestroy(stream);
+            free(out);
             return false;
         }
 
-        if ((fwrite(byteStreamCursor(stream), 1, stream->bufferSize, fp)) == 0) {
-            byteStreamDestroy(stream);
-            (void) fclose(fp);
-            return false;
-        }
+        ok = fwrite(out, 1, outl, fp) == outl;
+        ok = (fclose(fp) == 0) && ok;
+        free(out);
+        return ok;
+    }
 
-        // update file
-    } else {
-        char id[ID3V2_TAG_ID_SIZE] = {0};
-        bool hasTag = false;
-        long fileSize = 0;
-        bool prepend = 0;
-        uint8_t *tmp = NULL;
-        uint8_t *upperTmp = NULL;
-        size_t upperBytes = 0;
-        uint32_t oldTagSize = 0;
+    // read the whole existing file
+    if (fseek(fp, 0, SEEK_END) != 0 || (oldl = ftell(fp)) < 0 || fseek(fp, 0, SEEK_SET) != 0) {
+        (void) fclose(fp);
+        free(out);
+        return false;
+    }
 
-        // does the tag exist?
-        while (hasTag == false && feof(fp) == 0) {
-            const size_t bytesRead = fread(id, sizeof(char), ID3V2_TAG_ID_SIZE, fp);
-            upperBytes += bytesRead;
-            if (bytesRead != ID3V2_TAG_ID_SIZE) {
-                if (ferror(fp)) {
-                    break;
-                }
-                break;
-            }
+    old = malloc((oldl > 0) ? (size_t) oldl : 1);
 
-            hasTag = (memcmp(id, "ID3", ID3V2_TAG_ID_SIZE) == 0);
-        }
-
-        // 1. update flag is set
-        if (hasTag == true && tag->header->extendedHeader != NULL) {
-            prepend = false;
-
-            if (tag->header->extendedHeader->update == true) {
-                prepend = true;
-            }
-
-            // 2. a tag exists
-        } else if (hasTag == true) {
-            prepend = false;
-
-            // get the tag size
-            (void) fseek(fp, 3, SEEK_CUR); // skips version and flag
-            tmp = malloc(4);
-            (void) fread(tmp, 1, 4, fp);
-            oldTagSize = byteSyncintDecode(btou32(tmp, 4));
-            free(tmp);
-
-            // 3. no tag exists
-        } else {
-            prepend = true;
-        }
-
-        // correct for ID3 tag
-        upperBytes = (upperBytes > ID3V2_TAG_ID_SIZE) ? upperBytes - ID3V2_TAG_ID_SIZE : 0;
-
-        // get file size
-        (void) fseek(fp, 0, SEEK_END);
-        fileSize = ftell(fp);
-        (void) fseek(fp, 0, SEEK_SET);
-
-        // read the file
-        tmp = malloc(fileSize);
-        if (fread(tmp, 1, fileSize, fp) != fileSize) {
-            free(tmp);
-            (void) fclose(fp);
-            byteStreamDestroy(stream);
-            return 0;
-        }
-
-        (void) fseek(fp, 0, SEEK_SET);
-
-        if (prepend) {
-            // write the stream to a file
-            if (fwrite(byteStreamCursor(stream), 1, stream->bufferSize, fp) != stream->bufferSize) {
-                free(tmp);
-                (void) fclose(fp);
-                byteStreamDestroy(stream);
-                return 0;
-            }
-
-            // write the existing file data back to the file
-            if (fwrite(tmp, 1, fileSize, fp) != fileSize) {
-                free(tmp);
-                (void) fclose(fp);
-                byteStreamDestroy(stream);
-                return 0;
-            }
-
-            free(tmp);
-        } else {
-            uint32_t offset = 10;
-
-            if (id3v2ReadFooterIndicator(tag->header) && tag->header->majorVersion == ID3V2_TAG_VERSION_4) {
-                offset += 10;
-            }
-
-            if (tag->header->extendedHeader != NULL) {
-                if (tag->header->extendedHeader->padding > 0) {
-                    offset += tag->header->extendedHeader->padding;
-                }
-            }
-
-            // prepend data above the tag
-            if (upperBytes > 0) {
-                upperTmp = calloc(sizeof(uint8_t), upperBytes);
-
-                if (fread(upperTmp, sizeof(char), upperBytes, fp) != upperBytes) {
-                    free(upperTmp);
-                    free(tmp);
-                    (void) fclose(fp);
-                    byteStreamDestroy(stream);
-                    return false;
-                }
-                free(upperTmp);
-
-                (void) fseek(fp, 0, SEEK_SET);
-            }
-
-            // write the stream to a file
-            if (fwrite(byteStreamCursor(stream), 1, stream->bufferSize, fp) != stream->bufferSize) {
-                free(tmp);
-                (void) fclose(fp);
-                byteStreamDestroy(stream);
-                return 0;
-            }
-
-            // no need to read the old tag
-            fileSize = fileSize - ((long) (oldTagSize + offset)) - (long) upperBytes;
-
-            if (fwrite(tmp + upperBytes + oldTagSize + offset, 1, fileSize, fp)) {
-                free(tmp);
-                (void) fclose(fp);
-                byteStreamDestroy(stream);
-                return 0;
-            }
-
-            free(tmp);
-        }
+    if (old == NULL || fread(old, 1, (size_t) oldl, fp) != (size_t) oldl) {
+        (void) fclose(fp);
+        free(old);
+        free(out);
+        return false;
     }
 
     (void) fclose(fp);
-    byteStreamDestroy(stream);
-    return true;
+
+    update = tag->header->extendedHeader != NULL && tag->header->extendedHeader->update;
+
+    // 3. a tag starts the file: skip past it, using the old tag's own header
+    if (!update && (size_t) oldl >= ID3V2_TAG_ID_SIZE && memcmp(old, "ID3", ID3V2_TAG_ID_SIZE) == 0) {
+        size_t tagEnd = 0;
+
+        if ((size_t) oldl < headerSize || ((old[6] | old[7] | old[8] | old[9]) & 0x80) != 0) {
+            free(old);
+            free(out);
+            return false;
+        }
+
+        tagEnd = headerSize + (((size_t) old[6] << 21) | ((size_t) old[7] << 14) | ((size_t) old[8] << 7) |
+                               (size_t) old[9]);
+
+        // ID3v2.4 footer flag (bit 4 of the flags byte)
+        if (old[3] == ID3V2_TAG_VERSION_4 && (old[5] & 0x10) != 0) {
+            tagEnd += headerSize;
+        }
+
+        if (tagEnd > (size_t) oldl) {
+            free(old);
+            free(out);
+            return false;
+        }
+
+        keepFrom = tagEnd;
+    }
+    // 2. otherwise keepFrom stays 0 and the tag goes in front of everything
+
+    // rewrite the file: new tag, then everything after the old tag
+    fp = fopen(filePath, "wb");
+
+    if (fp == NULL) {
+        free(old);
+        free(out);
+        return false;
+    }
+
+    ok = fwrite(out, 1, outl, fp) == outl;
+
+    if (ok) {
+        ok = fwrite(old + keepFrom, 1, (size_t) oldl - keepFrom, fp) == (size_t) oldl - keepFrom;
+    }
+
+    ok = (fclose(fp) == 0) && ok;
+
+    // a failed write left the file incomplete: put the original back
+    if (!ok) {
+        fp = fopen(filePath, "wb");
+
+        if (fp != NULL) {
+            (void) fwrite(old, 1, (size_t) oldl, fp);
+            (void) fclose(fp);
+        }
+    }
+
+    free(old);
+    free(out);
+    return ok;
 }

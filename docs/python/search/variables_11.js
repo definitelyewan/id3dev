@@ -1,0 +1,23 @@
+var searchData=
+[
+  ['salsa_0',['SALSA',['../classid3dev_1_1__genre_1_1_genre.html#aefa8b9dbeb105067feee838570cf3188',1,'id3dev::_genre::Genre']]],
+  ['samba_1',['SAMBA',['../classid3dev_1_1__genre_1_1_genre.html#a128d67d57ac33c796a6a4dc84ed997f8',1,'id3dev::_genre::Genre']]],
+  ['satire_2',['SATIRE',['../classid3dev_1_1__genre_1_1_genre.html#a5cb8321c592b90c4dd47a37db94870b5',1,'id3dev::_genre::Genre']]],
+  ['shoegaze_3',['SHOEGAZE',['../classid3dev_1_1__genre_1_1_genre.html#a886ef47017b517f1f14d01de230e4e0b',1,'id3dev::_genre::Genre']]],
+  ['showtunes_4',['SHOWTUNES',['../classid3dev_1_1__genre_1_1_genre.html#a9a1a8c46a4bfc8cf58ca1df96f6b4522',1,'id3dev::_genre::Genre']]],
+  ['ska_5',['SKA',['../classid3dev_1_1__genre_1_1_genre.html#a97a16722f2e577a675952c2e812a16b0',1,'id3dev::_genre::Genre']]],
+  ['slow_5fjam_6',['SLOW_JAM',['../classid3dev_1_1__genre_1_1_genre.html#abd820486f210ff292c010e71fd7b6e90',1,'id3dev::_genre::Genre']]],
+  ['slow_5frock_7',['SLOW_ROCK',['../classid3dev_1_1__genre_1_1_genre.html#a51593c7c9da6dae0d97ba2f72a325ea2',1,'id3dev::_genre::Genre']]],
+  ['sonata_8',['SONATA',['../classid3dev_1_1__genre_1_1_genre.html#a4232b48706101e650abce9e720b09cc0',1,'id3dev::_genre::Genre']]],
+  ['soul_9',['SOUL',['../classid3dev_1_1__genre_1_1_genre.html#af9419eb1fa9e18d5b3941c7109de2c7b',1,'id3dev::_genre::Genre']]],
+  ['sound_5fclip_10',['SOUND_CLIP',['../classid3dev_1_1__genre_1_1_genre.html#a72ea0890d1213212b433ed37d9aa4cd5',1,'id3dev::_genre::Genre']]],
+  ['soundtrack_11',['SOUNDTRACK',['../classid3dev_1_1__genre_1_1_genre.html#afac54891574ba97fab2bb4f977d63ebf',1,'id3dev::_genre::Genre']]],
+  ['southern_5frock_12',['SOUTHERN_ROCK',['../classid3dev_1_1__genre_1_1_genre.html#a44d3b8f5aca3ad55c50a1a8b48130805',1,'id3dev::_genre::Genre']]],
+  ['space_13',['SPACE',['../classid3dev_1_1__genre_1_1_genre.html#aeb6b95c5b1df77df2417406026b7bf65',1,'id3dev::_genre::Genre']]],
+  ['space_5frock_14',['SPACE_ROCK',['../classid3dev_1_1__genre_1_1_genre.html#acf0977ae605d26f3f63e9dec4629d80a',1,'id3dev::_genre::Genre']]],
+  ['speech_15',['SPEECH',['../classid3dev_1_1__genre_1_1_genre.html#a146ac4eb173eb509d69741bb2509f127',1,'id3dev::_genre::Genre']]],
+  ['swing_16',['SWING',['../classid3dev_1_1__genre_1_1_genre.html#aa93ebb03896798a3a10cc9aab95a4112',1,'id3dev::_genre::Genre']]],
+  ['symphonic_5frock_17',['SYMPHONIC_ROCK',['../classid3dev_1_1__genre_1_1_genre.html#a916eb11137059ad64f7143b5a602b024',1,'id3dev::_genre::Genre']]],
+  ['symphony_18',['SYMPHONY',['../classid3dev_1_1__genre_1_1_genre.html#abff4dcb07fd369ae0a55e31f041be20c',1,'id3dev::_genre::Genre']]],
+  ['synthpop_19',['SYNTHPOP',['../classid3dev_1_1__genre_1_1_genre.html#a8f3eec9c2c8afda8786a92a22eca235b',1,'id3dev::_genre::Genre']]]
+];

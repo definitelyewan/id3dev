@@ -15,3 +15,8 @@ scripts/common/__pycache__
 cmake-build-*
 Debug*
 .idea
+
+# python library
+interfaces/python/id3dev/dist
+interfaces/python/id3dev/src/__pycache__
+interfaces/python/id3dev/src/id3dev/__pycache__

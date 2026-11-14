@@ -247,7 +247,7 @@ static void id3v2WriteFrameEntry_greatestHits(void **state) {
             char *tmp = NULL;
 
             while ((tmp = id3v2ReadFrameEntryAsChar(&entries, &s)) != NULL) {
-                if (memcmp("IS_GREATEST_HITS", tmp, s) == 0) {
+                if (s >= 16 && memcmp("IS_GREATEST_HITS", tmp, 16) == 0) {
                     uint8_t zero = 0;
                     id3v2WriteFrameEntry(f, &entries, 1, (void *) &zero);
 
@@ -300,6 +300,88 @@ static void id3v2WriteFrameEntry_updateTitle(void **state) {
 
     id3v2DestroyTag(&tag);
     byteStreamDestroy(stream);
+}
+
+// entry shorter than the context's min: copied then zero padded, never read past entrySize
+static void id3v2WriteFrameEntry_padToMin(void **state) {
+    (void) state;
+    HashTable *pairs = hashTableCreate(4, id3v2DeleteContentContextList, id3v2PrintContentContextList,
+                                       id3v2CopyContentContextList);
+    List *context = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                               id3v2CopyContentContext);
+    assert_true(listInsertBack(context, id3v2CreateContentContext(binary_context, id3v2djb2("data"), 32, 16)));
+    assert_int_equal(hashTableInsert(pairs, "XMIN", context), 0);
+
+    Id3v2Frame *f = id3v2CreateEmptyFrame("XMIN", ID3V2_TAG_VERSION_3, pairs);
+    assert_non_null(f);
+
+    // heap allocated and exactly 1 byte so ASan reports any over read
+    uint8_t *one = malloc(1);
+    assert_non_null(one);
+    one[0] = 0xAB;
+
+    ListIter entries = id3v2CreateFrameEntryTraverser(f);
+    assert_true(id3v2WriteFrameEntry(f, &entries, 1, one));
+    free(one);
+
+    size_t s = 0;
+    uint8_t expected[16] = {0xAB};
+    uint8_t *data = id3v2ReadFrameEntry(&entries, &s);
+    assert_non_null(data);
+    assert_int_equal(s, 16);
+    assert_memory_equal(data, expected, 16);
+    free(data);
+
+    // longer than max is still cut to max
+    uint8_t big[40];
+    memset(big, 0x11, sizeof(big));
+    entries = id3v2CreateFrameEntryTraverser(f);
+    assert_true(id3v2WriteFrameEntry(f, &entries, sizeof(big), big));
+    data = id3v2ReadFrameEntry(&entries, &s);
+    assert_non_null(data);
+    assert_int_equal(s, 32);
+    assert_memory_equal(data, big, 32);
+    free(data);
+
+    id3v2DestroyFrame(&f);
+    listFree(context);
+    hashTableFree(pairs);
+}
+
+// AsU16 and AsU32 both read big-endian, as ID3v2 stores numbers; 1 byte entries zero extend
+static void id3v2ReadFrameEntryAsU16U32_bigEndian(void **state) {
+    (void) state;
+    HashTable *pairs = hashTableCreate(4, id3v2DeleteContentContextList, id3v2PrintContentContextList,
+                                       id3v2CopyContentContextList);
+    List *context = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                               id3v2CopyContentContext);
+    assert_true(listInsertBack(context, id3v2CreateContentContext(numeric_context, id3v2djb2("a"), 2, 2)));
+    assert_true(listInsertBack(context, id3v2CreateContentContext(numeric_context, id3v2djb2("b"), 4, 4)));
+    assert_true(listInsertBack(context, id3v2CreateContentContext(numeric_context, id3v2djb2("c"), 1, 1)));
+    assert_int_equal(hashTableInsert(pairs, "XNUM", context), 0);
+
+    Id3v2Frame *f = id3v2CreateEmptyFrame("XNUM", ID3V2_TAG_VERSION_3, pairs);
+    assert_non_null(f);
+
+    uint8_t u16[2] = {0x01, 0x02};
+    uint8_t u32[4] = {0x01, 0x02, 0x03, 0x04};
+    uint8_t one = 0xAB;
+
+    ListIter entries = id3v2CreateFrameEntryTraverser(f);
+    assert_true(id3v2WriteFrameEntry(f, &entries, sizeof(u16), u16));
+    id3v2ReadFrameEntryAsU8(&entries);
+    assert_true(id3v2WriteFrameEntry(f, &entries, sizeof(u32), u32));
+    id3v2ReadFrameEntryAsU8(&entries);
+    assert_true(id3v2WriteFrameEntry(f, &entries, 1, &one));
+
+    entries = id3v2CreateFrameEntryTraverser(f);
+    assert_int_equal(id3v2ReadFrameEntryAsU16(&entries), 0x0102);
+    assert_int_equal(id3v2ReadFrameEntryAsU32(&entries), 0x01020304);
+    assert_int_equal(id3v2ReadFrameEntryAsU16(&entries), 0x00AB);
+
+    id3v2DestroyFrame(&f);
+    listFree(context);
+    hashTableFree(pairs);
 }
 
 static void id3v2AttachFrameFromTag_TSOA(void **state) {
@@ -731,10 +813,10 @@ static void id3v2FrameSerialize_v2EQU(void **state) {
     // EQU
     uint8_t equ[15] = {
         'E', 'Q', 'U', 0x00, 0x00, 0x09,
-        2U,
-        0x03, 0xe9, // 000000111110100 1  inc/dec
+        0x10, // 16 adjustment bits -> 2 byte volumes
+        0x03, 0xe9, // 0 000001111101001  inc/dec (MSB) + frequency
         0x40, 0x00,
-        0x00, 0x28, // 000000000010100 0  inc/dec
+        0x80, 0x28, // 1 000000000101000  inc/dec (MSB) + frequency
         0xfc, 0x00
     };
 
@@ -758,25 +840,348 @@ static void id3v2FrameSerialize_v2EQU(void **state) {
     assert_memory_equal(byteStreamCursor(rep), "\x00\x00\x09", 3);
     byteStreamSeek(rep, 3, SEEK_CUR);
 
-    assert_memory_equal(byteStreamCursor(rep), "\x02", 1);
+    assert_memory_equal(byteStreamCursor(rep), "\x10", 1);
     byteStreamSeek(rep, 1, SEEK_CUR);
 
-    assert_memory_equal(byteStreamCursor(rep), "\x01\xd3", 2);
+    assert_memory_equal(byteStreamCursor(rep), "\x03\xe9", 2);
     byteStreamSeek(rep, 2, SEEK_CUR);
 
     assert_memory_equal(byteStreamCursor(rep), "\x40\x00", 2);
     byteStreamSeek(rep, 2, SEEK_CUR);
 
-    assert_memory_equal(byteStreamCursor(rep), "\x00\x50", 2);
+    assert_memory_equal(byteStreamCursor(rep), "\x80\x28", 2);
     byteStreamSeek(rep, 2, SEEK_CUR);
 
     assert_memory_equal(byteStreamCursor(rep), "\xfc\x00", 2);
     byteStreamSeek(rep, 2, SEEK_CUR);
 
+    // full round trip
+    assert_int_equal(outl, 15);
+    assert_memory_equal(out, equ, 15);
+
     free(out);
     listFree(context);
     byteStreamDestroy(stream);
     byteStreamDestroy(rep);
+    id3v2DestroyFrame(&f);
+}
+
+/**
+ * Parses a frame then serializes it and checks the output is byte for byte identical.
+ */
+static void internal_assertRoundTrip(const uint8_t *in, size_t inl, List *context, uint8_t version) {
+    Id3v2Frame *f = NULL;
+    size_t outl = 0;
+
+    assert_int_equal(id3v2ParseFrame((uint8_t *) in, inl, context, version, &f), inl);
+    assert_non_null(f);
+
+    uint8_t *out = id3v2FrameSerialize(f, version, &outl);
+
+    assert_non_null(out);
+    assert_int_equal(outl, inl);
+    assert_memory_equal(out, in, inl);
+
+    free(out);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2FrameSerialize_v2RVA(void **state) {
+    (void) state;
+    const uint8_t rva[12] = {
+        'R', 'V', 'A', 0x00, 0x00, 0x06,
+        0x01, 0x08, 0x10, 0x20, 0x7f, 0x7e
+    };
+    List *context = id3v2CreateRelativeVolumeAdjustmentFrameContext(ID3V2_TAG_VERSION_2);
+
+    internal_assertRoundTrip(rva, sizeof(rva), context, ID3V2_TAG_VERSION_2);
+    listFree(context);
+}
+
+static void id3v2FrameSerialize_v3RVAD(void **state) {
+    (void) state;
+    const uint8_t all[36] = {
+        'R', 'V', 'A', 'D', 0x00, 0x00, 0x00, 0x1a, 0x00, 0x00,
+        0x3f, 0x10,
+        0x01, 0x00, 0x02, 0x00, 0x7f, 0xff, 0x7f, 0xfe,
+        0x00, 0x10, 0x00, 0x20, 0x10, 0x00, 0x20, 0x00,
+        0x00, 0x30, 0x30, 0x00,
+        0x00, 0x40, 0x40, 0x00
+    };
+    const uint8_t frontOnly[16] = {
+        'R', 'V', 'A', 'D', 0x00, 0x00, 0x00, 0x06, 0x00, 0x00,
+        0x03, 0x10, 0x01, 0x00, 0x02, 0x00
+    };
+    // 12 bits per volume description is still 2 whole bytes
+    const uint8_t twelveBits[20] = {
+        'R', 'V', 'A', 'D', 0x00, 0x00, 0x00, 0x0a, 0x00, 0x00,
+        0x00, 0x0c, 0x0f, 0xff, 0x00, 0x01, 0x08, 0x00, 0x00, 0x80
+    };
+    List *context = id3v2CreateRelativeVolumeAdjustmentFrameContext(ID3V2_TAG_VERSION_3);
+
+    internal_assertRoundTrip(all, sizeof(all), context, ID3V2_TAG_VERSION_3);
+    internal_assertRoundTrip(frontOnly, sizeof(frontOnly), context, ID3V2_TAG_VERSION_3);
+    internal_assertRoundTrip(twelveBits, sizeof(twelveBits), context, ID3V2_TAG_VERSION_3);
+    listFree(context);
+}
+
+static void id3v2FrameSerialize_v3EQUA(void **state) {
+    (void) state;
+    const uint8_t equa[19] = {
+        'E', 'Q', 'U', 'A', 0x00, 0x00, 0x00, 0x09, 0x00, 0x00,
+        0x0C, 0x80, 0x64, 0x0f, 0xff, 0x01, 0x00, 0x00, 0x01
+    };
+    List *context = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_3);
+
+    internal_assertRoundTrip(equa, sizeof(equa), context, ID3V2_TAG_VERSION_3);
+    listFree(context);
+}
+
+static void id3v2FrameSerialize_v4RVA2(void **state) {
+    (void) state;
+    const uint8_t perChannel[31] = {
+        'R', 'V', 'A', '2', 0x00, 0x00, 0x00, 0x15, 0x00, 0x00,
+        't', 'r', 'a', 'c', 'k', 0x00,
+        0x01, 0x04, 0x00, 0x10, 0x7f, 0xff,
+        0x02, 0xfc, 0x00, 0x00,
+        0x03, 0x00, 0x01, 0x08, 0xff
+    };
+    // the last channel has no peak so the frame ends on the bits field
+    const uint8_t lastNoPeak[16] = {
+        'R', 'V', 'A', '2', 0x00, 0x00, 0x00, 0x06, 0x00, 0x00,
+        'x', 0x00, 0x01, 0x04, 0x00, 0x00
+    };
+    List *context = id3v2CreateRelativeVolumeAdjustmentFrameContext(ID3V2_TAG_VERSION_4);
+
+    internal_assertRoundTrip(perChannel, sizeof(perChannel), context, ID3V2_TAG_VERSION_4);
+    internal_assertRoundTrip(lastNoPeak, sizeof(lastNoPeak), context, ID3V2_TAG_VERSION_4);
+    listFree(context);
+}
+
+static void id3v2FrameSerialize_v4EQU2(void **state) {
+    (void) state;
+    const uint8_t equ2[22] = {
+        'E', 'Q', 'U', '2', 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00,
+        0x01, 'e', 'q', 0x00,
+        0x00, 0xc8, 0x04, 0x00,
+        0x07, 0xd0, 0xfc, 0x00
+    };
+    List *context = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_4);
+
+    internal_assertRoundTrip(equ2, sizeof(equ2), context, ID3V2_TAG_VERSION_4);
+    listFree(context);
+}
+
+static void id3v2FrameSerialize_adjustmentEntrySizeMismatch(void **state) {
+    (void) state;
+    uint8_t rvad[16] = {
+        'R', 'V', 'A', 'D', 0x00, 0x00, 0x00, 0x06, 0x00, 0x00,
+        0x03, 0x10, 0x01, 0x00, 0x02, 0x00
+    };
+    const uint8_t expected[16] = {
+        'R', 'V', 'A', 'D', 0x00, 0x00, 0x00, 0x06, 0x00, 0x00,
+        0x03, 0x10, 0x00, 0xab, 0x22, 0x33
+    };
+    Id3v2Frame *f = NULL;
+    List *context = id3v2CreateRelativeVolumeAdjustmentFrameContext(ID3V2_TAG_VERSION_3);
+
+    id3v2ParseFrame(rvad, sizeof(rvad), context, ID3V2_TAG_VERSION_3, &f);
+    assert_non_null(f);
+
+    // heap allocated so ASan reports any over read
+    uint8_t *shorter = malloc(1);
+    uint8_t *longer = malloc(3);
+    assert_non_null(shorter);
+    assert_non_null(longer);
+    shorter[0] = 0xab;
+    longer[0] = 0x11;
+    longer[1] = 0x22;
+    longer[2] = 0x33;
+
+    ListIter entries = id3v2CreateFrameEntryTraverser(f);
+    listIteratorNext(&entries);
+    listIteratorNext(&entries);
+    assert_true(id3v2WriteFrameEntry(f, &entries, 1, shorter));
+    listIteratorNext(&entries);
+    assert_true(id3v2WriteFrameEntry(f, &entries, 3, longer));
+    free(shorter);
+    free(longer);
+
+    // a 1 byte entry is padded in front, a 3 byte entry keeps its low 2 bytes
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameSerialize(f, ID3V2_TAG_VERSION_3, &outl);
+
+    assert_int_equal(outl, sizeof(expected));
+    assert_memory_equal(out, expected, sizeof(expected));
+
+    free(out);
+    listFree(context);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2FrameToJSON_v4RVA2(void **state) {
+    (void) state;
+    uint8_t rva2[31] = {
+        'R', 'V', 'A', '2', 0x00, 0x00, 0x00, 0x15, 0x00, 0x00,
+        't', 'r', 'a', 'c', 'k', 0x00,
+        0x01, 0x04, 0x00, 0x10, 0x7f, 0xff,
+        0x02, 0xfc, 0x00, 0x00,
+        0x03, 0x00, 0x01, 0x08, 0xff
+    };
+    Id3v2Frame *f = NULL;
+    List *context = id3v2CreateRelativeVolumeAdjustmentFrameContext(ID3V2_TAG_VERSION_4);
+
+    id3v2ParseFrame(rva2, sizeof(rva2), context, ID3V2_TAG_VERSION_4, &f);
+    assert_non_null(f);
+
+    char *json = id3v2FrameToJSON(f, ID3V2_TAG_VERSION_4);
+    assert_non_null(json);
+
+    // every peak is present, including the empty one, and each object is closed
+    assert_non_null(strstr(json, "{\"value\":\"f/8=\",\"size\":2}"));
+    assert_non_null(strstr(json, "{\"value\":\"\",\"size\":0}"));
+    assert_non_null(strstr(json, "{\"value\":\"/w==\",\"size\":1}]}"));
+
+    free(json);
+    listFree(context);
+    id3v2DestroyFrame(&f);
+}
+
+/**
+ * Positions a fresh entry traverser on the entry at index.
+ */
+static ListIter internal_entryAt(Id3v2Frame *f, size_t index) {
+    ListIter entries = id3v2CreateFrameEntryTraverser(f);
+
+    for (size_t i = 0; i < index; i++) {
+        listIteratorNext(&entries);
+    }
+
+    return entries;
+}
+
+static void id3v2WriteFrameEntry_iteratedEQUBand(void **state) {
+    (void) state;
+    uint8_t equ[15] = {
+        'E', 'Q', 'U', 0x00, 0x00, 0x09,
+        0x10,
+        0x03, 0xe9, 0x40, 0x00,
+        0x80, 0x28, 0xfc, 0x00
+    };
+    // band 2 moves to 256Hz (increment bit kept) with a new adjustment
+    const uint8_t expected[15] = {
+        'E', 'Q', 'U', 0x00, 0x00, 0x09,
+        0x10,
+        0x03, 0xe9, 0x40, 0x00,
+        0x81, 0x00, 0x12, 0x34
+    };
+    const uint8_t frequency[2] = {0x01, 0x00};
+    const uint8_t volume[2] = {0x12, 0x34};
+    Id3v2Frame *f = NULL;
+    List *context = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_2);
+
+    id3v2ParseFrame(equ, sizeof(equ), context, ID3V2_TAG_VERSION_2, &f);
+    assert_non_null(f);
+
+    // entries: adjustment, then unary/frequency/volume per band
+    ListIter entries = internal_entryAt(f, 5);
+    assert_true(id3v2WriteFrameEntry(f, &entries, sizeof(frequency), frequency));
+    entries = internal_entryAt(f, 6);
+    assert_true(id3v2WriteFrameEntry(f, &entries, sizeof(volume), volume));
+
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameSerialize(f, ID3V2_TAG_VERSION_2, &outl);
+
+    assert_int_equal(outl, sizeof(expected));
+    assert_memory_equal(out, expected, sizeof(expected));
+
+    free(out);
+    listFree(context);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2WriteFrameEntry_iteratedRVA2Channel(void **state) {
+    (void) state;
+    uint8_t rva2[31] = {
+        'R', 'V', 'A', '2', 0x00, 0x00, 0x00, 0x15, 0x00, 0x00,
+        't', 'r', 'a', 'c', 'k', 0x00,
+        0x01, 0x04, 0x00, 0x10, 0x7f, 0xff,
+        0x02, 0xfc, 0x00, 0x00,
+        0x03, 0x00, 0x01, 0x08, 0xff
+    };
+    const uint8_t expected[31] = {
+        'R', 'V', 'A', '2', 0x00, 0x00, 0x00, 0x15, 0x00, 0x00,
+        't', 'r', 'a', 'c', 'k', 0x00,
+        0x01, 0x04, 0x00, 0x10, 0x7f, 0xff,
+        0x04, 0xfc, 0x00, 0x00,
+        0x03, 0xfe, 0x00, 0x08, 0x34
+    };
+    const uint8_t channel = 0x04;
+    const uint8_t volume[2] = {0xfe, 0x00};
+    const uint8_t peak[2] = {0x12, 0x34};
+    Id3v2Frame *f = NULL;
+    List *context = id3v2CreateRelativeVolumeAdjustmentFrameContext(ID3V2_TAG_VERSION_4);
+
+    id3v2ParseFrame(rva2, sizeof(rva2), context, ID3V2_TAG_VERSION_4, &f);
+    assert_non_null(f);
+
+    // entries: identifier, then channel/volume/bits/peak per channel
+    ListIter entries = internal_entryAt(f, 5);
+    assert_true(id3v2WriteFrameEntry(f, &entries, 1, &channel));
+
+    // channel 2 declares a 0 bit peak, there is nothing to write into
+    entries = internal_entryAt(f, 8);
+    assert_false(id3v2WriteFrameEntry(f, &entries, sizeof(peak), peak));
+
+    entries = internal_entryAt(f, 10);
+    assert_true(id3v2WriteFrameEntry(f, &entries, sizeof(volume), volume));
+
+    // channel 3 declares an 8 bit peak so only the low byte is kept
+    entries = internal_entryAt(f, 12);
+    assert_true(id3v2WriteFrameEntry(f, &entries, sizeof(peak), peak));
+    assert_int_equal(((Id3v2ContentEntry *) f->entries->tail->data)->size, 1);
+
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameSerialize(f, ID3V2_TAG_VERSION_4, &outl);
+
+    assert_int_equal(outl, sizeof(expected));
+    assert_memory_equal(out, expected, sizeof(expected));
+
+    free(out);
+    listFree(context);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2WriteFrameEntry_iteratedSYLTStamp(void **state) {
+    (void) state;
+    uint8_t sylt[30] = {
+        'S', 'Y', 'L', 'T', 0x00, 0x00, 0x00, 0x14, 0x00, 0x00,
+        0x00, 'e', 'n', 'g', 0x02, 0x01,
+        'd', 0x00,
+        'a', 0x00, 0x00, 0x00, 0x00, 0x10,
+        'b', 0x00, 0x00, 0x00, 0x00, 0x20
+    };
+    const uint8_t stamp[4] = {0x00, 0x00, 0x01, 0x00};
+    Id3v2Frame *f = NULL;
+    List *context = id3v2CreateSynchronisedLyricFrameContext();
+
+    assert_int_equal(id3v2ParseFrame(sylt, sizeof(sylt), context, ID3V2_TAG_VERSION_3, &f), sizeof(sylt));
+    assert_non_null(f);
+    assert_int_equal(listLength(f->entries), 9);
+
+    // entries: encoding, language, format, symbol, desc, then text/stamp per line
+    ListIter entries = internal_entryAt(f, 8);
+    assert_true(id3v2WriteFrameEntry(f, &entries, sizeof(stamp), stamp));
+
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameSerialize(f, ID3V2_TAG_VERSION_3, &outl);
+
+    assert_int_equal(outl, sizeof(sylt));
+    assert_memory_equal(out, sylt, sizeof(sylt) - 4);
+    assert_memory_equal(out + sizeof(sylt) - 4, stamp, 4);
+
+    free(out);
+    listFree(context);
     id3v2DestroyFrame(&f);
 }
 
@@ -970,7 +1375,7 @@ static void id3v2CompareFrameId_EQU(void **state) {
     // EQU
     uint8_t equ[15] = {
         'E', 'Q', 'U', 0x00, 0x00, 0x09,
-        2U,
+        0x10, // 16 adjustment bits -> 2 byte volumes
         0x03, 0xe9, // 000000111110100 1  inc/dec
         0x40, 0x00,
         0x00, 0x28, // 000000000010100 0  inc/dec
@@ -990,6 +1395,77 @@ static void id3v2CompareFrameId_EQU(void **state) {
     id3v2DestroyFrame(&f);
 }
 
+static void internal_unsyncCase(const uint8_t *in, size_t inl, const uint8_t *expected, size_t expectedl) {
+    size_t outl = 0;
+    uint8_t *out = id3v2ApplyUnsynchronisation(in, inl, &outl);
+
+    assert_non_null(out);
+    assert_int_equal(outl, expectedl);
+    assert_memory_equal(out, expected, expectedl);
+
+    // decoding must give back the original
+    assert_int_equal(id3v2RemoveUnsynchronisation(out, outl), inl);
+    assert_memory_equal(out, in, inl);
+    free(out);
+}
+
+static void id3v2ApplyUnsynchronisation_noSync(void **state) {
+    (void) state;
+    const uint8_t in[] = {0x00, 0x01, 0xFE, 0xDF, 'a'};
+    internal_unsyncCase(in, sizeof(in), in, sizeof(in));
+}
+
+static void id3v2ApplyUnsynchronisation_falseSyncs(void **state) {
+    (void) state;
+    // $FF $E0, $FF $00 and $FF $FF all need a $00; $FF $DF and $FF $12 do not
+    const uint8_t in[] = {0xFF, 0xE0, 0xFF, 0x00, 0xFF, 0xDF, 0xFF, 0xFF, 0x12};
+    const uint8_t expected[] = {0xFF, 0x00, 0xE0, 0xFF, 0x00, 0x00, 0xFF, 0xDF, 0xFF, 0x00, 0xFF, 0x12};
+    internal_unsyncCase(in, sizeof(in), expected, sizeof(expected));
+}
+
+static void id3v2ApplyUnsynchronisation_trailingFF(void **state) {
+    (void) state;
+    const uint8_t in[] = {'a', 0xFF};
+    const uint8_t expected[] = {'a', 0xFF, 0x00};
+    internal_unsyncCase(in, sizeof(in), expected, sizeof(expected));
+}
+
+static void id3v2ApplyUnsynchronisation_allFF(void **state) {
+    (void) state;
+    uint8_t in[64];
+    uint8_t expected[128];
+
+    memset(in, 0xFF, sizeof(in));
+    for (size_t i = 0; i < sizeof(expected); i += 2) {
+        expected[i] = 0xFF;
+        expected[i + 1] = 0x00;
+    }
+
+    internal_unsyncCase(in, sizeof(in), expected, sizeof(expected));
+}
+
+static void id3v2ApplyUnsynchronisation_badArgs(void **state) {
+    (void) state;
+    const uint8_t in[] = {0xFF};
+    size_t outl = 1;
+
+    assert_null(id3v2ApplyUnsynchronisation(NULL, 1, &outl));
+    assert_int_equal(outl, 0);
+    assert_null(id3v2ApplyUnsynchronisation(in, 0, &outl));
+    assert_null(id3v2ApplyUnsynchronisation(in, 1, NULL));
+}
+
+static void id3v2RemoveUnsynchronisation_lenientInput(void **state) {
+    (void) state;
+    // a lone $FF $E0 (not properly unsynchronised) and a trailing $FF are kept as-is
+    uint8_t buf[] = {0xFF, 0xE0, 0xFF, 0x00, 0x00, 0xFF};
+    const uint8_t expected[] = {0xFF, 0xE0, 0xFF, 0x00, 0xFF};
+
+    assert_int_equal(id3v2RemoveUnsynchronisation(buf, sizeof(buf)), sizeof(expected));
+    assert_memory_equal(buf, expected, sizeof(expected));
+    assert_int_equal(id3v2RemoveUnsynchronisation(NULL, 4), 0);
+}
+
 int main() {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(id3v2CreateAndDestroyFrameHeader_allInOne),
@@ -1003,6 +1479,8 @@ int main() {
         cmocka_unit_test(id3v2ReadFrameEntry_checkETCO),
 
         cmocka_unit_test(id3v2WriteFrameEntry_greatestHits),
+        cmocka_unit_test(id3v2WriteFrameEntry_padToMin),
+        cmocka_unit_test(id3v2ReadFrameEntryAsU16U32_bigEndian),
         cmocka_unit_test(id3v2WriteFrameEntry_updateTitle),
         cmocka_unit_test(id3v2AttachFrameFromTag_TSOA),
         cmocka_unit_test(id3v2DetachFrameFromTag_TIT2),
@@ -1029,12 +1507,30 @@ int main() {
         cmocka_unit_test(id3v2FrameSerialize_v4WCOM),
         cmocka_unit_test(id3v2FrameSerialize_v4ETCO),
         cmocka_unit_test(id3v2FrameSerialize_v2EQU),
+        cmocka_unit_test(id3v2FrameSerialize_v2RVA),
+        cmocka_unit_test(id3v2FrameSerialize_v3RVAD),
+        cmocka_unit_test(id3v2FrameSerialize_v3EQUA),
+        cmocka_unit_test(id3v2FrameSerialize_v4RVA2),
+        cmocka_unit_test(id3v2FrameSerialize_v4EQU2),
+        cmocka_unit_test(id3v2FrameSerialize_adjustmentEntrySizeMismatch),
+        cmocka_unit_test(id3v2WriteFrameEntry_iteratedEQUBand),
+        cmocka_unit_test(id3v2WriteFrameEntry_iteratedRVA2Channel),
+        cmocka_unit_test(id3v2WriteFrameEntry_iteratedSYLTStamp),
         cmocka_unit_test(id3v2FrameSerialize_v3TXXX),
 
         // id3v2FrameToJSON
         cmocka_unit_test(id3v2FrameToJSON_v3TXXX),
         cmocka_unit_test(id3v2FrameToJSON_v3APIC),
         cmocka_unit_test(id3v2FrameToJSON_v4ETCO),
+        cmocka_unit_test(id3v2FrameToJSON_v4RVA2),
+
+        // unsynchronisation
+        cmocka_unit_test(id3v2ApplyUnsynchronisation_noSync),
+        cmocka_unit_test(id3v2ApplyUnsynchronisation_falseSyncs),
+        cmocka_unit_test(id3v2ApplyUnsynchronisation_trailingFF),
+        cmocka_unit_test(id3v2ApplyUnsynchronisation_allFF),
+        cmocka_unit_test(id3v2ApplyUnsynchronisation_badArgs),
+        cmocka_unit_test(id3v2RemoveUnsynchronisation_lenientInput),
 
         // id3v2CreateEmptyFrame
         cmocka_unit_test(id3v2CreateEmptyFrame_noID),

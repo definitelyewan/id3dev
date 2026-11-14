@@ -17,6 +17,7 @@ ID3dev is a library crafted to support all versions of the ID3 standard includin
     + [Doxygen](#doxygen)
     + [Examples](#examples)
     + [Tests](#tests)
+- [FFI](#FFI)
 
 ## What Can It Do?
 ID3dev is capable of reading, manipulating, converting, and outputting all supported frames found within the ID3v2.x specifications with only a couple of exceptions when it comes to features (see below table). Additionally, it supports all previously mentioned features for ID3v1.x with the ability to dynamically switch between ID3v2.x and ID3v1.x standards.
@@ -46,7 +47,7 @@ Keep in mind that not all frames are supported in every version.
 | Popularimeter                                    |     |     | POP | POPM | POPM | ✅ |
 | Position synchronisation frame                   |     |     |     | POSS | POSS | ✅ |
 | Recommended buffer size                          |     |     | BUF | RBUF | RBUF | ✅ |
-| Relative volume adjustment                       |     |     | RVA | RVAD | RVA2 | 🟡 |
+| Relative volume adjustment                       |     |     | RVA | RVAD | RVA2 | ✅ |
 | Reverb                                           |     |     | REV | RVRB | RVRB | ✅ |
 | Seek                                             |     |     |     |      | SEEK | ✅ |
 | Signature                                        |     |     |     |      | SIGN | ✅ |
@@ -134,6 +135,7 @@ build options:
 - `BUILD_ID3_TESTS` can be toggled to generate unit tests
 - `DEBUG_ID3_SYMBOLS` can be toggled to include or not include debug symbols
 - `BUILD_ID3_C_EXAMPLES` can  be toggled to create example C programs
+- `ID3_SANITIZER` can be set to address or thread to run Asan or Tsan when symbols are enabled
 
 To build ID3dev with these options you will need to use CMake along with the below commands (OS dependant).
 ```bash
@@ -219,6 +221,13 @@ A couple examples on how to use this project are located in the `example` folder
 ### Tests
 There are well over 100 test cases located in the test folder for proof of functionallity. to build and run these tests cmocka must be installed on your system for `python3 ./scripts/test.py`.
 
-### Known Bugs
-- id3v2ParseFrame has a bit_context implementation that can result in incorrect return values when the number of bits is more then 8. Tests will need to be updated to match whatever fix is made across the board.
+## FFI
+As of version 2026.11 ID3dev works with more than just C/C++ projects
+
+### Python
+As of version 2026.11 ID3dev now supports Python bindings and can be found in the `./interfaces/python` directory. Yippie!
+#### Building
+To build the wheel you will need to have a valid version of at least python 3.9 and pip available in your user/system paths. Once available the provided `wheel.py` file located in `./scripts` can be used to generate a wheel file for your host systems architecture (arm or x86). 
+### Documentation
+For documentation on how to use ID3dev as a python wheel please view https://definitelyewan.github.io/id3dev/ or take a look at the examples found in `./examples/python`.
 

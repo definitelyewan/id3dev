@@ -205,8 +205,7 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata) {
 
     if (metadata->id3v1->title[0] != 0x00) {
         if (!id3v2WriteTitle((char *) metadata->id3v1->title, newTag)) {
-            id3v2DestroyTag(&newTag);
-            listFree(frames);
+            id3v2DestroyTag(&newTag); // also frees frames
             return false;
         }
     }
@@ -214,8 +213,7 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata) {
 
     if (metadata->id3v1->artist[0] != 0x00) {
         if (!id3v2WriteArtist((char *) metadata->id3v1->artist, newTag)) {
-            id3v2DestroyTag(&newTag);
-            listFree(frames);
+            id3v2DestroyTag(&newTag); // also frees frames
             return false;
         }
     }
@@ -223,8 +221,7 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata) {
 
     if (metadata->id3v1->albumTitle[0] != 0x00) {
         if (!id3v2WriteAlbum((char *) metadata->id3v1->albumTitle, newTag)) {
-            id3v2DestroyTag(&newTag);
-            listFree(frames);
+            id3v2DestroyTag(&newTag); // also frees frames
             return false;
         }
     }
@@ -235,8 +232,7 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata) {
         str = calloc(size + 1, sizeof(char));
         (void) snprintf(str, size + 1, "%d", metadata->id3v1->year);
         if (!id3v2WriteYear(str, newTag)) {
-            id3v2DestroyTag(&newTag);
-            listFree(frames);
+            id3v2DestroyTag(&newTag); // also frees frames
             free(str);
             return false;
         }
@@ -250,8 +246,7 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata) {
         (void) snprintf(str, size + 1, "%d", metadata->id3v1->track);
 
         if (!id3v2WriteTrack(str, newTag)) {
-            id3v2DestroyTag(&newTag);
-            listFree(frames);
+            id3v2DestroyTag(&newTag); // also frees frames
             free(str);
             return false;
         }
@@ -260,8 +255,7 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata) {
 
     if (metadata->id3v1->genre < PSYBIENT_GENRE) {
         if (!id3v2WriteGenre(id3v1GenreFromTable(metadata->id3v1->genre), newTag)) {
-            id3v2DestroyTag(&newTag);
-            listFree(frames);
+            id3v2DestroyTag(&newTag); // also frees frames
             return false;
         }
     }
@@ -269,8 +263,7 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata) {
 
     if (metadata->id3v1->comment[0] != 0x00) {
         if (!id3v2WriteComment((char *) metadata->id3v1->comment, newTag)) {
-            id3v2DestroyTag(&newTag);
-            listFree(frames);
+            id3v2DestroyTag(&newTag); // also frees frames
             return false;
         }
     }

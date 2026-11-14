@@ -531,12 +531,16 @@ char *id3v1GenreFromTable(Genre val) {
             return "Jpop\0";
         case SYNTHPOP_GENRE:
             return "Synthpop\0";
+        case CHRISTMAS_GENRE:
+            return "Christmas\0";
         case ABSTRACT_GENRE:
             return "Abstract\0";
         case ART_ROCK_GENRE:
             return "Art Rock";
         case BAROQUE_GENRE:
             return "Baroque\0";
+        case BHANGRA_GENRE:
+            return "Bhangra\0";
         case BIG_BEAT_GENRE:
             return "Big Beat\0";
         case BREAKBEAT_GENRE:
@@ -797,10 +801,9 @@ int id3v1WriteTagToFile(const char *filePath, const Id3v1Tag *tag) {
         return 0;
     }
 
-    char *tmp = NULL;
+    unsigned char yearBuf[ID3V1_YEAR_SIZE] = {0};
     unsigned char byte = 0x00;
     int n = 0;
-    int yearW = 0;
     FILE *fp = NULL;
     ByteStream *stream = byteStreamCreate(NULL, ID3V1_MAX_SIZE);
 
@@ -809,27 +812,15 @@ int id3v1WriteTagToFile(const char *filePath, const Id3v1Tag *tag) {
     byteStreamWrite(stream, (unsigned char *) tag->artist, ID3V1_FIELD_SIZE);
     byteStreamWrite(stream, (unsigned char *) tag->albumTitle, ID3V1_FIELD_SIZE);
 
-    //int to string - handle edge cases for log10
-    if (tag->year <= 0) {
-        n = 1;
-        yearW = 0;
-    } else {
-        n = (int) log10(tag->year) + 1;
-        yearW = tag->year;
-    }
-    tmp = calloc(n, sizeof(char));
-    if (tmp == NULL) {
-        byteStreamDestroy(stream);
-        return 0;
+    // year is always ID3V1_YEAR_SIZE bytes: digits left aligned and zero padded ("999" -> "999\0"),
+    // all zero when there is no year (the parser reads that as 0), first 4 digits if longer
+    if (tag->year > 0) {
+        char digits[12] = {0};
+        n = snprintf(digits, sizeof(digits), "%d", tag->year);
+        memcpy(yearBuf, digits, (n < ID3V1_YEAR_SIZE) ? (size_t) n : ID3V1_YEAR_SIZE);
     }
 
-    for (int i = n - 1; i >= 0; --i, yearW /= 10) {
-        tmp[i] = (char) ((yearW % 10) + '0');
-    }
-
-    //write convert
-    byteStreamWrite(stream, (unsigned char *) tmp, ID3V1_YEAR_SIZE);
-    free(tmp);
+    byteStreamWrite(stream, yearBuf, ID3V1_YEAR_SIZE);
 
     byteStreamWrite(stream, (unsigned char *) tag->comment, ID3V1_FIELD_SIZE);
 

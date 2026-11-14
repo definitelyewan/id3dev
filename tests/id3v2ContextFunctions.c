@@ -618,14 +618,23 @@ void id3v2CreateEqualizationFrameContext_validVersion4(void **state) {
     assert_int_equal(c->type, numeric_context);
     assert_int_equal(c->max, 2);
     assert_int_equal(c->min, 2);
-    assert_int_equal(c->key, id3v2djb2("volume"));
+    assert_int_equal(c->key, id3v2djb2("frequency"));
 
     c = (Id3v2ContentContext *) n->next->next->next->data;
+
+    assert_int_equal(c->type, numeric_context);
+    assert_int_equal(c->max, 2);
+    assert_int_equal(c->min, 2);
+    assert_int_equal(c->key, id3v2djb2("volume"));
+
+    c = (Id3v2ContentContext *) n->next->next->next->next->data;
 
     assert_int_equal(c->type, iter_context);
     assert_int_equal(c->max, UINT_MAX);
     assert_int_equal(c->min, 2);
     assert_int_equal(c->key, id3v2djb2("iter"));
+
+    assert_int_equal(listLength(l), 5);
 
     listFree(l);
 }
@@ -949,20 +958,92 @@ static void id3v2CreateRecommendedBufferSizeFrameContext_valid() {
     listFree(l);
 }
 
-static void id3v2CreateRelativeVolumeAdjustmentFrameContext_valid(void **state) {
+static void internal_assertContext(const Node *n, Id3v2ContextType type, const char *key, size_t max, size_t min) {
+    assert_non_null(n);
+    const Id3v2ContentContext *c = (const Id3v2ContentContext *) n->data;
+
+    assert_int_equal(c->type, type);
+    assert_int_equal(c->key, id3v2djb2(key));
+    assert_int_equal(c->max, max);
+    assert_int_equal(c->min, min);
+}
+
+static void id3v2CreateRelativeVolumeAdjustmentFrameContext_wrongVersion(void **state) {
     (void) state;
     List *l = id3v2CreateRelativeVolumeAdjustmentFrameContext(1);
 
     assert_non_null(l);
+    assert_int_equal(listLength(l), 1);
+    internal_assertContext(l->head, unknown_context, "unknown", 1, 1);
+
+    listFree(l);
+}
+
+static void id3v2CreateRelativeVolumeAdjustmentFrameContext_validVersion2(void **state) {
+    (void) state;
+    List *l = id3v2CreateRelativeVolumeAdjustmentFrameContext(ID3V2_TAG_VERSION_2);
+    const char *volumes[] = {"volume right", "volume left", "peak right", "peak left"};
+
+    assert_non_null(l);
+    assert_int_equal(listLength(l), 6);
 
     Node *n = l->head;
+    internal_assertContext(n, numeric_context, "flags", 1, 1);
+    n = n->next;
+    internal_assertContext(n, numeric_context, "adjustment", 1, 1);
 
-    Id3v2ContentContext *c = (Id3v2ContentContext *) n->data;
+    for (size_t i = 0; i < 4; i++) {
+        n = n->next;
+        internal_assertContext(n, adjustment_context, volumes[i], UINT_MAX, 1);
+    }
 
-    assert_int_equal(c->type, binary_context);
-    assert_int_equal(c->max, UINT_MAX);
-    assert_int_equal(c->min, 1);
-    assert_int_equal(c->key, id3v2djb2("data"));
+    listFree(l);
+}
+
+static void id3v2CreateRelativeVolumeAdjustmentFrameContext_validVersion3(void **state) {
+    (void) state;
+    List *l = id3v2CreateRelativeVolumeAdjustmentFrameContext(ID3V2_TAG_VERSION_3);
+    const char *volumes[] = {
+        "volume right", "volume left", "peak right", "peak left",
+        "volume right back", "volume left back", "peak right back", "peak left back",
+        "volume center", "peak center", "volume bass", "peak bass"
+    };
+
+    assert_non_null(l);
+    assert_int_equal(listLength(l), 14);
+
+    Node *n = l->head;
+    internal_assertContext(n, numeric_context, "flags", 1, 1);
+    n = n->next;
+    internal_assertContext(n, numeric_context, "adjustment", 1, 1);
+
+    for (size_t i = 0; i < 12; i++) {
+        n = n->next;
+        internal_assertContext(n, adjustment_context, volumes[i], UINT_MAX, 1);
+    }
+
+    listFree(l);
+}
+
+static void id3v2CreateRelativeVolumeAdjustmentFrameContext_validVersion4(void **state) {
+    (void) state;
+    List *l = id3v2CreateRelativeVolumeAdjustmentFrameContext(ID3V2_TAG_VERSION_4);
+
+    assert_non_null(l);
+    assert_int_equal(listLength(l), 6);
+
+    Node *n = l->head;
+    internal_assertContext(n, latin1Encoding_context, "identifier", UINT_MAX, 1);
+    n = n->next;
+    internal_assertContext(n, numeric_context, "channel", 1, 1);
+    n = n->next;
+    internal_assertContext(n, numeric_context, "volume", 2, 2);
+    n = n->next;
+    internal_assertContext(n, numeric_context, "adjustment", 1, 1);
+    n = n->next;
+    internal_assertContext(n, adjustment_context, "peak", UINT_MAX, 0);
+    n = n->next;
+    internal_assertContext(n, iter_context, "iter", UINT_MAX, 1);
 
     listFree(l);
 }
@@ -1471,9 +1552,12 @@ int main() {
         cmocka_unit_test(id3v2CreateRecommendedBufferSizeFrameContext_valid),
 
         // id3v2CreateRelativeVolumeAdjustmentFrameContext tests
-        cmocka_unit_test(id3v2CreateRelativeVolumeAdjustmentFrameContext_valid),
+        cmocka_unit_test(id3v2CreateRelativeVolumeAdjustmentFrameContext_wrongVersion),
+        cmocka_unit_test(id3v2CreateRelativeVolumeAdjustmentFrameContext_validVersion2),
+        cmocka_unit_test(id3v2CreateRelativeVolumeAdjustmentFrameContext_validVersion3),
+        cmocka_unit_test(id3v2CreateRelativeVolumeAdjustmentFrameContext_validVersion4),
 
-        // id3v2CreateRelativeVolumeAdjustmentFrameContext tests
+        // id3v2CreateReverbFrameContext tests
         cmocka_unit_test(id3v2CreateReverbFrameContext_valid),
 
         // id3v2CreateSeekFrameContext tests

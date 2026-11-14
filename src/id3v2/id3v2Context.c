@@ -653,21 +653,23 @@ List *id3v2CreatePlayCounterFrameContext(void) {
 
 /**
  * @brief Creates a context definition list for equalization frames (EQU/EQUA/EQU2).
- * @details Constructs a list defining the structure of equalization frames, with format varying 
- * by ID3v2 version. For v2.2/v2.3 (EQU/EQUA): specifies a 1-byte adjustment bits field, a 1-bit 
- * increment/decrement flag, a 15-bit frequency value, volume adjustment data (1 to UINT_MAX bytes, 
- * length dependent on adjustment field), and an iterator context for repeating frequency/volume 
- * pairs. For v2.4 (EQU2): specifies a 1-byte interpolation method symbol, an identifier string 
- * (1 to UINT_MAX bytes) in latin-1 format describing the equalization curve, a 2-byte volume 
- * adjustment value, and an iterator for repeating frequency/volume pairs (minimum 2 bytes). These 
- * structures enable storage of frequency-specific volume adjustments for audio equalization.
- * 
+ * @details Follows ID3v2.2 4.13, ID3v2.3 4.13 and ID3v2.4 4.12.
+ *
+ * For v2.2/v2.3 (EQU/EQUA): a 1-byte "adjustment" field giving the number of bits used for each
+ * adjustment, then for every band a 1-bit increment/decrement flag, a 15-bit frequency and an
+ * adjustment of ceil(adjustment bits / 8) bytes. The bands repeat until the frame data runs out.
+ *
+ * For v2.4 (EQU2): a 1-byte interpolation method, a latin-1 identification string, then for every
+ * adjustment point a 2-byte frequency (units of 1/2 Hz) and a 2-byte signed volume adjustment
+ * (dB * 512). The points repeat until the frame data runs out.
+ *
  * @param version The ID3v2 version (ID3V2_TAG_VERSION_2, ID3V2_TAG_VERSION_3, or ID3V2_TAG_VERSION_4)
- * 
- * @return List* - Heap allocated list containing version-specific content contexts. For v2.2/v2.3: 
- * adjustment (1 byte), unary (1 bit), frequency (15 bits), volume (1-UINT_MAX bytes), and iter 
- * (1-UINT_MAX bytes). For v2.4: symbol (1 byte), identifier (1-UINT_MAX bytes), volume (2 bytes), 
- * and iter (2-UINT_MAX bytes). Caller must free with listFree()
+ *
+ * @return List* - Heap allocated list containing version-specific content contexts. For v2.2/v2.3:
+ * adjustment (1 byte), unary (1 bit), frequency (15 bits), volume (adjustment_context) and iter
+ * (from unary). For v2.4: symbol (1 byte), identifier (latin-1), frequency (2 bytes), volume (2 bytes)
+ * and iter (from frequency). An unknown version yields a single unknown_context. Caller must free with
+ * listFree()
  */
 List *id3v2CreateEqualizationFrameContext(unsigned int version) {
     List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
@@ -691,7 +693,7 @@ List *id3v2CreateEqualizationFrameContext(unsigned int version) {
             toAdd = (void *) id3v2CreateContentContext(bit_context, id3v2djb2("frequency"), 15, 15);
             listInsertBack(l, toAdd);
 
-            // volume (adjustment dependant)
+            // volume, ceil(adjustment bits / 8) bytes
             toAdd = (void *) id3v2CreateContentContext(adjustment_context, id3v2djb2("volume"), UINT_MAX, 1);
             listInsertBack(l, toAdd);
 
@@ -711,11 +713,15 @@ List *id3v2CreateEqualizationFrameContext(unsigned int version) {
             toAdd = (void *) id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("identifier"), UINT_MAX, 1);
             listInsertBack(l, toAdd);
 
-            // volume
+            // frequency (1/2 Hz units)
+            toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("frequency"), 2, 2);
+            listInsertBack(l, toAdd);
+
+            // volume (signed fixed point dB * 512)
             toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("volume"), 2, 2);
             listInsertBack(l, toAdd);
 
-            // iter through the last 2 limit is int max but a frames data will 100% run out before this
+            // iter through frequency and volume, limit is int max but a frames data will 100% run out before this
             toAdd = (void *) id3v2CreateContentContext(iter_context, id3v2djb2("iter"), UINT_MAX, 2);
             listInsertBack(l, toAdd);
             break;
@@ -1052,26 +1058,95 @@ List *id3v2CreateRecommendedBufferSizeFrameContext(void) {
 
 /**
  * @brief Creates a context definition list for relative volume adjustment frames (RVA/RVAD/RVA2).
- * @details Constructs a simplified list defining the structure of relative volume adjustment frames 
- * used to specify recommended playback volume changes. Currently implemented as a single binary data 
- * field (1 to UINT_MAX bytes) containing the entire frame structure without parsing individual 
- * components. The complete RVA2 structure includes an identification string, channel type bytes, 
- * volume adjustment values (typically 2 bytes), bits representing peak volume, and optional peak 
- * volume data. This simplified implementation allows reading and preserving RVA frames while deferring 
- * detailed parsing to future enhancements or post-processing functions.
- * @warning THIS IS A BUMMY IMPLEMENTATION AND NEEDS TO BE UPDATED IN THE FUTURE
- * @param version The ID3v2 version (currently unused; all versions treated uniformly as binary data)
- * 
- * @return List* - Heap allocated list containing one content context: data (1-UINT_MAX bytes). 
- * Caller must free with listFree()
+ * @details Follows ID3v2.2 4.12, ID3v2.3 4.12 and ID3v2.4 4.11.
+ *
+ * For v2.2 (RVA): a 1-byte increment/decrement field (bit 0 right, bit 1 left), a 1-byte "adjustment"
+ * field giving the bits used for each volume description, then relative volume change right/left and
+ * peak volume right/left, each ceil(adjustment bits / 8) bytes. The peak fields may be omitted.
+ *
+ * For v2.3 (RVAD): as v2.2, optionally followed by the right back/left back volume changes and peaks
+ * (bits 2 and 3), the center volume change and peak (bit 4) and the bass volume change and peak (bit 5),
+ * in that order. Trailing groups that are absent are simply not parsed.
+ *
+ * For v2.4 (RVA2): a latin-1 identification string, then for every channel a 1-byte channel type, a
+ * 2-byte signed volume adjustment (dB * 512), a 1-byte "adjustment" field giving the bits representing
+ * the peak (0-255) and a peak volume of ceil(bits / 8) bytes, which is empty when the bits are 0. Each
+ * channel's peak uses that channel's own "adjustment" field. The channels repeat until the frame data
+ * runs out.
+ *
+ * @param version The ID3v2 version (ID3V2_TAG_VERSION_2, ID3V2_TAG_VERSION_3, or ID3V2_TAG_VERSION_4)
+ *
+ * @return List* - Heap allocated list of version-specific content contexts. An unknown version yields a
+ * single unknown_context. Caller must free with listFree()
  */
 List *id3v2CreateRelativeVolumeAdjustmentFrameContext(unsigned int version) {
     List *l = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
                          id3v2CopyContentContext);
+    void *toAdd = NULL;
 
-    // data
-    void *toAdd = (void *) id3v2CreateContentContext(binary_context, id3v2djb2("data"), UINT_MAX, 1);
-    listInsertBack(l, toAdd);
+    // volume descriptions in the order RVA/RVAD store them, RVA stops after the first 4
+    static const char *const channels[] = {
+        "volume right", "volume left", "peak right", "peak left",
+        "volume right back", "volume left back", "peak right back", "peak left back",
+        "volume center", "peak center",
+        "volume bass", "peak bass"
+    };
+    size_t channelCount = 0;
+
+    switch (version) {
+        // RVA and RVAD
+        case ID3V2_TAG_VERSION_2:
+        case ID3V2_TAG_VERSION_3:
+            channelCount = (version == ID3V2_TAG_VERSION_2) ? 4 : sizeof(channels) / sizeof(channels[0]);
+
+            // increment/decrement flags
+            toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("flags"), 1, 1);
+            listInsertBack(l, toAdd);
+
+            // bits used for volume description
+            toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("adjustment"), 1, 1);
+            listInsertBack(l, toAdd);
+
+            // each volume description is ceil(adjustment bits / 8) bytes
+            for (size_t i = 0; i < channelCount; i++) {
+                toAdd = (void *) id3v2CreateContentContext(adjustment_context, id3v2djb2(channels[i]), UINT_MAX, 1);
+                listInsertBack(l, toAdd);
+            }
+            break;
+
+        // RVA2
+        case ID3V2_TAG_VERSION_4:
+
+            // identification
+            toAdd = (void *) id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("identifier"), UINT_MAX, 1);
+            listInsertBack(l, toAdd);
+
+            // type of channel
+            toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("channel"), 1, 1);
+            listInsertBack(l, toAdd);
+
+            // volume adjustment (signed fixed point dB * 512)
+            toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("volume"), 2, 2);
+            listInsertBack(l, toAdd);
+
+            // bits representing peak
+            toAdd = (void *) id3v2CreateContentContext(numeric_context, id3v2djb2("adjustment"), 1, 1);
+            listInsertBack(l, toAdd);
+
+            // peak volume, ceil(bits / 8) bytes and empty when bits is 0
+            toAdd = (void *) id3v2CreateContentContext(adjustment_context, id3v2djb2("peak"), UINT_MAX, 0);
+            listInsertBack(l, toAdd);
+
+            // iter from channel onward, limit is int max but a frames data will 100% run out before this
+            toAdd = (void *) id3v2CreateContentContext(iter_context, id3v2djb2("iter"), UINT_MAX, 1);
+            listInsertBack(l, toAdd);
+            break;
+
+        default:
+            toAdd = (void *) id3v2CreateContentContext(unknown_context, id3v2djb2("unknown"), 1, 1);
+            listInsertBack(l, toAdd);
+            break;
+    }
 
     return l;
 }

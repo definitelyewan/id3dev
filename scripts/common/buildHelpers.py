@@ -8,11 +8,9 @@ from .InformUser import Inform
 
 # replaces a folder
 def replace_folder(foldername):
-    if not os.path.exists(foldername):
-        os.mkdir(foldername)
-    else:
+    if os.path.exists(foldername):
         shutil.rmtree(foldername)
-        os.mkdir(foldername)
+    os.makedirs(foldername)
 
 
 # builds a cmake project on different platforms
@@ -76,3 +74,16 @@ def compile_code(project_name):
 # checks to see if a program is installed on the host
 def is_command(tool):
         return shutil.which(tool) is not None
+
+# copy files from one directory to another
+def copy_to_dest(source: Path, dest: Path):
+    dest.mkdir(parents=True, exist_ok=True)
+    for item in source.iterdir():
+        target = dest / item.name
+        if item.is_file():
+            shutil.copy2(item, target)
+        elif item.is_dir():
+            copy_to_dest(item, target)
+
+def remove_dir(directory):
+    shutil.rmtree(directory)

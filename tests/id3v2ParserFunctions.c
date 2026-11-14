@@ -15,6 +15,7 @@
 #include <cmocka.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "id3v2/id3v2Parser.h"
 #include "id3v2/id3v2TagIdentity.h"
 #include "id3v2/id3v2Frame.h"
@@ -880,7 +881,7 @@ static void id3v2ParseFrame_parseWCOM(void **state) {
 
     Id3v2ContentEntry *e = (Id3v2ContentEntry *) f->entries->head->data;
 
-    assert_memory_equal(e->entry, "https://bandcamp.com/", 22);
+    assert_memory_equal(e->entry, "https://bandcamp.com/", 21);
     assert_int_equal(e->size, 22);
 
     listFree(context);
@@ -1135,10 +1136,10 @@ static void id3v2ParseFrame_parseEQU(void **state) {
     // EQU
     uint8_t equ[15] = {
         'E', 'Q', 'U', 0x00, 0x00, 0x09,
-        2U,
-        0x03, 0xe9, // 000000111110100 1  inc/dec
+        0x10, // 16 adjustment bits -> 2 byte volumes
+        0x03, 0xe9, // 0000001111101001  inc/dec
         0x40, 0x00,
-        0x00, 0x28, // 000000000010100 0  inc/dec
+        0x80, 0x28, // 1000000000101000  inc/dec
         0xfc, 0x00
     };
 
@@ -1165,15 +1166,15 @@ static void id3v2ParseFrame_parseEQU(void **state) {
 
     Id3v2ContentEntry *e = (Id3v2ContentEntry *) f->entries->head->data;
 
-    assert_int_equal(((uint8_t *)e->entry)[0], 2);
+    assert_int_equal(((uint8_t *)e->entry)[0], 0x10);
     assert_int_equal(e->size, 1);
 
     e = (Id3v2ContentEntry *) f->entries->head->next->data;
-    assert_int_equal(((uint8_t *)e->entry)[0], 1);
+    assert_int_equal(((uint8_t *)e->entry)[0], 0);
     assert_int_equal(e->size, 1);
 
     e = (Id3v2ContentEntry *) f->entries->head->next->next->data;
-    assert_int_equal(((uint8_t *)e->entry)[0], 0);
+    assert_int_equal(((uint8_t *)e->entry)[0], 0x03);
     assert_int_equal(((uint8_t *)e->entry)[1], 0xe9);
     assert_int_equal(e->size, 2);
 
@@ -1183,7 +1184,7 @@ static void id3v2ParseFrame_parseEQU(void **state) {
     assert_int_equal(e->size, 2);
 
     e = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->data;
-    assert_int_equal(((uint8_t *)e->entry)[0], 0x00);
+    assert_int_equal(((uint8_t *)e->entry)[0], 0x01);
     assert_int_equal(e->size, 1);
 
     e = (Id3v2ContentEntry *) f->entries->head->next->next->next->next->next->data;
@@ -1199,6 +1200,307 @@ static void id3v2ParseFrame_parseEQU(void **state) {
 
     listFree(context);
     byteStreamDestroy(stream);
+    id3v2DestroyFrame(&f);
+}
+
+/**
+ * Walks a frame's entries comparing each against an expected byte string. A NULL expected value
+ * means an empty entry.
+ */
+static void internal_assertEntries(const Id3v2Frame *f, const uint8_t *const *values, const size_t *sizes, size_t count) {
+    Node *n = f->entries->head;
+
+    for (size_t i = 0; i < count; i++) {
+        assert_non_null(n);
+        const Id3v2ContentEntry *e = (const Id3v2ContentEntry *) n->data;
+
+        assert_int_equal(e->size, sizes[i]);
+        if (sizes[i] > 0) {
+            assert_memory_equal(e->entry, values[i], sizes[i]);
+        } else {
+            assert_null(e->entry);
+        }
+
+        n = n->next;
+    }
+
+    assert_null(n);
+}
+
+static void id3v2ParseFrame_parseEQUANonByteAlignedBits(void **state) {
+    (void) state;
+    // 12 adjustment bits are stored in 2 bytes padded at the top
+    uint8_t equa[19] = {
+        'E', 'Q', 'U', 'A', 0x00, 0x00, 0x00, 0x09, 0x00, 0x00,
+        0x0C,
+        0x80, 0x64, 0x0f, 0xff, // increment, 100Hz, 0x0fff
+        0x01, 0x00, 0x00, 0x01  // decrement, 256Hz, 0x0001
+    };
+    const uint8_t *values[] = {
+        (const uint8_t *) "\x0c", (const uint8_t *) "\x01", (const uint8_t *) "\x00\x64", (const uint8_t *) "\x0f\xff",
+        (const uint8_t *) "\x00", (const uint8_t *) "\x01\x00", (const uint8_t *) "\x00\x01"
+    };
+    const size_t sizes[] = {1, 1, 2, 2, 1, 2, 2};
+
+    Id3v2Frame *f = NULL;
+    List *context = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_3);
+    uint32_t frameSize = id3v2ParseFrame(equa, sizeof(equa), context, ID3V2_TAG_VERSION_3, &f);
+
+    assert_non_null(f);
+    assert_int_equal(frameSize, sizeof(equa));
+    assert_memory_equal(f->header->id, "EQUA", 4);
+    internal_assertEntries(f, values, sizes, 7);
+
+    listFree(context);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2ParseFrame_parseRVA(void **state) {
+    (void) state;
+    uint8_t rva[12] = {
+        'R', 'V', 'A', 0x00, 0x00, 0x06,
+        0x01,       // right increment, left decrement
+        0x08,       // 8 bits per volume description
+        0x10, 0x20, // right, left
+        0x7f, 0x7e  // peak right, peak left
+    };
+    const uint8_t *values[] = {
+        (const uint8_t *) "\x01", (const uint8_t *) "\x08", (const uint8_t *) "\x10", (const uint8_t *) "\x20",
+        (const uint8_t *) "\x7f", (const uint8_t *) "\x7e"
+    };
+    const size_t sizes[] = {1, 1, 1, 1, 1, 1};
+
+    Id3v2Frame *f = NULL;
+    List *context = id3v2CreateRelativeVolumeAdjustmentFrameContext(ID3V2_TAG_VERSION_2);
+    uint32_t frameSize = id3v2ParseFrame(rva, sizeof(rva), context, ID3V2_TAG_VERSION_2, &f);
+
+    assert_non_null(f);
+    assert_int_equal(frameSize, sizeof(rva));
+    assert_memory_equal(f->header->id, "RVA", 3);
+    internal_assertEntries(f, values, sizes, 6);
+
+    listFree(context);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2ParseFrame_parseRVADAllChannels(void **state) {
+    (void) state;
+    uint8_t rvad[36] = {
+        'R', 'V', 'A', 'D', 0x00, 0x00, 0x00, 0x1a, 0x00, 0x00,
+        0x3f, 0x10,
+        0x01, 0x00, 0x02, 0x00, 0x7f, 0xff, 0x7f, 0xfe, // front right/left, peaks
+        0x00, 0x10, 0x00, 0x20, 0x10, 0x00, 0x20, 0x00, // back right/left, peaks
+        0x00, 0x30, 0x30, 0x00,                         // center, peak
+        0x00, 0x40, 0x40, 0x00                          // bass, peak
+    };
+
+    Id3v2Frame *f = NULL;
+    List *context = id3v2CreateRelativeVolumeAdjustmentFrameContext(ID3V2_TAG_VERSION_3);
+    uint32_t frameSize = id3v2ParseFrame(rvad, sizeof(rvad), context, ID3V2_TAG_VERSION_3, &f);
+
+    assert_non_null(f);
+    assert_int_equal(frameSize, sizeof(rvad));
+    assert_int_equal(listLength(f->entries), 14);
+
+    const uint8_t *values[14];
+    size_t sizes[14];
+    values[0] = (const uint8_t *) "\x3f";
+    sizes[0] = 1;
+    values[1] = (const uint8_t *) "\x10";
+    sizes[1] = 1;
+    for (size_t i = 0; i < 12; i++) {
+        values[i + 2] = rvad + 12 + (i * 2);
+        sizes[i + 2] = 2;
+    }
+    internal_assertEntries(f, values, sizes, 14);
+
+    listFree(context);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2ParseFrame_parseRVADFrontOnly(void **state) {
+    (void) state;
+    // peaks and the optional channels are omitted
+    uint8_t rvad[16] = {
+        'R', 'V', 'A', 'D', 0x00, 0x00, 0x00, 0x06, 0x00, 0x00,
+        0x03, 0x10,
+        0x01, 0x00, 0x02, 0x00
+    };
+    const uint8_t *values[] = {
+        (const uint8_t *) "\x03", (const uint8_t *) "\x10", (const uint8_t *) "\x01\x00", (const uint8_t *) "\x02\x00"
+    };
+    const size_t sizes[] = {1, 1, 2, 2};
+
+    Id3v2Frame *f = NULL;
+    List *context = id3v2CreateRelativeVolumeAdjustmentFrameContext(ID3V2_TAG_VERSION_3);
+    uint32_t frameSize = id3v2ParseFrame(rvad, sizeof(rvad), context, ID3V2_TAG_VERSION_3, &f);
+
+    assert_non_null(f);
+    assert_int_equal(frameSize, sizeof(rvad));
+    internal_assertEntries(f, values, sizes, 4);
+
+    listFree(context);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2ParseFrame_parseRVA2PerChannelPeakBits(void **state) {
+    (void) state;
+    // every channel declares its own peak width: 16 bits, 0 bits (no peak) and 8 bits
+    uint8_t rva2[31] = {
+        'R', 'V', 'A', '2', 0x00, 0x00, 0x00, 0x15, 0x00, 0x00,
+        't', 'r', 'a', 'c', 'k', 0x00,
+        0x01, 0x04, 0x00, 0x10, 0x7f, 0xff, // master, +2dB, 16 bit peak
+        0x02, 0xfc, 0x00, 0x00,             // front right, -2dB, no peak
+        0x03, 0x00, 0x01, 0x08, 0xff        // front left, 8 bit peak
+    };
+
+    Id3v2Frame *f = NULL;
+    List *context = id3v2CreateRelativeVolumeAdjustmentFrameContext(ID3V2_TAG_VERSION_4);
+    uint32_t frameSize = id3v2ParseFrame(rva2, sizeof(rva2), context, ID3V2_TAG_VERSION_4, &f);
+
+    assert_non_null(f);
+    assert_int_equal(frameSize, sizeof(rva2));
+    assert_memory_equal(f->header->id, "RVA2", 4);
+    assert_int_equal(listLength(f->entries), 13);
+
+    const Id3v2ContentEntry *e = (const Id3v2ContentEntry *) f->entries->head->data;
+    assert_true(e->size >= 5);
+    assert_memory_equal(e->entry, "track", 5);
+
+    // check each channel after the identification
+    const uint8_t *values[] = {
+        (const uint8_t *) "\x01", (const uint8_t *) "\x04\x00", (const uint8_t *) "\x10", (const uint8_t *) "\x7f\xff",
+        (const uint8_t *) "\x02", (const uint8_t *) "\xfc\x00", (const uint8_t *) "\x00", NULL,
+        (const uint8_t *) "\x03", (const uint8_t *) "\x00\x01", (const uint8_t *) "\x08", (const uint8_t *) "\xff"
+    };
+    const size_t sizes[] = {1, 2, 1, 2, 1, 2, 1, 0, 1, 2, 1, 1};
+    Node *n = f->entries->head->next;
+
+    for (size_t i = 0; i < 12; i++) {
+        assert_non_null(n);
+        e = (const Id3v2ContentEntry *) n->data;
+        assert_int_equal(e->size, sizes[i]);
+        if (sizes[i] > 0) {
+            assert_memory_equal(e->entry, values[i], sizes[i]);
+        }
+        n = n->next;
+    }
+
+    listFree(context);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2ParseFrame_parseRVA2LastChannelNoPeak(void **state) {
+    (void) state;
+    // the frame ends on a bits representing peak of $00, the peak is present but empty
+    uint8_t rva2[16] = {
+        'R', 'V', 'A', '2', 0x00, 0x00, 0x00, 0x06, 0x00, 0x00,
+        'x', 0x00,
+        0x01, 0x04, 0x00, 0x00
+    };
+
+    Id3v2Frame *f = NULL;
+    List *context = id3v2CreateRelativeVolumeAdjustmentFrameContext(ID3V2_TAG_VERSION_4);
+    uint32_t frameSize = id3v2ParseFrame(rva2, sizeof(rva2), context, ID3V2_TAG_VERSION_4, &f);
+
+    assert_non_null(f);
+    assert_int_equal(frameSize, sizeof(rva2));
+    assert_int_equal(listLength(f->entries), 5);
+
+    const Id3v2ContentEntry *e = (const Id3v2ContentEntry *) f->entries->tail->data;
+    assert_int_equal(e->size, 0);
+    assert_null(e->entry);
+
+    e = (const Id3v2ContentEntry *) f->entries->tail->previous->data;
+    assert_int_equal(e->size, 1);
+    assert_int_equal(((uint8_t *) e->entry)[0], 0x00);
+
+    listFree(context);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2ParseFrame_parseRVADOmittedPeaksNotEmitted(void **state) {
+    (void) state;
+    // with 16 bit volume descriptions, running out of data means the remaining fields are omitted
+    uint8_t rvad[16] = {
+        'R', 'V', 'A', 'D', 0x00, 0x00, 0x00, 0x06, 0x00, 0x00,
+        0x03, 0x10, 0x01, 0x00, 0x02, 0x00
+    };
+
+    Id3v2Frame *f = NULL;
+    List *context = id3v2CreateRelativeVolumeAdjustmentFrameContext(ID3V2_TAG_VERSION_3);
+
+    id3v2ParseFrame(rvad, sizeof(rvad), context, ID3V2_TAG_VERSION_3, &f);
+
+    assert_non_null(f);
+    assert_int_equal(listLength(f->entries), 4);
+
+    listFree(context);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2ParseFrame_zeroWidthIterationStops(void **state) {
+    (void) state;
+    // a custom layout whose repeated block is only a 0 bit wide field must not repeat forever
+    uint8_t xzro[14] = {
+        'X', 'Z', 'R', 'O', 0x00, 0x00, 0x00, 0x04, 0x00, 0x00,
+        0x00, 0x11, 0x22, 0x33
+    };
+
+    List *context = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                               id3v2CopyContentContext);
+    listInsertBack(context, id3v2CreateContentContext(numeric_context, id3v2djb2("adjustment"), 1, 1));
+    listInsertBack(context, id3v2CreateContentContext(adjustment_context, id3v2djb2("data"), UINT_MAX, 0));
+    listInsertBack(context, id3v2CreateContentContext(iter_context, id3v2djb2("iter"), UINT_MAX, 1));
+
+    Id3v2Frame *f = NULL;
+    uint32_t frameSize = id3v2ParseFrame(xzro, sizeof(xzro), context, ID3V2_TAG_VERSION_3, &f);
+
+    assert_non_null(f);
+    assert_int_equal(frameSize, sizeof(xzro));
+    // the adjustment, the first empty field and one repeat before the guard stops the loop
+    assert_int_equal(listLength(f->entries), 3);
+
+    listFree(context);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2ParseFrame_parseEQU2(void **state) {
+    (void) state;
+    uint8_t equ2[22] = {
+        'E', 'Q', 'U', '2', 0x00, 0x00, 0x00, 0x0c, 0x00, 0x00,
+        0x01,               // linear
+        'e', 'q', 0x00,
+        0x00, 0xc8, 0x04, 0x00, // 100Hz, +2dB
+        0x07, 0xd0, 0xfc, 0x00  // 1000Hz, -2dB
+    };
+
+    Id3v2Frame *f = NULL;
+    List *context = id3v2CreateEqualizationFrameContext(ID3V2_TAG_VERSION_4);
+    uint32_t frameSize = id3v2ParseFrame(equ2, sizeof(equ2), context, ID3V2_TAG_VERSION_4, &f);
+
+    assert_non_null(f);
+    assert_int_equal(frameSize, sizeof(equ2));
+    assert_int_equal(listLength(f->entries), 6);
+
+    const uint8_t *values[] = {
+        (const uint8_t *) "\x00\xc8", (const uint8_t *) "\x04\x00",
+        (const uint8_t *) "\x07\xd0", (const uint8_t *) "\xfc\x00"
+    };
+    Node *n = f->entries->head;
+    const Id3v2ContentEntry *e = (const Id3v2ContentEntry *) n->data;
+    assert_int_equal(e->size, 1);
+    assert_int_equal(((uint8_t *) e->entry)[0], 0x01);
+
+    n = n->next->next;
+    for (size_t i = 0; i < 4; i++) {
+        e = (const Id3v2ContentEntry *) n->data;
+        assert_int_equal(e->size, 2);
+        assert_memory_equal(e->entry, values[i], 2);
+        n = n->next;
+    }
+
+    listFree(context);
     id3v2DestroyFrame(&f);
 }
 
@@ -1790,14 +2092,16 @@ static void id3v2ParseTagFromStream_v4(void **state) {
 
 static void id3v2ParseTagFromStream_v2unsync(void **state) {
     (void) state;
-    uint8_t data[43] = {
-        'I', 'D', '3', 0x02, 0x01, 0x80, 0x00, 0x00, 0x00, 0x21,
-        'T', 0x00, 'A', 0x00, 'L', 0x00, 0x00, 0x00, 0x00, 0x00, 0x0b, 0x00,
-        0x00, 0x00,
-        'F', 0x00, 'a', 0x00, 'm', 0x00, 'i', 0x00, 'l', 0x00, 'y', 0x00, ' ', 0x00, 'G', 0x00, 'u', 0x00, 'y'
+    // tag body is 18 bytes once decoded, 19 as stored: the $FF at the end of the text
+    // was followed by a stuffed $00 that the parser must strip
+    uint8_t data[29] = {
+        'I', 'D', '3', 0x02, 0x01, 0x80, 0x00, 0x00, 0x00, 0x13,
+        'T', 'A', 'L', 0x00, 0x00, 0x0c,
+        0x00,
+        'F', 'a', 'm', 'i', 'l', 'y', ' ', 'G', 'u', 'y', 0xFF, 0x00
     };
 
-    ByteStream *stream = byteStreamCreate(data, 43);
+    ByteStream *stream = byteStreamCreate(data, 29);
     Id3v2Tag *tag = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, NULL);
     uint8_t encoding = 0;
 
@@ -1815,10 +2119,44 @@ static void id3v2ParseTagFromStream_v2unsync(void **state) {
     testEntry(ce, 1, &encoding);
 
     ce = (Id3v2ContentEntry *) f->entries->head->next->data;
-    testEntry(ce, 11, (uint8_t *) "Family Guy");
+    testEntry(ce, 12, (uint8_t *) "Family Guy\xFF");
+
+    assert_null(f->entries->head->next->next);
 
     id3v2DestroyTag(&tag);
     byteStreamDestroy(stream);
+}
+
+// v2.4 frame level unsync: TALB is flagged and stored with a stuffed $00, TIT2 after it
+// is not, so this also checks the parser advances by the stored frame size
+static void id3v2ParseTagFromStream_v4frameUnsync(void **state) {
+    (void) state;
+    uint8_t data[46] = {
+        'I', 'D', '3', 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x24,
+        'T', 'A', 'L', 'B', 0x00, 0x00, 0x00, 0x0d, 0x00, 0x02,
+        0x00,
+        'F', 'a', 'm', 'i', 'l', 'y', ' ', 'G', 'u', 'y', 0xFF, 0x00,
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x03, 0x00, 0x00,
+        0x00, 'H', 'i'
+    };
+
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(data, sizeof(data), NULL);
+    uint8_t encoding = 0;
+
+    assert_non_null(tag);
+    assert_int_equal(tag->header->majorVersion, 4);
+
+    Id3v2Frame *f = (Id3v2Frame *) tag->frames->head->data;
+    testFrameHeader(f, "TALB", 1, 0, 0, 0, 0, 0, 0);
+    testEntry((Id3v2ContentEntry *) f->entries->head->data, 1, &encoding);
+    testEntry((Id3v2ContentEntry *) f->entries->head->next->data, 12, (uint8_t *) "Family Guy\xFF");
+
+    assert_non_null(tag->frames->head->next);
+    f = (Id3v2Frame *) tag->frames->head->next->data;
+    testFrameHeader(f, "TIT2", 0, 0, 0, 0, 0, 0, 0);
+    testEntry((Id3v2ContentEntry *) f->entries->head->next->data, 3, (uint8_t *) "Hi");
+
+    id3v2DestroyTag(&tag);
 }
 
 static void id3v2ParseTagFromStream_v3ext(void **state) {
@@ -1946,6 +2284,15 @@ int main() {
         cmocka_unit_test(id3v2ParseFrame_parseIPLLatin1),
         cmocka_unit_test(id3v2ParseFrame_parseSYLTUTF16),
         cmocka_unit_test(id3v2ParseFrame_parseEQU),
+        cmocka_unit_test(id3v2ParseFrame_parseEQUANonByteAlignedBits),
+        cmocka_unit_test(id3v2ParseFrame_parseRVA),
+        cmocka_unit_test(id3v2ParseFrame_parseRVADAllChannels),
+        cmocka_unit_test(id3v2ParseFrame_parseRVADFrontOnly),
+        cmocka_unit_test(id3v2ParseFrame_parseRVA2PerChannelPeakBits),
+        cmocka_unit_test(id3v2ParseFrame_parseRVA2LastChannelNoPeak),
+        cmocka_unit_test(id3v2ParseFrame_parseRVADOmittedPeaksNotEmitted),
+        cmocka_unit_test(id3v2ParseFrame_zeroWidthIterationStops),
+        cmocka_unit_test(id3v2ParseFrame_parseEQU2),
         cmocka_unit_test(id3v2ParseFrame_parseEncrypted),
 
 
@@ -1954,6 +2301,7 @@ int main() {
         cmocka_unit_test(id3v2ParseTagFromStream_v4),
         cmocka_unit_test(id3v2ParseTagFromStream_v2unsync),
         cmocka_unit_test(id3v2ParseTagFromStream_v3ext),
+        cmocka_unit_test(id3v2ParseTagFromStream_v4frameUnsync),
         cmocka_unit_test(id3v2ParseTagFromStream_v2ULTWithMissingDesc)
 
     };

@@ -101,6 +101,14 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl);
 
 char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version);
 
+/*
+    Unsynchronisation
+*/
+
+uint8_t *id3v2ApplyUnsynchronisation(const uint8_t *in, size_t inl, size_t *outl);
+
+size_t id3v2RemoveUnsynchronisation(uint8_t *buf, size_t len);
+
 
 #ifdef __cplusplus
 } //extern c end
