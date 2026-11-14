@@ -4,6 +4,7 @@ import subprocess
 import errno
 import shutil
 from .InformUser import Inform
+from pathlib import Path
 
 
 # replaces a folder
