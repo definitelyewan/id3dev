@@ -274,7 +274,7 @@ Functions</h2></td></tr>
 <li>binary_context/noEncoding_context/precision_context/numeric_context: Fixed-size raw binary/numeric data</li>
 <li>bit_context: Bit-level extraction, MSB-first across consecutive bit_contexts</li>
 <li>iter_context: Loop control marker for repeated field groups</li>
-<li>adjustment_context: Variable-length data where size comes from previously parsed "adjustment" field</li>
+<li>adjustment_context: Field whose width in bits comes from the most recently parsed "adjustment" field, stored in ceil(bits / 8) bytes</li>
 <li>unknown_context: Skip remaining content</li>
 </ul>
 <p>The function creates heap-allocated content entries for each parsed field and assembles them into a complete frame structure. On success, caller must free with id3v2DestroyFrame.</p>
@@ -290,7 +290,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>uint32_t - Total bytes consumed on success, header size on partial success, or 0 on complete failure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_parser_8c_source.html#l00848">848</a> of file <a class="el" href="id3v2_parser_8c_source.html">id3v2Parser.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_parser_8c_source.html#l00865">865</a> of file <a class="el" href="id3v2_parser_8c_source.html">id3v2Parser.c</a>.</p>
 
 </div>
 </div>
@@ -402,7 +402,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Id3v2Tag* - Heap-allocated complete tag structure on success, partial tag on partial failure, or NULL on complete failure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_parser_8c_source.html#l01135">1135</a> of file <a class="el" href="id3v2_parser_8c_source.html">id3v2Parser.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_parser_8c_source.html#l01177">1177</a> of file <a class="el" href="id3v2_parser_8c_source.html">id3v2Parser.c</a>.</p>
 
 </div>
 </div>

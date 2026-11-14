@@ -155,11 +155,11 @@ Static Public Attributes</h2></td></tr>
 <tr class="memitem:a20abfc86e5b52302f17c18368f0c6f2b" id="r_a20abfc86e5b52302f17c18368f0c6f2b"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#a20abfc86e5b52302f17c18368f0c6f2b">ITER</a> = lib.iter_context</td></tr>
 <tr class="memdesc:a20abfc86e5b52302f17c18368f0c6f2b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Repeats earlier fields: min is the index to start from, max how many times to repeat (iter_context).  <br /></td></tr>
 <tr class="memitem:ab084ddb38e836df04f4d1501bccde928" id="r_ab084ddb38e836df04f4d1501bccde928"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#ab084ddb38e836df04f4d1501bccde928">ADJUSTMENT</a> = lib.adjustment_context</td></tr>
-<tr class="memdesc:ab084ddb38e836df04f4d1501bccde928"><td class="mdescLeft">&#160;</td><td class="mdescRight">Field whose max size is taken from an earlier field keyed "adjustment" (adjustment_context).  <br /></td></tr>
+<tr class="memdesc:ab084ddb38e836df04f4d1501bccde928"><td class="mdescLeft">&#160;</td><td class="mdescRight">Field whose width in bits is taken from the most recent field keyed "adjustment", stored in ceil(bits / 8) bytes and empty when the width is 0; max/min are not used (adjustment_context).  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The type of a <a class="el" href="classid3dev_1_1__context_1_1_context.html" title="The layout of one kind of frame: an ordered list of fields.">Context</a> field: how <a class="el" href="namespaceid3dev.html">id3dev</a> reads and writes it. </p>
-<p>Values come from the compiled Id3v2ContextType enum in id3v2Types.h. For every type except BIT and ITER, a field's max and min are sizes in bytes. These are ints, so they can be passed anywhere <a class="el" href="namespaceid3dev.html">id3dev</a> expects one.</p>
+<p>Values come from the compiled Id3v2ContextType enum in id3v2Types.h. For every type except BIT, ITER and ADJUSTMENT, a field's max and min are sizes in bytes. These are ints, so they can be passed anywhere <a class="el" href="namespaceid3dev.html">id3dev</a> expects one.</p>
 <div class="fragment"><div class="line"><span class="keyword">from</span> id3dev <span class="keyword">import</span> Context, ContextType</div>
 <div class="line"> </div>
 <div class="line">ctx = Context().add(ContextType.LATIN1, <span class="stringliteral">&quot;label&quot;</span>, 64, 1)</div>
@@ -184,7 +184,7 @@ Static Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Field whose max size is taken from an earlier field keyed "adjustment" (adjustment_context). </p>
+<p>Field whose width in bits is taken from the most recent field keyed "adjustment", stored in ceil(bits / 8) bytes and empty when the width is 0; max/min are not used (adjustment_context). </p>
 
 </div>
 </div>

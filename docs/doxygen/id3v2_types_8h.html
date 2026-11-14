@@ -722,8 +722,8 @@ Enumerations</h2></td></tr>
 <tr><td class="fieldname"><a id="a5952924cb986144f1228a28505ce4bc0a41cc8eeca49ec075af9c4f0e01822060" name="a5952924cb986144f1228a28505ce4bc0a41cc8eeca49ec075af9c4f0e01822060"></a>iter_context&#160;</td><td class="fielddoc"><p>Iterator for repeating context sequences. </p>
 <p>Executes contexts from index 'min' for 'max' iterations. Min/max semantics differ: min=start index, max=iteration count. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="a5952924cb986144f1228a28505ce4bc0a8ce069d917f9f241b3f9b6b87b5aae30" name="a5952924cb986144f1228a28505ce4bc0a8ce069d917f9f241b3f9b6b87b5aae30"></a>adjustment_context&#160;</td><td class="fielddoc"><p>Dynamic upper bound adjustment based on prior context with key 'adjustment'. </p>
-<p>Allows runtime modification of context max value using data from previous context labeled 'adjustment'. </p>
+<tr><td class="fieldname"><a id="a5952924cb986144f1228a28505ce4bc0a8ce069d917f9f241b3f9b6b87b5aae30" name="a5952924cb986144f1228a28505ce4bc0a8ce069d917f9f241b3f9b6b87b5aae30"></a>adjustment_context&#160;</td><td class="fielddoc"><p>Field whose width in bits is set by a prior context with key 'adjustment'. </p>
+<p>The most recently parsed field keyed 'adjustment' gives the width in bits. The field is stored in ceil(bits / 8) whole bytes, padded at the most significant end, and is empty when the width is 0. Because the most recent value is used, an 'adjustment' field inside an iter_context applies only to its own iteration. The 'adjustment' field must be a numeric, binary, noEncoding or precision context. </p>
 </td></tr>
 </table>
 

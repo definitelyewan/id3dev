@@ -334,7 +334,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>uint8_t* - Heap allocated byte array containing the serialized context. Returns NULL if cc is NULL (with outl set to 0). Caller must free the returned buffer </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01970">1970</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l02045">2045</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -365,7 +365,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>char* - Heap allocated null-terminated JSON string. Returns "{}" if cc is NULL. Caller must free the returned string </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l02033">2033</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l02108">2108</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -619,7 +619,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>HashTable* - Heap allocated hash table mapping frame ID strings to context definition lists. Contains 60+ standard frame mappings plus fallback contexts. Caller must free with hashTableDestroy() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01416">1416</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01491">1491</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -662,16 +662,18 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Creates a context definition list for equalization frames (EQU/EQUA/EQU2). </p>
-<p>Constructs a list defining the structure of equalization frames, with format varying by ID3v2 version. For v2.2/v2.3 (EQU/EQUA): specifies a 1-byte adjustment bits field, a 1-bit increment/decrement flag, a 15-bit frequency value, volume adjustment data (1 to UINT_MAX bytes, length dependent on adjustment field), and an iterator context for repeating frequency/volume pairs. For v2.4 (EQU2): specifies a 1-byte interpolation method symbol, an identifier string (1 to UINT_MAX bytes) in latin-1 format describing the equalization curve, a 2-byte volume adjustment value, and an iterator for repeating frequency/volume pairs (minimum 2 bytes). These structures enable storage of frequency-specific volume adjustments for audio equalization.</p>
+<p>Follows ID3v2.2 4.13, ID3v2.3 4.13 and ID3v2.4 4.12.</p>
+<p>For v2.2/v2.3 (EQU/EQUA): a 1-byte "adjustment" field giving the number of bits used for each adjustment, then for every band a 1-bit increment/decrement flag, a 15-bit frequency and an adjustment of ceil(adjustment bits / 8) bytes. The bands repeat until the frame data runs out.</p>
+<p>For v2.4 (EQU2): a 1-byte interpolation method, a latin-1 identification string, then for every adjustment point a 2-byte frequency (units of 1/2 Hz) and a 2-byte signed volume adjustment (dB * 512). The points repeat until the frame data runs out.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">version</td><td>The ID3v2 version (ID3V2_TAG_VERSION_2, ID3V2_TAG_VERSION_3, or ID3V2_TAG_VERSION_4)</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing version-specific content contexts. For v2.2/v2.3: adjustment (1 byte), unary (1 bit), frequency (15 bits), volume (1-UINT_MAX bytes), and iter (1-UINT_MAX bytes). For v2.4: symbol (1 byte), identifier (1-UINT_MAX bytes), volume (2 bytes), and iter (2-UINT_MAX bytes). Caller must free with listFree() </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing version-specific content contexts. For v2.2/v2.3: adjustment (1 byte), unary (1 bit), frequency (15 bits), volume (adjustment_context) and iter (from unary). For v2.4: symbol (1 byte), identifier (latin-1), frequency (2 bytes), volume (2 bytes) and iter (from frequency). An unknown version yields a single unknown_context. Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00672">672</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00674">674</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -694,7 +696,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of event timing codes frames that mark significant moments during audio playback. The context specifies: a 1-byte symbol field indicating the time stamp format (MPEG frames, milliseconds, etc.), a 1-byte event type code identifying the event (intro start, outro start, key change, etc.), a 4-byte time stamp indicating when the event occurs, and an iterator context for repeating type/stamp pairs (1 to UINT_MAX bytes). This structure enables synchronization of events with audio playback at precisely defined moments.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing four content contexts: symbol (1 byte), type (1 byte), stamp (4 bytes), and iter (1-UINT_MAX bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00745">745</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00751">751</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -717,7 +719,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of general encapsulated object frames used to embed arbitrary files within ID3v2 tags. The context specifies: a 1-byte encoding field for text strings, a MIME type format string (1 to UINT_MAX bytes) in latin-1 encoding describing the object type, a filename field (1 to UINT_MAX bytes) in the specified encoding, a content description field (1 to UINT_MAX bytes) in the specified encoding, and binary data (1 to UINT_MAX bytes) containing the actual encapsulated object. This structure enables embedding any file type (documents, images, archives, etc.) directly within the audio file's metadata.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing five content contexts: encoding (1 byte), format (1-UINT_MAX bytes), name (1-UINT_MAX bytes), description (1-UINT_MAX bytes), and data (1-UINT_MAX bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00783">783</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00789">789</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -740,7 +742,7 @@ Functions</h2></td></tr>
 <p>Constructs a minimal fallback list for handling frames whose structure is not explicitly defined or recognized by the parser. The context specifies a single binary data field (1 to UINT_MAX bytes) that captures the entire frame content without interpretation. This generic context enables the library to preserve and handle unrecognized frame types, experimental frames, or proprietary frame extensions without data loss, allowing the complete tag to be read, modified, and written back even when some frame types are unknown.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing one content context: binary data (1-UINT_MAX bytes) marked with unknown identifier. Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01387">1387</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01462">1462</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -763,7 +765,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of involved people list frames that document individuals involved in the recording and their roles. The context specifies: a 1-byte encoding field for text strings, a name field (1 to UINT_MAX bytes) in the specified encoding describing the involvement or role (e.g., "producer", "engineer", "mixer"), a text field (1 to UINT_MAX bytes) in the specified encoding containing the person's name, and an iterator context for repeating name/text pairs (1 to UINT_MAX bytes). This structure enables documentation of multiple contributors and their specific roles in the production process.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing four content contexts: encoding (1 byte), name (1-UINT_MAX bytes), text (1-UINT_MAX bytes), and iter (1-UINT_MAX bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00824">824</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00830">830</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -786,7 +788,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of linked information frames used to reference additional data stored externally or in other locations within the tag. The context specifies: a URL field (1 to UINT_MAX bytes) in latin-1 encoding pointing to the location of the linked information, and a data field (1 to UINT_MAX bytes) containing frame identifier codes and additional identification data for the linked content. This structure enables referencing external resources or creating connections between frames without duplicating large amounts of data within the tag itself.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing two content contexts: url (1-UINT_MAX bytes) and data (1-UINT_MAX bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00860">860</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00866">866</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -809,7 +811,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of MPEG location lookup table frames that provide seek point references for efficient navigation within MPEG audio streams. The context specifies a single binary data field (1 to UINT_MAX bytes) containing reference point information including MPEG frames between references, bytes between references, milliseconds between references, and deviation arrays. Note: This implementation treats the entire frame as binary data without parsing individual subfields, as MLLT frames are rarely used in practice.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing one content context: data (1-UINT_MAX bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00887">887</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00893">893</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -855,7 +857,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of ownership frames that document the legal ownership of the audio file. The context specifies: a 1-byte encoding field for text strings, a price string (1 to UINT_MAX bytes) in latin-1 format indicating the purchase price with currency code, an 8-byte date string (YYYYMMDD format) in latin-1 encoding indicating the date of purchase, and a seller name field (1 to UINT_MAX bytes) in the specified encoding containing the name of the person or organization from whom the file was purchased. This structure provides a record of legitimate ownership and purchase information.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing four content contexts: encoding (1 byte), price (1-UINT_MAX bytes), date (8 bytes), and name (1-UINT_MAX bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00911">911</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00917">917</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -901,7 +903,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of popularimeter frames that store user ratings and play count information. The context specifies: an identifier field (1 to UINT_MAX bytes) in latin-1 encoding containing the email address of the user or application providing the rating, a 1-byte rating symbol value (typically 0-255, where higher values indicate better ratings), and a counter data field (1 to UINT_MAX bytes) containing the play count as a big-endian integer. This structure enables multiple users or applications to store independent ratings and play counts by using unique email identifiers.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing three content contexts: identifier (1-UINT_MAX bytes), symbol (1 byte), and data (1-UINT_MAX bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00947">947</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00953">953</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -924,7 +926,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of position synchronisation frames used to mark the current playback position when audio has been edited or reorganized. The context specifies: a 1-byte format field indicating the time stamp format (MPEG frames, milliseconds, etc.), and a 4-byte time stamp value indicating the precise playback position within the audio. This structure enables applications to maintain synchronized playback positions across edited versions of the same audio file or after structural modifications.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing two content contexts: format (1 byte) and stamp (4 bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00978">978</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l00984">984</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -947,7 +949,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of private frames used to store application-specific proprietary data. The context specifies: an identifier field (1 to UINT_MAX bytes) in latin-1 encoding containing the owner identifier (typically an email address or URL) that uniquely identifies the application or organization, and a binary data field (1 to UINT_MAX bytes) containing the private data in any format chosen by the owner. Using unique identifiers prevents conflicts between different applications storing private data within the same tag, enabling custom metadata extensions without standardization.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing two content contexts: identifier (1-UINT_MAX bytes) and data (1-UINT_MAX bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01006">1006</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01012">1012</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -970,7 +972,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of recommended buffer size frames that provide guidance for optimal streaming buffer sizes. The context specifies: a 3-byte buffer size field indicating the recommended minimum buffer size in bytes for streaming the audio file, a 1-byte flag field where bit 0 indicates whether embedded info is present and bit 1 indicates the next tag location, and an optional 4-byte offset field (0 to 4 bytes) containing the offset to the next tag if the flag indicates its presence. This structure helps streaming applications optimize buffering and locate subsequent tags efficiently.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing three content contexts: buffer (3 bytes), flag (1 byte), and offset (0-4 bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01034">1034</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01040">1040</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -1013,16 +1015,19 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Creates a context definition list for relative volume adjustment frames (RVA/RVAD/RVA2). </p>
-<p>Constructs a simplified list defining the structure of relative volume adjustment frames used to specify recommended playback volume changes. Currently implemented as a single binary data field (1 to UINT_MAX bytes) containing the entire frame structure without parsing individual components. The complete RVA2 structure includes an identification string, channel type bytes, volume adjustment values (typically 2 bytes), bits representing peak volume, and optional peak volume data. This simplified implementation allows reading and preserving RVA frames while deferring detailed parsing to future enhancements or post-processing functions. </p><dl class="section warning"><dt>Warning</dt><dd>THIS IS A BUMMY IMPLEMENTATION AND NEEDS TO BE UPDATED IN THE FUTURE </dd></dl>
+<p>Follows ID3v2.2 4.12, ID3v2.3 4.12 and ID3v2.4 4.11.</p>
+<p>For v2.2 (RVA): a 1-byte increment/decrement field (bit 0 right, bit 1 left), a 1-byte "adjustment" field giving the bits used for each volume description, then relative volume change right/left and peak volume right/left, each ceil(adjustment bits / 8) bytes. The peak fields may be omitted.</p>
+<p>For v2.3 (RVAD): as v2.2, optionally followed by the right back/left back volume changes and peaks (bits 2 and 3), the center volume change and peak (bit 4) and the bass volume change and peak (bit 5), in that order. Trailing groups that are absent are simply not parsed.</p>
+<p>For v2.4 (RVA2): a latin-1 identification string, then for every channel a 1-byte channel type, a 2-byte signed volume adjustment (dB * 512), a 1-byte "adjustment" field giving the bits representing the peak (0-255) and a peak volume of ceil(bits / 8) bytes, which is empty when the bits are 0. Each channel's peak uses that channel's own "adjustment" field. The channels repeat until the frame data runs out.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">version</td><td>The ID3v2 version (currently unused; all versions treated uniformly as binary data)</td></tr>
+    <tr><td class="paramname">version</td><td>The ID3v2 version (ID3V2_TAG_VERSION_2, ID3V2_TAG_VERSION_3, or ID3V2_TAG_VERSION_4)</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing one content context: data (1-UINT_MAX bytes). Caller must free with listFree() </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list of version-specific content contexts. An unknown version yields a single unknown_context. Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01068">1068</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01082">1082</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -1045,7 +1050,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of reverb frames that specify recommended reverb effect parameters for audio playback. The context specifies: 2-byte reverb delay values for left and right channels in milliseconds, 1-byte bounce values for left and right channels indicating initial reflection intensity, four 1-byte feedback values defining the cross-channel feedback matrix (left-to-left, left-to-right, right-to-right, right-to-left), and 1-byte premix level values for left and right channels controlling the dry/wet mix. These ten fields provide comprehensive control over stereo reverb characteristics, enabling applications to recreate the intended spatial audio effects during playback.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing ten content contexts: left (2 bytes), right (2 bytes), bounce left (1 byte), bounce right (1 byte), feedback ll (1 byte), feedback lr (1 byte), feedback rr (1 byte), feedback rl (1 byte), p left (1 byte), and p right (1 byte). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01094">1094</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01169">1169</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -1068,7 +1073,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of seek frames that indicate the location of additional ID3v2 tags within the audio file. The context specifies a single 4-byte offset field containing the minimum number of bytes from the end of the current tag to the beginning of the next tag. This structure enables efficient tag discovery by allowing applications to skip directly to subsequent tags without scanning the entire file, particularly useful for files containing multiple ID3v2 tags at different locations.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing one content context: offset (4 bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01152">1152</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01227">1227</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -1091,7 +1096,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of signature frames used to provide digital signatures for tag authentication and integrity verification. The context specifies: a 1-byte symbol field identifying the group or frame type being signed, and a binary data field (1 to UINT_MAX bytes) containing the actual digital signature. The signature is calculated over specific tag data to ensure authenticity and detect unauthorized modifications. This structure enables verification that tag content has not been altered since the signature was applied by the legitimate owner or authority.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing two content contexts: symbol (1 byte) and data (1-UINT_MAX bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01176">1176</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01251">1251</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -1114,7 +1119,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of synchronised lyrics or text that display lyrics, captions, or other text synchronized with audio playback. The context specifies: a 1-byte encoding field for text strings, a 3-byte language code in ISO-639-2 format, a 1-byte time stamp format indicator (MPEG frames, milliseconds, etc.), a 1-byte content type symbol identifying the text purpose (lyrics, transcription, movement description, etc.), a content descriptor field (1 to UINT_MAX bytes) in the specified encoding, a text field (1 to UINT_MAX bytes) containing the synchronized text content, a 4-byte time stamp indicating when to display the text, and an iterator context for repeating text/stamp pairs (minimum 5 bytes). This structure enables karaoke-style lyric display and timed caption presentation during playback.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing eight content contexts: encoding (1 byte), language (3 bytes), format (1 byte), symbol (1 byte), description (1-UINT_MAX bytes), text (1-UINT_MAX bytes), stamp (4 bytes), and iter (5-UINT_MAX bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01207">1207</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01282">1282</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -1137,7 +1142,7 @@ Functions</h2></td></tr>
 <p>Constructs a simplified list defining the structure of synchronised tempo codes frames used to specify tempo/BPM changes throughout the audio track. The context specifies: a 1-byte time stamp format field indicating the timing unit (MPEG frames, milliseconds, etc.), and a binary data field (1 to UINT_MAX bytes) containing tempo change events. Currently implemented as binary data without parsing individual tempo entries, each of which would normally consist of a tempo value and corresponding time stamp. This simplified implementation allows reading and preserving SYTC frames while deferring detailed tempo event parsing to future enhancements or post-processing functions. </p><dl class="section warning"><dt>Warning</dt><dd>THIS IS AN INCOMPLETE IMPLEMENTATION AND NEEDS TO BE UPDATED IN THE FUTURE </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing two content contexts: format (1 byte) and data (1-UINT_MAX bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01260">1260</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01335">1335</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -1160,7 +1165,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of terms of use frames that specify legal usage conditions and licensing information for the audio file. The context specifies: a 1-byte encoding field for text strings, a 3-byte language code in ISO-639-2 format indicating the language of the terms, and a text field (1 to UINT_MAX bytes) in the specified encoding containing the complete terms of use, copyright restrictions, or licensing conditions. This structure enables content creators and distributors to embed legally binding usage terms directly within the audio file metadata, ensuring users are informed of restrictions and requirements.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing three content contexts: encoding (1 byte), language (3 bytes), and text (1-UINT_MAX bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01317">1317</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01392">1392</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -1207,7 +1212,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of unique file identifier frames used to store database-specific identifiers for the audio file. The context specifies: a URL or owner identifier field (1 to UINT_MAX bytes) in latin-1 encoding identifying the database or system (such as "http://www.id3.org/dummy/ufid.html" or "http://musicbrainz.org"), and a binary data field (1 to 64 bytes) containing the unique identifier value assigned by that database. Multiple UFID frames with different owner identifiers enable the file to be tracked across various music databases and services simultaneously.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing two content contexts: url (1-UINT_MAX bytes) and data (1-64 bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01288">1288</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01363">1363</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -1230,7 +1235,7 @@ Functions</h2></td></tr>
 <p>Constructs a list defining the structure of unsynchronised lyrics or text comment frames that contain complete lyrics or text without timing information. The context specifies: a 1-byte encoding field for text strings, a 3-byte language code in ISO-639-2 format indicating the text language, a content descriptor field (1 to UINT_MAX bytes) in the specified encoding providing a brief description of the content, and a text field (1 to UINT_MAX bytes) in the specified encoding containing the full lyrics or extended text. Unlike synchronised lyrics (SYLT), this frame stores text without time stamps, making it suitable for displaying complete lyrics statically or for general text content that doesn't require playback synchronization.</p>
 <dl class="section return"><dt>Returns</dt><dd>List* - Heap allocated list containing four content contexts: encoding (1 byte), language (3 bytes), description (1-UINT_MAX bytes), and text (1-UINT_MAX bytes). Caller must free with listFree() </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01352">1352</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01427">1427</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>
@@ -1453,7 +1458,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>bool - true if the pairing was successfully inserted, false if any parameter is NULL </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l01942">1942</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_context_8c_source.html#l02017">2017</a> of file <a class="el" href="id3v2_context_8c_source.html">id3v2Context.c</a>.</p>
 
 </div>
 </div>

@@ -258,7 +258,7 @@ Functions</h2></td></tr>
 <tr class="memitem:acc0b2969133a0c51267f0534be227f1e" id="r_acc0b2969133a0c51267f0534be227f1e"><td class="memItemLeft">char *&#160;</td><td class="memItemRight"><a class="el" href="#acc0b2969133a0c51267f0534be227f1e">id3v2TagToJSON</a> (<a class="el" href="id3v2_types_8h.html#a470730b75a95acb88dfb1736f05e8e81">Id3v2Tag</a> *tag)</td></tr>
 <tr class="memdesc:acc0b2969133a0c51267f0534be227f1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Serializes an ID3v2 tag structure to JSON format.  <br /></td></tr>
 <tr class="memitem:a3b2d6c7eb03f4557397e2b008f48a68b" id="r_a3b2d6c7eb03f4557397e2b008f48a68b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a3b2d6c7eb03f4557397e2b008f48a68b">id3v2WriteTagToFile</a> (const char *filePath, <a class="el" href="id3v2_types_8h.html#a470730b75a95acb88dfb1736f05e8e81">Id3v2Tag</a> *tag)</td></tr>
-<tr class="memdesc:a3b2d6c7eb03f4557397e2b008f48a68b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes an ID3v2 tag to a file, creating, prepending, or replacing as needed.  <br /></td></tr>
+<tr class="memdesc:a3b2d6c7eb03f4557397e2b008f48a68b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Writes an ID3v2 tag to the start of a file, creating, prepending, or replacing as needed.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Function implementation of ID3v2 tag operations including reading/writing metadata frames, tag serialization, and file I/O. </p>
@@ -1326,8 +1326,8 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Writes an ID3v2 tag to a file, creating, prepending, or replacing as needed. </p>
-<p>Serializes the tag and handles three scenarios: (1) If file doesn't exist, creates it and writes the tag; (2) If file exists without a tag or with the update flag set in the extended header, prepends the new tag to the file; (3) If file exists with a tag and no update flag, replaces the old tag by reading existing tag size, writing new tag at file start, and appending remaining file data. Accounts for footer (10 bytes for ID3v2.4) and padding from extended header when calculating offsets. Returns false on validation failures (null parameters, serialization errors, file open/read/write errors, or memory allocation failures) without modifying the file. Frees all allocated memory on both success and failure paths. </p><dl class="params"><dt>Parameters</dt><dd>
+<p>Writes an ID3v2 tag to the start of a file, creating, prepending, or replacing as needed. </p>
+<p>Serializes the tag, then: (1) if the file doesn't exist, creates it holding only the tag; (2) if the file doesn't start with an ID3v2 tag, or the new tag's extended header has the update flag set, puts the new tag in front of the existing contents; (3) if the file starts with an ID3v2 tag, replaces that tag. The old tag's length comes from its own header: 10 bytes, plus its syncsafe size, plus a 10 byte footer when an ID3v2.4 header says it has one. Only a tag at offset 0 is replaced; "ID3" bytes anywhere else are audio and are kept. Every byte after the old tag is kept and the file is rewritten to its new length, so a smaller tag leaves no stale bytes at the end. The existing file is read into memory and rewritten in full. If the existing tag's header can't be trusted (size bytes that aren't syncsafe, or a size past the end of the file), returns false and leaves the file untouched. If a write fails part way, the original contents are written back. The rewrite is not atomic: a crash or power loss during it can leave the file incomplete, so callers needing that guarantee should write a copy and rename it over the original. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">filePath</td><td>- Null-terminated string containing the path to the file to write. </td></tr>
     <tr><td class="paramname">tag</td><td>- Tag structure to write to the file. </td></tr>
@@ -1336,7 +1336,7 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>int - 1 (true) if tag written successfully, 0 (false) on failure. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="id3v2_8c_source.html#l02332">2332</a> of file <a class="el" href="id3v2_8c_source.html">id3v2.c</a>.</p>
+<p class="definition">Definition at line <a class="el" href="id3v2_8c_source.html#l02339">2339</a> of file <a class="el" href="id3v2_8c_source.html">id3v2.c</a>.</p>
 
 </div>
 </div>
