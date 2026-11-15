@@ -33,7 +33,7 @@ endif()
 
 # Enable shared lib
 if(BUILD_ID3_SHARED_LIBS)
-    option(BUILD_SHARED_LIBS ON)
+    set(BUILD_SHARED_LIBS ON)
 endif()
 
 # Build dependencies
