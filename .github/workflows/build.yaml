@@ -89,7 +89,8 @@ jobs:
         env:
           CIBW_ARCHS_LINUX: ${{ matrix.archs }}
           CIBW_ARCHS_MACOS: ${{ matrix.archs }}
-          CIBW_SKIP: "pp* *-musllinux_*"   # drop musllinux for Alpine wheels
+          CIBW_BUILD: "cp39-*"             # one abi3 wheel per platform
+          CIBW_SKIP: "*-musllinux_*"       # drop musllinux for Alpine wheels
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: pytest -q {package}/tests
         run: |
