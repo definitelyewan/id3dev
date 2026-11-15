@@ -1,0 +1,137 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # ---------------------------------------------------------------
+  # C shared library (libid3dev.so) for x86_64, aarch64, armv7
+  # ---------------------------------------------------------------
+  shared-lib:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { arch: x86_64,  runner: ubuntu-24.04,     container: "" }
+          - { arch: aarch64, runner: ubuntu-24.04-arm, container: "" }
+          - { arch: armv7,   runner: ubuntu-24.04-arm, container: "arm32v7/debian:bookworm" }
+          - { arch: arm64,   runner: macos-latest,     container: "", os: macos }
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build (native)
+        if: matrix.container == ''
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_ID3_SHARED_LIBS=ON
+          cmake --build build --parallel
+
+      - name: Build (armv7 container)
+        if: matrix.container != ''
+        run: |
+          docker run --rm --platform linux/arm/v7 \
+            -v "$PWD":/src -w /src ${{ matrix.container }} \
+            bash -c "apt-get update -qq && apt-get install -y -qq cmake gcc g++ make && \
+                     cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_ID3_SHARED_LIBS=ON && \
+                     cmake --build build --parallel"
+
+      - name: Collect
+        run: |
+          mkdir -p out
+          find build \( -name 'libid3dev.so*' -o -name 'libid3dev*.dylib' \) -exec cp -P {} out/ \;
+          file out/*
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libid3dev-${{ matrix.os || 'linux' }}-${{ matrix.arch }}
+          path: out/
+
+  # ---------------------------------------------------------------
+  # Python wheels (cffi) for x86_64, aarch64, armv7l
+  # ---------------------------------------------------------------
+  wheels:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: ubuntu-24.04,     archs: "x86_64" }
+          - { runner: ubuntu-24.04-arm, archs: "aarch64 armv7l" }
+          - { runner: macos-latest,     archs: "arm64" }
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Vendor C sources + test assets
+        run: |
+          V=interfaces/python/id3dev/vendor/id3dev
+          mkdir -p "$V/id3dependencies"
+          cp -r include src LICENSE "$V/"
+          for dep in ByteStream LinkedListLib HashTableLib; do
+            mkdir -p "$V/id3dependencies/$dep"
+            cp -r id3dependencies/$dep/include id3dependencies/$dep/src \
+                  id3dependencies/$dep/LICENSE "$V/id3dependencies/$dep/"
+          done
+          find "$V" -name CMakeLists.txt -delete
+          cp -r assets interfaces/python/id3dev/tests/assets
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build wheels
+        env:
+          CIBW_ARCHS_LINUX: ${{ matrix.archs }}
+          CIBW_ARCHS_MACOS: ${{ matrix.archs }}
+          CIBW_BUILD: "cp39-*"             # one abi3 wheel per platform
+          CIBW_SKIP: "*-musllinux_*"       # drop musllinux for Alpine wheels
+          CIBW_TEST_REQUIRES: pytest
+          CIBW_TEST_COMMAND: pytest -q {package}/tests
+        run: |
+          pip install cibuildwheel
+          cibuildwheel --output-dir wheelhouse interfaces/python/id3dev
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.runner }}
+          path: wheelhouse/*.whl
+
+  # ---------------------------------------------------------------
+  # On a v* tag, attach everything to a GitHub Release
+  # ---------------------------------------------------------------
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [shared-lib, wheels]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Package release assets
+        run: |
+          mkdir -p assets
+          # one tarball per shared-lib build (the .so names would otherwise clash)
+          for d in dist/libid3dev-*; do
+            tar -czf "assets/$(basename "$d").tar.gz" -C "$d" .
+          done
+          # wheels already have unique names
+          cp dist/wheels-*/*.whl assets/
+          ls -l assets
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" assets/* \
+            --repo "${{ github.repository }}" \
+            --title "${{ github.ref_name }}" \
+            --generate-notes
