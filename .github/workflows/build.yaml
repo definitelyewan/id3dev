@@ -89,7 +89,7 @@ jobs:
         env:
           CIBW_ARCHS_LINUX: ${{ matrix.archs }}
           CIBW_ARCHS_MACOS: ${{ matrix.archs }}
-          CIBW_SKIP: "pp* *-musllinux_*"   # drop the musllinux fr Alpine wheels
+          CIBW_SKIP: "pp* *-musllinux_*"   # drop musllinux for Alpine wheels
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: pytest -q {package}/tests
         run: |
@@ -100,3 +100,37 @@ jobs:
         with:
           name: wheels-${{ matrix.runner }}
           path: wheelhouse/*.whl
+
+  # ---------------------------------------------------------------
+  # On a v* tag, attach everything to a GitHub Release
+  # ---------------------------------------------------------------
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [shared-lib, wheels]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Package release assets
+        run: |
+          mkdir -p assets
+          # one tarball per shared-lib build (the .so names would otherwise clash)
+          for d in dist/libid3dev-*; do
+            tar -czf "assets/$(basename "$d").tar.gz" -C "$d" .
+          done
+          # wheels already have unique names
+          cp dist/wheels-*/*.whl assets/
+          ls -l assets
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" assets/* \
+            --repo "${{ github.repository }}" \
+            --title "${{ github.ref_name }}" \
+            --generate-notes
