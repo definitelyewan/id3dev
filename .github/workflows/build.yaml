@@ -37,7 +37,7 @@ jobs:
         run: |
           docker run --rm --platform linux/arm/v7 \
             -v "$PWD":/src -w /src ${{ matrix.container }} \
-            bash -c "apt-get update -qq && apt-get install -y -qq cmake gcc make && \
+            bash -c "apt-get update -qq && apt-get install -y -qq cmake gcc g++ make && \
                      cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_ID3_SHARED_LIBS=ON && \
                      cmake --build build --parallel"
 
@@ -89,7 +89,7 @@ jobs:
         env:
           CIBW_ARCHS_LINUX: ${{ matrix.archs }}
           CIBW_ARCHS_MACOS: ${{ matrix.archs }}
-          CIBW_SKIP: "pp* *-musllinux_*"   # delete for alpine wheel
+          CIBW_SKIP: "pp* *-musllinux_*"   # drop the musllinux fr Alpine wheels
           CIBW_TEST_REQUIRES: pytest
           CIBW_TEST_COMMAND: pytest -q {package}/tests
         run: |
