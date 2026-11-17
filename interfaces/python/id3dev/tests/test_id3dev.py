@@ -31,6 +31,16 @@ def test_missing_file():
         ID3.from_file(ASSETS / "nope.mp3")
 
 
+def test_file_without_tags_raises_with_or_without_pairs():
+    pairs = Id3Pairs()
+    pairs["XFRM"] = Context().add(ContextType.BINARY, "data", 64, 1)
+    with pytest.raises(ValueError):
+        ID3.from_file(ASSETS / "null.mp3")
+    with pytest.raises(ValueError):
+        ID3.from_file(ASSETS / "null.mp3", pairs=pairs)
+    assert ID3.from_file(ASSETS / "empty.mp3", pairs=pairs).has_id3v1   # ID3v1 only still loads
+
+
 def test_write_and_save_round_trip(mp3):
     tag = ID3.from_file(mp3)
     tag.title = "New Title"
@@ -74,6 +84,51 @@ def test_remove_frames(mp3):
     tag = ID3.from_file(mp3)
     assert tag.remove_frames("TIT2") >= 1
     assert tag.frame("TIT2") is None
+
+
+def _comm(language: bytes, desc: str, text: str) -> Frame:
+    f = Frame.new("COMM", 3)
+    f.set_entries(b"\x03", language, desc.encode() + b"\x00", text.encode())
+    return f
+
+
+def test_find_and_remove_frames_by_key_value(mp3):
+    tag = ID3.from_file(mp3)
+    tag.remove_frames("COMM")
+    tag.remove_frames("TXXX")
+    for desc in ("XREF", "keep"):
+        txxx = Frame.new("TXXX", 3)
+        txxx.set_entries(b"\x01", b"\xff\xfe" + desc.encode("utf-16-le"), b"\xff\xfe" + "v".encode("utf-16-le"))
+        tag.add_frame(txxx)
+    for frame in (_comm(b"eng", "", "a"), _comm(b"deu", "", "b"), _comm(b"eng", "note", "c")):
+        tag.add_frame(frame)
+
+    # text fields compare as text whatever the encoding (these are UTF-16)
+    found = tag.find_frames("TXXX", "desc", "XREF")
+    assert len(found) == 1 and found[0].matches("desc", "XREF")
+    assert tag.find_frames("TXXX", "desc", "xref") == []
+
+    # narrowing by a second field
+    empty = tag.find_frames("COMM", "desc", "")
+    assert len(empty) == 2
+    assert [f.matches("language", "deu") for f in empty] == [False, True]
+    assert empty[0].matches("language", b"eng")                       # bytes or str
+
+    assert tag.remove_frames("TXXX", "desc", "XREF") == 1
+    assert tag.remove_frames("COMM", "desc", "") == 2                 # every match goes
+    assert tag.remove_frames("COMM", "desc", "missing") == 0
+    tag.save(mp3)
+
+    again = ID3.from_file(mp3)
+    assert [f.matches("desc", "keep") for f in again.find_frames("TXXX", "desc", "keep")] == [True]
+    assert again.find_frames("TXXX", "desc", "XREF") == []
+    assert len(again.find_frames("COMM", "desc", "note")) == 1
+    assert again.find_frames("COMM", "desc", "") == []
+
+    with pytest.raises(ValueError):
+        tag.remove_frames("COMM", "desc")                             # key without value
+    with pytest.raises(TypeError):
+        tag.find_frames("COMM", "desc", 5)
 
 
 def test_custom_frame_with_pairs(mp3):
@@ -204,6 +259,9 @@ def test_genre_enum():
     assert Genre.from_text(" hip-hop ") is Genre.HIP_HOP
     assert Genre.CHRISTMAS.text == "Christmas"
     assert len({g.text for g in Genre}) == len(Genre)   # every genre has its own name
+    assert Genre.UNKNOWN == 255 and Genre.UNKNOWN.text == "Unknown"
+    assert Genre.from_text("Other") is Genre.OTHER
+    assert Genre.from_text("unknown") is Genre.UNKNOWN
     with pytest.raises(ValueError):
         Genre.from_text("Vaporwave")
 
@@ -267,6 +325,33 @@ def test_direct_tags_ignore_preferred_standard():
     assert tag.id3v1.artist == ""
 
 
+def test_id3v1_json_is_escaped():
+    tag = ID3.new(None, id3v1=True)
+    v1 = tag.id3v1
+    v1.title, v1.artist, v1.album = 'Say "hi"', "C:\\new", "tab\there"
+    parsed = json.loads(tag.to_json())["ID3v1"]
+    assert (parsed["title"], parsed["artist"], parsed["album"]) == ('Say "hi"', "C:\\new", "tab\there")
+
+
+def test_id3v1_text_is_latin1_on_disk(tmp_path):
+    tag = ID3.new(None, id3v1=True)
+    v1 = tag.id3v1
+    v1.title = "Héctor"
+    v1.artist = "파란노을 €"                       # not in Latin-1
+    v1.comment = "é" * 40                          # 40 characters, 30 fit
+    assert v1.title == "Héctor"
+    assert v1.artist == "???? ?"
+    assert v1.comment == "é" * 30
+
+    path = tmp_path / "v1.mp3"
+    shutil.copy(ASSETS / "null.mp3", path)
+    tag.save(path)
+    raw = path.read_bytes()[-128:]
+    assert raw[3:33].rstrip(b"\x00") == "Héctor".encode("latin-1")
+    assert raw[33:63].rstrip(b"\x00") == b"???? ?"
+    assert ID3.from_file(path).id3v1.title == "Héctor"
+
+
 def test_id3v1_fields(tmp_path):
     tag = ID3.new(None, id3v1=True)
     assert tag.id3v2 is None
@@ -291,8 +376,8 @@ def test_id3v1_fields(tmp_path):
     assert (again.title, again.year, again.track, again.genre) == ("Happier Than Ever", 2021, 15, Genre.ROCK)
 
 
-def test_id3v1_unknown_genre_reads_none():
-    assert ID3.from_file(ASSETS / "sorry4dying.mp3").id3v1.genre is None   # genre byte 255
+def test_id3v1_unknown_genre():
+    assert ID3.from_file(ASSETS / "sorry4dying.mp3").id3v1.genre is Genre.UNKNOWN   # genre byte 255
 
 
 def test_id3v2_fields(mp3):

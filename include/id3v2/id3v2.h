@@ -32,6 +32,11 @@ Id3v2Frame *id3v2ReadFrameByID(const char id[ID3V2_FRAME_ID_MAX_SIZE], Id3v2Tag 
 
 int id3v2RemoveFrameByID(const char *id, Id3v2Tag *tag);
 
+Id3v2Frame *id3v2FindFrameByKeyValue(ListIter *frames, const char *id, const char *key, const void *value,
+                                     size_t valueSize);
+
+int id3v2RemoveFrameByKeyValue(const char *id, const char *key, const void *value, size_t valueSize, Id3v2Tag *tag);
+
 int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t encoding, const char *string,
                          Id3v2Tag *tag);
 

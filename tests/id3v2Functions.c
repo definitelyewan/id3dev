@@ -17,7 +17,9 @@
 #include "id3v2/id3v2.h"
 #include "id3v2/id3v2Frame.h"
 #include "byteStream.h"
+#include "byteInt.h"
 #include "id3v2/id3v2Parser.h"
+#include "id3v2/id3v2Context.h"
 
 static void id3v2TagFromFile_v3(void **state) {
     (void) state;
@@ -1257,6 +1259,35 @@ static void id3v2TagSerialize_v3ext(void **state) {
     assert_true(v);
 }
 
+static void id3v2TagSerialize_v3extPadding(void **state) {
+    (void) state;
+    Id3v2Tag *tag = id3v2TagFromFile("assets/sorry4dying.mp3");
+    tag->header->extendedHeader = id3v2CreateExtendedTagHeader(32, 0x74657374, 0, 0, 0);
+    id3v2WriteExtendedHeaderIndicator(tag->header, true);
+
+    size_t outl = 0;
+    uint8_t *out = id3v2TagSerialize(tag, &outl);
+    assert_non_null(out);
+
+    // the size field must cover exactly the bytes written, padding included
+    uint32_t declared = byteSyncintDecode(((uint32_t) out[6] << 24) | ((uint32_t) out[7] << 16) |
+                                          ((uint32_t) out[8] << 8) | out[9]);
+    assert_int_equal(outl, 10 + declared);
+
+    for (size_t i = outl - 32; i < outl; i++) {
+        assert_int_equal(out[i], 0);
+    }
+
+    Id3v2Tag *tag2 = id3v2ParseTagFromBuffer(out, outl, NULL);
+    bool v = id3v2CompareTag(tag, tag2);
+
+    free(out);
+    id3v2DestroyTag(&tag);
+    id3v2DestroyTag(&tag2);
+
+    assert_true(v);
+}
+
 static void id3v2TagSerialize_v4ext(void **state) {
     (void) state;
     Id3v2Tag *tag = id3v2TagFromFile("assets/OnGP.mp3");
@@ -1763,6 +1794,252 @@ static void id3v2WriteTagToFile_v4OverwriteNoPicturesAsUpdate(void **state) {
     id3v2DestroyTag(&tag);
 }
 
+// --- find / remove by context key and value ---
+
+static const uint8_t keyValueTag[] = {
+    // v2.3 header
+    0x49, 0x44, 0x33, 0x03, 0x00, 0x00, 0x00, 0x00, 0x01, 0x19,
+    // TXXX desc XREF (Latin-1)
+    0x54, 0x58, 0x58, 0x58, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x58, 0x52, 0x45, 0x46, 0x00,
+    0x7b, 0x7d,
+    // TXXX desc Héllo (UTF-16)
+    0x54, 0x58, 0x58, 0x58, 0x00, 0x00, 0x00, 0x13, 0x00, 0x00, 0x01, 0xff, 0xfe, 0x48, 0x00, 0xe9,
+    0x00, 0x6c, 0x00, 0x6c, 0x00, 0x6f, 0x00, 0x00, 0x00, 0xff, 0xfe, 0x76, 0x00,
+    // TXXX desc bytes C3 A9 in a Latin-1 frame ("Ã©")
+    0x54, 0x58, 0x58, 0x58, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0xc3, 0xa9, 0x00, 0x78,
+    // TXXX desc other
+    0x54, 0x58, 0x58, 0x58, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x6f, 0x74, 0x68, 0x65, 0x72,
+    0x00, 0x78,
+    // COMM eng, empty desc
+    0x43, 0x4f, 0x4d, 0x4d, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x65, 0x6e, 0x67, 0x00, 0x61,
+    // COMM deu, empty desc
+    0x43, 0x4f, 0x4d, 0x4d, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x64, 0x65, 0x75, 0x00, 0x62,
+    // COMM eng, desc note
+    0x43, 0x4f, 0x4d, 0x4d, 0x00, 0x00, 0x00, 0x0a, 0x00, 0x00, 0x00, 0x65, 0x6e, 0x67, 0x6e, 0x6f,
+    0x74, 0x65, 0x00, 0x63,
+    // ETCO format 1, events (2, 0x10) and (5, 0x20)
+    0x45, 0x54, 0x43, 0x4f, 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00, 0x01, 0x02, 0x00, 0x00, 0x00, 0x10,
+    0x05, 0x00, 0x00, 0x00, 0x20
+};
+
+static Id3v2Tag *internal_keyValueTag(void) {
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer((uint8_t *) keyValueTag, sizeof(keyValueTag), NULL);
+    assert_non_null(tag);
+    assert_int_equal(tag->frames->length, 8);
+    return tag;
+}
+
+// returns the n'th (0 based) frame with this id
+static Id3v2Frame *internal_nthFrame(Id3v2Tag *tag, const char *id, int n) {
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+
+    while ((f = id3v2FrameTraverse(&frames)) != NULL) {
+        if (memcmp(f->header->id, id, 4) == 0 && n-- == 0) {
+            return f;
+        }
+    }
+
+    return NULL;
+}
+
+static void id3v2FrameMatchesKeyValue_text(void **state) {
+    (void) state;
+    Id3v2Tag *tag = internal_keyValueTag();
+    Id3v2Frame *xref = internal_nthFrame(tag, "TXXX", 0);
+
+    assert_true(id3v2FrameMatchesKeyValue(xref, "desc", "XREF", 4));
+    assert_true(id3v2FrameMatchesKeyValue(xref, "desc", "XREF", 5));   // trailing NUL in value is ignored
+    assert_false(id3v2FrameMatchesKeyValue(xref, "desc", "xref", 4));  // case sensitive
+    assert_false(id3v2FrameMatchesKeyValue(xref, "desc", "XRE", 3));
+    assert_false(id3v2FrameMatchesKeyValue(xref, "desc", "XREFS", 5));
+    assert_true(id3v2FrameMatchesKeyValue(xref, "text", "{}", 2));     // the last entry, no terminator stored
+
+    // a key the frame doesn't have is no match
+    assert_false(id3v2FrameMatchesKeyValue(xref, "language", "eng", 3));
+
+    // bad arguments
+    assert_false(id3v2FrameMatchesKeyValue(NULL, "desc", "XREF", 4));
+    assert_false(id3v2FrameMatchesKeyValue(xref, NULL, "XREF", 4));
+    assert_false(id3v2FrameMatchesKeyValue(xref, "desc", NULL, 4));
+
+    id3v2DestroyTag(&tag);
+}
+
+// text is compared as UTF-8 whatever the frame's encoding
+static void id3v2FrameMatchesKeyValue_encodings(void **state) {
+    (void) state;
+    Id3v2Tag *tag = internal_keyValueTag();
+
+    // UTF-16 with BOM matched by UTF-8 "Héllo"
+    Id3v2Frame *f = internal_nthFrame(tag, "TXXX", 1);
+    assert_true(id3v2FrameMatchesKeyValue(f, "desc", "H\xc3\xa9llo", 6));
+    assert_false(id3v2FrameMatchesKeyValue(f, "desc", "\xff\xfeH\x00", 4));
+
+    // Latin-1 bytes C3 A9 are "Ã©", not a UTF-8 "é"
+    f = internal_nthFrame(tag, "TXXX", 2);
+    assert_true(id3v2FrameMatchesKeyValue(f, "desc", "\xc3\x83\xc2\xa9", 4));
+    assert_false(id3v2FrameMatchesKeyValue(f, "desc", "\xc3\xa9", 2));
+
+    // an empty description is matched by an empty value
+    f = internal_nthFrame(tag, "COMM", 0);
+    assert_true(id3v2FrameMatchesKeyValue(f, "desc", "", 0));
+    assert_true(id3v2FrameMatchesKeyValue(f, "desc", NULL, 0));
+    assert_false(id3v2FrameMatchesKeyValue(f, "desc", "note", 4));
+
+    id3v2DestroyTag(&tag);
+}
+
+// non text contexts are compared byte for byte
+static void id3v2FrameMatchesKeyValue_bytes(void **state) {
+    (void) state;
+    Id3v2Tag *tag = internal_keyValueTag();
+    Id3v2Frame *f = internal_nthFrame(tag, "COMM", 0);
+
+    assert_true(id3v2FrameMatchesKeyValue(f, "language", "eng", 3));
+    assert_false(id3v2FrameMatchesKeyValue(f, "language", "en", 2));
+    assert_false(id3v2FrameMatchesKeyValue(f, "language", "eng", 4));  // the NUL is a 4th byte here
+    assert_false(id3v2FrameMatchesKeyValue(f, "language", "ENG", 3));
+
+    id3v2DestroyTag(&tag);
+}
+
+// in a repeated block any occurrence of the key can match
+static void id3v2FrameMatchesKeyValue_repeatedBlock(void **state) {
+    (void) state;
+    Id3v2Tag *tag = internal_keyValueTag();
+    Id3v2Frame *f = internal_nthFrame(tag, "ETCO", 0);
+    const uint8_t first = 0x02;
+    const uint8_t second = 0x05;
+    const uint8_t missing = 0x07;
+    const uint8_t format = 0x01;
+
+    assert_true(id3v2FrameMatchesKeyValue(f, "symbol", &format, 1));
+    assert_true(id3v2FrameMatchesKeyValue(f, "type", &first, 1));
+    assert_true(id3v2FrameMatchesKeyValue(f, "type", &second, 1));
+    assert_false(id3v2FrameMatchesKeyValue(f, "type", &missing, 1));
+    assert_true(id3v2FrameMatchesKeyValue(f, "stamp", "\x00\x00\x00\x20", 4));
+    assert_false(id3v2FrameMatchesKeyValue(f, "stamp", "\x00\x00\x00\x30", 4));
+
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2FindFrameByKeyValue_iterates(void **state) {
+    (void) state;
+    Id3v2Tag *tag = internal_keyValueTag();
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *f = NULL;
+
+    // both COMM frames with an empty description, in order, then no more
+    f = id3v2FindFrameByKeyValue(&frames, "COMM", "desc", "", 0);
+    assert_ptr_equal(f, internal_nthFrame(tag, "COMM", 0));
+    f = id3v2FindFrameByKeyValue(&frames, "COMM", "desc", "", 0);
+    assert_ptr_equal(f, internal_nthFrame(tag, "COMM", 1));
+    assert_null(id3v2FindFrameByKeyValue(&frames, "COMM", "desc", "", 0));
+
+    // narrowing by a second key: language and description
+    int eng = 0;
+    frames = id3v2CreateFrameTraverser(tag);
+    while ((f = id3v2FindFrameByKeyValue(&frames, "COMM", "desc", "", 0)) != NULL) {
+        if (id3v2FrameMatchesKeyValue(f, "language", "deu", 3)) {
+            eng++;
+            assert_ptr_equal(f, internal_nthFrame(tag, "COMM", 1));
+        }
+    }
+    assert_int_equal(eng, 1);
+
+    // the frame id must match too
+    frames = id3v2CreateFrameTraverser(tag);
+    assert_null(id3v2FindFrameByKeyValue(&frames, "TXXX", "language", "eng", 3));
+
+    // bad arguments
+    frames = id3v2CreateFrameTraverser(tag);
+    assert_null(id3v2FindFrameByKeyValue(NULL, "COMM", "desc", "", 0));
+    assert_null(id3v2FindFrameByKeyValue(&frames, NULL, "desc", "", 0));
+    assert_null(id3v2FindFrameByKeyValue(&frames, "", "desc", "", 0));
+    assert_null(id3v2FindFrameByKeyValue(&frames, "COMM", NULL, "", 0));
+
+    id3v2DestroyTag(&tag);
+}
+
+static void id3v2RemoveFrameByKeyValue_removesOnlyMatches(void **state) {
+    (void) state;
+    Id3v2Tag *tag = internal_keyValueTag();
+
+    // only the TXXX described XREF goes
+    assert_int_equal(id3v2RemoveFrameByKeyValue("TXXX", "desc", "XREF", 4, tag), 1);
+    assert_int_equal(tag->frames->length, 7);
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    assert_null(id3v2FindFrameByKeyValue(&frames, "TXXX", "desc", "XREF", 4));
+    frames = id3v2CreateFrameTraverser(tag);
+    assert_non_null(id3v2FindFrameByKeyValue(&frames, "TXXX", "desc", "other", 5));
+
+    // every match goes: both COMM frames with an empty description, not the one described "note"
+    assert_int_equal(id3v2RemoveFrameByKeyValue("COMM", "desc", "", 0, tag), 2);
+    assert_int_equal(tag->frames->length, 5);
+    frames = id3v2CreateFrameTraverser(tag);
+    assert_non_null(id3v2FindFrameByKeyValue(&frames, "COMM", "desc", "note", 4));
+
+    // nothing matches
+    assert_int_equal(id3v2RemoveFrameByKeyValue("COMM", "desc", "missing", 7, tag), 0);
+    assert_int_equal(id3v2RemoveFrameByKeyValue("TXXX", "desc", "XREF", 4, NULL), 0);
+    assert_int_equal(tag->frames->length, 5);
+
+    id3v2DestroyTag(&tag);
+}
+
+// identical frames are all removed
+static void id3v2RemoveFrameByKeyValue_duplicates(void **state) {
+    (void) state;
+    Id3v2Tag *tag = internal_keyValueTag();
+
+    assert_true(id3v2AttachFrameToTag(tag, id3v2CopyFrame(internal_nthFrame(tag, "TXXX", 0))));
+    assert_true(id3v2AttachFrameToTag(tag, id3v2CopyFrame(internal_nthFrame(tag, "TXXX", 0))));
+    assert_int_equal(tag->frames->length, 10);
+
+    assert_int_equal(id3v2RemoveFrameByKeyValue("TXXX", "desc", "XREF", 4, tag), 3);
+    assert_int_equal(tag->frames->length, 7);
+
+    id3v2DestroyTag(&tag);
+}
+
+// custom frames use the keys their pairs define
+static void id3v2RemoveFrameByKeyValue_customFrame(void **state) {
+    (void) state;
+    Id3v2Tag *tag = internal_keyValueTag();
+    HashTable *pairs = hashTableCreate(4, id3v2DeleteContentContextList, id3v2PrintContentContextList,
+                                       id3v2CopyContentContextList);
+    List *context = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                               id3v2CopyContentContext);
+    assert_true(listInsertBack(context, id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("label"), 64, 1)));
+    assert_true(listInsertBack(context, id3v2CreateContentContext(binary_context, id3v2djb2("data"), 64, 1)));
+    assert_int_equal(hashTableInsert(pairs, "XCST", context), 0);
+
+    const char *labels[] = {"keep", "drop"};
+
+    for (int i = 0; i < 2; i++) {
+        Id3v2Frame *f = id3v2CreateEmptyFrame("XCST", ID3V2_TAG_VERSION_3, pairs);
+        assert_non_null(f);
+        ListIter entries = id3v2CreateFrameEntryTraverser(f);
+        assert_true(id3v2WriteFrameEntry(f, &entries, 4, labels[i]));
+        listIteratorNext(&entries);
+        assert_true(id3v2WriteFrameEntry(f, &entries, 2, "\x01\x02"));
+        assert_true(id3v2AttachFrameToTag(tag, f));
+    }
+
+    assert_int_equal(id3v2RemoveFrameByKeyValue("XCST", "label", "drop", 4, tag), 1);
+
+    ListIter frames = id3v2CreateFrameTraverser(tag);
+    Id3v2Frame *kept = id3v2FindFrameByKeyValue(&frames, "XCST", "label", "keep", 4);
+    assert_non_null(kept);
+    assert_true(id3v2FrameMatchesKeyValue(kept, "data", "\x01\x02", 2));
+    assert_null(id3v2FindFrameByKeyValue(&frames, "XCST", "data", "\x01\x02", 2));
+
+    id3v2DestroyTag(&tag);
+    listFree(context);
+    hashTableFree(pairs);
+}
+
 int main() {
     const struct CMUnitTest tests[] = {
 
@@ -1904,6 +2181,7 @@ int main() {
         cmocka_unit_test(id3v2TagSerialize_v2),
         cmocka_unit_test(id3v2TagSerialize_v4),
         cmocka_unit_test(id3v2TagSerialize_v3ext),
+        cmocka_unit_test(id3v2TagSerialize_v3extPadding),
         cmocka_unit_test(id3v2TagSerialize_v4ext),
         cmocka_unit_test(id3v2TagSerialize_v4footer),
 
@@ -1924,7 +2202,15 @@ int main() {
         cmocka_unit_test(id3v2WriteTagToFile_v4OverwriteNoPicturesAsUpdate),
         cmocka_unit_test(id3v2WriteTagToFile_smallerTagKeepsAudio),
         cmocka_unit_test(id3v2WriteTagToFile_noTagID3InAudio),
-        cmocka_unit_test(id3v2WriteTagToFile_badExistingHeaderUntouched)
+        cmocka_unit_test(id3v2WriteTagToFile_badExistingHeaderUntouched),
+        cmocka_unit_test(id3v2FrameMatchesKeyValue_text),
+        cmocka_unit_test(id3v2FrameMatchesKeyValue_encodings),
+        cmocka_unit_test(id3v2FrameMatchesKeyValue_bytes),
+        cmocka_unit_test(id3v2FrameMatchesKeyValue_repeatedBlock),
+        cmocka_unit_test(id3v2FindFrameByKeyValue_iterates),
+        cmocka_unit_test(id3v2RemoveFrameByKeyValue_removesOnlyMatches),
+        cmocka_unit_test(id3v2RemoveFrameByKeyValue_duplicates),
+        cmocka_unit_test(id3v2RemoveFrameByKeyValue_customFrame)
 
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

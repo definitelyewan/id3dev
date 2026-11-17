@@ -8,6 +8,8 @@
 #include "id3v2/id3v2.h"
 #include "id3v1/id3v1.h"
 #include "id3v1/id3v1Parser.h"
+#include "id3v2/id3v2Frame.h"
+#include "id3v2/id3v2Context.h"
 
 static void id3CreateAndDestroy_allInOne(void **state) {
     (void) state;
@@ -46,11 +48,26 @@ static void id3SetPreferredStandard_changeVersion(void **state) {
 static void id3FromFile_badPath(void **state) {
     (void) state;
 
-    ID3 *metadata = id3FromFile("example/example/example");
+    assert_null(id3FromFile("example/example/example"));
+    assert_null(id3FromFile(NULL));
+}
+
+// a file with neither an ID3v1 nor an ID3v2 tag
+static void id3FromFile_noTags(void **state) {
+    (void) state;
+
+    assert_null(id3FromFile("assets/null.mp3"));
+}
+
+// a file that is only an ID3v1 tag
+static void id3FromFile_v1Only(void **state) {
+    (void) state;
+
+    ID3 *metadata = id3FromFile("assets/empty.mp3");
 
     assert_non_null(metadata);
     assert_null(metadata->id3v2);
-    assert_null(metadata->id3v1);
+    assert_non_null(metadata->id3v1);
 
     id3Destroy(&metadata);
 }
@@ -301,9 +318,9 @@ static void id3ConvertId3v2ToId3v1_noId3v1(void **state) {
     free(str);
     free(v1Str);
 
-    // utf8 not supported so cant call id3v2ReadAlbum
+    // ID3v1 is Latin-1 and 30 bytes: Û is kept, ȾℲⅧ♈ ♉ ♊ are not in Latin-1 so they become '?'
     v1Str = id3v1ReadAlbum(metadata->id3v1);
-    assert_memory_equal("The Powers That Butf8ÛȾℲ", v1Str, 28);
+    assert_string_equal(v1Str, "The Powers That Butf8Û???? ? ?");
     free(v1Str);
 
     assert_int_equal(9, id3v1ReadTrack(metadata->id3v1));
@@ -334,9 +351,11 @@ static void id3ConvertId3v2ToId3v1_overwriteId3v1(void **state) {
 
     assert_non_null(metadata->id3v1);
 
+    // ID3v1 is Latin-1, so the two ⚄ (U+2684) become '?'
     strv1 = id3v1ReadTitle(metadata->id3v1);
     strv2 = id3v2ReadTitle(metadata->id3v2);
-    assert_memory_equal(strv1, strv2, 30);
+    assert_string_equal(strv2, "10 d E A T h b R E a s T \xe2\x9a\x84 \xe2\x9a\x84");
+    assert_string_equal(strv1, "10 d E A T h b R E a s T ? ?");
     free(strv1);
     free(strv2);
 
@@ -1215,6 +1234,127 @@ static void id3WriteToFile_v1v2NoTags(void **state) {
     id3Destroy(&metadata2);
 }
 
+// ID3v1 Latin-1 text becomes UTF-8 in ID3v2
+static void id3ConvertId3v1ToId3v2_latin1(void **state) {
+    (void) state;
+
+    ID3 *metadata = id3Create(NULL, id3v1CreateTag((uint8_t *) "H\xe9" "ctor", (uint8_t *) "abcdefghijklmnopqrstuvwxyz0123",
+                                                   NULL, 0, 0, NULL, OTHER_GENRE));
+    assert_non_null(metadata);
+
+    assert_true(id3ConvertId3v1ToId3v2(metadata));
+
+    char *str = id3v2ReadTitle(metadata->id3v2);
+    assert_string_equal(str, "H\xc3\xa9" "ctor");
+    free(str);
+
+    // full 30 byte field, must not run into the next field
+    str = id3v2ReadArtist(metadata->id3v2);
+    assert_string_equal(str, "abcdefghijklmnopqrstuvwxyz0123");
+    free(str);
+
+    id3Destroy(&metadata);
+}
+
+// ID3v2 UTF-8 text becomes Latin-1 in ID3v1, with '?' for what Latin-1 can not hold
+static void id3ConvertId3v2ToId3v1_utf8(void **state) {
+    (void) state;
+
+    ID3 *metadata = id3FromFile("assets/sorry4dying.mp3");
+    assert_non_null(metadata);
+
+    assert_true(id3v2WriteTitle("H\xc3\xa9" "ctor \xea\xb0\x80", metadata->id3v2)); // Héctor 가
+
+    id3v1DestroyTag(&metadata->id3v1);
+    assert_true(id3ConvertId3v2ToId3v1(metadata));
+
+    assert_memory_equal(metadata->id3v1->title, "H\xe9" "ctor ?\0", 9);
+
+    char *str = id3v1ReadTitle(metadata->id3v1);
+    assert_string_equal(str, "H\xc3\xa9" "ctor ?");
+    free(str);
+
+    id3Destroy(&metadata);
+}
+
+static void id3FromFileWithPairs_noTags(void **state) {
+    (void) state;
+
+    assert_null(id3FromFileWithPairs("assets/null.mp3", NULL));
+    assert_null(id3FromFileWithPairs("example/example/example", NULL));
+    assert_null(id3FromFileWithPairs(NULL, NULL));
+}
+
+// without pairs it reads exactly what id3FromFile reads
+static void id3FromFileWithPairs_nullPairs(void **state) {
+    (void) state;
+
+    ID3 *metadata = id3FromFileWithPairs("assets/sorry4dying.mp3", NULL);
+    ID3 *expected = id3FromFile("assets/sorry4dying.mp3");
+
+    assert_non_null(metadata);
+    assert_non_null(expected);
+    assert_true(id3Compare(metadata, expected));
+
+    id3Destroy(&metadata);
+    id3Destroy(&expected);
+}
+
+// a custom frame is parsed with the user's contexts, and left as one generic entry without them
+static void id3FromFileWithPairs_customFrame(void **state) {
+    (void) state;
+
+    // v2.3 tag holding XCST: latin1 "hi" then 2 bytes of binary data
+    const uint8_t file[] = {
+        'I', 'D', '3', 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0f,
+        'X', 'C', 'S', 'T', 0x00, 0x00, 0x00, 0x05, 0x00, 0x00,
+        'h', 'i', 0x00, 0x01, 0x02
+    };
+    FILE *fp = fopen("assets/pairs.mp3", "wb");
+    assert_non_null(fp);
+    assert_int_equal(fwrite(file, 1, sizeof(file), fp), sizeof(file));
+    (void) fclose(fp);
+
+    HashTable *pairs = hashTableCreate(4, id3v2DeleteContentContextList, id3v2PrintContentContextList,
+                                       id3v2CopyContentContextList);
+    List *context = listCreate(id3v2PrintContentContext, id3v2DeleteContentContext, id3v2CompareContentContext,
+                               id3v2CopyContentContext);
+    assert_true(listInsertBack(context, id3v2CreateContentContext(latin1Encoding_context, id3v2djb2("label"), 64, 1)));
+    assert_true(listInsertBack(context, id3v2CreateContentContext(binary_context, id3v2djb2("data"), 64, 1)));
+    assert_int_equal(hashTableInsert(pairs, "XCST", context), 0);
+
+    ID3 *withPairs = id3FromFileWithPairs("assets/pairs.mp3", pairs);
+    ID3 *without = id3FromFile("assets/pairs.mp3");
+
+    assert_non_null(withPairs);
+    assert_non_null(without);
+
+    Id3v2Frame *f = (Id3v2Frame *) withPairs->id3v2->frames->head->data;
+    assert_memory_equal(f->header->id, "XCST", 4);
+    assert_int_equal(f->entries->length, 2);
+
+    ListIter entries = id3v2CreateFrameEntryTraverser(f);
+    size_t s = 0;
+    char *label = id3v2ReadFrameEntryAsChar(&entries, &s);
+    assert_string_equal(label, "hi");
+    free(label);
+
+    uint8_t *data = id3v2ReadFrameEntry(&entries, &s);
+    assert_int_equal(s, 2);
+    assert_memory_equal(data, "\x01\x02", 2);
+    free(data);
+
+    f = (Id3v2Frame *) without->id3v2->frames->head->data;
+    assert_memory_equal(f->header->id, "XCST", 4);
+    assert_int_equal(f->entries->length, 1);
+
+    id3Destroy(&withPairs);
+    id3Destroy(&without);
+    listFree(context);
+    hashTableFree(pairs);
+    (void) remove("assets/pairs.mp3");
+}
+
 int main() {
     FILE *fp = NULL;
 
@@ -1238,6 +1378,11 @@ int main() {
         // id3TagFromFile
         cmocka_unit_test(id3FromFile_badPath),
         cmocka_unit_test(id3FromFile_noV2),
+        cmocka_unit_test(id3FromFile_noTags),
+        cmocka_unit_test(id3FromFile_v1Only),
+        cmocka_unit_test(id3FromFileWithPairs_noTags),
+        cmocka_unit_test(id3FromFileWithPairs_nullPairs),
+        cmocka_unit_test(id3FromFileWithPairs_customFrame),
 
         // id3Copy
         cmocka_unit_test(id3Copy_fullTags),
@@ -1259,6 +1404,8 @@ int main() {
         cmocka_unit_test(id3ConvertId3v2ToId3v1_nullArg),
         cmocka_unit_test(id3ConvertId3v2ToId3v1_noId3v1),
         cmocka_unit_test(id3ConvertId3v2ToId3v1_overwriteId3v1),
+        cmocka_unit_test(id3ConvertId3v1ToId3v2_latin1),
+        cmocka_unit_test(id3ConvertId3v2ToId3v1_utf8),
 
         // id3Read*
         cmocka_unit_test(id3ReadTitle_v1v2),

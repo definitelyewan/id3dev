@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include "id3py.h"
 #include "id3v1/id3v1Parser.h"
-#include "id3v2/id3v2Parser.h"
 #include "id3v2/id3v2Frame.h"
 #include "id3v2/id3v2TagIdentity.h"
 
@@ -31,28 +30,6 @@ int id3py_context_add(List *ctx, Id3v2ContextType type, const char *key, size_t 
     }
 
     return 0;
-}
-
-ID3 *id3py_from_buffer(uint8_t *buf, size_t len, HashTable *userPairs) {
-    Id3v2Tag *v2 = NULL;
-    Id3v1Tag *v1 = NULL;
-
-    if (buf == NULL || len == 0) {
-        return NULL;
-    }
-
-    v2 = id3v2ParseTagFromBuffer(buf, len, userPairs);
-
-    // an ID3v1 tag if present
-    if (len >= ID3V1_MAX_SIZE && id3v1HasTag(buf + len - ID3V1_MAX_SIZE)) {
-        v1 = id3v1TagFromBuffer(buf + len - ID3V1_MAX_SIZE);
-    }
-
-    if (v2 == NULL && v1 == NULL) {
-        return NULL;
-    }
-
-    return id3Create(v2, v1);
 }
 
 Id3v2Tag *id3py_v2_tag_new(uint8_t version) {

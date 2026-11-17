@@ -223,6 +223,113 @@ int id3v2RemoveFrameByID(const char *id, Id3v2Tag *tag) {
 }
 
 /**
+ * @brief Finds the next frame with an ID whose entry under a context key equals a value.
+ * @details Advances frames until it returns a frame with a matching ID for which id3v2FrameMatchesKeyValue is true,
+ * so calling it again with the same iterator finds the next match. IDs match as in id3v2ReadFrameByID: the
+ * characters of id, up to ID3V2_FRAME_ID_MAX_SIZE, are compared with the start of the frame ID. Text contexts are
+ * compared as UTF-8 text and other contexts byte for byte; see id3v2FrameMatchesKeyValue.
+ *
+ * Example, every COMM frame with an empty description, checking the language as well:
+ * ```c
+ * ListIter frames = id3v2CreateFrameTraverser(tag);
+ * Id3v2Frame *f = NULL;
+ *
+ * while ((f = id3v2FindFrameByKeyValue(&frames, "COMM", "desc", "", 0)) != NULL) {
+ *     if (id3v2FrameMatchesKeyValue(f, "language", "eng", 3)) {
+ *         // ...
+ *     }
+ * }
+ * ```
+ *
+ * @param frames - Frame traverser from id3v2CreateFrameTraverser, advanced past the returned frame
+ * @param id - Frame ID to match, e.g. "TXXX"
+ * @param key - The context key, e.g. "desc"
+ * @param value - The value to look for: UTF-8 text for text contexts, raw bytes otherwise. May be NULL only if
+ * valueSize is 0
+ * @param valueSize - Number of bytes in value
+ *
+ * @return Id3v2Frame* - The matching frame, still owned by the tag (not a copy), or NULL when there are no more
+ * matches or an argument is NULL.
+ */
+Id3v2Frame *id3v2FindFrameByKeyValue(ListIter *frames, const char *id, const char *key, const void *value,
+                                     size_t valueSize) {
+    Id3v2Frame *f = NULL;
+    size_t i = 0;
+
+    if (frames == NULL || id == NULL || key == NULL || (value == NULL && valueSize != 0)) {
+        return NULL;
+    }
+
+    // same id matching as id3v2ReadFrameByID
+    while (i < ID3V2_FRAME_ID_MAX_SIZE && id[i] != '\0') {
+        i++;
+    }
+
+    if (i == 0) {
+        return NULL;
+    }
+
+    while ((f = id3v2FrameTraverse(frames)) != NULL) {
+        if (memcmp(id, f->header->id, i) == 0 && id3v2FrameMatchesKeyValue(f, key, value, valueSize)) {
+            return f;
+        }
+    }
+
+    return NULL;
+}
+
+/**
+ * @brief Removes every frame with an ID whose entry under a context key equals a value.
+ * @details Each match found by id3v2FindFrameByKeyValue is detached with id3v2DetachFrameFromTag and destroyed,
+ * and the search starts again until nothing matches, so every matching frame is removed. Frames that don't match
+ * are left alone. Pointers to removed frames must not be used afterwards.
+ *
+ * Example, removing only the TXXX frame described "XREF":
+ * ```c
+ * id3v2RemoveFrameByKeyValue("TXXX", "desc", "XREF", 4, tag);
+ * ```
+ *
+ * @param id - Frame ID to match, e.g. "TXXX"
+ * @param key - The context key, e.g. "desc"
+ * @param value - The value to look for: UTF-8 text for text contexts, raw bytes otherwise. May be NULL only if
+ * valueSize is 0
+ * @param valueSize - Number of bytes in value
+ * @param tag - Tag to remove frames from
+ *
+ * @return int - Number of frames removed, 0 if none matched or an argument is NULL.
+ */
+int id3v2RemoveFrameByKeyValue(const char *id, const char *key, const void *value, size_t valueSize, Id3v2Tag *tag) {
+    int count = 0;
+
+    if (tag == NULL || tag->frames == NULL) {
+        return 0;
+    }
+
+    while (true) {
+        // restart each time: detaching unlinks a list node, so an iterator past it is not reused
+        ListIter frames = id3v2CreateFrameTraverser(tag);
+        Id3v2Frame *match = id3v2FindFrameByKeyValue(&frames, id, key, value, valueSize);
+        Id3v2Frame *removed = NULL;
+
+        if (match == NULL) {
+            break;
+        }
+
+        // detach removes the first frame equal to match, which matches too
+        removed = id3v2DetachFrameFromTag(tag, match);
+
+        if (removed == NULL) {
+            break;
+        }
+
+        id3v2DestroyFrame(&removed);
+        count++;
+    }
+
+    return count;
+}
+
+/**
  * @brief Creates and inserts a new text frame with the specified encoding into a tag.
  * @details Converts the input UTF-8 string to the target encoding, prepends BOM if needed, and adds appropriate padding for UTF-16.
  * Returns false on validation failures, encoding conversion errors, or memory allocation failures without modifying the tag.
@@ -2147,10 +2254,11 @@ uint8_t *id3v2TagSerialize(Id3v2Tag *tag, size_t *outl) {
     free(sizeBytes);
 
     // create stream
+    // padding is counted in the size field, so it must be written too; a new stream is zero filled
     stream = byteStreamCreate(
-        NULL, frameStream->bufferSize + headerStream->bufferSize + ((footerStream != NULL)
-                                                                        ? footerStream->bufferSize
-                                                                        : 0));
+        NULL, frameStream->bufferSize + headerStream->bufferSize + padding + ((footerStream != NULL)
+                                                                                  ? footerStream->bufferSize
+                                                                                  : 0));
     byteStreamWrite(stream, byteStreamCursor(headerStream), headerStream->bufferSize);
     byteStreamWrite(stream, byteStreamCursor(frameStream), frameStream->bufferSize);
     byteStreamSeek(stream, padding, SEEK_CUR);

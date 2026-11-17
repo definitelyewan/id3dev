@@ -15,6 +15,7 @@ DEPS = ID3DEV / "id3dependencies"
 
 SOURCES = [
     ID3DEV / "src" / "id3dev.c",
+    ID3DEV / "src" / "id3Internal.c",
     ID3DEV / "src" / "id3v1" / "id3v1.c",
     ID3DEV / "src" / "id3v1" / "id3v1Parser.c",
     ID3DEV / "src" / "id3v2" / "id3v2.c",
@@ -124,6 +125,7 @@ ffibuilder.cdef(
     /* --- id3dev.h: whole-file API --- */
     ID3 *id3Create(Id3v2Tag *id3v2, Id3v1Tag *id3v1);
     ID3 *id3FromFile(const char *filePath);
+    ID3 *id3FromFileWithPairs(const char *filePath, HashTable *userPairs);
     ID3 *id3Copy(const ID3 *toCopy);
     void id3Destroy(ID3 **toDelete);
     bool id3Compare(const ID3 *metadata1, const ID3 *metadata2);
@@ -209,6 +211,8 @@ ffibuilder.cdef(
     /* --- id3v2 frames --- */
     int id3v2ReadTagVersion(const Id3v2Tag *tag);
     int id3v2RemoveFrameByID(const char *id, Id3v2Tag *tag);
+    Id3v2Frame *id3v2FindFrameByKeyValue(ListIter *frames, const char *id, const char *key, const void *value, size_t valueSize);
+    int id3v2RemoveFrameByKeyValue(const char *id, const char *key, const void *value, size_t valueSize, Id3v2Tag *tag);
     Id3v2Frame *id3v2ReadFrameByID(const char *id, Id3v2Tag *tag);
     Id3v2Frame *id3v2CreateEmptyFrame(const char *id, uint8_t version, HashTable *userPairs);
     void id3v2DestroyFrame(Id3v2Frame **toDelete);
@@ -224,6 +228,7 @@ ffibuilder.cdef(
     uint16_t id3v2ReadFrameEntryAsU16(ListIter *traverser);
     uint32_t id3v2ReadFrameEntryAsU32(ListIter *traverser);
     bool id3v2WriteFrameEntry(Id3v2Frame *frame, ListIter *entries, size_t entrySize, const void *entry);
+    bool id3v2FrameMatchesKeyValue(Id3v2Frame *frame, const char *key, const void *value, size_t valueSize);
 
     /* --- LinkedListLib / HashTableLib, only what the wrappers need --- */
     void listFree(List *list);
@@ -236,7 +241,6 @@ ffibuilder.cdef(
     HashTable *id3py_pairs_create(size_t size);
     List *id3py_context_new(void);
     int id3py_context_add(List *ctx, Id3v2ContextType type, const char *key, size_t max, size_t min);
-    ID3 *id3py_from_buffer(uint8_t *buf, size_t len, HashTable *userPairs);
     Id3v2Tag *id3py_v2_tag_new(uint8_t version);
     Id3v1Tag *id3py_v1_tag_new(void);
     """

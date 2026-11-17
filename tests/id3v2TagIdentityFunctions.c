@@ -749,21 +749,14 @@ static void id3v2TagCreateAndDestroy_AllInOne(void **state) {
 static void id3v2ExtendedTagHeaderSerialize_v3noCRC(void **state) {
     (void) state;
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(100, 0, 0, 0, 0);
+    const uint8_t expected[] = {0, 0, 0, 6 /* size, excludes itself */, 0, 0 /* flags */, 0, 0, 0, 100 /* padding */};
     size_t outl = 0;
     uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_3, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
 
+    assert_non_null(out);
+    assert_int_equal(outl, sizeof(expected));
+    assert_memory_equal(out, expected, sizeof(expected));
 
-    assert_int_equal(byteStreamReturnInt(stream), 10);
-
-    assert_int_equal(byteStreamGetCh(stream), 0);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-    assert_int_equal(byteStreamGetCh(stream), 0);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_int_equal(byteStreamReturnInt(stream), 100);
-
-    byteStreamDestroy(stream);
     free(out);
     id3v2DestroyExtendedTagHeader(&ext);
 }
@@ -771,23 +764,15 @@ static void id3v2ExtendedTagHeaderSerialize_v3noCRC(void **state) {
 static void id3v2ExtendedTagHeaderSerialize_v3CRC(void **state) {
     (void) state;
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(UINT32_MAX, UINT32_MAX, 1, 1, 1);
+    const uint8_t expected[] = {0, 0, 0, 10 /* size */, 0x80, 0 /* CRC flag */, 0xff, 0xff, 0xff, 0xff /* padding */, 0xff, 0xff, 0xff, 0xff /* crc */};
     size_t outl = 0;
     uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_3, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
 
-    assert_int_equal(byteStreamReturnInt(stream), 14);
-
-    assert_int_equal(byteStreamGetCh(stream), 0x80);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_int_equal(byteStreamGetCh(stream), 0);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_int_equal(byteStreamReturnU32(stream), UINT32_MAX);
-    assert_int_equal(byteStreamReturnU32(stream), UINT32_MAX);
+    assert_non_null(out);
+    assert_int_equal(outl, sizeof(expected));
+    assert_memory_equal(out, expected, sizeof(expected));
 
     free(out);
-    byteStreamDestroy(stream);
     id3v2DestroyExtendedTagHeader(&ext);
 }
 
@@ -802,30 +787,14 @@ static void id3v2ExtendedTagHeaderSerialize_null(void **state) {
 static void id3v2ExtendedTagHeaderSerialize_v4WithEverything(void **state) {
     (void) state;
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(UINT32_MAX, UINT32_MAX, 1, 1, 0xfe);
+    const uint8_t expected[] = {0, 0, 0, 15 /* syncsafe size of the whole header */, 1 /* flag bytes */, 0x70 /* update, CRC, restrictions */, 0x00 /* update length */, 0x05, 0x0f, 0x7f, 0x7f, 0x7f, 0x7f /* CRC length and syncsafe CRC */, 0x01, 0xfe /* restrictions length and restrictions */};
     size_t outl = 0;
     uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
 
-    assert_int_equal(byteStreamReturnInt(stream), 12);
+    assert_non_null(out);
+    assert_int_equal(outl, sizeof(expected));
+    assert_memory_equal(out, expected, sizeof(expected));
 
-    assert_int_equal(byteStreamCursor(stream)[0], 6);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_int_equal(byteStreamCursor(stream)[0], 0x70);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-
-    unsigned char tmp[5] = {0, 0, 0, 0, 0};
-    byteStreamRead(stream, tmp, 5);
-
-    assert_int_equal(btost(tmp, 5), byteSyncintEncode(UINT32_MAX));
-    byteStreamSeek(stream, 5, SEEK_CUR);
-
-
-    assert_int_equal(byteStreamCursor(stream)[0], 0xfe);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    byteStreamDestroy(stream);
     free(out);
     id3v2DestroyExtendedTagHeader(&ext);
 }
@@ -833,21 +802,14 @@ static void id3v2ExtendedTagHeaderSerialize_v4WithEverything(void **state) {
 static void id3v2ExtendedTagHeaderSerialize_v4(void **state) {
     (void) state;
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, 0, 0, 0);
+    const uint8_t expected[] = {0, 0, 0, 6 /* size */, 1 /* flag bytes */, 0x00 /* flags */};
     size_t outl = 0;
     uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
 
-    assert_int_equal(byteStreamReturnInt(stream), 6);
+    assert_non_null(out);
+    assert_int_equal(outl, sizeof(expected));
+    assert_memory_equal(out, expected, sizeof(expected));
 
-    assert_int_equal(byteStreamCursor(stream)[0], 0);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_int_equal(byteStreamCursor(stream)[0], 0);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_int_equal(stream->bufferSize, 6);
-
-    byteStreamDestroy(stream);
     free(out);
     id3v2DestroyExtendedTagHeader(&ext);
 }
@@ -855,26 +817,14 @@ static void id3v2ExtendedTagHeaderSerialize_v4(void **state) {
 static void id3v2ExtendedTagHeaderSerialize_v4crc(void **state) {
     (void) state;
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 9000, 0, 0, 0);
+    const uint8_t expected[] = {0, 0, 0, 12 /* size */, 1 /* flag bytes */, 0x20 /* CRC */, 0x05, 0, 0, 0, 0x46, 0x28 /* CRC length and syncsafe 9000 */};
     size_t outl = 0;
     uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
 
-    assert_int_equal(byteStreamReturnInt(stream), 11);
+    assert_non_null(out);
+    assert_int_equal(outl, sizeof(expected));
+    assert_memory_equal(out, expected, sizeof(expected));
 
-    assert_int_equal(byteStreamCursor(stream)[0], 5);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_int_equal(byteStreamCursor(stream)[0], 0x20);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    unsigned char tmp[5] = {0, 0, 0, 0, 0};
-    byteStreamRead(stream, tmp, 5);
-
-    assert_int_equal(btost(tmp, 5), byteSyncintEncode(9000));
-
-    assert_int_equal(stream->bufferSize, 11);
-
-    byteStreamDestroy(stream);
     free(out);
     id3v2DestroyExtendedTagHeader(&ext);
 }
@@ -882,24 +832,14 @@ static void id3v2ExtendedTagHeaderSerialize_v4crc(void **state) {
 static void id3v2ExtendedTagHeaderSerialize_v4restrictions(void **state) {
     (void) state;
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0, 0, 1, 0xff);
+    const uint8_t expected[] = {0, 0, 0, 8 /* size */, 1 /* flag bytes */, 0x10 /* restrictions */, 0x01, 0xff /* restrictions length and restrictions */};
     size_t outl = 0;
     uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, ID3V2_TAG_VERSION_4, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
 
-    assert_int_equal(byteStreamReturnInt(stream), 7);
+    assert_non_null(out);
+    assert_int_equal(outl, sizeof(expected));
+    assert_memory_equal(out, expected, sizeof(expected));
 
-    assert_int_equal(byteStreamCursor(stream)[0], 1);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_int_equal(byteStreamCursor(stream)[0], 0x10);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_int_equal(byteStreamCursor(stream)[0], 0xff);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_int_equal(stream->bufferSize, 7);
-
-    byteStreamDestroy(stream);
     free(out);
     id3v2DestroyExtendedTagHeader(&ext);
 }
@@ -1070,44 +1010,24 @@ static void id3v2TagHeaderSerialize_v3WithExt(void **state) {
     (void) state;
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(100, 0, 0, 0, 0);
     Id3v2TagHeader *h = id3v2CreateTagHeader(3, 1, 0x60, ext);
+    const uint8_t extExpected[] = {0, 0, 0, 6, 0, 0, 0, 0, 0, 100};
     size_t outl = 0;
     uint8_t *out = id3v2TagHeaderSerialize(h, 1000, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
-    unsigned char *tmp = NULL;
+    uint8_t *sizeBytes = u32tob(byteSyncintEncode(1000));
 
+    assert_non_null(out);
+    assert_int_equal(outl, 10 + sizeof(extExpected));
+    assert_memory_equal(out, "ID3", 3);
+    assert_int_equal(out[3], 3);
+    assert_int_equal(out[4], 1);
+    assert_int_equal(out[5], 0x60);
+    assert_memory_equal(out + 6, sizeBytes, 4);
+    assert_memory_equal(out + 10, extExpected, sizeof(extExpected));
 
-    assert_non_null(stream);
-
-    assert_memory_equal(byteStreamCursor(stream), "ID3", 3);
-    byteStreamSeek(stream, 3, SEEK_CUR);
-
-    assert_int_equal(byteStreamCursor(stream)[0], 3);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_int_equal(byteStreamCursor(stream)[0], 1);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_int_equal(byteStreamCursor(stream)[0], 0x60);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    tmp = u32tob(byteSyncintEncode(1000));
-    assert_memory_equal(byteStreamCursor(stream), tmp, 4);
-    free(tmp);
-    byteStreamSeek(stream, 4, SEEK_CUR);
-
-    assert_int_equal(byteStreamReturnU32(stream), 10);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_memory_equal(byteStreamCursor(stream), "\x00\x00", 2);
-    byteStreamSeek(stream, 2, SEEK_CUR);
-
-    assert_int_equal(byteStreamReturnU32(stream), 100);
-
+    free(sizeBytes);
     id3v2DestroyTagHeader(&h);
     free(out);
-    byteStreamDestroy(stream);
 }
-
 
 static void id3v2TagHeaderSerialize_v4(void **state) {
     (void) state;
@@ -1146,49 +1066,23 @@ static void id3v2TagHeaderSerialize_v4WithExt(void **state) {
     (void) state;
     Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(80, 870, 1, 1, 0xff);
     Id3v2TagHeader *h = id3v2CreateTagHeader(4, 0, 0xF0, ext);
+    const uint8_t extExpected[] = {0, 0, 0, 15, 1, 0x70, 0x00, 0x05, 0, 0, 0, 0x06, 0x66, 0x01, 0xff};
     size_t outl = 0;
     uint8_t *out = id3v2TagHeaderSerialize(h, 900, &outl);
-    ByteStream *stream = byteStreamCreate(out, outl);
-    unsigned char *tmp = NULL;
+    uint8_t *sizeBytes = u32tob(byteSyncintEncode(900));
 
-    assert_non_null(stream);
+    assert_non_null(out);
+    assert_int_equal(outl, 10 + sizeof(extExpected));
+    assert_memory_equal(out, "ID3", 3);
+    assert_int_equal(out[3], 4);
+    assert_int_equal(out[4], 0);
+    assert_int_equal(out[5], 0xF0);
+    assert_memory_equal(out + 6, sizeBytes, 4);
+    assert_memory_equal(out + 10, extExpected, sizeof(extExpected));
 
-    assert_memory_equal(byteStreamCursor(stream), "ID3", 3);
-    byteStreamSeek(stream, 3, SEEK_CUR);
-
-    assert_int_equal(byteStreamCursor(stream)[0], 4);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_int_equal(byteStreamCursor(stream)[0], 0);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_int_equal(byteStreamCursor(stream)[0], 0xF0);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    tmp = u32tob(byteSyncintEncode(900));
-    assert_memory_equal(byteStreamCursor(stream), tmp, 4);
-    free(tmp);
-    byteStreamSeek(stream, 4, SEEK_CUR);
-
-    assert_int_equal(byteStreamReturnInt(stream), 12);
-
-    assert_int_equal(byteStreamCursor(stream)[0], 6);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    assert_int_equal(byteStreamCursor(stream)[0], 0x70);
-    byteStreamSeek(stream, 1, SEEK_CUR);
-
-    tmp = malloc(5);
-    byteStreamRead(stream, tmp, 5);
-    assert_int_equal(btost(tmp, 5), byteSyncintEncode(870));
-    free(tmp);
-
-    assert_int_equal(byteStreamCursor(stream)[0], 0xff);
-
-
+    free(sizeBytes);
     id3v2DestroyTagHeader(&h);
     free(out);
-    byteStreamDestroy(stream);
 }
 
 static void id3v2TagHeaderToJSON_null(void **state) {
@@ -1272,6 +1166,126 @@ static void id3v2TagHeaderToJSON_v4ext(void **state) {
  * there will be code within the write to file and tag to bytestream that will handle this.
  * Its done this way as pretty much all structs are unaware of the unsync flag
  */
+
+static void id3v2ValidateTagHeader_valid(void **state) {
+    (void) state;
+
+    const uint8_t versions[] = {ID3V2_TAG_VERSION_2, ID3V2_TAG_VERSION_3, ID3V2_TAG_VERSION_4};
+    const uint8_t allFlags[] = {0x80, 0xE0, 0xF0}; // every defined flag (v2.2 compression excluded)
+
+    for (size_t i = 0; i < sizeof(versions); i++) {
+        Id3v2TagHeader *h = id3v2CreateTagHeader(versions[i], 0, 0, NULL);
+        assert_true(id3v2ValidateTagHeader(h));
+        h->flags = allFlags[i];
+        h->minorVersion = 0xFE;
+        assert_true(id3v2ValidateTagHeader(h));
+        id3v2DestroyTagHeader(&h);
+    }
+}
+
+static void id3v2ValidateTagHeader_badVersion(void **state) {
+    (void) state;
+
+    assert_false(id3v2ValidateTagHeader(NULL));
+
+    // 0x33 is the version from "ID3" bytes found in audio
+    const uint8_t majors[] = {0, 1, 5, 0x33, 0xFF};
+
+    for (size_t i = 0; i < sizeof(majors); i++) {
+        Id3v2TagHeader *h = id3v2CreateTagHeader(majors[i], 0, 0, NULL);
+        assert_false(id3v2ValidateTagHeader(h));
+        id3v2DestroyTagHeader(&h);
+    }
+
+    Id3v2TagHeader *h = id3v2CreateTagHeader(ID3V2_TAG_VERSION_3, 0xFF, 0, NULL);
+    assert_false(id3v2ValidateTagHeader(h));
+    id3v2DestroyTagHeader(&h);
+}
+
+static void id3v2ValidateTagHeader_undefinedFlags(void **state) {
+    (void) state;
+
+    const uint8_t versions[] = {ID3V2_TAG_VERSION_2, ID3V2_TAG_VERSION_3, ID3V2_TAG_VERSION_4};
+    const uint8_t undefined[] = {0x3F, 0x1F, 0x0F};
+
+    for (size_t i = 0; i < sizeof(versions); i++) {
+        for (unsigned int bit = 0; bit < 8; bit++) {
+            if ((undefined[i] >> bit) & 1) {
+                Id3v2TagHeader *h = id3v2CreateTagHeader(versions[i], 0, (uint8_t) (1 << bit), NULL);
+                assert_false(id3v2ValidateTagHeader(h));
+                id3v2DestroyTagHeader(&h);
+            }
+        }
+    }
+
+    // ID3v2.2 compression
+    Id3v2TagHeader *h = id3v2CreateTagHeader(ID3V2_TAG_VERSION_2, 0, 0x40, NULL);
+    assert_false(id3v2ValidateTagHeader(h));
+    id3v2DestroyTagHeader(&h);
+}
+
+static void id3v2ValidateTagHeader_extendedHeader(void **state) {
+    (void) state;
+
+    // flag set, extended header attached and valid
+    Id3v2TagHeader *h = id3v2CreateTagHeader(ID3V2_TAG_VERSION_3, 0, 0x40,
+                                             id3v2CreateExtendedTagHeader(10, 0, false, false, 0));
+    assert_true(id3v2ValidateTagHeader(h));
+    id3v2DestroyTagHeader(&h);
+
+    // flag set, extended header not parsed yet
+    h = id3v2CreateTagHeader(ID3V2_TAG_VERSION_4, 0, 0x40, NULL);
+    assert_true(id3v2ValidateTagHeader(h));
+    id3v2DestroyTagHeader(&h);
+
+    // extended header attached without the flag
+    h = id3v2CreateTagHeader(ID3V2_TAG_VERSION_3, 0, 0, id3v2CreateExtendedTagHeader(10, 0, false, false, 0));
+    assert_false(id3v2ValidateTagHeader(h));
+    id3v2DestroyTagHeader(&h);
+
+    // extended header attached but invalid for the version
+    h = id3v2CreateTagHeader(ID3V2_TAG_VERSION_3, 0, 0x40, id3v2CreateExtendedTagHeader(0, 0, true, false, 0));
+    assert_false(id3v2ValidateTagHeader(h));
+    id3v2DestroyTagHeader(&h);
+}
+
+static void id3v2ValidateExtendedTagHeader_v3(void **state) {
+    (void) state;
+
+    assert_false(id3v2ValidateExtendedTagHeader(NULL, ID3V2_TAG_VERSION_3));
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0xfefefefe, 0xffffffff, false, false, 0);
+    assert_true(id3v2ValidateExtendedTagHeader(ext, ID3V2_TAG_VERSION_3));
+    assert_false(id3v2ValidateExtendedTagHeader(ext, ID3V2_TAG_VERSION_2));
+    id3v2DestroyExtendedTagHeader(&ext);
+
+    // ID3v2.4 only fields
+    ext = id3v2CreateExtendedTagHeader(0, 0, true, false, 0);
+    assert_false(id3v2ValidateExtendedTagHeader(ext, ID3V2_TAG_VERSION_3));
+    id3v2DestroyExtendedTagHeader(&ext);
+
+    ext = id3v2CreateExtendedTagHeader(0, 0, false, true, 0x12);
+    assert_false(id3v2ValidateExtendedTagHeader(ext, ID3V2_TAG_VERSION_3));
+    id3v2DestroyExtendedTagHeader(&ext);
+}
+
+static void id3v2ValidateExtendedTagHeader_v4(void **state) {
+    (void) state;
+
+    Id3v2ExtendedTagHeader *ext = id3v2CreateExtendedTagHeader(0, 0x12345678, true, true, 0xFF);
+    assert_true(id3v2ValidateExtendedTagHeader(ext, ID3V2_TAG_VERSION_4));
+    id3v2DestroyExtendedTagHeader(&ext);
+
+    // no padding field in ID3v2.4
+    ext = id3v2CreateExtendedTagHeader(10, 0, false, false, 0);
+    assert_false(id3v2ValidateExtendedTagHeader(ext, ID3V2_TAG_VERSION_4));
+    id3v2DestroyExtendedTagHeader(&ext);
+
+    // restrictions without the restrictions flag
+    ext = id3v2CreateExtendedTagHeader(0, 0, false, false, 0x01);
+    assert_false(id3v2ValidateExtendedTagHeader(ext, ID3V2_TAG_VERSION_4));
+    id3v2DestroyExtendedTagHeader(&ext);
+}
 
 int main() {
     const struct CMUnitTest tests[] = {
@@ -1429,7 +1443,13 @@ int main() {
         cmocka_unit_test(id3v2TagHeaderToJSON_v3),
         cmocka_unit_test(id3v2TagHeaderToJSON_v3ext),
         cmocka_unit_test(id3v2TagHeaderToJSON_v4),
-        cmocka_unit_test(id3v2TagHeaderToJSON_v4ext)
+        cmocka_unit_test(id3v2TagHeaderToJSON_v4ext),
+        cmocka_unit_test(id3v2ValidateTagHeader_valid),
+        cmocka_unit_test(id3v2ValidateTagHeader_badVersion),
+        cmocka_unit_test(id3v2ValidateTagHeader_undefinedFlags),
+        cmocka_unit_test(id3v2ValidateTagHeader_extendedHeader),
+        cmocka_unit_test(id3v2ValidateExtendedTagHeader_v3),
+        cmocka_unit_test(id3v2ValidateExtendedTagHeader_v4)
 
 
     };

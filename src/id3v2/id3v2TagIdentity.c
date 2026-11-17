@@ -54,6 +54,75 @@ void id3v2DestroyTagHeader(Id3v2TagHeader **toDelete) {
 }
 
 /**
+ * @brief Checks that a tag header holds a legitimate ID3v2.x header.
+ * @details Used to tell a real tag header from "ID3" bytes that happen to appear in other data, such as
+ * audio. A header is valid when:
+ *
+ * - the major version is 2, 3 or 4
+ *
+ * - the minor version is not 0xFF
+ *
+ * - no flag bits the version leaves undefined are set (ID3v2.2 %ab000000, ID3v2.3 %abc00000,
+ *   ID3v2.4 %abcd0000)
+ *
+ * - for ID3v2.2, the compression flag is clear, as the standard says to ignore a compressed ID3v2.2 tag
+ *
+ * - an attached extended header is only present on ID3v2.3/ID3v2.4 with the extended header flag set,
+ *   and passes id3v2ValidateExtendedTagHeader
+ *
+ * The extended header flag may be set while extendedHeader is still NULL, as a parser validates the
+ * header before reading the extended header.
+ *
+ * @param header - The tag header to check.
+ * @return bool - true if the header is valid, false if it is NULL or invalid.
+ */
+bool id3v2ValidateTagHeader(const Id3v2TagHeader *header) {
+    uint8_t undefinedFlags = 0;
+
+    if (header == NULL) {
+        return false;
+    }
+
+    if (header->minorVersion == 0xFF) {
+        return false;
+    }
+
+    switch (header->majorVersion) {
+        case ID3V2_TAG_VERSION_2:
+            undefinedFlags = 0x3F;
+
+            // compression, no scheme was ever defined so the tag must be ignored
+            if (readBit(header->flags, 6)) {
+                return false;
+            }
+
+            break;
+        case ID3V2_TAG_VERSION_3:
+            undefinedFlags = 0x1F;
+            break;
+        case ID3V2_TAG_VERSION_4:
+            undefinedFlags = 0x0F;
+            break;
+        default:
+            return false;
+    }
+
+    if ((header->flags & undefinedFlags) != 0) {
+        return false;
+    }
+
+    if (header->extendedHeader != NULL) {
+        if (header->majorVersion == ID3V2_TAG_VERSION_2 || !readBit(header->flags, 6)) {
+            return false;
+        }
+
+        return id3v2ValidateExtendedTagHeader(header->extendedHeader, header->majorVersion);
+    }
+
+    return true;
+}
+
+/**
  * @brief Sets or clears the unsynchronisation flag in the tag header.
  * @details Modifies bit 7 of the header flags byte. Unsynchronisation prevents false sync patterns in tag data.
  * @param header - The tag header to modify.
@@ -304,6 +373,41 @@ void id3v2DestroyExtendedTagHeader(Id3v2ExtendedTagHeader **toDelete) {
         free(*toDelete);
         *toDelete = NULL;
         toDelete = NULL;
+    }
+}
+
+/**
+ * @brief Checks that an extended header holds legitimate values for an ID3v2.x version.
+ * @details An extended header is valid when:
+ *
+ * - the version is 3 or 4 (ID3v2.2 has no extended header)
+ *
+ * - for ID3v2.3, the ID3v2.4 only fields are unset: update is false, tagRestrictions is false and
+ *   restrictions is 0
+ *
+ * - for ID3v2.4, padding is 0 (ID3v2.4 has no padding field) and restrictions is 0 unless
+ *   tagRestrictions is set
+ *
+ * @param ext - The extended header to check.
+ * @param version - The major version of the tag the extended header belongs to.
+ * @return bool - true if the extended header is valid, false if it is NULL or invalid.
+ */
+bool id3v2ValidateExtendedTagHeader(const Id3v2ExtendedTagHeader *ext, uint8_t version) {
+    if (ext == NULL) {
+        return false;
+    }
+
+    switch (version) {
+        case ID3V2_TAG_VERSION_3:
+            return !ext->update && !ext->tagRestrictions && ext->restrictions == 0;
+        case ID3V2_TAG_VERSION_4:
+            if (ext->padding != 0) {
+                return false;
+            }
+
+            return ext->tagRestrictions || ext->restrictions == 0;
+        default:
+            return false;
     }
 }
 
@@ -654,19 +758,19 @@ void id3v2DestroyTag(Id3v2Tag **toDelete) {
 }
 
 /**
- * @brief Serializes an ID3v2 extended tag header into a byte stream.
+ * @brief Serializes an ID3v2 extended tag header into a byte array.
  * @details Converts an extended header structure into its binary representation according 
  * to the ID3v2 specification. Returns a dynamically allocated byte array that must be freed 
  * by the caller. Handles version-specific formats:
  * 
- * - ID3v2.3: Writes 10+ bytes containing size (4), flags (1+2 reserved), padding size (4), 
- * and optional CRC-32 (4).
+ * - ID3v2.3: 10 or 14 bytes: size (4, big-endian, 6 or 10 as it excludes itself), flags (2, 0x8000 when a
+ * CRC is present), padding size (4), and the CRC-32 (4) when crc is non-zero.
  * 
- * - ID3v2.4: Writes 6+ bytes containing extended size (4), flag bytes count (1), flags 
- * (update/CRC/restrictions in 1 byte), optional syncsafe CRC-32 (5), and optional 
- * restrictions byte (1).
+ * - ID3v2.4: 6 to 15 bytes: syncsafe size of the whole extended header (4), number of flag bytes (1, always 1),
+ * flags (%0bcd0000), then for each set flag a length byte and its data: update $00, CRC $05 with a 5 byte
+ * syncsafe CRC-32, restrictions $01 with the restrictions byte. padding is not part of the ID3v2.4 layout.
  * 
- * ID3v2.2 does not support extended headers and returns NULL.
+ * A crc of 0 means no CRC. ID3v2.2 does not support extended headers and returns NULL.
  * 
  * @param ext - Pointer to the extended header structure to serialize.
  * @param version - ID3v2 version (ID3V2_TAG_VERSION_2, ID3V2_TAG_VERSION_3, or ID3V2_TAG_VERSION_4) determining serialization format.
@@ -674,110 +778,89 @@ void id3v2DestroyTag(Id3v2Tag **toDelete) {
  * @return uint8_t* - Dynamically allocated byte array containing serialized header, or NULL on failure. Caller must free returned memory.
  */
 uint8_t *id3v2ExtendedTagHeaderSerialize(Id3v2ExtendedTagHeader *ext, uint8_t version, size_t *outl) {
-    ByteStream *stream = NULL;
+    uint8_t buf[15] = {0};
+    size_t n = 0;
     uint8_t *out = NULL;
-    int buildSize = 0;
-    unsigned char *tmp = NULL;
-    unsigned char crcb[5] = {0, 0, 0, 0, 0};
+
+    *outl = 0;
 
     if (ext == NULL) {
-        *outl = 0;
         return NULL;
     }
 
     switch (version) {
-        case ID3V2_TAG_VERSION_3:
+        case ID3V2_TAG_VERSION_3: {
+            const uint32_t size = (ext->crc) ? 10 : 6;
 
-            // size
-            buildSize = 10 + ((ext->crc) ? 4 : 0);
+            buf[n++] = (uint8_t) (size >> 24);
+            buf[n++] = (uint8_t) (size >> 16);
+            buf[n++] = (uint8_t) (size >> 8);
+            buf[n++] = (uint8_t) size;
 
-            stream = byteStreamCreate(NULL, buildSize);
+            // flags
+            buf[n++] = (ext->crc) ? 0x80 : 0x00;
+            buf[n++] = 0x00;
 
-            tmp = (unsigned char *) itob(buildSize);
-            byteStreamWrite(stream, tmp, 4);
-            free(tmp);
-
-            // flag
-            byteStreamWriteBit(stream, (ext->crc > 0) ? 1 : 0, 7);
-            byteStreamSeek(stream, 2, SEEK_CUR);
-
-            // crc
-            tmp = u32tob(ext->padding);
-            byteStreamWrite(stream, tmp, 4);
-            free(tmp);
+            // padding size
+            buf[n++] = (uint8_t) (ext->padding >> 24);
+            buf[n++] = (uint8_t) (ext->padding >> 16);
+            buf[n++] = (uint8_t) (ext->padding >> 8);
+            buf[n++] = (uint8_t) ext->padding;
 
             if (ext->crc) {
-                tmp = u32tob(ext->crc);
-                byteStreamWrite(stream, tmp, 4);
-                free(tmp);
+                buf[n++] = (uint8_t) (ext->crc >> 24);
+                buf[n++] = (uint8_t) (ext->crc >> 16);
+                buf[n++] = (uint8_t) (ext->crc >> 8);
+                buf[n++] = (uint8_t) ext->crc;
             }
 
             break;
+        }
+        case ID3V2_TAG_VERSION_4: {
+            const uint32_t size = 6 + ((ext->update) ? 1 : 0) + ((ext->crc) ? 6 : 0) + ((ext->tagRestrictions) ? 2 : 0);
 
-        case ID3V2_TAG_VERSION_4:
+            // syncsafe size, never above 15 so only the last byte is used
+            buf[n++] = 0x00;
+            buf[n++] = 0x00;
+            buf[n++] = 0x00;
+            buf[n++] = (uint8_t) size;
 
-            buildSize = 6 + ((ext->crc) ? 5 : 0) + ((ext->tagRestrictions) ? 1 : 0);
+            // number of flag bytes then the flags
+            buf[n++] = 0x01;
+            buf[n++] = (uint8_t) (((ext->update) ? 0x40 : 0) | ((ext->crc) ? 0x20 : 0) |
+                                  ((ext->tagRestrictions) ? 0x10 : 0));
 
-            stream = byteStreamCreate(NULL, buildSize);
+            if (ext->update) {
+                buf[n++] = 0x00;
+            }
 
-
-            // ext size
-            tmp = u32tob(buildSize);
-            byteStreamWrite(stream, tmp, 4);
-            free(tmp);
-
-            // flag bytes
-            tmp = (unsigned char *) itob(buildSize - 6);
-            byteStreamWrite(stream, &tmp[3], 1);
-            free(tmp);
-
-            // flags
-            byteStreamWriteBit(stream, ext->update, 6);
-            byteStreamWriteBit(stream, (ext->crc > 0) ? 1 : 0, 5);
-            byteStreamWriteBit(stream, ext->tagRestrictions, 4);
-            byteStreamSeek(stream, 1, SEEK_CUR);
-
-            // crc
             if (ext->crc) {
-                int offset = 0;
-                int toWrite = 0;
-                tmp = sttob(byteSyncintEncode(ext->crc));
-
-                while (offset < sizeof(size_t) && tmp[offset] == 0) {
-                    offset++;
+                buf[n++] = 0x05;
+                for (int shift = 28; shift >= 0; shift -= 7) {
+                    buf[n++] = (uint8_t) ((ext->crc >> shift) & 0x7F);
                 }
-
-                // c4c is 5 bytes if the 0s are there they must be kept
-                if (offset > 3) {
-                    offset = 3;
-                }
-
-                toWrite = ((int) (sizeof(size_t) - offset) > 5) ? 5 : (int) (sizeof(size_t) - offset);
-                memcpy(crcb, tmp + offset, toWrite);
-
-                byteStreamSeek(stream, 6, SEEK_SET);
-                byteStreamWrite(stream, crcb, 5);
-                free(tmp);
             }
 
             if (ext->tagRestrictions) {
-                byteStreamWrite(stream, &ext->restrictions, 1);
+                buf[n++] = 0x01;
+                buf[n++] = ext->restrictions;
             }
 
             break;
-
+        }
         // no support or it does not exist
         case ID3V2_TAG_VERSION_2:
         default:
-            *outl = 0;
             return NULL;
     }
 
-    byteStreamRewind(stream);
-    out = calloc(stream->bufferSize, sizeof(uint8_t));
-    *outl = stream->bufferSize;
-    byteStreamRead(stream, out, stream->bufferSize);
-    byteStreamDestroy(stream);
+    out = malloc(n);
+    if (out == NULL) {
+        return NULL;
+    }
+
+    memcpy(out, buf, n);
+    *outl = n;
 
     return out;
 }

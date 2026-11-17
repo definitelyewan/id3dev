@@ -53,6 +53,10 @@ int id3v2ReadExperimentalIndicator(Id3v2TagHeader *header);
 
 int id3v2ReadFooterIndicator(Id3v2TagHeader *header);
 
+//validation functions
+
+bool id3v2ValidateTagHeader(const Id3v2TagHeader *header);
+
 /*
     Extended Tag Header
 */
@@ -63,6 +67,10 @@ Id3v2ExtendedTagHeader *id3v2CreateExtendedTagHeader(uint32_t padding, uint32_t 
                                                      uint8_t restrictions);
 
 void id3v2DestroyExtendedTagHeader(Id3v2ExtendedTagHeader **toDelete);
+
+//validation functions
+
+bool id3v2ValidateExtendedTagHeader(const Id3v2ExtendedTagHeader *ext, uint8_t version);
 
 //tag restriction functions
 

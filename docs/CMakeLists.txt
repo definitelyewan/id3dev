@@ -10,6 +10,8 @@ if(DOXYGEN_FOUND)
 
             "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3dev.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/../src/id3dev.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../src/id3Internal.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/../src/id3Internal.c"
 
             "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3v1/id3v1.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3v1/id3v1Parser.h"

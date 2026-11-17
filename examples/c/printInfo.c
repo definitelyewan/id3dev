@@ -38,6 +38,12 @@ int main(int argc, char *argv[]) {
     // Parse all versions of ID3 and store it in a structure
     id3 = id3FromFile(argv[1]);
 
+    // NULL when the file can't be read or has neither an ID3v1 nor an ID3v2 tag
+    if (id3 == NULL) {
+        printf("No ID3 tags found in %s\n", argv[1]);
+        return EXIT_FAILURE;
+    }
+
     // Read basic information about the song
     title = id3ReadTitle(id3);
     artist = id3ReadArtist(id3);

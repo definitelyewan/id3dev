@@ -31,3 +31,15 @@ def frame_id(raw: str) -> bytes:
     if not isinstance(raw, str) or not 3 <= len(raw) <= 4 or not raw.isascii():
         raise ValueError(f"frame IDs are 3 or 4 ASCII characters, not {raw!r}")
     return raw.encode("ascii")
+
+def key_value(key: str, value: "str | bytes") -> "tuple[bytes, bytes]":
+    """Encode a context key and value for id3v2*KeyValue: a str value as UTF-8, bytes as given."""
+    if not isinstance(key, str) or not key:
+        raise ValueError(f"a context key is a non-empty str, not {key!r}")
+    if isinstance(value, str):
+        value = value.encode("utf-8")
+    elif isinstance(value, (bytes, bytearray, memoryview)):
+        value = bytes(value)
+    else:
+        raise TypeError(f"a context value is a str or bytes, not {type(value).__name__}")
+    return key.encode("utf-8"), value

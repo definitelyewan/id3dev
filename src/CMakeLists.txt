@@ -34,12 +34,14 @@ set(ID3DEV_HEADER_FILES
         ${ID3V1_HEADERS}
         ${ID3V2_HEADERS}
         "${CMAKE_CURRENT_SOURCE_DIR}/../include/id3dev.h"
+        "${CMAKE_CURRENT_SOURCE_DIR}/id3Internal.h"
 )
 
 set(ID3DEV_SOURCE_FILES
         ${ID3V1_SOURCE_FILES}
         ${ID3V2_SOURCE_FILES}
         "${CMAKE_CURRENT_SOURCE_DIR}/id3dev.c"
+        "${CMAKE_CURRENT_SOURCE_DIR}/id3Internal.c"
 )
 
 add_library(id3dev ${ID3DEV_HEADER_FILES} ${ID3DEV_SOURCE_FILES}
