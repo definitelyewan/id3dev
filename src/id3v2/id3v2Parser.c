@@ -17,179 +17,162 @@
 #include "id3v2/id3v2Frame.h"
 #include "id3v2/id3v2Parser.h"
 #include "id3v2/id3v2TagIdentity.h"
+#include "src/id3Internal.h"
 #include "id3dependencies/ByteStream/include/byteStream.h"
 #include "id3dependencies/ByteStream/include/byteInt.h"
 #include "id3dependencies/ByteStream/include/byteUnicode.h"
 
 /**
  * @brief Parses an ID3v2 extended tag header from a byte buffer.
- * @details Extracts and decodes extended header fields from binary data according to the 
- * ID3v2 specification. Returns the number of bytes consumed during parsing and creates 
- * a heap-allocated extended header structure. Supports version-specific parsing:
- * 
- * - ID3v2.3: Reads size (4 bytes), CRC flag (bit 7), 2 reserved bytes, padding size (4 bytes), 
- * and optional CRC-32 (4 bytes if flag set).
- * 
- * - ID3v2.4: Reads extended size (4 bytes), flag bytes count (1 byte), flags byte (update at 
- * bit 6, CRC at bit 5, restrictions at bit 4), optional syncsafe CRC-32 (5 bytes), and 
- * optional restrictions byte (8 bits for tag/text/image limitations).
- * 
- * ID3v2.2 and unsupported versions return 0 with NULL extendedTagHeader. On success, caller 
+ * @details Decodes the extended header that follows the tag header and checks its structure against the
+ * standard. Anything that doesn't match is treated as junk: 0 is returned and extendedTagHeader is set to NULL.
+ *
+ * - ID3v2.3: size (4, big-endian), flags (2), padding size (4), and a CRC-32 (4) when flag 0x8000 is set. The
+ * size excludes its own 4 bytes, so it must be 6 without a CRC or 10 with one. Only the CRC flag may be set, and
+ * the padding must fit in the bytes left after the extended header.
+ *
+ * - ID3v2.4: syncsafe size (4) covering the whole extended header, the number of flag bytes (always 1), the
+ * flags byte (%0bcd0000), then for each set flag in order a length byte and its data: update $00, CRC $05 with
+ * a 5 byte syncsafe CRC-32, restrictions $01 with 1 byte. The size must equal the bytes those fields take.
+ *
+ * Every version must also fit within inl. ID3v2.2 has no extended header and returns 0. On success, caller
  * must free the returned structure with id3v2DestroyExtendedTagHeader.
- * 
+ *
  * @param in - Pointer to byte buffer containing extended header data.
- * @param inl - Size of input buffer in bytes.
+ * @param inl - Bytes left in the tag from in onwards.
  * @param version - ID3v2 version (ID3V2_TAG_VERSION_3 or ID3V2_TAG_VERSION_4).
  * @param extendedTagHeader - Output parameter receiving pointer to heap-allocated extended header structure, or NULL on failure.
- * @return uint32_t - Number of bytes read from buffer on success, 0 on failure or unsupported version.
+ * @return uint32_t - Number of bytes the extended header takes including its size field, 0 on failure or unsupported version.
  */
 uint32_t id3v2ParseExtendedTagHeader(uint8_t *in, size_t inl, uint8_t version,
                                      Id3v2ExtendedTagHeader **extendedTagHeader) {
-    if (in == NULL || inl == 0) {
-        *extendedTagHeader = NULL;
-        return 0;
-    }
-
-    ByteStream *stream = byteStreamCreate(in, inl);
-
-    if (!stream) {
-        *extendedTagHeader = NULL;
-        return 0;
-    }
-
-    // values needed
     uint32_t padding = 0;
     uint32_t crc = 0;
     bool update = false;
     bool tagRestrictions = false;
     uint8_t restrictions = 0;
+    size_t total = 0;
 
-    // values for parsing
-    size_t offset = 0;
-    unsigned char crcBytes[5] = {0, 0, 0, 0, 0};
-    bool hasCrc = false;
-    bool hasRestrictions = false;
+    *extendedTagHeader = NULL;
 
-    // size return
-    uint32_t hSize = 0;
-
-    if (version == ID3V2_TAG_VERSION_3 || version == ID3V2_TAG_VERSION_4) {
-        hSize = byteStreamReturnInt(stream);
-        if (!hSize) {
-            *extendedTagHeader = NULL;
-            byteStreamDestroy(stream);
-            return 0;
-        }
-
-        if (hSize > (stream->bufferSize - stream->cursor)) {
-            offset = hSize - (stream->bufferSize - stream->cursor);
-        }
+    if (in == NULL || inl < 4) {
+        return 0;
     }
-
-    ByteStream *innerStream = byteStreamCreate(byteStreamCursor(stream), hSize - offset);
 
     switch (version) {
         case ID3V2_TAG_VERSION_3: {
-            const int8_t flags = (int8_t) byteStreamReadBit(innerStream, 7);
+            const uint32_t size = ((uint32_t) in[0] << 24) | ((uint32_t) in[1] << 16) | ((uint32_t) in[2] << 8) | in[3];
+            uint16_t flags = 0;
+            bool hasCrc = false;
 
-            // read flags
-            if (flags == -1) {
-                break;
+            if (size != 6 && size != 10) {
+                return 0;
             }
 
-            // skip over flags
-            if (!byteStreamSeek(innerStream, 2, SEEK_CUR)) {
-                break;
+            total = 4 + (size_t) size;
+            if (total > inl) {
+                return 0;
             }
 
-            // read padding
-            padding = byteStreamReturnInt(innerStream);
+            flags = (uint16_t) ((in[4] << 8) | in[5]);
+            hasCrc = (flags & 0x8000) != 0;
 
-            if (!padding && flags == 0) {
-                break;
+            // only the CRC flag is defined and the size must match it
+            if ((flags & 0x7FFF) != 0 || size != (hasCrc ? 10u : 6u)) {
+                return 0;
             }
 
-            // check to see if a crc is there
-            if (flags) {
-                crc = byteStreamReturnInt(innerStream);
-                if (!crc) {
-                    break;
-                }
+            padding = ((uint32_t) in[6] << 24) | ((uint32_t) in[7] << 16) | ((uint32_t) in[8] << 8) | in[9];
+            if (padding > inl - total) {
+                return 0;
+            }
+
+            if (hasCrc) {
+                crc = ((uint32_t) in[10] << 24) | ((uint32_t) in[11] << 16) | ((uint32_t) in[12] << 8) | in[13];
             }
 
             break;
         }
-        case ID3V2_TAG_VERSION_4:
+        case ID3V2_TAG_VERSION_4: {
+            uint32_t size = 0;
+            size_t pos = 6;
+            uint8_t flags = 0;
 
-            // number of flag bytes
-            if (!byteStreamSeek(innerStream, 1, SEEK_CUR)) {
-                break;
+            for (int i = 0; i < 4; i++) {
+                if (in[i] & 0x80) {
+                    return 0;
+                }
+                size = (size << 7) | in[i];
             }
 
-            // read flags
-            if (byteStreamReadBit(innerStream, 6)) {
+            if (size < 6 || size > inl) {
+                return 0;
+            }
+
+            total = size;
+
+            // one flag byte, %0bcd0000
+            if (in[4] != 1) {
+                return 0;
+            }
+
+            flags = in[5];
+            if (flags & 0x8F) {
+                return 0;
+            }
+
+            // each set flag carries a length byte then its data, in flag order
+            if (flags & 0x40) {
+                if (pos + 1 > total || in[pos] != 0x00) {
+                    return 0;
+                }
                 update = true;
+                pos += 1;
             }
 
-            if (byteStreamReadBit(innerStream, 5)) {
-                hasCrc = true;
-            }
-
-            if (byteStreamReadBit(innerStream, 4)) {
-                hasRestrictions = true;
-            }
-
-            if (!byteStreamSeek(innerStream, 1, SEEK_CUR)) {
-                break;
-            }
-
-            // read crc
-            if (hasCrc) {
-                if (!byteStreamRead(innerStream, (uint8_t *) crcBytes, 5)) {
-                    break;
+            if (flags & 0x20) {
+                if (pos + 6 > total || in[pos] != 0x05) {
+                    return 0;
                 }
 
-                crc = byteSyncintDecode(btoi(crcBytes, 5));
-            }
+                // 35 bits of syncsafe data hold a 32 bit CRC, so the first byte uses only its low 4 bits
+                if (in[pos + 1] > 0x0F) {
+                    return 0;
+                }
 
-            // read restrictions
-            if (hasRestrictions) {
-                for (uint8_t k = 8; k > 0; k--) {
-                    int bit = byteStreamReadBit(innerStream, k - 1);
-
-                    if (bit == -1) {
-                        break;
+                for (size_t i = pos + 1; i < pos + 6; i++) {
+                    if (in[i] & 0x80) {
+                        return 0;
                     }
-
-                    restrictions = setBit(restrictions, k - 1, (bool) bit);
+                    crc = (crc << 7) | in[i];
                 }
 
+                pos += 6;
+            }
+
+            if (flags & 0x10) {
+                if (pos + 2 > total || in[pos] != 0x01) {
+                    return 0;
+                }
                 tagRestrictions = true;
+                restrictions = in[pos + 1];
+                pos += 2;
+            }
 
-                if (!byteStreamSeek(innerStream, 1, SEEK_CUR)) {
-                    break;
-                }
+            if (pos != total) {
+                return 0;
             }
 
             break;
-
+        }
         // no support
         default:
-            byteStreamDestroy(innerStream);
-            *extendedTagHeader = NULL;
             return 0;
     }
 
-    // clean up
-    byteStreamDestroy(stream);
     *extendedTagHeader = id3v2CreateExtendedTagHeader(padding, crc, update, tagRestrictions, restrictions);
-    uint32_t walk = innerStream->cursor + 4;
 
-    if (innerStream != NULL) {
-        byteStreamDestroy(innerStream);
-    }
-
-    return walk;
+    return (*extendedTagHeader == NULL) ? 0 : (uint32_t) total;
 }
 
  /**
@@ -271,7 +254,20 @@ uint32_t id3v2ParseTagHeader(uint8_t *in, size_t inl, Id3v2TagHeader **tagHeader
             break;
         }
 
-        // size
+        // size is a syncsafe integer, so the top bit of every byte must be clear. Decoding masks those
+        // bits off, so check the raw bytes first
+        if (stream->bufferSize - stream->cursor < 4) {
+            break;
+        }
+
+        if (((byteStreamCursor(stream)[0] | byteStreamCursor(stream)[1] | byteStreamCursor(stream)[2] |
+              byteStreamCursor(stream)[3]) & 0x80) != 0) {
+            *tagHeader = NULL;
+            *tagSize = 0;
+            byteStreamDestroy(stream);
+            return 0;
+        }
+
         hSize = byteStreamReturnSyncInt(stream);
         if (!hSize) {
             break;
@@ -689,29 +685,6 @@ static size_t internal_id3v2ParseFrameEncodedStringContent(ByteStream *innerStre
     }
 
     return dataSize;
-}
-
-/**
- * @brief Reads a big-endian unsigned value from an entry's bytes.
- * @details Used to read the bit count stored in a field keyed "adjustment". Only the trailing
- * sizeof(size_t) bytes are used, which is far beyond any bit count the standard allows.
- *
- * @param data - Entry bytes, may be NULL when size is 0.
- * @param size - Number of bytes in data.
- * @return size_t - The decoded value, 0 when data is NULL or size is 0.
- */
-static size_t internal_id3v2AdjustmentBits(const uint8_t *data, size_t size) {
-    size_t value = 0;
-
-    if (data == NULL) {
-        return 0;
-    }
-
-    for (size_t i = (size > sizeof(size_t)) ? size - sizeof(size_t) : 0; i < size; i++) {
-        value = (value << CHAR_BIT) | data[i];
-    }
-
-    return value;
 }
 
 /**
@@ -1193,24 +1166,36 @@ Id3v2Tag *id3v2ParseTagFromBuffer(uint8_t *in, size_t inl, HashTable *userPairs)
     Id3v2ExtendedTagHeader *ext = NULL;
     List *frames = listCreate(id3v2PrintFrame, id3v2DeleteFrame, id3v2CompareFrame, id3v2CopyFrame);
 
-    // locate the start of the tag
+    // locate the start of the tag, checking every byte offset
     while (true) {
-        if (!byteStreamRead(stream, id, ID3V2_TAG_ID_SIZE)) {
+        // byteStreamRead allows short reads, so check a whole identifier is left
+        if (stream->bufferSize - stream->cursor < ID3V2_TAG_ID_SIZE) {
             listFree(frames);
             byteStreamDestroy(stream);
             return NULL;
         }
 
+        memcpy(id, byteStreamCursor(stream), ID3V2_TAG_ID_SIZE);
+
         if (btoi(id, ID3V2_TAG_ID_SIZE) == ID3V2_TAG_ID_MAGIC_NUMBER_H) {
-            stream->cursor = stream->cursor - ID3V2_TAG_ID_SIZE;
             break;
         }
+
+        stream->cursor++;
     }
 
     while (true) {
         read = id3v2ParseTagHeader(byteStreamCursor(stream), stream->bufferSize - stream->cursor, &header, &tagSize);
 
-        if (read == 0 || header == NULL || tagSize == 0) {
+        // "ID3" followed by a header that is not legitimate is not a tag, e.g. the bytes appeared in audio
+        if (read == 0 || header == NULL || !id3v2ValidateTagHeader(header)) {
+            id3v2DestroyTagHeader(&header);
+            listFree(frames);
+            byteStreamDestroy(stream);
+            return NULL;
+        }
+
+        if (tagSize == 0) {
             break;
         }
 
@@ -1238,8 +1223,12 @@ Id3v2Tag *id3v2ParseTagFromBuffer(uint8_t *in, size_t inl, HashTable *userPairs)
                                                header->majorVersion, &ext);
             header->extendedHeader = ext;
 
-            if (read == 0 || ext == NULL) {
-                break;
+            // the header promised an extended header, so a missing or illegitimate one means junk
+            if (read == 0 || ext == NULL || !id3v2ValidateExtendedTagHeader(ext, header->majorVersion)) {
+                id3v2DestroyTagHeader(&header);
+                listFree(frames);
+                byteStreamDestroy(stream);
+                return NULL;
             }
 
             tagSize = ((tagSize < read) ? 0 : tagSize - read);

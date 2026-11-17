@@ -19,6 +19,7 @@
 #include "id3dependencies/ByteStream/include/byteInt.h"
 #include "id3dependencies/ByteStream/include/byteUnicode.h"
 #include "id3dependencies/ByteStream/include/byteStream.h"
+#include "src/id3Internal.h"
 
 static char *internal_base64Encode(const unsigned char *input, size_t inputLength) {
     static const unsigned char base64Chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
@@ -44,29 +45,6 @@ static char *internal_base64Encode(const unsigned char *input, size_t inputLengt
 
     output[outputLength] = '\0';
     return (char *) output;
-}
-
-/**
- * @brief Reads a big-endian unsigned value from an entry's bytes.
- * @details Used to read the bit count stored in a field keyed "adjustment". Only the trailing
- * sizeof(size_t) bytes are used, which is far beyond any bit count the standard allows.
- *
- * @param data - Entry bytes, may be NULL when size is 0.
- * @param size - Number of bytes in data.
- * @return size_t - The decoded value, 0 when data is NULL or size is 0.
- */
-static size_t internal_id3v2AdjustmentBits(const uint8_t *data, size_t size) {
-    size_t value = 0;
-
-    if (data == NULL) {
-        return 0;
-    }
-
-    for (size_t i = (size > sizeof(size_t)) ? size - sizeof(size_t) : 0; i < size; i++) {
-        value = (value << CHAR_BIT) | data[i];
-    }
-
-    return value;
 }
 
 
@@ -641,22 +619,23 @@ void *id3v2ReadFrameEntry(ListIter *traverser, size_t *dataSize) {
 
 
 /**
- * @brief Reads a frame entry as a UTF-8 encoded string with escaped special characters, advancing the iterator.
- * @details Retrieves the content entry at the iterator's current position, automatically detects its encoding, 
- * and converts it to UTF-8. Strips UTF-8 BOM if present and escapes quotes and backslashes for JSON/C std 
- * compatibility. Advances the iterator to the next entry. Returns NULL and sets dataSize to 0 if the traverser 
- * is NULL, the current entry is NULL, memory allocation fails, or encoding conversion fails.
- * 
+ * @brief Reads a frame entry as a UTF-8 encoded string, advancing the iterator.
+ * @details Retrieves the content entry at the iterator's current position, automatically detects its encoding,
+ * and converts it to UTF-8. Strips UTF-8 BOM if present and stops at the first NUL. The text is returned as is,
+ * with no escaping; escape it yourself if it is embedded in another format such as JSON. Advances the iterator
+ * to the next entry. Returns NULL and sets dataSize to 0 if the traverser is NULL, the current entry is NULL,
+ * memory allocation fails, or encoding conversion fails.
+ *
  * @param traverser - Iterator positioned at the entry to read and convert
- * @param dataSize - Output parameter receiving the final escaped string length in bytes, or 0 on failure
- * 
- * @return char* - Heap allocated UTF-8 string with escaped quotes and backslashes. Caller must free. NULL on failure
+ * @param dataSize - Output parameter receiving the string length in bytes (1 for an empty string), or 0 on failure
+ *
+ * @return char* - Heap allocated NUL terminated UTF-8 string. Caller must free. NULL on failure
  */
 char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize) {
     unsigned char *tmp = NULL;
     unsigned char *outString = NULL;
     unsigned char encoding = 0;
-    char *escapedStr = NULL;
+    char *str = NULL;
     bool convi = false;
     int utf8BomOffset = 0;
     size_t outLen = 0;
@@ -727,35 +706,32 @@ char *id3v2ReadFrameEntryAsChar(ListIter *traverser, size_t *dataSize) {
         utf8BomOffset = 3;
     }
 
-    // escape quotes and backslashes
-    escapedStr = malloc((2 * (*dataSize - utf8BomOffset)) + 1);
+    // copy without the BOM, stopping at the first NUL
+    str = malloc((*dataSize - utf8BomOffset) + 1);
+
+    if (str == NULL) {
+        free(outString);
+        *dataSize = 0;
+        return NULL;
+    }
+
     j = 0;
 
-    for (size_t i = 0; i < *dataSize - utf8BomOffset; i++) {
-        if (outString[i + utf8BomOffset] == '"' || outString[i + utf8BomOffset] == '\\') {
-            escapedStr[j++] = '\\';
-            escapedStr[j++] = (char) outString[i + utf8BomOffset];
-        } else {
-            escapedStr[j++] = (char) outString[i + utf8BomOffset];
-        }
+    while (j < *dataSize - utf8BomOffset && outString[j + utf8BomOffset] != '\0') {
+        str[j] = (char) outString[j + utf8BomOffset];
+        j++;
     }
 
-    escapedStr[j] = '\0';
+    str[j] = '\0';
     free(outString);
 
-    // truncate
-    size_t nullPos = 0;
-    while (escapedStr[nullPos] != '\0') {
-        nullPos++;
-    }
-    *dataSize = nullPos;
-    escapedStr[nullPos] = '\0';
+    *dataSize = j;
 
     if (*dataSize == 0) {
         *dataSize = 1;
     }
 
-    return escapedStr;
+    return str;
 }
 
 /**
@@ -1339,6 +1315,407 @@ char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, uint8_t version) {
 }
 
 /**
+ * @brief Finds the length of the text held in a raw frame entry, excluding any terminator.
+ * @details Entries can carry a terminator or trailing zero padding from parsing (the parser keeps the
+ * terminator on 8-bit strings and pads entries up to their context minimum). The text ends at the first
+ * 0x00 byte for 8-bit encodings, or at the first 2-byte aligned 0x00 0x00 pair for UTF-16.
+ *
+ * @param raw - Entry bytes
+ * @param rawLen - Number of bytes in raw
+ * @param wide - true when raw is UTF-16
+ *
+ * @return size_t - Length of the text in bytes
+ */
+static size_t internal_id3v2RawTextLength(const uint8_t *raw, size_t rawLen, bool wide) {
+    size_t i = 0;
+
+    if (!wide) {
+        while (i < rawLen && raw[i] != 0x00) {
+            i++;
+        }
+
+        return i;
+    }
+
+    while (i + 1 < rawLen) {
+        if (raw[i] == 0x00 && raw[i + 1] == 0x00) {
+            return i;
+        }
+
+        i += 2;
+    }
+
+    // a lone trailing zero byte is padding, not a code unit
+    if (rawLen % 2 == 1 && raw[rawLen - 1] == 0x00) {
+        return rawLen - 1;
+    }
+
+    return rawLen;
+}
+
+/**
+ * @brief Works out which encoding the bytes of a raw text entry are in.
+ * @details A UTF-16 BOM decides it. Without one, an entry in a frame declared as UTF-16 with BOM holds 8-bit
+ * text (UTF-8 if it is valid UTF-8, otherwise Latin-1), and any other entry is taken to be in the declared
+ * encoding, including BOM-less UTF-16BE.
+ *
+ * @param raw - Entry bytes
+ * @param rawLen - Number of bytes in raw
+ * @param declared - The frame's encoding byte (ID3V2_ENCODING_*)
+ * @param source - Output parameter receiving the encoding of the stored bytes
+ *
+ * @return bool - false if memory allocation fails, true otherwise
+ */
+static bool internal_id3v2EntrySourceEncoding(const uint8_t *raw, size_t rawLen, uint8_t declared, uint8_t *source) {
+    *source = declared;
+
+    if (rawLen >= BYTE_BOM_SIZE && raw[0] == 0xFF && raw[1] == 0xFE) {
+        *source = BYTE_UTF16LE;
+    } else if (rawLen >= BYTE_BOM_SIZE && raw[0] == 0xFE && raw[1] == 0xFF) {
+        *source = BYTE_UTF16BE;
+    } else if (declared == ID3V2_ENCODING_UTF16LE) {
+        uint8_t *terminated = calloc(rawLen + BYTE_PADDING, sizeof(uint8_t));
+
+        if (terminated == NULL) {
+            return false;
+        }
+
+        memcpy(terminated, raw, rawLen);
+        *source = byteIsUtf8(terminated) ? BYTE_UTF8 : BYTE_ISO_8859_1;
+        free(terminated);
+    }
+
+    return true;
+}
+
+/**
+ * @brief Prepares a raw text entry for writing in a frame with the given encoding byte.
+ * @details Text is written byte for byte as stored in the entry. It is only converted when the stored bytes
+ * are clearly in a different encoding from the frame's encoding byte: a UTF-16 entry (detected by its BOM)
+ * in an 8-bit frame, an 8-bit entry in a UTF-16 frame, or UTF-16 of the other byte order in a UTF-16BE frame.
+ * No escaping is applied; escaping is only for the JSON/char readers. Any terminator or trailing padding is
+ * removed, as the caller adds separators between entries.
+ *
+ * @param raw - Entry bytes as returned by id3v2ReadFrameEntry
+ * @param rawLen - Number of bytes in raw
+ * @param encoding - The frame's encoding byte (ID3V2_ENCODING_*)
+ * @param outLen - Output parameter receiving the number of bytes to write
+ * @param ok - Output parameter set to false if memory allocation or a conversion fails, true otherwise
+ *
+ * @return uint8_t* - Heap allocated bytes to write, or NULL with outLen 0 for an empty string. Also NULL with
+ * outLen 0 on failure, in which case ok is set to false.
+ */
+static uint8_t *internal_id3v2SerializeTextEntry(const uint8_t *raw, size_t rawLen, uint8_t encoding,
+                                                 size_t *outLen, bool *ok) {
+    const bool bomLE = rawLen >= BYTE_BOM_SIZE && raw[0] == 0xFF && raw[1] == 0xFE;
+    const bool bomBE = rawLen >= BYTE_BOM_SIZE && raw[0] == 0xFE && raw[1] == 0xFF;
+    uint8_t source = encoding;
+    size_t textLen = 0;
+    bool convert = false;
+    uint8_t *out = NULL;
+
+    *outLen = 0;
+    *ok = true;
+
+    // work out what the stored bytes are
+    if (!internal_id3v2EntrySourceEncoding(raw, rawLen, encoding, &source)) {
+        *ok = false;
+        return NULL;
+    }
+
+    const bool wide = (source == BYTE_UTF16LE || source == BYTE_UTF16BE);
+    textLen = internal_id3v2RawTextLength(raw, rawLen, wide);
+
+    if (textLen == 0) {
+        return NULL;
+    }
+
+    // does the stored text already match the frame encoding?
+    switch (encoding) {
+        case ID3V2_ENCODING_UTF16LE:
+            convert = !(bomLE || bomBE);
+            break;
+        case ID3V2_ENCODING_UTF16BE:
+            convert = (source != BYTE_UTF16BE);
+            break;
+        case ID3V2_ENCODING_ISO_8859_1:
+        case ID3V2_ENCODING_ASCII:
+        case ID3V2_ENCODING_UTF8:
+            convert = wide;
+            break;
+        default:
+            // unknown encoding byte, leave the bytes alone
+            convert = false;
+            break;
+    }
+
+    if (!convert) {
+        out = malloc(textLen);
+
+        if (out == NULL) {
+            *ok = false;
+            return NULL;
+        }
+
+        memcpy(out, raw, textLen);
+        *outLen = textLen;
+        return out;
+    }
+
+    // convert without the BOM so it is not carried into the output as U+FEFF
+    const uint8_t *text = raw;
+    size_t inLen = textLen;
+
+    if (bomLE || bomBE) {
+        text += BYTE_BOM_SIZE;
+        inLen -= BYTE_BOM_SIZE;
+    }
+
+    if (inLen > 0) {
+        size_t convLen = 0;
+        uint8_t *in = calloc(inLen + BYTE_PADDING, sizeof(uint8_t));
+
+        if (in == NULL) {
+            *ok = false;
+            return NULL;
+        }
+
+        memcpy(in, text, inLen);
+
+        if (!byteConvertTextFormat(in, source, inLen, &out, encoding, &convLen)) {
+            free(in);
+            free(out);
+            *ok = false;
+            return NULL;
+        }
+
+        // same encoding, nothing was converted
+        if (convLen == 0) {
+            out = in;
+            convLen = inLen;
+        } else {
+            free(in);
+        }
+
+        *outLen = convLen;
+    }
+
+    // UTF-16 is written with a BOM
+    if (encoding == ID3V2_ENCODING_UTF16BE || encoding == ID3V2_ENCODING_UTF16LE) {
+        bytePrependBOM(encoding, &out, outLen);
+    }
+
+    return out;
+}
+
+/**
+ * @brief Converts a raw text entry to UTF-8 using the frame's encoding byte.
+ * @details The stored encoding is worked out as for serialization (BOM first, then the declared encoding), so
+ * Latin-1 bytes that happen to form valid UTF-8 and BOM-less UTF-16BE are read correctly. A UTF-16 or UTF-8
+ * BOM, any terminator and trailing padding are dropped. No escaping is applied.
+ *
+ * @param raw - Entry bytes
+ * @param rawLen - Number of bytes in raw
+ * @param declared - The frame's encoding byte (ID3V2_ENCODING_*), ID3V2_ENCODING_ISO_8859_1 for Latin-1 contexts
+ * @param outLen - Output parameter receiving the UTF-8 length in bytes
+ * @param ok - Output parameter set to false if memory allocation or a conversion fails, true otherwise
+ *
+ * @return uint8_t* - Heap allocated UTF-8 bytes (not NUL terminated), or NULL with outLen 0 for an empty string
+ * or on failure, in which case ok is set to false. Caller must free.
+ */
+static uint8_t *internal_id3v2EntryToUtf8(const uint8_t *raw, size_t rawLen, uint8_t declared, size_t *outLen,
+                                          bool *ok) {
+    uint8_t source = declared;
+    uint8_t *out = NULL;
+    uint8_t *in = NULL;
+    size_t convLen = 0;
+
+    *outLen = 0;
+    *ok = true;
+
+    if (!internal_id3v2EntrySourceEncoding(raw, rawLen, declared, &source)) {
+        *ok = false;
+        return NULL;
+    }
+
+    const bool wide = (source == BYTE_UTF16LE || source == BYTE_UTF16BE);
+    size_t textLen = internal_id3v2RawTextLength(raw, rawLen, wide);
+    const uint8_t *text = raw;
+
+    // drop the BOM so it is not compared as U+FEFF
+    if (wide && textLen >= BYTE_BOM_SIZE && ((raw[0] == 0xFF && raw[1] == 0xFE) || (raw[0] == 0xFE && raw[1] == 0xFF))) {
+        text += BYTE_BOM_SIZE;
+        textLen -= BYTE_BOM_SIZE;
+    } else if (!wide && textLen >= 3 && raw[0] == 0xEF && raw[1] == 0xBB && raw[2] == 0xBF) {
+        text += 3;
+        textLen -= 3;
+    }
+
+    if (textLen == 0) {
+        return NULL;
+    }
+
+    in = calloc(textLen + BYTE_PADDING, sizeof(uint8_t));
+
+    if (in == NULL) {
+        *ok = false;
+        return NULL;
+    }
+
+    memcpy(in, text, textLen);
+
+    // UTF-8, ASCII and unknown encoding bytes are compared as stored
+    if (source == BYTE_UTF8 || source == BYTE_ASCII || !byteIsLegalEncoding(source)) {
+        *outLen = textLen;
+        return in;
+    }
+
+    if (!byteConvertTextFormat(in, source, textLen, &out, BYTE_UTF8, &convLen)) {
+        free(in);
+        free(out);
+        *ok = false;
+        return NULL;
+    }
+
+    if (convLen == 0) {
+        *outLen = textLen;
+        return in;
+    }
+
+    free(in);
+    *outLen = convLen;
+    return out;
+}
+
+/**
+ * @brief Checks whether a frame holds a value under a context key.
+ * @details Walks the frame's contexts and entries together, as the parser produced them, and compares every entry
+ * whose context key matches. Text contexts (encodedString_context and latin1Encoding_context) are compared as
+ * text: the entry is converted to UTF-8 using the frame's encoding and compared exactly (case sensitive) with
+ * value as UTF-8. Terminators and padding in the entry, and trailing NULs in value, are ignored, so "" matches an
+ * empty string. Every other context is compared byte for byte: the entry must be exactly valueSize bytes and equal
+ * to value. In a repeated block (iter_context) the key can occur more than once; any occurrence can match.
+ *
+ * Example, a TXXX frame with the description "XREF":
+ * ```c
+ * id3v2FrameMatchesKeyValue(frame, "desc", "XREF", 4); // true
+ * ```
+ *
+ * @param frame - The frame to check
+ * @param key - The context key, e.g. "desc" or "language"
+ * @param value - The value to look for: UTF-8 text for text contexts, raw bytes otherwise. May be NULL only if
+ * valueSize is 0
+ * @param valueSize - Number of bytes in value
+ *
+ * @return bool - true if an entry under key equals value. false if none does, the frame has no such key, or an
+ * argument is NULL
+ */
+bool id3v2FrameMatchesKeyValue(Id3v2Frame *frame, const char *key, const void *value, size_t valueSize) {
+    if (frame == NULL || key == NULL || (value == NULL && valueSize != 0)) {
+        return false;
+    }
+
+    if (frame->contexts == NULL || frame->entries == NULL) {
+        return false;
+    }
+
+    const size_t keyHash = id3v2djb2(key);
+    const size_t encodingKey = id3v2djb2("encoding");
+    ListIter contextIter = listCreateIterator(frame->contexts);
+    ListIter entriesIter = listCreateIterator(frame->entries);
+    ListIter iterStorage = contextIter;
+    Id3v2ContentContext *cc = NULL;
+    Id3v2ContentEntry *ce = NULL;
+    size_t currIterations = 0;
+    bool entrySinceIter = true;
+    uint8_t encoding = ID3V2_ENCODING_ISO_8859_1;
+    size_t textValueSize = valueSize;
+
+    // trailing NULs are not part of the text
+    while (textValueSize > 0 && ((const uint8_t *) value)[textValueSize - 1] == 0x00) {
+        textValueSize--;
+    }
+
+    // same walk as id3v2WriteFrameEntry, mirroring id3v2ParseFrame and id3v2FrameSerialize
+    while ((cc = (Id3v2ContentContext *) listIteratorNext(&contextIter)) != NULL) {
+        if (cc->type == iter_context) {
+            // a repeated block that produced no entries would loop forever
+            if (!entrySinceIter) {
+                break;
+            }
+            entrySinceIter = false;
+
+            if (currIterations == 0) {
+                iterStorage = contextIter;
+                contextIter = listCreateIterator(frame->contexts);
+
+                for (size_t i = 0; i < cc->min; i++) {
+                    listIteratorNext(&contextIter);
+                }
+            }
+
+            if (currIterations != cc->max && currIterations != 0) {
+                contextIter = listCreateIterator(frame->contexts);
+
+                for (size_t i = 0; i < cc->min; i++) {
+                    listIteratorNext(&contextIter);
+                }
+            }
+
+            if (currIterations >= cc->max) {
+                contextIter = iterStorage;
+
+                for (size_t i = 0; i < currIterations; i++) {
+                    listIteratorNext(&contextIter);
+                }
+
+                currIterations = 0;
+            }
+
+            currIterations++;
+            continue;
+        }
+
+        if (cc->type == unknown_context) {
+            break;
+        }
+
+        ce = (Id3v2ContentEntry *) listIteratorNext(&entriesIter);
+        if (ce == NULL) {
+            break;
+        }
+        entrySinceIter = true;
+
+        // the frame's encoding byte decides how later encoded strings are read
+        if (cc->key == encodingKey && ce->size > 0 && ce->entry != NULL) {
+            encoding = ((const uint8_t *) ce->entry)[0];
+        }
+
+        if (cc->key != keyHash) {
+            continue;
+        }
+
+        if (cc->type == encodedString_context || cc->type == latin1Encoding_context) {
+            size_t textLen = 0;
+            bool ok = true;
+            const uint8_t declared = (cc->type == latin1Encoding_context) ? ID3V2_ENCODING_ISO_8859_1 : encoding;
+            uint8_t *text = internal_id3v2EntryToUtf8((const uint8_t *) ce->entry, ce->size, declared, &textLen, &ok);
+            bool match = ok && textLen == textValueSize && (textLen == 0 || memcmp(text, value, textLen) == 0);
+
+            free(text);
+
+            if (match) {
+                return true;
+            }
+        } else if (ce->size == valueSize && (valueSize == 0 || memcmp(ce->entry, value, valueSize) == 0)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
  * @brief Serializes a complete ID3v2 frame to binary format according to the specified version.
  * @details Converts a frame structure into its binary representation by serializing the header and 
  * processing each content entry according to its context type. Handles encoding conversions (UTF-8, 
@@ -1394,7 +1771,7 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
                 ListIter contentEntryIter = listCreateIterator(frame->entries);
                 size_t poscc = 0;
                 size_t posce = 0;
-                size_t utf8Len = 0;
+                size_t rawLen = 0;
                 uint8_t encoding = 0;
                 void *iterNext = NULL;
 
@@ -1422,43 +1799,24 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
                     posce++;
                 }
 
-                // enforce encoding as utf8
-                tmp = (unsigned char *) id3v2ReadFrameEntryAsChar(&trav, &utf8Len);
+                // raw bytes, written as stored (no JSON escaping)
+                tmp = id3v2ReadFrameEntry(&trav, &rawLen);
 
-                if (tmp == NULL || utf8Len == 0) {
+                if (tmp == NULL || rawLen == 0) {
                     exit = true;
                     break;
                 }
 
                 unsigned char *outStr = NULL;
                 size_t outLen = 0;
+                bool ok = true;
 
-                // non-empty strings
-                if (utf8Len >= 1 && tmp[0] != 0) {
-                    bool convi = false;
-                    convi = byteConvertTextFormat(tmp, BYTE_UTF8, utf8Len, &outStr, encoding, &outLen);
+                outStr = internal_id3v2SerializeTextEntry(tmp, rawLen, encoding, &outLen, &ok);
+                free(tmp);
 
-                    if (convi == false && outLen == 0) {
-                        free(tmp);
-                        exit = true;
-                        break;
-                    }
-
-
-                    // data is already in utf8
-                    if (convi && outLen == 0) {
-                        outStr = tmp;
-                        outLen = utf8Len;
-                    } else {
-                        free(tmp);
-                    }
-
-                    // prepend BOM
-                    if (encoding == BYTE_UTF16BE || encoding == BYTE_UTF16LE) {
-                        bytePrependBOM(encoding, &outStr, &outLen);
-                    }
-                } else {
-                    free(tmp);
+                if (!ok) {
+                    exit = true;
+                    break;
                 }
 
                 // append null spacer if there are more entries in the list
@@ -1531,32 +1889,25 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
 
             // latin1 will be enforced
             case latin1Encoding_context: {
-                bool convi = false;
                 unsigned char *outStr = NULL;
                 size_t outLen = 0;
-                size_t utf8len = 0;
+                size_t rawLen = 0;
+                bool ok = true;
 
-                tmp = (unsigned char *) id3v2ReadFrameEntryAsChar(&trav, &utf8len);
+                // raw bytes, written as stored (no JSON escaping)
+                tmp = id3v2ReadFrameEntry(&trav, &rawLen);
 
                 if (tmp == NULL) {
                     exit = true;
                     break;
                 }
 
-                // ensure latin1
-                convi = byteConvertTextFormat(tmp, BYTE_UTF8, utf8len, &outStr, BYTE_ISO_8859_1, &outLen);
+                // ensure latin1 (only converts if the entry holds UTF-16)
+                outStr = internal_id3v2SerializeTextEntry(tmp, rawLen, ID3V2_ENCODING_ISO_8859_1, &outLen, &ok);
+                free(tmp);
 
-                if (convi == false && outLen == 0) {
-                    free(tmp);
+                if (!ok) {
                     break;
-                }
-
-                // data is already in latin1
-                if (convi && outLen == 0) {
-                    outStr = tmp;
-                    outLen = utf8len;
-                } else {
-                    free(tmp);
                 }
 
                 // add spacer
@@ -1920,10 +2271,20 @@ char *id3v2FrameToJSON(Id3v2Frame *frame, uint8_t version) {
                 tmp = (unsigned char *) id3v2ReadFrameEntryAsChar(&trav, &readSize);
 
                 if (tmp == NULL || readSize == 0) {
+                    free(tmp);
                     exit = true;
                     break;
                 }
 
+                // escaped for JSON here only; size stays the unescaped length
+                char *escaped = internal_id3JsonEscape((char *) tmp);
+                free(tmp);
+                tmp = (unsigned char *) escaped;
+
+                if (tmp == NULL) {
+                    exit = true;
+                    break;
+                }
 
                 contentMemCount += snprintf(NULL, 0,
                                             "{\"value\":\"%s\",\"size\":%zu}",

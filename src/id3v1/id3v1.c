@@ -14,6 +14,7 @@
 #include "id3v1/id3v1Parser.h"
 #include "id3v1/id3v1.h"
 #include "id3dependencies/ByteStream/include/byteStream.h"
+#include "src/id3Internal.h"
 #include "id3dependencies/ByteStream/include/byteInt.h"
 
 /**
@@ -71,56 +72,142 @@ Id3v1Tag *id3v1CopyTag(Id3v1Tag *toCopy) {
 }
 
 /**
- * @brief Writes ID3V1_FIELD_SIZE bytes to a buffer.
- * @details This function is not in any header and is private to this library. It returns 1 on success and 0 otherwise.
- * @param src
- * @param dest
- * @return int
+ * @brief Converts a UTF-8 string to Latin-1 and stores it in an ID3v1 text field.
+ * @details This function is not in any header and is private to this library. ID3v1 text is Latin-1, while the
+ * library's text API is UTF-8. Code points up to U+00FF are stored as their Latin-1 byte. Code points Latin-1
+ * can not hold, and invalid UTF-8 (stray continuation bytes, truncated or overlong sequences, surrogates), are
+ * each stored as '?'. Conversion stops at the end of src or once ID3V1_FIELD_SIZE bytes are stored, and the
+ * rest of the field is zeroed. A NULL src clears the field.
+ * @param src - NUL terminated UTF-8 string, may be NULL
+ * @param dest - ID3V1_FIELD_SIZE byte field to write to
+ * @return int - 1 on success, 0 on failure.
  */
-static int internal_id3v1CharsToStructUint8(const char *src, uint8_t *dest) {
+static int internal_id3v1Utf8ToField(const char *src, uint8_t *dest) {
+    static const uint32_t minimum[5] = {0, 0, 0x80, 0x800, 0x10000};
+    const unsigned char *s = (const unsigned char *) src;
+    size_t i = 0;
+    size_t j = 0;
+
     memset(dest, 0, ID3V1_FIELD_SIZE);
 
-    if (src != NULL) {
-        const int len = (int) strlen(src);
-        const int wLen = ((len > ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : len);
+    if (src == NULL) {
+        return 1;
+    }
 
-        memcpy(dest, (uint8_t *) src, wLen);
+    while (s[i] != 0x00 && j < ID3V1_FIELD_SIZE) {
+        const unsigned char c = s[i];
+        uint32_t codePoint = 0;
+        size_t len = 0;
+        size_t k = 1;
+
+        if (c < 0x80) {
+            codePoint = c;
+            len = 1;
+        } else if ((c & 0xE0) == 0xC0) {
+            codePoint = c & 0x1F;
+            len = 2;
+        } else if ((c & 0xF0) == 0xE0) {
+            codePoint = c & 0x0F;
+            len = 3;
+        } else if ((c & 0xF8) == 0xF0) {
+            codePoint = c & 0x07;
+            len = 4;
+        } else {
+            // continuation byte in a leading position or an impossible byte
+            dest[j++] = '?';
+            i++;
+            continue;
+        }
+
+        // a NUL fails this check, so it never reads past the end of src
+        for (k = 1; k < len; k++) {
+            if ((s[i + k] & 0xC0) != 0x80) {
+                break;
+            }
+
+            codePoint = (codePoint << 6) | (s[i + k] & 0x3F);
+        }
+
+        // truncated sequence, replace what was consumed and carry on from the byte that broke it
+        if (k < len) {
+            dest[j++] = '?';
+            i += k;
+            continue;
+        }
+
+        if (codePoint < minimum[len] || codePoint > 0x10FFFF || (codePoint >= 0xD800 && codePoint <= 0xDFFF)) {
+            codePoint = '?';
+        }
+
+        dest[j++] = (codePoint <= 0xFF) ? (uint8_t) codePoint : (uint8_t) '?';
+        i += len;
     }
 
     return 1;
 }
 
 /**
+ * @brief Converts an ID3v1 text field from Latin-1 to a UTF-8 string.
+ * @details This function is not in any header and is private to this library. Reads up to ID3V1_FIELD_SIZE
+ * bytes, stopping at the first NUL, so fields that fill all ID3V1_FIELD_SIZE bytes are handled.
+ * @param src - ID3V1_FIELD_SIZE byte field to read
+ * @return char* - Heap allocated NUL terminated UTF-8 string. Caller must free. NULL on failure
+ */
+static char *internal_id3v1FieldToUtf8(const uint8_t *src) {
+    // each Latin-1 byte is at most 2 UTF-8 bytes
+    char *r = calloc((ID3V1_FIELD_SIZE * 2) + 1, sizeof(char));
+    size_t j = 0;
+
+    if (r == NULL) {
+        return NULL;
+    }
+
+    for (size_t i = 0; i < ID3V1_FIELD_SIZE && src[i] != 0x00; i++) {
+        if (src[i] < 0x80) {
+            r[j++] = (char) src[i];
+        } else {
+            r[j++] = (char) (0xC0 | (src[i] >> 6));
+            r[j++] = (char) (0x80 | (src[i] & 0x3F));
+        }
+    }
+
+    return r;
+}
+
+/**
  * @brief Writes a title to an Id3v1Tag.
- * @details Copies up to ID3V1_FIELD_SIZE bytes from the title string to the tag's title member.
- * @param title - The title string to write
+ * @details Converts the UTF-8 title to Latin-1 and stores up to ID3V1_FIELD_SIZE bytes of it. Characters
+ * Latin-1 can not hold, and invalid UTF-8, are stored as '?'.
+ * @param title - The UTF-8 title to write, NULL clears it
  * @param tag - The tag to write to
  * @return int - 1 on success, 0 on failure.
  */
 int id3v1WriteTitle(const char *title, Id3v1Tag *tag) {
-    return (tag == NULL) ? 0 : internal_id3v1CharsToStructUint8(title, tag->title);
+    return (tag == NULL) ? 0 : internal_id3v1Utf8ToField(title, tag->title);
 }
 
 /**
  * @brief Writes an artist to an Id3v1Tag.
- * @details Copies up to ID3V1_FIELD_SIZE bytes from the artist string to the tag's artist member.
- * @param artist - The artist string to write
+ * @details Converts the UTF-8 artist to Latin-1 and stores up to ID3V1_FIELD_SIZE bytes of it. Characters
+ * Latin-1 can not hold, and invalid UTF-8, are stored as '?'.
+ * @param artist - The UTF-8 artist to write, NULL clears it
  * @param tag - The tag to write to
  * @return int - 1 on success, 0 on failure.
  */
 int id3v1WriteArtist(const char *artist, Id3v1Tag *tag) {
-    return (tag == NULL) ? 0 : internal_id3v1CharsToStructUint8(artist, tag->artist);
+    return (tag == NULL) ? 0 : internal_id3v1Utf8ToField(artist, tag->artist);
 }
 
 /**
  * @brief Writes an album to an Id3v1Tag.
- * @details Copies up to ID3V1_FIELD_SIZE bytes from the album string to the tag's album member.
- * @param album - The album string to write
+ * @details Converts the UTF-8 album to Latin-1 and stores up to ID3V1_FIELD_SIZE bytes of it. Characters
+ * Latin-1 can not hold, and invalid UTF-8, are stored as '?'.
+ * @param album - The UTF-8 album to write, NULL clears it
  * @param tag - The tag to write to
  * @return int - 1 on success, 0 on failure.
  */
 int id3v1WriteAlbum(const char *album, Id3v1Tag *tag) {
-    return (tag == NULL) ? 0 : internal_id3v1CharsToStructUint8(album, tag->albumTitle);
+    return (tag == NULL) ? 0 : internal_id3v1Utf8ToField(album, tag->albumTitle);
 }
 
 /**
@@ -141,13 +228,15 @@ int id3v1WriteYear(int year, Id3v1Tag *tag) {
 
 /**
  * @brief Writes a comment to an Id3v1Tag.
- * @details Copies up to ID3V1_FIELD_SIZE bytes from the comment string to the tag's comment member.
- * @param comment - The comment string to write
+ * @details Converts the UTF-8 comment to Latin-1 and stores up to ID3V1_FIELD_SIZE bytes of it. Characters
+ * Latin-1 can not hold, and invalid UTF-8, are stored as '?'. When the tag has a track number only the first
+ * ID3V1_FIELD_SIZE - 2 bytes are written to a file (ID3v1.1).
+ * @param comment - The UTF-8 comment to write, NULL clears it
  * @param tag - The tag to write to
  * @return int - 1 on success, 0 on failure.
  */
 int id3v1WriteComment(const char *comment, Id3v1Tag *tag) {
-    return (tag == NULL) ? 0 : internal_id3v1CharsToStructUint8(comment, tag->comment);
+    return (tag == NULL) ? 0 : internal_id3v1Utf8ToField(comment, tag->comment);
 }
 
 /**
@@ -621,6 +710,8 @@ char *id3v1GenreFromTable(Genre val) {
             return "Garage Rock\0";
         case PSYBIENT_GENRE:
             return "Psybient\0";
+        case GENRE_UNKNOWN:
+            return "Unknown\0";
         default:
             break;
     }
@@ -630,7 +721,7 @@ char *id3v1GenreFromTable(Genre val) {
 
 /**
  * @brief Reads the title member from an Id3v1Tag.
- * @details Allocates and returns a null-terminated string copy of the tags title to the caller.
+ * @details Converts the tag's title from Latin-1 and returns it as a newly allocated, NUL terminated UTF-8 string.
  * @param tag - The tag to read from
  * @return char* Newly allocated string containing the title.
  */
@@ -638,17 +729,13 @@ char *id3v1ReadTitle(const Id3v1Tag *tag) {
     if (tag == NULL) {
         return NULL;
     }
-    char *r = calloc(ID3V1_FIELD_SIZE + 1, sizeof(char));
-    if (r == NULL) {
-        return NULL;
-    }
-    memcpy(r, tag->title, ID3V1_FIELD_SIZE);
-    return r;
+
+    return internal_id3v1FieldToUtf8(tag->title);
 }
 
 /**
  * @brief Reads the artist member from an Id3v1Tag.
- * @details Allocates and returns a null-terminated string copy of the tags artist to the caller.
+ * @details Converts the tag's artist from Latin-1 and returns it as a newly allocated, NUL terminated UTF-8 string.
  * @param tag - The tag to read from
  * @return char* - Newly allocated string containing the artist.
  */
@@ -656,17 +743,13 @@ char *id3v1ReadArtist(const Id3v1Tag *tag) {
     if (tag == NULL) {
         return NULL;
     }
-    char *r = calloc(ID3V1_FIELD_SIZE + 1, sizeof(char));
-    if (r == NULL) {
-        return NULL;
-    }
-    memcpy(r, tag->artist, ID3V1_FIELD_SIZE);
-    return r;
+
+    return internal_id3v1FieldToUtf8(tag->artist);
 }
 
 /**
  * @brief Reads the album member from an Id3v1Tag.
- * @details Allocates and returns a null-terminated string copy of the tags album to the caller.
+ * @details Converts the tag's album from Latin-1 and returns it as a newly allocated, NUL terminated UTF-8 string.
  * @param tag - The tag to read from
  * @return char* - Newly allocated string containing the album.
  */
@@ -674,12 +757,8 @@ char *id3v1ReadAlbum(const Id3v1Tag *tag) {
     if (tag == NULL) {
         return NULL;
     }
-    char *r = calloc(ID3V1_FIELD_SIZE + 1, sizeof(char));
-    if (r == NULL) {
-        return NULL;
-    }
-    memcpy(r, tag->albumTitle, ID3V1_FIELD_SIZE);
-    return r;
+
+    return internal_id3v1FieldToUtf8(tag->albumTitle);
 }
 
 /**
@@ -697,7 +776,7 @@ int id3v1ReadYear(const Id3v1Tag *tag) {
 
 /**
  * @brief Reads the comment member from an Id3v1Tag.
- * @details Allocates and returns a null-terminated string copy of the tags comment to the caller.
+ * @details Converts the tag's comment from Latin-1 and returns it as a newly allocated, NUL terminated UTF-8 string.
  * @param tag - The tag to read from
  * @return char* - Newly allocated string containing the comment.
  */
@@ -705,12 +784,8 @@ char *id3v1ReadComment(const Id3v1Tag *tag) {
     if (tag == NULL) {
         return NULL;
     }
-    char *r = calloc(ID3V1_FIELD_SIZE + 1, sizeof(char));
-    if (r == NULL) {
-        return NULL;
-    }
-    memcpy(r, tag->comment, ID3V1_FIELD_SIZE);
-    return r;
+
+    return internal_id3v1FieldToUtf8(tag->comment);
 }
 
 /**
@@ -743,7 +818,8 @@ int id3v1ReadTrack(const Id3v1Tag *tag) {
  * @brief Converts an Id3v1Tag to a JSON string representation.
  * @details Allocates and returns a JSON-formatted string containing all tag fields. Returns "{}" if tag is NULL. 
  * The JSON format is: {"title":"...","artist":"...","album":"...","year":n,"track":n,"comment":"...","genreNumber":n,"genre":"..."}.
- * Caller must free the returned string.
+ * Text fields are UTF-8 and escaped for JSON (quotes, backslashes and control characters). Caller must free the
+ * returned string.
  * @param tag - The tag to convert.
  * @return char* - Newly allocated JSON string, never NULL.
  */
@@ -757,33 +833,58 @@ char *id3v1ToJSON(const Id3v1Tag *tag) {
         return json;
     }
 
+    // UTF-8 copies, NUL terminated even when a field fills all ID3V1_FIELD_SIZE bytes
+    char *title = id3v1ReadTitle(tag);
+    char *artist = id3v1ReadArtist(tag);
+    char *album = id3v1ReadAlbum(tag);
+    char *comment = id3v1ReadComment(tag);
+    char **fields[] = {&title, &artist, &album, &comment};
+
+    // escaped for JSON: quotes, backslashes and control characters. A failed read stays NULL
+    for (size_t i = 0; i < sizeof(fields) / sizeof(fields[0]); i++) {
+        char *escaped = internal_id3JsonEscape(*fields[i]);
+        free(*fields[i]);
+        *fields[i] = escaped;
+    }
+
+    if (title == NULL || artist == NULL || album == NULL || comment == NULL) {
+        free(title);
+        free(artist);
+        free(album);
+        free(comment);
+        return NULL;
+    }
+
     memCount += snprintf(
         NULL, 0,
         "{\"title\":\"%s\",\"artist\":\"%s\",\"album\":\"%s\",\"year\":%d,\"track\":%d,\"comment\":\"%s\",\"genreNumber\":%d,\"genre\":\"%s\"}",
-        (char *) tag->title,
-        (char *) tag->artist,
-        (char *) tag->albumTitle,
+        title,
+        artist,
+        album,
         tag->year,
         tag->track,
-        (char *) tag->comment,
+        comment,
         tag->genre,
         id3v1GenreFromTable(tag->genre));
 
     json = calloc(memCount + 1, sizeof(char));
-    if (json == NULL) {
-        return NULL;
+    if (json != NULL) {
+        (void) snprintf(json, memCount + 1,
+                        "{\"title\":\"%s\",\"artist\":\"%s\",\"album\":\"%s\",\"year\":%d,\"track\":%d,\"comment\":\"%s\",\"genreNumber\":%d,\"genre\":\"%s\"}",
+                        title,
+                        artist,
+                        album,
+                        tag->year,
+                        tag->track,
+                        comment,
+                        tag->genre,
+                        id3v1GenreFromTable(tag->genre));
     }
-    (void) snprintf(json, memCount + 1,
-                    "{\"title\":\"%s\",\"artist\":\"%s\",\"album\":\"%s\",\"year\":%d,\"track\":%d,\"comment\":\"%s\",\"genreNumber\":%d,\"genre\":\"%s\"}",
-                    (char *) tag->title,
-                    (char *) tag->artist,
-                    (char *) tag->albumTitle,
-                    tag->year,
-                    tag->track,
-                    (char *) tag->comment,
-                    tag->genre,
-                    id3v1GenreFromTable(tag->genre));
 
+    free(title);
+    free(artist);
+    free(album);
+    free(comment);
 
     return json;
 }
@@ -824,9 +925,13 @@ int id3v1WriteTagToFile(const char *filePath, const Id3v1Tag *tag) {
 
     byteStreamWrite(stream, (unsigned char *) tag->comment, ID3V1_FIELD_SIZE);
 
-    //track is one byte but an int can be more so clamp it
+    // ID3v1.1: a track of 1-255 takes the last two comment bytes. The first must be 0x00 so readers know
+    // the second is a track, which limits the comment to 28 bytes. A track of 0 (or out of range) means
+    // no track, so the tag is written as ID3v1.0 with the full 30 byte comment
     if (tag->track <= 0xFF && tag->track > 0x00) {
-        byteStreamSeek(stream, -1, SEEK_CUR);
+        byteStreamSeek(stream, -2, SEEK_CUR);
+        byte = 0x00;
+        byteStreamWrite(stream, &byte, 1);
         byte = (unsigned char) tag->track & 0xFF;
         byteStreamWrite(stream, &byte, 1);
     }

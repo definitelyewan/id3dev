@@ -28,6 +28,12 @@ int main(int argc, char *argv[]) {
     // Parse all versions of ID3 and store it in a structure
     id3 = id3FromFile(argv[1]);
 
+    // NULL when the file can't be read or has neither an ID3v1 nor an ID3v2 tag
+    if (id3 == NULL) {
+        printf("No ID3 tags found in %s\n", argv[1]);
+        return EXIT_FAILURE;
+    }
+
     /**
      * Reads the attached picture from an ID3v2.x tag with the image type of 0.
      * the image type is usually set to 3 for cover art in mp3 files

@@ -7,7 +7,7 @@ from ._frame import Frame
 from ._genre import Genre
 from ._tags import ID3v1Tag, ID3v2Tag
 from ._id3dev import ffi, lib
-from ._util import frame_id, take_bytes, take_string
+from ._util import frame_id, key_value, take_bytes, take_string
 
 # The fields id3dev.h has a read/write pair for: Python name -> C name part.
 # Each becomes a property on ID3 (see the loop at the bottom of this file).
@@ -96,11 +96,9 @@ class ID3:
         @param path   path to the file, as a `str` or `os.PathLike`
         @param pairs  optional Id3Pairs describing custom frames, so they are parsed
                       into fields instead of left as raw bytes
-        @return a new ID3 object
+        @return a new ID3 object holding at least one tag (id3FromFile / id3FromFileWithPairs)
         @throws FileNotFoundError if `path` is not a file
-        @throws ValueError if id3dev returns nothing. With `pairs` this happens when the
-                file has no tags; without `pairs` a file with no tags still loads, with
-                has_id3v1 and has_id3v2 both False.
+        @throws ValueError if the file has neither an ID3v1 nor an ID3v2 tag
         """
         path = os.fspath(path)
         if not os.path.isfile(path):
@@ -108,9 +106,7 @@ class ID3:
         if pairs is None:
             ptr = lib.id3FromFile(path.encode())
         else:
-            with open(path, "rb") as f:
-                data = f.read()
-            ptr = lib.id3py_from_buffer(ffi.from_buffer("uint8_t[]", data), len(data), pairs._table)
+            ptr = lib.id3FromFileWithPairs(path.encode(), pairs._table)
         if ptr == ffi.NULL:
             raise ValueError(f"no ID3 tags could be read from {path}")
         return cls(ptr)
@@ -402,13 +398,57 @@ class ID3:
         ffi.gc(frame._ptr, None)    # the tag frees it now, not Python
         frame._owner = self
 
-    def remove_frames(self, id_: str) -> int:
-        """! @brief Removes every frame with this ID.
-        @details Views of removed frames must not be used afterwards.
-        @param id_  frame ID, e.g. "COMM"
-        @return how many frames were removed (0 if none matched)
-        @throws ValueError if there is no ID3v2 tag or `id_` is not 3-4 ASCII characters
+    def find_frames(self, id_: str, key: str, value: "str | bytes") -> "list[Frame]":
+        """! @brief Every frame with this ID whose field `key` holds `value` (id3v2FindFrameByKeyValue).
+        @details Keys are the field names of the frame's layout, e.g. "desc" and "text" for
+                 TXXX, or "language" and "desc" for COMM. Text fields are compared as text,
+                 whatever encoding the frame uses; other fields byte for byte. A `str`
+                 value is passed as UTF-8, `bytes` as given. The frames are views into this
+                 tag, like those from frames. Use Frame.matches to check more fields.
+        @code{.py}
+        tag.find_frames("TXXX", "desc", "XREF")
+        [f for f in tag.find_frames("COMM", "desc", "") if f.matches("language", "eng")]
+        @endcode
+        @param id_    frame ID, e.g. "TXXX"
+        @param key    field name, e.g. "desc"
+        @param value  the field's value
+        @return list of matching Frame views, in tag order
+        @throws ValueError if there is no ID3v2 tag, `id_` is not 3-4 ASCII characters or
+                `key` is empty
+        @throws TypeError if `value` is not a str or bytes
         """
+        tag = self._v2()
+        fid = frame_id(id_)
+        k, v = key_value(key, value)
+        version = tag.header.majorVersion
+        it = ffi.new("ListIter *", lib.id3v2CreateFrameTraverser(tag))
+        out = []
+        while (ptr := lib.id3v2FindFrameByKeyValue(it, fid, k, v, len(v))) != ffi.NULL:
+            out.append(Frame(ptr, owner=self, version=version))
+        return out
+
+    def remove_frames(self, id_: str, key: "str | None" = None, value: "str | bytes | None" = None) -> int:
+        """! @brief Removes every frame with this ID, or only those whose field `key` holds `value`.
+        @details With just an ID every frame with that ID goes (id3v2RemoveFrameByID). With
+                 `key` and `value` only matching frames go (id3v2RemoveFrameByKeyValue),
+                 matched as in find_frames. Views of removed frames must not be used afterwards.
+        @code{.py}
+        tag.remove_frames("COMM")                    # every comment
+        tag.remove_frames("TXXX", "desc", "XREF")    # only the TXXX described XREF
+        @endcode
+        @param id_    frame ID, e.g. "COMM"
+        @param key    optional field name, e.g. "desc"
+        @param value  the field's value, required with `key`
+        @return how many frames were removed (0 if none matched)
+        @throws ValueError if there is no ID3v2 tag, `id_` is not 3-4 ASCII characters, or
+                only one of `key` and `value` is given
+        @throws TypeError if `value` is not a str or bytes
+        """
+        if (key is None) != (value is None):
+            raise ValueError("give both key and value, or neither")
+        if key is not None:
+            k, v = key_value(key, value)
+            return lib.id3v2RemoveFrameByKeyValue(frame_id(id_), k, v, len(v), self._v2())
         count = 0
         while lib.id3v2RemoveFrameByID(frame_id(id_), self._v2()):
             count += 1

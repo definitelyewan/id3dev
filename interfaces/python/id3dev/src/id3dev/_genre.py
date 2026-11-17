@@ -20,7 +20,8 @@ class Genre(IntEnum):
     Genre.from_text("hip-hop")    # Genre.HIP_HOP
     @endcode
     """
-
+    ## Unknown genre (255)
+    UNKNOWN = lib.GENRE_UNKNOWN
     ## Blues (0)
     BLUES = lib.BLUES_GENRE
     ## Classic Rock (1)

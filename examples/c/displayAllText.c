@@ -29,6 +29,12 @@ int main(int argc, char *argv[]) {
     // Parse ID3 metadata from the from provided file
     id3 = id3FromFile(argv[1]);
 
+    // NULL when the file can't be read or has neither an ID3v1 nor an ID3v2 tag
+    if (id3 == NULL) {
+        printf("No ID3 tags found in %s\n", argv[1]);
+        return EXIT_FAILURE;
+    }
+
     // Check to see if any ID2v2 tags are present
     if (id3->id3v2 == NULL) {
         printf("No ID3v2 tags found in %s\n", argv[1]);

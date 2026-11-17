@@ -1,9 +1,7 @@
 """! @brief Frame: one ID3v2 frame, either owned by Python or a view into a tag."""
 
-import re
-
 from ._id3dev import ffi, lib
-from ._util import frame_id, take_bytes, take_string
+from ._util import frame_id, key_value, take_bytes, take_string
 
 
 class Frame:
@@ -117,6 +115,23 @@ class Frame:
                 raise ValueError(f"frame {self.id} has no entry for value {value!r}")
             take_bytes(lib.id3v2ReadFrameEntry(it, size), size[0])   # advance the iterator
 
+    def matches(self, key: str, value: "str | bytes") -> bool:
+        """! @brief Whether the field `key` holds `value` (id3v2FrameMatchesKeyValue).
+        @details Text fields are compared as text, whatever encoding the frame uses; other
+                 fields byte for byte. A `str` value is passed as UTF-8, `bytes` as given.
+                 A key the frame's layout doesn't have never matches.
+        @code{.py}
+        comm.matches("language", "eng")
+        @endcode
+        @param key    field name, e.g. "desc" or "language"
+        @param value  the field's value
+        @return True if the field holds `value`
+        @throws ValueError if `key` is empty
+        @throws TypeError if `value` is not a str or bytes
+        """
+        k, v = key_value(key, value)
+        return bool(lib.id3v2FrameMatchesKeyValue(self._ptr, k, v, len(v)))
+
     def to_json(self) -> str:
         """! @brief The frame as a JSON string (id3v2FrameToJSON): its header flags and entries.
         @return JSON text
@@ -126,10 +141,6 @@ class Frame:
     def __repr__(self) -> str:
         """! @brief `<Frame TIT2>`"""
         return f"<Frame {self.id}>"
-
-
-# id3v2ReadFrameEntryAsChar escapes these two characters for JSON; undo exactly that.
-_UNESCAPE = re.compile(r'\\(["\\])')
 
 
 class EntryReader:
@@ -175,10 +186,9 @@ class EntryReader:
         if ptr == ffi.NULL:
             raise ValueError("id3dev could not decode this entry as text")
         try:
-            raw = ffi.string(ptr).decode("utf-8", errors="replace")
+            return ffi.string(ptr).decode("utf-8", errors="replace")
         finally:
             lib.free(ptr)
-        return _UNESCAPE.sub(r"\1", raw)
 
     def u8(self) -> int:
         """! @brief Reads the entry's first byte as an unsigned integer (id3v2ReadFrameEntryAsU8).

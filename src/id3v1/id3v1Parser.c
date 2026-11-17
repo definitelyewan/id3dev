@@ -27,8 +27,28 @@ bool id3v1HasTag(const uint8_t *buffer) {
 }
 
 /**
+ * @brief Finds the length of an ID3v1 text field, reading at most ID3V1_FIELD_SIZE bytes.
+ * @details This function is not in any header and is private to this file. Reads one byte at a time and stops at
+ * the first NUL or after ID3V1_FIELD_SIZE bytes, whichever comes first, so it is safe for NUL terminated strings
+ * and for fields that fill all ID3V1_FIELD_SIZE bytes without a NUL (unlike strlen, which would read on into the
+ * next field).
+ * @param src - Text to measure, either NUL terminated or at least ID3V1_FIELD_SIZE bytes long
+ * @return size_t - Number of bytes before the first NUL, at most ID3V1_FIELD_SIZE
+ */
+static size_t internal_id3v1FieldLength(const uint8_t *src) {
+    size_t n = 0;
+
+    while (n < ID3V1_FIELD_SIZE && src[n] != 0x00) {
+        n++;
+    }
+
+    return n;
+}
+
+/**
  * @brief Creates and allocates a new Id3v1Tag structure.
- * @details Allocates memory, initializes all fields to zero, then copies provided values. String fields are truncated to ID3V1_FIELD_SIZE if needed. Caller must free with id3v1DestroyTag.
+ * @details Allocates memory, initializes all fields to zero, then copies provided values. String fields are copied up to the first NUL or ID3V1_FIELD_SIZE bytes, whichever comes first, so
+ * a full ID3V1_FIELD_SIZE byte field without a NUL (such as another tag's field) is safe to pass. Caller must free with id3v1DestroyTag.
  * @param title - Song title.
  * @param artist - Artist name.
  * @param albumTitle - Album title.
@@ -48,26 +68,21 @@ Id3v1Tag *id3v1CreateTag(uint8_t *title, uint8_t *artist, uint8_t *albumTitle, i
     //inits all members
     memset(tag, 0, sizeof(Id3v1Tag));
 
-    //set values
+    //set values, never reading more than ID3V1_FIELD_SIZE bytes of each
     if (title != NULL) {
-        memcpy(tag->title, title,
-               ((strlen((char *) title) >= ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : strlen((char *) title)));
+        memcpy(tag->title, title, internal_id3v1FieldLength(title));
     }
 
     if (artist != NULL) {
-        memcpy(tag->artist, artist,
-               ((strlen((char *) artist) >= ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : strlen((char *) artist)));
+        memcpy(tag->artist, artist, internal_id3v1FieldLength(artist));
     }
 
     if (albumTitle != NULL) {
-        memcpy(tag->albumTitle, albumTitle, ((strlen((char *) albumTitle) >= ID3V1_FIELD_SIZE)
-                                                 ? ID3V1_FIELD_SIZE
-                                                 : strlen((char *) albumTitle)));
+        memcpy(tag->albumTitle, albumTitle, internal_id3v1FieldLength(albumTitle));
     }
 
     if (comment != NULL) {
-        memcpy(tag->comment, comment,
-               ((strlen((char *) comment) >= ID3V1_FIELD_SIZE) ? ID3V1_FIELD_SIZE : strlen((char *) comment)));
+        memcpy(tag->comment, comment, internal_id3v1FieldLength(comment));
     }
 
     tag->year = year;

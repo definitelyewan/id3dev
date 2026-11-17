@@ -17,6 +17,8 @@
 #include "id3v1/id3v1.h"
 #include "id3v1/id3v1Parser.h"
 #include "id3v2/id3v2Frame.h"
+#include "id3v2/id3v2Parser.h"
+#include "id3dependencies/ByteStream/include/byteStream.h"
 
 /**
  * @brief default standard for reading ID3 tags from a data structure representation.
@@ -97,14 +99,68 @@ uint8_t id3GetPreferredStandard(void) {
 
 /**
  * @brief Reads both ID3v1 and ID3v2 tags from a file into an ID3 metadata structure.
- * @details Attempts to read both ID3v2 (from file start) and ID3v1 (from file end) tags from the specified file.
- * Always returns an ID3 structure, but individual tag pointers (id3v1, id3v2) will be NULL if not found or if read errors occur.
- * The returned structure must be freed with id3Destroy().
+ * @details Reads the ID3v2 tag and the ID3v1 tag (from the last 128 bytes) from the specified file. Only the
+ * standard frames are parsed into fields; use id3FromFileWithPairs to parse custom frames. One of the tag
+ * pointers (id3v1, id3v2) may be NULL if that tag is not present. The returned structure must be freed with
+ * id3Destroy().
  * @param filePath - Null-terminated string containing the path to the file to read.
- * @return ID3* - Pointer to allocated ID3 structure containing the read tags (tags may be NULL if not found). Caller must free with id3Destroy().
+ * @return ID3* - Pointer to allocated ID3 structure containing the read tags, or NULL if the file can't be read or
+ * holds neither an ID3v1 nor an ID3v2 tag. Caller must free with id3Destroy().
  */
 ID3 *id3FromFile(const char *filePath) {
-    return id3Create(id3v2TagFromFile(filePath), id3v1TagFromFile(filePath));
+    return id3FromFileWithPairs(filePath, NULL);
+}
+
+/**
+ * @brief Reads both ID3v1 and ID3v2 tags from a file, parsing custom frames with user defined pairs.
+ * @details Works like id3FromFile, but frames whose IDs are in userPairs are parsed with the contexts given there
+ * instead of being treated as unknown frames. The file is read once and both tags are parsed from it. One of the
+ * tag pointers (id3v1, id3v2) may be NULL if that tag is not present. The returned structure must be freed with
+ * id3Destroy().
+ * @param filePath - Null-terminated string containing the path to the file to read.
+ * @param userPairs - Frame ID to context list pairings for custom frames. May be NULL, in which case only the
+ * standard frames are parsed into fields, exactly as id3FromFile does.
+ * @return ID3* - Pointer to allocated ID3 structure containing the read tags, or NULL if the file can't be read or
+ * holds neither an ID3v1 nor an ID3v2 tag. Caller must free with id3Destroy().
+ */
+ID3 *id3FromFileWithPairs(const char *filePath, HashTable *userPairs) {
+    ByteStream *stream = NULL;
+    Id3v2Tag *v2 = NULL;
+    Id3v1Tag *v1 = NULL;
+    ID3 *metadata = NULL;
+
+    if (filePath == NULL) {
+        return NULL;
+    }
+
+    stream = byteStreamFromFile(filePath);
+
+    if (stream == NULL) {
+        return NULL;
+    }
+
+    if (stream->bufferSize > 0) {
+        v2 = id3v2ParseTagFromBuffer(stream->buffer, stream->bufferSize, userPairs);
+    }
+
+    if (stream->bufferSize >= ID3V1_MAX_SIZE) {
+        v1 = id3v1TagFromBuffer(stream->buffer + (stream->bufferSize - ID3V1_MAX_SIZE));
+    }
+
+    byteStreamDestroy(stream);
+
+    if (v2 == NULL && v1 == NULL) {
+        return NULL;
+    }
+
+    metadata = id3Create(v2, v1);
+
+    if (metadata == NULL) {
+        id3v2DestroyTag(&v2);
+        id3v1DestroyTag(&v1);
+    }
+
+    return metadata;
 }
 
 /**
@@ -204,26 +260,44 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata) {
     newTag = id3v2CreateTag(header, frames);
 
     if (metadata->id3v1->title[0] != 0x00) {
-        if (!id3v2WriteTitle((char *) metadata->id3v1->title, newTag)) {
+        // UTF-8, as the ID3v2 writers expect
+        str = id3v1ReadTitle(metadata->id3v1);
+
+        if (str == NULL || !id3v2WriteTitle(str, newTag)) {
             id3v2DestroyTag(&newTag); // also frees frames
+            free(str);
             return false;
         }
+
+        free(str);
     }
 
 
     if (metadata->id3v1->artist[0] != 0x00) {
-        if (!id3v2WriteArtist((char *) metadata->id3v1->artist, newTag)) {
+        // UTF-8, as the ID3v2 writers expect
+        str = id3v1ReadArtist(metadata->id3v1);
+
+        if (str == NULL || !id3v2WriteArtist(str, newTag)) {
             id3v2DestroyTag(&newTag); // also frees frames
+            free(str);
             return false;
         }
+
+        free(str);
     }
 
 
     if (metadata->id3v1->albumTitle[0] != 0x00) {
-        if (!id3v2WriteAlbum((char *) metadata->id3v1->albumTitle, newTag)) {
+        // UTF-8, as the ID3v2 writers expect
+        str = id3v1ReadAlbum(metadata->id3v1);
+
+        if (str == NULL || !id3v2WriteAlbum(str, newTag)) {
             id3v2DestroyTag(&newTag); // also frees frames
+            free(str);
             return false;
         }
+
+        free(str);
     }
 
 
@@ -262,10 +336,16 @@ bool id3ConvertId3v1ToId3v2(ID3 *metadata) {
 
 
     if (metadata->id3v1->comment[0] != 0x00) {
-        if (!id3v2WriteComment((char *) metadata->id3v1->comment, newTag)) {
+        // UTF-8, as the ID3v2 writers expect
+        str = id3v1ReadComment(metadata->id3v1);
+
+        if (str == NULL || !id3v2WriteComment(str, newTag)) {
             id3v2DestroyTag(&newTag); // also frees frames
+            free(str);
             return false;
         }
+
+        free(str);
     }
 
     if (metadata->id3v2 != NULL) {

@@ -1466,6 +1466,206 @@ static void id3v2RemoveUnsynchronisation_lenientInput(void **state) {
     assert_int_equal(id3v2RemoveUnsynchronisation(NULL, 4), 0);
 }
 
+/**
+ * Regression tests for text frames being JSON escaped on serialization. Each frame is parsed and serialized
+ * and must come out byte for byte identical, so repeated saves can not compound.
+ */
+static void id3v2FrameSerialize_latin1QuotesAndBackslashes(void **state) {
+    (void) state;
+    // TIT2, ISO-8859-1, Say "hi" \ now
+    const uint8_t in[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x0f, 0x00, 0x00,
+        0x00, 'S', 'a', 'y', ' ', '"', 'h', 'i', '"', ' ', '\\', ' ', 'n', 'o', 'w'
+    };
+
+    internal_assertRoundTrip(in, sizeof(in), id3v2CreateTextFrameContext(), ID3V2_TAG_VERSION_3);
+}
+
+static void id3v2FrameSerialize_latin1BytesThatLookLikeUtf8(void **state) {
+    (void) state;
+    // TIT2, ISO-8859-1, "Ã©" (0xC3 0xA9) must not be treated as UTF-8 and collapsed to "é"
+    const uint8_t in[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x03, 0x00, 0x00,
+        0x00, 0xc3, 0xa9
+    };
+
+    internal_assertRoundTrip(in, sizeof(in), id3v2CreateTextFrameContext(), ID3V2_TAG_VERSION_3);
+}
+
+static void id3v2FrameSerialize_utf16QuotesAndHangul(void **state) {
+    (void) state;
+    // TPE1, UTF-16 with BOM, "\가나다라
+    const uint8_t in[] = {
+        'T', 'P', 'E', '1', 0x00, 0x00, 0x00, 0x0f, 0x00, 0x00,
+        0x01, 0xff, 0xfe, 0x22, 0x00, 0x5c, 0x00, 0x00, 0xac, 0x98, 0xb0, 0xe4, 0xb2, 0x7c, 0xb7
+    };
+
+    internal_assertRoundTrip(in, sizeof(in), id3v2CreateTextFrameContext(), ID3V2_TAG_VERSION_3);
+}
+
+static void id3v2FrameSerialize_utf16beNoBom(void **state) {
+    (void) state;
+    // v2.4 TIT2, UTF-16BE without BOM, "가
+    const uint8_t in[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x05, 0x00, 0x00,
+        0x02, 0x00, 0x22, 0xac, 0x00
+    };
+
+    internal_assertRoundTrip(in, sizeof(in), id3v2CreateTextFrameContext(), ID3V2_TAG_VERSION_4);
+}
+
+static void id3v2FrameSerialize_txxxJsonValue(void **state) {
+    (void) state;
+    // TXXX, ISO-8859-1, description XREF, value {"a":"b\\"}
+    const uint8_t in[] = {
+        'T', 'X', 'X', 'X', 0x00, 0x00, 0x00, 0x11, 0x00, 0x00,
+        0x00, 'X', 'R', 'E', 'F', 0x00,
+        '{', '"', 'a', '"', ':', '"', 'b', '\\', '\\', '"', '}'
+    };
+
+    internal_assertRoundTrip(in, sizeof(in), id3v2CreateUserDefinedTextFrameContext(), ID3V2_TAG_VERSION_3);
+}
+
+static void id3v2FrameSerialize_wxxxLatin1Url(void **state) {
+    (void) state;
+    // WXXX, description d, latin1 url http://x/"q"\ (latin1Encoding_context)
+    const uint8_t in[] = {
+        'W', 'X', 'X', 'X', 0x00, 0x00, 0x00, 0x10, 0x00, 0x00,
+        0x00, 'd', 0x00,
+        'h', 't', 't', 'p', ':', '/', '/', 'x', '/', '"', 'q', '"', '\\'
+    };
+
+    internal_assertRoundTrip(in, sizeof(in), id3v2CreateUserDefinedURLFrameContext(), ID3V2_TAG_VERSION_3);
+}
+
+/**
+ * Builds a v2.3 TIT2 frame with the given encoding and the text "x", then replaces the text entry.
+ */
+static Id3v2Frame *internal_textFrameWithEntry(uint8_t encoding, const uint8_t *entry, size_t entryl) {
+    uint8_t latin1[] = {'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 'x'};
+    uint8_t utf16[] = {'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x01, 0xff, 0xfe, 'x', 0x00};
+    uint8_t *in = (encoding == ID3V2_ENCODING_UTF16LE) ? utf16 : latin1;
+    size_t inl = (encoding == ID3V2_ENCODING_UTF16LE) ? sizeof(utf16) : sizeof(latin1);
+    Id3v2Frame *f = NULL;
+
+    id3v2ParseFrame(in, inl, id3v2CreateTextFrameContext(), ID3V2_TAG_VERSION_3, &f);
+    assert_non_null(f);
+
+    ListIter trav = id3v2CreateFrameEntryTraverser(f);
+    listIteratorNext(&trav); // skip encoding
+    assert_true(id3v2WriteFrameEntry(f, &trav, entryl, entry));
+
+    return f;
+}
+
+static void id3v2FrameSerialize_utf8EntryInUtf16Frame(void **state) {
+    (void) state;
+    // UTF-8 "가 stored in a UTF-16 frame is converted, with a BOM and without escaping
+    const uint8_t entry[] = {0x22, 0xea, 0xb0, 0x80};
+    const uint8_t expected[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x07, 0x00, 0x00,
+        0x01, 0xff, 0xfe, 0x22, 0x00, 0x00, 0xac
+    };
+    Id3v2Frame *f = internal_textFrameWithEntry(ID3V2_ENCODING_UTF16LE, entry, sizeof(entry));
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameSerialize(f, ID3V2_TAG_VERSION_3, &outl);
+
+    assert_int_equal(outl, sizeof(expected));
+    assert_memory_equal(out, expected, outl);
+
+    free(out);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2FrameSerialize_utf16EntryInLatin1Frame(void **state) {
+    (void) state;
+    // UTF-16 "\ stored in a latin1 frame is converted to latin1 without escaping
+    const uint8_t entry[] = {0xff, 0xfe, 0x22, 0x00, 0x5c, 0x00};
+    const uint8_t expected[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x03, 0x00, 0x00,
+        0x00, 0x22, 0x5c
+    };
+    Id3v2Frame *f = internal_textFrameWithEntry(ID3V2_ENCODING_ISO_8859_1, entry, sizeof(entry));
+    size_t outl = 0;
+    uint8_t *out = id3v2FrameSerialize(f, ID3V2_TAG_VERSION_3, &outl);
+
+    assert_int_equal(outl, sizeof(expected));
+    assert_memory_equal(out, expected, outl);
+
+    free(out);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2ReadFrameEntryAsChar_notEscaped(void **state) {
+    (void) state;
+    // TIT2, ISO-8859-1, a"b\c
+    const uint8_t in[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x06, 0x00, 0x00,
+        0x00, 'a', '"', 'b', '\\', 'c'
+    };
+    Id3v2Frame *f = NULL;
+    size_t s = 0;
+
+    id3v2ParseFrame((uint8_t *) in, sizeof(in), id3v2CreateTextFrameContext(), ID3V2_TAG_VERSION_3, &f);
+    assert_non_null(f);
+
+    ListIter trav = id3v2CreateFrameEntryTraverser(f);
+    listIteratorNext(&trav); // skip encoding
+
+    char *str = id3v2ReadFrameEntryAsChar(&trav, &s);
+    assert_non_null(str);
+    assert_string_equal(str, "a\"b\\c");
+    assert_int_equal(s, 5);
+
+    free(str);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2ReadFrameEntryAsChar_utf16NotEscaped(void **state) {
+    (void) state;
+    // TIT2, UTF-16 with BOM, "가\ -> UTF-8 without BOM or escaping
+    const uint8_t in[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x09, 0x00, 0x00,
+        0x01, 0xff, 0xfe, 0x22, 0x00, 0x00, 0xac, 0x5c, 0x00
+    };
+    Id3v2Frame *f = NULL;
+    size_t s = 0;
+
+    id3v2ParseFrame((uint8_t *) in, sizeof(in), id3v2CreateTextFrameContext(), ID3V2_TAG_VERSION_3, &f);
+    assert_non_null(f);
+
+    ListIter trav = id3v2CreateFrameEntryTraverser(f);
+    listIteratorNext(&trav); // skip encoding
+
+    char *str = id3v2ReadFrameEntryAsChar(&trav, &s);
+    assert_non_null(str);
+    assert_string_equal(str, "\"\xea\xb0\x80\\");
+    assert_int_equal(s, 5);
+
+    free(str);
+    id3v2DestroyFrame(&f);
+}
+
+static void id3v2FrameToJSON_escapesText(void **state) {
+    (void) state;
+    // USLT style text with quotes, a backslash, newline, tab and a 0x01 control byte
+    const uint8_t in[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x09, 0x00, 0x00,
+        0x00, '"', 'a', '\\', '\n', 'b', '\t', 0x01, '"'
+    };
+    Id3v2Frame *f = NULL;
+
+    id3v2ParseFrame((uint8_t *) in, sizeof(in), id3v2CreateTextFrameContext(), ID3V2_TAG_VERSION_3, &f);
+    assert_non_null(f);
+
+    char *json = id3v2FrameToJSON(f, ID3V2_TAG_VERSION_3);
+    assert_non_null(json);
+    assert_non_null(strstr(json, "{\"value\":\"\\\"a\\\\\\nb\\t\\u0001\\\"\",\"size\":8}"));
+
+    free(json);
+    id3v2DestroyFrame(&f);
+}
+
 int main() {
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(id3v2CreateAndDestroyFrameHeader_allInOne),
@@ -1517,6 +1717,17 @@ int main() {
         cmocka_unit_test(id3v2WriteFrameEntry_iteratedRVA2Channel),
         cmocka_unit_test(id3v2WriteFrameEntry_iteratedSYLTStamp),
         cmocka_unit_test(id3v2FrameSerialize_v3TXXX),
+        cmocka_unit_test(id3v2FrameSerialize_latin1QuotesAndBackslashes),
+        cmocka_unit_test(id3v2FrameSerialize_latin1BytesThatLookLikeUtf8),
+        cmocka_unit_test(id3v2FrameSerialize_utf16QuotesAndHangul),
+        cmocka_unit_test(id3v2FrameSerialize_utf16beNoBom),
+        cmocka_unit_test(id3v2FrameSerialize_txxxJsonValue),
+        cmocka_unit_test(id3v2FrameSerialize_wxxxLatin1Url),
+        cmocka_unit_test(id3v2FrameSerialize_utf8EntryInUtf16Frame),
+        cmocka_unit_test(id3v2FrameSerialize_utf16EntryInLatin1Frame),
+        cmocka_unit_test(id3v2ReadFrameEntryAsChar_notEscaped),
+        cmocka_unit_test(id3v2ReadFrameEntryAsChar_utf16NotEscaped),
+        cmocka_unit_test(id3v2FrameToJSON_escapesText),
 
         // id3v2FrameToJSON
         cmocka_unit_test(id3v2FrameToJSON_v3TXXX),

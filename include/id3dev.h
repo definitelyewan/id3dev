@@ -44,6 +44,8 @@ uint8_t id3GetPreferredStandard(void);
 
 ID3 *id3FromFile(const char *filePath);
 
+ID3 *id3FromFileWithPairs(const char *filePath, HashTable *userPairs);
+
 ID3 *id3Copy(const ID3 *toCopy);
 
 bool id3Compare(const ID3 *metadata1, const ID3 *metadata2);

@@ -67,199 +67,274 @@ static void id3v2ParseExtendedTagHeader_v2(void **state) {
     assert_int_equal(v, 0);
 }
 
+// parses `in` and checks it was rejected as junk
+static void internal_assertExtRejected(const uint8_t *in, size_t inl, uint8_t version) {
+    Id3v2ExtendedTagHeader *h = (Id3v2ExtendedTagHeader *) 0x1;
+    uint32_t v = id3v2ParseExtendedTagHeader((uint8_t *) in, inl, version, &h);
+
+    assert_int_equal(v, 0);
+    assert_null(h);
+}
+
 static void id3v2ParseExtendedTagHeader_v3(void **state) {
     (void) state;
-    uint8_t ext[14] = {
-        0, 0, 0, 0x0A, // size
-        0x80, 0, // flags
-        0, 0, 0xff, 0xff, // padding
-        0, 0, 0, 15
-    }; // crc
-
-    ByteStream *stream = byteStreamCreate(ext, 14);
+    uint8_t ext[16] = {
+        0, 0, 0, 0x0A, // size, excludes itself
+        0x80, 0, // flags, CRC present
+        0, 0, 0, 2, // padding
+        0, 0, 0, 15, // crc
+        0, 0 // the padding itself
+    };
 
     Id3v2ExtendedTagHeader *h;
-    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_3, &h);
+    uint32_t v = id3v2ParseExtendedTagHeader(ext, sizeof(ext), ID3V2_TAG_VERSION_3, &h);
 
     assert_int_equal(v, 14);
-
     assert_non_null(h);
-    assert_int_equal(h->padding, 0xffff);
+    assert_int_equal(h->padding, 2);
     assert_int_equal(h->crc, 0xf);
 
     id3v2DestroyExtendedTagHeader(&h);
-    byteStreamDestroy(stream);
 }
 
 static void id3v2ParseExtendedTagHeader_v3NoCrc(void **state) {
     (void) state;
     uint8_t ext[10] = {
         0, 0, 0, 0x06, // size
-        0x80, 0, // flags
-        0, 0, 0xff, 0xff
-    }; // padding
-
-
-    ByteStream *stream = byteStreamCreate(ext, 10);
+        0, 0, // flags
+        0, 0, 0, 0 // padding
+    };
 
     Id3v2ExtendedTagHeader *h;
-
-    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_3, &h);
+    uint32_t v = id3v2ParseExtendedTagHeader(ext, sizeof(ext), ID3V2_TAG_VERSION_3, &h);
 
     assert_int_equal(v, 10);
-
-    assert_non_null(h);
-    assert_int_equal(h->padding, 0xffff);
-    assert_int_equal(h->crc, 0);
-
-    id3v2DestroyExtendedTagHeader(&h);
-    byteStreamDestroy(stream);
-}
-
-static void id3v2ParseExtendedTagHeader_v3NoPadding(void **state) {
-    (void) state;
-    uint8_t ext[6] = {
-        0, 0, 0, 0x02, // size
-        0x80, 0
-    }; // flags
-
-
-    ByteStream *stream = byteStreamCreate(ext, 6);
-
-    Id3v2ExtendedTagHeader *h;
-
-    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_3, &h);
-
-    assert_non_null(h);
-    assert_int_equal(v, 6);
-    assert_int_equal(h->padding, 0);
-    assert_int_equal(h->crc, 0);
-
-    byteStreamDestroy(stream);
-    id3v2DestroyExtendedTagHeader(&h);
-}
-
-static void id3v2ParseExtendedTagHeader_v3UnsupportedSize(void **state) {
-    (void) state;
-    uint8_t ext[14] = {
-        0, 0, 0, 0x90, // size
-        0x80, 0, // flags
-        0, 0, 0xff, 0xff, // padding
-        0, 0, 0, 15
-    }; // crc
-
-    ByteStream *stream = byteStreamCreate(ext, 14);
-
-    Id3v2ExtendedTagHeader *h;
-    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_3, &h);
-
-    assert_int_equal(v, 14);
-
-    assert_non_null(h);
-    assert_int_equal(h->padding, 0xffff);
-    assert_int_equal(h->crc, 0xf);
-
-    id3v2DestroyExtendedTagHeader(&h);
-    byteStreamDestroy(stream);
-}
-
-static void id3v2ParseExtendedTagHeader_v3SmallSizeWithData(void **state) {
-    (void) state;
-    uint8_t ext[6] = {
-        0, 0, 0, 0x90, // size
-        0x80, 0
-    }; // flags
-
-    ByteStream *stream = byteStreamCreate(ext, 6);
-
-    Id3v2ExtendedTagHeader *h;
-    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_3, &h);
-
-    assert_int_equal(v, 6);
-
     assert_non_null(h);
     assert_int_equal(h->padding, 0);
     assert_int_equal(h->crc, 0);
 
     id3v2DestroyExtendedTagHeader(&h);
-    byteStreamDestroy(stream);
 }
 
+static void id3v2ParseExtendedTagHeader_v3Rejected(void **state) {
+    (void) state;
+    // the size id3dev wrote before it followed the standard, counting its own 4 bytes
+    const uint8_t oldSize[10] = {0, 0, 0, 0x0A, 0, 0, 0, 0, 0, 0};
+    const uint8_t oldSizeCrc[14] = {0, 0, 0, 0x0E, 0x80, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+    // size says CRC, flags don't
+    const uint8_t sizeFlagMismatch[14] = {0, 0, 0, 0x0A, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+    // flags say CRC, size doesn't
+    const uint8_t flagSizeMismatch[10] = {0, 0, 0, 0x06, 0x80, 0, 0, 0, 0, 0};
+    // undefined flag bits
+    const uint8_t undefinedFlag[10] = {0, 0, 0, 0x06, 0x40, 0, 0, 0, 0, 0};
+    const uint8_t undefinedLowFlag[10] = {0, 0, 0, 0x06, 0, 0x01, 0, 0, 0, 0};
+    // more padding than bytes left in the tag
+    const uint8_t paddingTooLarge[12] = {0, 0, 0, 0x06, 0, 0, 0, 0, 0, 3, 0, 0};
+    // CRC flag set but the buffer ends before the CRC
+    const uint8_t truncated[10] = {0, 0, 0, 0x0A, 0x80, 0, 0, 0, 0, 0};
+    const uint8_t zeroSize[4] = {0, 0, 0, 0};
+
+    internal_assertExtRejected(oldSize, sizeof(oldSize), ID3V2_TAG_VERSION_3);
+    internal_assertExtRejected(oldSizeCrc, sizeof(oldSizeCrc), ID3V2_TAG_VERSION_3);
+    internal_assertExtRejected(sizeFlagMismatch, sizeof(sizeFlagMismatch), ID3V2_TAG_VERSION_3);
+    internal_assertExtRejected(flagSizeMismatch, sizeof(flagSizeMismatch), ID3V2_TAG_VERSION_3);
+    internal_assertExtRejected(undefinedFlag, sizeof(undefinedFlag), ID3V2_TAG_VERSION_3);
+    internal_assertExtRejected(undefinedLowFlag, sizeof(undefinedLowFlag), ID3V2_TAG_VERSION_3);
+    internal_assertExtRejected(paddingTooLarge, sizeof(paddingTooLarge), ID3V2_TAG_VERSION_3);
+    internal_assertExtRejected(truncated, sizeof(truncated), ID3V2_TAG_VERSION_3);
+    internal_assertExtRejected(zeroSize, sizeof(zeroSize), ID3V2_TAG_VERSION_3);
+    internal_assertExtRejected(zeroSize, 3, ID3V2_TAG_VERSION_3);
+}
+
+static void id3v2ParseExtendedTagHeader_v3PaddingFits(void **state) {
+    (void) state;
+    const uint8_t ext[13] = {0, 0, 0, 0x06, 0, 0, 0, 0, 0, 3, 0, 0, 0};
+    Id3v2ExtendedTagHeader *h;
+
+    uint32_t v = id3v2ParseExtendedTagHeader((uint8_t *) ext, sizeof(ext), ID3V2_TAG_VERSION_3, &h);
+
+    assert_int_equal(v, 10);
+    assert_non_null(h);
+    assert_int_equal(h->padding, 3);
+
+    id3v2DestroyExtendedTagHeader(&h);
+}
 
 static void id3v2ParseExtendedTagHeader_v4(void **state) {
     (void) state;
-    uint8_t ext[12] = {
-        0, 0, 0, 8,
-        6,
-        0x70,
-        0, 0, 0, 0x3E, 0x48,
-        0xff
+    uint8_t ext[15] = {
+        0, 0, 0, 15, // syncsafe size of the whole extended header
+        1, // number of flag bytes
+        0x70, // update, CRC, restrictions
+        0x00, // update length
+        0x05, 0, 0, 0, 0x3E, 0x48, // CRC length and syncsafe CRC
+        0x01, 0xff // restrictions length and restrictions
     };
 
-
-    ByteStream *stream = byteStreamCreate(ext, 12);
-
     Id3v2ExtendedTagHeader *h;
-    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_4, &h);
+    uint32_t v = id3v2ParseExtendedTagHeader(ext, sizeof(ext), ID3V2_TAG_VERSION_4, &h);
 
-    assert_int_equal(v, 12);
-
+    assert_int_equal(v, 15);
+    assert_non_null(h);
     assert_int_equal(h->crc, 8008);
     assert_true(h->update);
     assert_true(h->tagRestrictions);
     assert_int_equal(h->restrictions, 0xff);
 
-    byteStreamDestroy(stream);
     id3v2DestroyExtendedTagHeader(&h);
 }
 
 static void id3v2ParseExtendedTagHeader_v4NoRestrictions(void **state) {
     (void) state;
-    uint8_t ext[11] = {
-        0, 0, 0, 7,
-        5,
-        0x70,
-        0, 0, 0, 0x3E, 0x48
+    uint8_t ext[13] = {
+        0, 0, 0, 13,
+        1,
+        0x60,
+        0x00,
+        0x05, 0, 0, 0, 0x3E, 0x48
     };
 
-
-    ByteStream *stream = byteStreamCreate(ext, 11);
-
     Id3v2ExtendedTagHeader *h;
-    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_4, &h);
+    uint32_t v = id3v2ParseExtendedTagHeader(ext, sizeof(ext), ID3V2_TAG_VERSION_4, &h);
 
-    assert_int_equal(v, 11);
+    assert_int_equal(v, 13);
+    assert_non_null(h);
     assert_int_equal(h->crc, 8008);
     assert_true(h->update);
-    assert_true(h->tagRestrictions);
+    assert_false(h->tagRestrictions);
     assert_int_equal(h->restrictions, 0);
 
-    byteStreamDestroy(stream);
     id3v2DestroyExtendedTagHeader(&h);
 }
 
 static void id3v2ParseExtendedTagHeader_v4NoCRC(void **state) {
     (void) state;
-    uint8_t ext[6] = {
-        0, 0, 0, 6,
-        0,
-        0x40
+    uint8_t ext[7] = {
+        0, 0, 0, 7,
+        1,
+        0x40,
+        0x00
     };
 
-
-    ByteStream *stream = byteStreamCreate(ext, 6);
-
     Id3v2ExtendedTagHeader *h;
-    uint32_t v = id3v2ParseExtendedTagHeader(stream->buffer, stream->bufferSize, ID3V2_TAG_VERSION_4, &h);
+    uint32_t v = id3v2ParseExtendedTagHeader(ext, sizeof(ext), ID3V2_TAG_VERSION_4, &h);
 
-    assert_int_equal(v, 6);
+    assert_int_equal(v, 7);
+    assert_non_null(h);
     assert_int_equal(h->crc, 0);
     assert_true(h->update);
     assert_false(h->tagRestrictions);
     assert_int_equal(h->restrictions, 0);
 
-    byteStreamDestroy(stream);
     id3v2DestroyExtendedTagHeader(&h);
+}
+
+static void id3v2ParseExtendedTagHeader_v4NoFlags(void **state) {
+    (void) state;
+    uint8_t ext[8] = {0, 0, 0, 6, 1, 0x00, 'T', 'I'}; // followed by a frame
+    Id3v2ExtendedTagHeader *h;
+
+    uint32_t v = id3v2ParseExtendedTagHeader(ext, sizeof(ext), ID3V2_TAG_VERSION_4, &h);
+
+    assert_int_equal(v, 6);
+    assert_non_null(h);
+    assert_false(h->update);
+    assert_false(h->tagRestrictions);
+    assert_int_equal(h->crc, 0);
+
+    id3v2DestroyExtendedTagHeader(&h);
+}
+
+static void id3v2ParseExtendedTagHeader_v4Rejected(void **state) {
+    (void) state;
+    // the layout id3dev wrote before it followed the standard: data byte count, no length bytes
+    const uint8_t oldLayout[12] = {0, 0, 0, 12, 6, 0x70, 0, 0, 0, 0x3E, 0x48, 0xff};
+    const uint8_t oldNoFlags[6] = {0, 0, 0, 6, 0, 0x00};
+    // more than one flag byte
+    const uint8_t flagCount[7] = {0, 0, 0, 7, 2, 0x00, 0x00};
+    // undefined flag bits
+    const uint8_t undefinedHigh[6] = {0, 0, 0, 6, 1, 0x80};
+    const uint8_t undefinedLow[6] = {0, 0, 0, 6, 1, 0x01};
+    // wrong length bytes
+    const uint8_t updateLength[7] = {0, 0, 0, 7, 1, 0x40, 0x01};
+    const uint8_t crcLength[12] = {0, 0, 0, 12, 1, 0x20, 0x04, 0, 0, 0x3E, 0x48, 0};
+    const uint8_t restrictionsLength[8] = {0, 0, 0, 8, 1, 0x10, 0x02, 0xff};
+    // CRC bytes that aren't syncsafe, or hold more than 32 bits
+    const uint8_t crcNotSyncsafe[12] = {0, 0, 0, 12, 1, 0x20, 0x05, 0, 0, 0, 0x80, 0};
+    const uint8_t crcTooLarge[12] = {0, 0, 0, 12, 1, 0x20, 0x05, 0x10, 0, 0, 0, 0};
+    // size doesn't match the flags
+    const uint8_t sizeTooLarge[8] = {0, 0, 0, 8, 1, 0x00, 0, 0};
+    const uint8_t sizeTooSmall[8] = {0, 0, 0, 7, 1, 0x10, 0x01, 0xff};
+    const uint8_t sizeBelowSix[6] = {0, 0, 0, 5, 1, 0x00};
+    // size bytes that aren't syncsafe
+    const uint8_t sizeNotSyncsafe[6] = {0, 0, 0, 0x86, 1, 0x00};
+    // size beyond the bytes left in the tag
+    const uint8_t truncated[7] = {0, 0, 0, 8, 1, 0x10, 0x01};
+
+    internal_assertExtRejected(oldLayout, sizeof(oldLayout), ID3V2_TAG_VERSION_4);
+    internal_assertExtRejected(oldNoFlags, sizeof(oldNoFlags), ID3V2_TAG_VERSION_4);
+    internal_assertExtRejected(flagCount, sizeof(flagCount), ID3V2_TAG_VERSION_4);
+    internal_assertExtRejected(undefinedHigh, sizeof(undefinedHigh), ID3V2_TAG_VERSION_4);
+    internal_assertExtRejected(undefinedLow, sizeof(undefinedLow), ID3V2_TAG_VERSION_4);
+    internal_assertExtRejected(updateLength, sizeof(updateLength), ID3V2_TAG_VERSION_4);
+    internal_assertExtRejected(crcLength, sizeof(crcLength), ID3V2_TAG_VERSION_4);
+    internal_assertExtRejected(restrictionsLength, sizeof(restrictionsLength), ID3V2_TAG_VERSION_4);
+    internal_assertExtRejected(crcNotSyncsafe, sizeof(crcNotSyncsafe), ID3V2_TAG_VERSION_4);
+    internal_assertExtRejected(crcTooLarge, sizeof(crcTooLarge), ID3V2_TAG_VERSION_4);
+    internal_assertExtRejected(sizeTooLarge, sizeof(sizeTooLarge), ID3V2_TAG_VERSION_4);
+    internal_assertExtRejected(sizeTooSmall, sizeof(sizeTooSmall), ID3V2_TAG_VERSION_4);
+    internal_assertExtRejected(sizeBelowSix, sizeof(sizeBelowSix), ID3V2_TAG_VERSION_4);
+    internal_assertExtRejected(sizeNotSyncsafe, sizeof(sizeNotSyncsafe), ID3V2_TAG_VERSION_4);
+    internal_assertExtRejected(truncated, sizeof(truncated), ID3V2_TAG_VERSION_4);
+}
+
+// serializes, parses and serializes again; both byte arrays must match and the fields survive
+static void internal_assertExtRoundTrip(Id3v2ExtendedTagHeader *ext, uint8_t version) {
+    size_t outl = 0;
+    size_t againl = 0;
+    Id3v2ExtendedTagHeader *parsed = NULL;
+    uint8_t *out = id3v2ExtendedTagHeaderSerialize(ext, version, &outl);
+    uint8_t *buf = calloc(outl + ext->padding, 1); // room for the padding the header promises
+
+    assert_non_null(out);
+    memcpy(buf, out, outl);
+
+    assert_int_equal(id3v2ParseExtendedTagHeader(buf, outl + ext->padding, version, &parsed), outl);
+    assert_non_null(parsed);
+    assert_true(id3v2ValidateExtendedTagHeader(parsed, version));
+    assert_int_equal(parsed->crc, ext->crc);
+    assert_int_equal(parsed->restrictions, ext->restrictions);
+    assert_int_equal(parsed->tagRestrictions, ext->tagRestrictions);
+    assert_int_equal(parsed->update, ext->update);
+    assert_int_equal(parsed->padding, ext->padding);
+
+    uint8_t *again = id3v2ExtendedTagHeaderSerialize(parsed, version, &againl);
+    assert_int_equal(againl, outl);
+    assert_memory_equal(again, out, outl);
+
+    free(again);
+    free(buf);
+    free(out);
+    id3v2DestroyExtendedTagHeader(&parsed);
+}
+
+static void id3v2ParseExtendedTagHeader_roundTrip(void **state) {
+    (void) state;
+    Id3v2ExtendedTagHeader *cases[] = {
+        id3v2CreateExtendedTagHeader(0, 0, false, false, 0), // v3
+        id3v2CreateExtendedTagHeader(16, 0xDEADBEEF, false, false, 0), // v3
+        id3v2CreateExtendedTagHeader(0, 0, false, false, 0), // v4
+        id3v2CreateExtendedTagHeader(0, 0, true, false, 0),
+        id3v2CreateExtendedTagHeader(0, UINT32_MAX, false, false, 0),
+        id3v2CreateExtendedTagHeader(0, 0, false, true, 0xA5),
+        id3v2CreateExtendedTagHeader(0, 0xDEADBEEF, true, true, 0xff),
+    };
+    const uint8_t versions[] = {3, 3, 4, 4, 4, 4, 4};
+
+    for (size_t i = 0; i < sizeof(versions); i++) {
+        internal_assertExtRoundTrip(cases[i], versions[i]);
+        id3v2DestroyExtendedTagHeader(&cases[i]);
+    }
 }
 
 static void id3v2ParseTagHeader_happyPath(void **state) {
@@ -2163,7 +2238,7 @@ static void id3v2ParseTagFromStream_v3ext(void **state) {
     (void) state;
     uint8_t data[45] = {
         'I', 'D', '3', 0x03, 0x01, 0x40, 0x00, 0x00, 0x00, 0x23, // header
-        0x00, 0x00, 0x00, 0x0a, 0x80, 0x00, 0xfe, 0xfe, 0xfe, 0xfe, 0xff, 0xff, 0xff, 0xff, // ext
+        0x00, 0x00, 0x00, 0x0a, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, // ext, no padding
         'T', 'A', 'L', 'B', 0x00, 0x00, 0x00, 0x0b, 0x00, 0x00,
         0x00,
         'F', 'a', 'm', 'i', 'l', 'y', ' ', 'G', 'u', 'y'
@@ -2181,7 +2256,7 @@ static void id3v2ParseTagFromStream_v3ext(void **state) {
     assert_int_equal(tag->header->minorVersion, 1);
 
     assert_int_equal(tag->header->extendedHeader->crc, 0xffffffff);
-    assert_int_equal(tag->header->extendedHeader->padding, 0xfefefefe);
+    assert_int_equal(tag->header->extendedHeader->padding, 0);
 
     Id3v2Frame *f = (Id3v2Frame *) tag->frames->head->data;
     Id3v2ContentEntry *ce = (Id3v2ContentEntry *) f->entries->head->data;
@@ -2234,6 +2309,68 @@ static void id3v2ParseTagFromStream_v2ULTWithMissingDesc(void **state) {
     byteStreamDestroy(stream);
 }
 
+// "ID3" inside audio with the bytes from the reported file (version 0x33) is not a tag
+static void id3v2ParseTagFromStream_junkVersionInAudio(void **state) {
+    (void) state;
+    uint8_t data[] = {
+        0xff, 0xfb, 0x90, 0x64, 0x00, 0x00, 0x00, 0x00, 0x00, // audio, 9 bytes so the old 3 byte stepping scan reached it
+        'I', 'D', '3', 0x33, 0xe6, 0x36, 0x0f, 0xe8, 0xd9, 0x61,
+        0x00, 0x11, 0x22, 0x33, 0x44, 0x55
+    };
+
+    assert_null(id3v2ParseTagFromBuffer(data, sizeof(data), NULL));
+}
+
+// a plausible version but a size byte with its top bit set is not syncsafe, so not a tag
+static void id3v2ParseTagFromStream_junkSize(void **state) {
+    (void) state;
+    uint8_t data[] = {
+        'I', 'D', '3', 0x03, 0x00, 0x00, 0x00, 0x00, 0x80, 0x0b,
+        'T', 'A', 'L', 'B', 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00
+    };
+
+    assert_null(id3v2ParseTagFromBuffer(data, sizeof(data), NULL));
+}
+
+// undefined flag bits set
+static void id3v2ParseTagFromStream_junkFlags(void **state) {
+    (void) state;
+    uint8_t data[] = {
+        'I', 'D', '3', 0x03, 0x00, 0x1f, 0x00, 0x00, 0x00, 0x0b,
+        'T', 'A', 'L', 'B', 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00
+    };
+
+    assert_null(id3v2ParseTagFromBuffer(data, sizeof(data), NULL));
+}
+
+// extended header flag set but the extended header size is 0
+static void id3v2ParseTagFromStream_junkExtendedHeader(void **state) {
+    (void) state;
+    uint8_t data[] = {
+        'I', 'D', '3', 0x03, 0x00, 0x40, 0x00, 0x00, 0x00, 0x15,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        'T', 'A', 'L', 'B', 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00
+    };
+
+    assert_null(id3v2ParseTagFromBuffer(data, sizeof(data), NULL));
+}
+
+// a legitimate tag after leading data is still found
+static void id3v2ParseTagFromStream_validAfterData(void **state) {
+    (void) state;
+    uint8_t data[] = {
+        0xff, 0xfb, 0x90, 0x64,
+        'I', 'D', '3', 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0d,
+        'T', 'A', 'L', 'B', 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 'h', 'i'
+    };
+
+    Id3v2Tag *tag = id3v2ParseTagFromBuffer(data, sizeof(data), NULL);
+    assert_non_null(tag);
+    assert_int_equal(tag->header->majorVersion, 3);
+    assert_int_equal(tag->frames->length, 1);
+    id3v2DestroyTag(&tag);
+}
+
 int main() {
     const struct CMUnitTest tests[] = {
 
@@ -2244,13 +2381,15 @@ int main() {
 
         cmocka_unit_test(id3v2ParseExtendedTagHeader_v3),
         cmocka_unit_test(id3v2ParseExtendedTagHeader_v3NoCrc),
-        cmocka_unit_test(id3v2ParseExtendedTagHeader_v3NoPadding),
-        cmocka_unit_test(id3v2ParseExtendedTagHeader_v3UnsupportedSize),
-        cmocka_unit_test(id3v2ParseExtendedTagHeader_v3SmallSizeWithData),
+        cmocka_unit_test(id3v2ParseExtendedTagHeader_v3Rejected),
+        cmocka_unit_test(id3v2ParseExtendedTagHeader_v3PaddingFits),
 
         cmocka_unit_test(id3v2ParseExtendedTagHeader_v4),
         cmocka_unit_test(id3v2ParseExtendedTagHeader_v4NoRestrictions),
         cmocka_unit_test(id3v2ParseExtendedTagHeader_v4NoCRC),
+        cmocka_unit_test(id3v2ParseExtendedTagHeader_v4NoFlags),
+        cmocka_unit_test(id3v2ParseExtendedTagHeader_v4Rejected),
+        cmocka_unit_test(id3v2ParseExtendedTagHeader_roundTrip),
 
         // id3v2ParseTagHeader tests
         cmocka_unit_test(id3v2ParseTagHeader_happyPath),
@@ -2302,7 +2441,12 @@ int main() {
         cmocka_unit_test(id3v2ParseTagFromStream_v2unsync),
         cmocka_unit_test(id3v2ParseTagFromStream_v3ext),
         cmocka_unit_test(id3v2ParseTagFromStream_v4frameUnsync),
-        cmocka_unit_test(id3v2ParseTagFromStream_v2ULTWithMissingDesc)
+        cmocka_unit_test(id3v2ParseTagFromStream_v2ULTWithMissingDesc),
+        cmocka_unit_test(id3v2ParseTagFromStream_junkVersionInAudio),
+        cmocka_unit_test(id3v2ParseTagFromStream_junkSize),
+        cmocka_unit_test(id3v2ParseTagFromStream_junkFlags),
+        cmocka_unit_test(id3v2ParseTagFromStream_junkExtendedHeader),
+        cmocka_unit_test(id3v2ParseTagFromStream_validAfterData)
 
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

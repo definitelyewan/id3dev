@@ -22,8 +22,10 @@ class ID3v1Tag:
     | `track`   | `int`       | id3v1ReadTrack / id3v1WriteTrack  |
     | `genre`   | Genre       | id3v1ReadGenre / id3v1WriteGenre  |
 
-    Text fields read as '' when unset and hold at most 30 bytes; id3dev cuts
-    longer values short. Writes that id3dev rejects raise ValueError.
+    Text fields read as '' when unset. ID3v1 stores Latin-1, so id3dev converts
+    on the way in and out: characters Latin-1 can't hold are stored as '?', and
+    each field keeps at most 30 characters (28 for the comment when a track is
+    set and the tag is saved). Writes that id3dev rejects raise ValueError.
 
     @code{.py}
     v1 = tag.id3v1
@@ -62,7 +64,8 @@ class ID3v1Tag:
     @property
     def genre(self) -> "Genre | None":
         """! @brief The genre, or None if the stored number isn't a known genre (id3v1ReadGenre).
-        @details Assign a Genre, its number, or its name such as "Pop" (id3v1WriteGenre).
+        @details 255, the ID3v1 value for no genre, reads as Genre.UNKNOWN.
+        Assign a Genre, its number, or its name such as "Pop" (id3v1WriteGenre).
         @throws ValueError on assigning a value that isn't an ID3v1 genre
         """
         value = lib.id3v1ReadGenre(self._tag())
