@@ -357,7 +357,7 @@ int id3v2InsertTextFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], const uint8_t e
     bool convi = false;
 
     // set up frame
-    header = id3v2CreateFrameHeader((uint8_t *) id, 0, 0, 0, 0, 0, 0, 0);
+    header = id3v2CreateFrameHeader((uint8_t *) id, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     f = id3v2CreateFrame(header, id3v2CreateTextFrameContext(),
                          listCreate(id3v2PrintContentEntry, id3v2DeleteContentEntry, id3v2CompareContentEntry,
                                     id3v2CopyContentEntry));
@@ -1536,11 +1536,11 @@ static int internal_id3v2CreateCommentFrameUTF16LE(uint8_t v, const char lang[3]
     // get frame header
     switch (v) {
         case ID3V2_TAG_VERSION_2:
-            header = id3v2CreateFrameHeader((uint8_t *) "COM\0", 0, 0, 0, 0, 0, 0, 0);
+            header = id3v2CreateFrameHeader((uint8_t *) "COM\0", 0, 0, 0, 0, 0, 0, 0, 0, 0);
             break;
         case ID3V2_TAG_VERSION_3:
         case ID3V2_TAG_VERSION_4:
-            header = id3v2CreateFrameHeader((uint8_t *) "COMM", 0, 0, 0, 0, 0, 0, 0);
+            header = id3v2CreateFrameHeader((uint8_t *) "COMM", 0, 0, 0, 0, 0, 0, 0, 0, 0);
             break;
         default:
             return false;

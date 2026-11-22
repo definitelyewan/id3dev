@@ -298,9 +298,11 @@ uint32_t id3v2ParseTagHeader(uint8_t *in, size_t inl, Id3v2TagHeader **tagHeader
  * 
  * - ID3v2.4: Reads 4-byte frame ID + 4-byte syncsafe size + 2-byte flags. 
  * Status flags: tag alter, file alter, read-only. Format flags: grouping (+1 byte), 
- * encryption (+1 byte), unsynchronisation, compression/data length (+syncsafe size).
- * 
- * The frameSize output represents the frame content size (excluding header). On success, 
+ * encryption (+1 byte), unsynchronisation, compression, data length indicator (+4 byte syncsafe
+ * size, only when its own flag is set).
+ *
+ * The frameSize output represents the frame content size, excluding the header and any extra
+ * header bytes added by format flags (both specs count those inside the size field). On success,
  * caller must free the returned structure with id3v2DestroyFrameHeader. Returns 0 with 
  * NULL on complete failure, or partial byte count with appropriate NULL/non-NULL outputs 
  * on partial parsing success.
@@ -334,6 +336,8 @@ uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2Fr
     bool fileAlter = false;
     bool readOnly = false;
     bool unsync = false;
+    bool compressed = false;
+    bool dataLengthIndicator = false;
     uint32_t decompressionSize = 0;
     uint8_t encryptionSymbol = 0;
     uint8_t groupSymbol = 0;
@@ -342,6 +346,8 @@ uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2Fr
     uint8_t sizeBytes[ID3V2_FRAME_ID_MAX_SIZE];
     uint8_t flagBytes[ID3V2_FRAME_FLAG_SIZE];
     uint32_t walk = 0;
+    uint32_t baseHeaderSize = 0;
+    uint32_t extraHeaderSize = 0;
 
     switch (version) {
         case ID3V2_TAG_VERSION_2:
@@ -401,7 +407,9 @@ uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2Fr
                 readOnly = true;
             }
 
+            // i - compression, the decompressed size is present only with it
             if (readBit(flagBytes[1], 7)) {
+                compressed = true;
                 decompressionSize = byteStreamReturnInt(stream);
                 if (!decompressionSize) {
                     break;
@@ -469,11 +477,19 @@ uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2Fr
                 }
             }
 
+            // k - compression adds no bytes of its own, the spec requires p alongside it
+            if (readBit(flagBytes[1], 3)) {
+                compressed = true;
+            }
+
             if (readBit(flagBytes[1], 1)) {
                 unsync = true;
             }
 
-            if (readBit(flagBytes[1], 3) || encryptionSymbol || readBit(flagBytes[1], 0)) {
+            // p - the data length indicator is present only when this flag is set,
+            // compression and encryption do not imply it
+            if (readBit(flagBytes[1], 0)) {
+                dataLengthIndicator = true;
                 decompressionSize = byteStreamReturnSyncInt(stream);
             }
 
@@ -487,11 +503,25 @@ uint32_t id3v2ParseFrameHeader(uint8_t *in, size_t inl, uint8_t version, Id3v2Fr
             return 0;
     }
 
-    *frameHeader = id3v2CreateFrameHeader(id, tagAlter, fileAlter, readOnly, unsync, decompressionSize,
-                                          encryptionSymbol, groupSymbol);
-    *frameSize = tSize;
     walk = stream->cursor;
     byteStreamDestroy(stream);
+
+    // the size field counts the extra header bytes (group, encryption, decompressed size or
+    // data length indicator), so take them off to leave only the frame content
+    baseHeaderSize = (version == ID3V2_TAG_VERSION_2) ? (ID3V2_FRAME_ID_MAX_SIZE - 1) * 2
+                                                      : ID3V2_FRAME_BASE_HEADER_SIZE;
+    extraHeaderSize = (walk > baseHeaderSize) ? walk - baseHeaderSize : 0;
+
+    // extra bytes that do not fit inside the frame mean the header is not legitimate
+    if (extraHeaderSize > tSize) {
+        *frameHeader = NULL;
+        *frameSize = 0;
+        return walk;
+    }
+
+    *frameHeader = id3v2CreateFrameHeader(id, tagAlter, fileAlter, readOnly, unsync, compressed,
+                                          dataLengthIndicator, decompressionSize, encryptionSymbol, groupSymbol);
+    *frameSize = tSize - extraHeaderSize;
     // printf("[*] frameSize = %zu, walk = %zu stream->cursor = %zu\n", *frameSize, walk, stream->cursor); // debug info i dont wanna rewrite
     return walk;
 }
@@ -811,7 +841,7 @@ static size_t internal_id3v2ParseFrameBitContent(ByteStream *innerStream, const 
  * approach allows flexible parsing of the diverse frame types in the ID3v2 specification.
  * 
  * **Encrypted/Compressed Frame Handling:**
- * Frames with encryptionSymbol or decompressionSize set are parsed as raw binary using a generic 
+ * Compressed or encrypted frames are parsed as raw binary using a generic 
  * context. The caller must decrypt/decompress and reparse to access structured content.
  * 
  * **Context Types Supported:**
@@ -909,7 +939,7 @@ uint32_t id3v2ParseFrame(uint8_t *in, size_t inl, List *context, uint8_t version
     // is a frame compressed or encrypted?
     // if so a generic context will be used meaning it's not up to me to decompress or unencrypted + if it's a text frame none
     // of the reads or writes will work until someone reparses the data after its changed.
-    if (header->encryptionSymbol > 0 || header->decompressionSize > 0) {
+    if (header->encryptionSymbol > 0 || header->compressed) {
         uint8_t *data = NULL;
         size_t dataSize = 0;
         List *gContext = id3v2CreateGenericFrameContext();

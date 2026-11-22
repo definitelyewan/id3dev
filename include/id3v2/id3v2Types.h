@@ -76,6 +76,13 @@ extern "C" {
 #define ID3V2_FRAME_FLAG_SIZE 2
 
 /**
+ * @brief Size in bytes of an ID3v2.3/ID3v2.4 frame header before any extra fields (10 bytes).
+ * @details ID, size and flags. Format flags may append extra fields after it (decompressed size or data
+ * length indicator, encryption method, group symbol) and those count inside the frame size field.
+ */
+#define ID3V2_FRAME_BASE_HEADER_SIZE 10
+
+/**
  * @brief Optional ID3v2 extended header containing supplementary tag metadata.
  * @details Provides additional information about tag structure including CRC validation, 
  * update flags, and content restrictions. Not required for basic tag parsing. Present in 
@@ -145,7 +152,18 @@ typedef struct _Id3v2FrameHeader {
     //! Marks a tag as unsynchronised
     bool unsynchronisation;
 
-    //! Decompressed size in bytes if frame uses zlib compression. 0 if uncompressed.
+    //! Frame content is zlib compressed (v2.3 flag i, v2.4 flag k)
+    bool compressed;
+
+    //! A data length indicator follows the frame header (v2.4 flag p only)
+    bool dataLengthIndicator;
+
+    /**
+     * @brief Length value carried in the frame header.
+     * @details v2.3: the decompressed size, present only when compressed is set.
+     * v2.4: the data length indicator, present only when dataLengthIndicator is set.
+     * 0 when neither applies.
+     */
     uint32_t decompressionSize;
 
     //! Encryption method identifier. 0 if frame is not encrypted.

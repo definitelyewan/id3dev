@@ -20,6 +20,7 @@
 #include "id3v2/id3v2TagIdentity.h"
 #include "id3v2/id3v2Frame.h"
 #include "id3v2/id3v2Context.h"
+#include "id3v2/id3v2.h"
 #include "byteStream.h"
 #include "byteInt.h"
 
@@ -524,12 +525,15 @@ static void id3v2ParseFrameHeader_v3(void **state) {
 
     assert_non_null(h);
     assert_int_equal(v, 16);
-    assert_int_equal(size, 100);
+    // the size field counts the 6 extra header bytes, size is the content after them
+    assert_int_equal(size, 94);
 
     assert_true(h->tagAlterPreservation);
     assert_true(h->fileAlterPreservation);
     assert_true(h->readOnly);
 
+    assert_true(h->compressed);
+    assert_false(h->dataLengthIndicator);
     assert_int_equal(h->decompressionSize, 0xEA60);
     assert_int_equal(h->encryptionSymbol, 0xFF);
     assert_int_equal(h->groupSymbol, 0xFE);
@@ -555,12 +559,14 @@ static void id3v2ParseFrameHeader_v3FlagsButNoSymbols(void **state) {
 
     assert_non_null(h);
     assert_int_equal(v, 14);
-    assert_int_equal(size, 100);
+    // only the 4 byte decompressed size could be read, so only it comes off the size field
+    assert_int_equal(size, 96);
 
     assert_true(h->tagAlterPreservation);
     assert_true(h->fileAlterPreservation);
     assert_true(h->readOnly);
 
+    assert_true(h->compressed);
     assert_int_equal(h->decompressionSize, 0xEA60);
     assert_int_equal(h->encryptionSymbol, 0);
     assert_int_equal(h->groupSymbol, 0);
@@ -591,6 +597,8 @@ static void id3v2ParseFrameHeader_v3noFlags(void **state) {
     assert_false(h->fileAlterPreservation);
     assert_false(h->readOnly);
 
+    assert_false(h->compressed);
+    assert_false(h->dataLengthIndicator);
     assert_int_equal(h->decompressionSize, 0);
     assert_int_equal(h->encryptionSymbol, 0);
     assert_int_equal(h->groupSymbol, 0);
@@ -641,7 +649,8 @@ static void id3v2ParseFrameHeader_v4(void **state) {
 
     assert_non_null(h);
     assert_int_equal(v, 16);
-    assert_int_equal(size, 256);
+    // the size field counts the 6 extra header bytes, size is the content after them
+    assert_int_equal(size, 250);
 
     assert_true(h->tagAlterPreservation);
     assert_true(h->fileAlterPreservation);
@@ -649,6 +658,8 @@ static void id3v2ParseFrameHeader_v4(void **state) {
 
     assert_int_equal(h->groupSymbol, 0xFF);
     assert_int_equal(h->encryptionSymbol, 0xFE);
+    assert_true(h->compressed);
+    assert_true(h->dataLengthIndicator);
     assert_int_equal(h->decompressionSize, byteSyncintDecode(69420));
     assert_true(h->unsynchronisation);
 
@@ -676,7 +687,8 @@ static void id3v2ParseFrameHeader_v4SetFlagButNoContent(void **state) {
 
     assert_non_null(h);
     assert_int_equal(v, 12);
-    assert_int_equal(size, 256);
+    // only the group and encryption bytes could be read, so only they come off the size field
+    assert_int_equal(size, 254);
 
     assert_true(h->tagAlterPreservation);
     assert_true(h->fileAlterPreservation);
@@ -684,6 +696,8 @@ static void id3v2ParseFrameHeader_v4SetFlagButNoContent(void **state) {
 
     assert_int_equal(h->groupSymbol, 0xFF);
     assert_int_equal(h->encryptionSymbol, 0xFE);
+    assert_true(h->compressed);
+    assert_true(h->dataLengthIndicator);
     assert_int_equal(h->decompressionSize, 0);
     assert_true(h->unsynchronisation);
 
@@ -1582,7 +1596,8 @@ static void id3v2ParseFrame_parseEQU2(void **state) {
 static void id3v2ParseFrame_parseEncrypted(void **state) {
     (void) state;
     uint8_t txxx[30] = {
-        'T', 'X', 'X', 'X', 0x00, 0x00, 0x00, 0x0f, 0x00, 0x05,
+        // size 20 = 1 method byte + 4 byte data length indicator + 15 content bytes
+        'T', 'X', 'X', 'X', 0x00, 0x00, 0x00, 0x14, 0x00, 0x05,
         0xff, 0x00, 0x1A, 0xE8, 0x5D, // 1763421 data length indicator before decode
         0x00,
         'l', 'a', 'b', 'e', 'l', 0x00,
@@ -1598,6 +1613,8 @@ static void id3v2ParseFrame_parseEncrypted(void **state) {
 
 
     testFrameHeader(f, "TXXX", 0, 0, 0, 0, byteSyncintDecode(1763421), 0, 0xff);
+    assert_false(f->header->compressed);
+    assert_true(f->header->dataLengthIndicator);
 
 
     testEntry((Id3v2ContentEntry *) f->entries->head->data, 15, (uint8_t *) "\0label\0dead air");
@@ -1605,6 +1622,234 @@ static void id3v2ParseFrame_parseEncrypted(void **state) {
     id3v2DestroyFrame(&f);
     listFree(context);
     byteStreamDestroy(stream);
+}
+
+/*
+ * Frame format flag round trips: a frame is parsed then serialized and must come back byte for byte,
+ * keeping its flags, extra header fields and a frame size that counts those fields.
+ */
+
+static void roundTripFrame(const uint8_t *in, size_t inl, uint8_t version, size_t entryCount,
+                           bool compressed, bool dataLengthIndicator) {
+    List *context = id3v2CreateTextFrameContext();
+    Id3v2Frame *f = NULL;
+    size_t outl = 0;
+    uint8_t *out = NULL;
+    uint32_t read = id3v2ParseFrame((uint8_t *) in, inl, context, version, &f);
+
+    assert_non_null(f);
+    assert_int_equal(read, inl);
+    assert_int_equal(listLength(f->entries), entryCount);
+    assert_int_equal(f->header->compressed, compressed);
+    assert_int_equal(f->header->dataLengthIndicator, dataLengthIndicator);
+
+    out = id3v2FrameSerialize(f, version, &outl);
+
+    assert_non_null(out);
+    assert_int_equal(outl, inl);
+    assert_memory_equal(out, in, inl);
+
+    free(out);
+    id3v2DestroyFrame(&f);
+    listFree(context);
+}
+
+// v2.4 data length indicator only: not compressed, parsed into its fields
+static void id3v2FrameFlags_v4DataLengthIndicatorOnly(void **state) {
+    (void) state;
+    const uint8_t frame[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x0A, 0x00, 0x01,
+        0x00, 0x00, 0x00, 0x06,
+        0x03, 'H', 'e', 'l', 'l', 'o'
+    };
+    roundTripFrame(frame, sizeof frame, ID3V2_TAG_VERSION_4, 2, false, true);
+}
+
+// v2.4 unsynchronisation + data length indicator
+static void id3v2FrameFlags_v4UnsyncDataLengthIndicator(void **state) {
+    (void) state;
+    const uint8_t frame[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x0A, 0x00, 0x03,
+        0x00, 0x00, 0x00, 0x06,
+        0x03, 'H', 'e', 'l', 'l', 'o'
+    };
+    roundTripFrame(frame, sizeof frame, ID3V2_TAG_VERSION_4, 2, false, true);
+}
+
+// v2.4 grouping only: parsed into its fields
+static void id3v2FrameFlags_v4Group(void **state) {
+    (void) state;
+    const uint8_t frame[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x07, 0x00, 0x40,
+        0x22,
+        0x03, 'H', 'e', 'l', 'l', 'o'
+    };
+    roundTripFrame(frame, sizeof frame, ID3V2_TAG_VERSION_4, 2, false, false);
+}
+
+// v2.4 encrypted without a data length indicator: kept as one blob, no indicator read
+static void id3v2FrameFlags_v4EncryptedOnly(void **state) {
+    (void) state;
+    const uint8_t frame[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x09, 0x00, 0x04,
+        0x80,
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'
+    };
+    roundTripFrame(frame, sizeof frame, ID3V2_TAG_VERSION_4, 1, false, false);
+}
+
+// v2.4 encrypted + data length indicator of 300, which needs syncsafe encoding
+static void id3v2FrameFlags_v4EncryptedDataLengthIndicator(void **state) {
+    (void) state;
+    const uint8_t frame[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x0D, 0x00, 0x05,
+        0x80,
+        0x00, 0x00, 0x02, 0x2C,
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'
+    };
+    roundTripFrame(frame, sizeof frame, ID3V2_TAG_VERSION_4, 1, false, true);
+}
+
+// v2.4 compressed + data length indicator of 200
+static void id3v2FrameFlags_v4Compressed(void **state) {
+    (void) state;
+    const uint8_t frame[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x0C, 0x00, 0x09,
+        0x00, 0x00, 0x01, 0x48,
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'
+    };
+    roundTripFrame(frame, sizeof frame, ID3V2_TAG_VERSION_4, 1, true, true);
+}
+
+// v2.4 compressed + encrypted + data length indicator of 1000
+static void id3v2FrameFlags_v4CompressedEncrypted(void **state) {
+    (void) state;
+    const uint8_t frame[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x0D, 0x00, 0x0D,
+        0x81,
+        0x00, 0x00, 0x07, 0x68,
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'
+    };
+    roundTripFrame(frame, sizeof frame, ID3V2_TAG_VERSION_4, 1, true, true);
+}
+
+// v2.4 every extra field: group, compressed, encrypted, data length indicator
+static void id3v2FrameFlags_v4AllExtraFields(void **state) {
+    (void) state;
+    const uint8_t frame[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x0E, 0x00, 0x4D,
+        0x22,
+        0x81,
+        0x00, 0x00, 0x07, 0x68,
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'
+    };
+    roundTripFrame(frame, sizeof frame, ID3V2_TAG_VERSION_4, 1, true, true);
+}
+
+// v2.3 compressed: a plain 32 bit decompressed size of 300 counted inside the frame size
+static void id3v2FrameFlags_v3Compressed(void **state) {
+    (void) state;
+    const uint8_t frame[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x0C, 0x00, 0x80,
+        0x00, 0x00, 0x01, 0x2C,
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'
+    };
+    roundTripFrame(frame, sizeof frame, ID3V2_TAG_VERSION_3, 1, true, false);
+}
+
+// v2.3 encrypted only
+static void id3v2FrameFlags_v3Encrypted(void **state) {
+    (void) state;
+    const uint8_t frame[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x09, 0x00, 0x40,
+        0x80,
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'
+    };
+    roundTripFrame(frame, sizeof frame, ID3V2_TAG_VERSION_3, 1, false, false);
+}
+
+// v2.3 grouping only: parsed into its fields
+static void id3v2FrameFlags_v3Group(void **state) {
+    (void) state;
+    const uint8_t frame[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x07, 0x00, 0x20,
+        0x22,
+        0x00, 'H', 'e', 'l', 'l', 'o'
+    };
+    roundTripFrame(frame, sizeof frame, ID3V2_TAG_VERSION_3, 2, false, false);
+}
+
+// v2.3 compressed + encrypted + grouped
+static void id3v2FrameFlags_v3AllExtraFields(void **state) {
+    (void) state;
+    const uint8_t frame[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x0E, 0x00, 0xE0,
+        0x00, 0x00, 0x01, 0x2C,
+        0x80,
+        0x22,
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'
+    };
+    roundTripFrame(frame, sizeof frame, ID3V2_TAG_VERSION_3, 1, true, false);
+}
+
+// a frame written from its fields gets a data length indicator matching its content, not the stale one read
+static void id3v2FrameFlags_v4DataLengthIndicatorRecomputed(void **state) {
+    (void) state;
+    const uint8_t frame[] = {
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x0A, 0x00, 0x01,
+        0x00, 0x00, 0x00, 0x63, // 99, wrong on purpose
+        0x03, 'H', 'e', 'l', 'l', 'o'
+    };
+    List *context = id3v2CreateTextFrameContext();
+    Id3v2Frame *f = NULL;
+    size_t outl = 0;
+    uint8_t *out = NULL;
+
+    id3v2ParseFrame((uint8_t *) frame, sizeof frame, context, ID3V2_TAG_VERSION_4, &f);
+    assert_non_null(f);
+    assert_int_equal(f->header->decompressionSize, 99);
+
+    out = id3v2FrameSerialize(f, ID3V2_TAG_VERSION_4, &outl);
+    assert_int_equal(outl, sizeof frame);
+    assert_memory_equal(out + 10, "\x00\x00\x00\x06", 4);
+    assert_memory_equal(out + 14, frame + 14, 6);
+
+    free(out);
+    id3v2DestroyFrame(&f);
+    listFree(context);
+}
+
+// extra header fields must not push the parser into the next frame
+static void id3v2FrameFlags_v4TagWithExtraFields(void **state) {
+    (void) state;
+    uint8_t tag[] = {
+        'I', 'D', '3', 4, 0, 0, 0, 0, 0, 39,
+        'T', 'I', 'T', '2', 0x00, 0x00, 0x00, 0x0A, 0x00, 0x01,
+        0x00, 0x00, 0x00, 0x06,
+        0x03, 'H', 'e', 'l', 'l', 'o',
+        'T', 'P', 'E', '1', 0x00, 0x00, 0x00, 0x09, 0x00, 0x04,
+        0x80,
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'
+    };
+    Id3v2Tag *t = id3v2ParseTagFromBuffer(tag, sizeof tag, NULL);
+    Id3v2Frame *f = NULL;
+    char *title = NULL;
+
+    assert_non_null(t);
+    assert_int_equal(listLength(t->frames), 2);
+
+    f = id3v2ReadFrameByID("TPE1", t);
+    assert_non_null(f);
+    assert_int_equal(f->header->encryptionSymbol, 0x80);
+    assert_false(f->header->dataLengthIndicator);
+    testEntry((Id3v2ContentEntry *) f->entries->head->data, 8, (uint8_t *) "ABCDEFGH");
+
+    title = id3v2ReadTitle(t);
+    assert_non_null(title);
+    assert_string_equal(title, "Hello");
+
+    free(title);
+    id3v2DestroyTag(&t);
 }
 
 
@@ -2433,6 +2678,22 @@ int main() {
         cmocka_unit_test(id3v2ParseFrame_zeroWidthIterationStops),
         cmocka_unit_test(id3v2ParseFrame_parseEQU2),
         cmocka_unit_test(id3v2ParseFrame_parseEncrypted),
+
+        // frame format flag round trips
+        cmocka_unit_test(id3v2FrameFlags_v4DataLengthIndicatorOnly),
+        cmocka_unit_test(id3v2FrameFlags_v4UnsyncDataLengthIndicator),
+        cmocka_unit_test(id3v2FrameFlags_v4Group),
+        cmocka_unit_test(id3v2FrameFlags_v4EncryptedOnly),
+        cmocka_unit_test(id3v2FrameFlags_v4EncryptedDataLengthIndicator),
+        cmocka_unit_test(id3v2FrameFlags_v4Compressed),
+        cmocka_unit_test(id3v2FrameFlags_v4CompressedEncrypted),
+        cmocka_unit_test(id3v2FrameFlags_v4AllExtraFields),
+        cmocka_unit_test(id3v2FrameFlags_v3Compressed),
+        cmocka_unit_test(id3v2FrameFlags_v3Encrypted),
+        cmocka_unit_test(id3v2FrameFlags_v3Group),
+        cmocka_unit_test(id3v2FrameFlags_v3AllExtraFields),
+        cmocka_unit_test(id3v2FrameFlags_v4DataLengthIndicatorRecomputed),
+        cmocka_unit_test(id3v2FrameFlags_v4TagWithExtraFields),
 
 
         // id3v2ParseTagFromStream

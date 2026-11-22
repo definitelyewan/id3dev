@@ -97,7 +97,7 @@ int main(void) {
     listInsertBack(entries, entry);
 
     // 3. Create a frame header
-    frameHeader = id3v2CreateFrameHeader((uint8_t *) "TXXX", 0, 0, 0, 0, 0, 0, 0);
+    frameHeader = id3v2CreateFrameHeader((uint8_t *) "TXXX", 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
     // 4. Create frame and insert it into the ID3v2 tag
     frame = id3v2CreateFrame(frameHeader, context, entries);

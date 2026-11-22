@@ -60,15 +60,18 @@ static char *internal_base64Encode(const unsigned char *input, size_t inputLengt
  * @param fileAlter - File alter preservation flag
  * @param readOnly - Read-only flag
  * @param unsync - Frame-level unsynchronisation flag (ID3v2.4 only, false sync signals removed)
- * @param decompressionSize - Original uncompressed size in bytes (0 = no compression, ID3v2.3/2.4 only)
+ * @param compressed - Frame content is zlib compressed (ID3v2.3/2.4 only)
+ * @param dataLengthIndicator - A data length indicator follows the header (ID3v2.4 only)
+ * @param decompressionSize - v2.3: decompressed size of a compressed frame. v2.4: the data length indicator value.
+ * 0 when neither applies
  * @param encryptionSymbol - Encryption method symbol (0 = no encryption, ID3v2.3/2.4 only)
  * @param groupSymbol - Group identifier for related frames (0 = no grouping, ID3v2.3/2.4 only)
- * 
+ *
  * @return Id3v2FrameHeader* - Heap-allocated Id3v2FrameHeader structure. Caller must free with id3v2DestroyFrameHeader
  */
 Id3v2FrameHeader *id3v2CreateFrameHeader(uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], bool tagAlter, bool fileAlter,
-                                         bool readOnly, bool unsync, uint32_t decompressionSize,
-                                         uint8_t encryptionSymbol, uint8_t groupSymbol) {
+                                         bool readOnly, bool unsync, bool compressed, bool dataLengthIndicator,
+                                         uint32_t decompressionSize, uint8_t encryptionSymbol, uint8_t groupSymbol) {
     Id3v2FrameHeader *h = malloc(sizeof(Id3v2FrameHeader));
 
     for (int i = 0; i < ID3V2_FRAME_ID_MAX_SIZE; i++) {
@@ -78,6 +81,8 @@ Id3v2FrameHeader *id3v2CreateFrameHeader(uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], bo
     h->tagAlterPreservation = tagAlter;
     h->fileAlterPreservation = fileAlter;
     h->readOnly = readOnly;
+    h->compressed = compressed;
+    h->dataLengthIndicator = dataLengthIndicator;
     h->decompressionSize = decompressionSize;
     h->encryptionSymbol = encryptionSymbol;
     h->groupSymbol = groupSymbol;
@@ -265,6 +270,14 @@ int id3v2CompareFrame(const void *first, const void *second) {
         return diff;
     }
 
+    if (f->header->compressed != s->header->compressed) {
+        return 1;
+    }
+
+    if (f->header->dataLengthIndicator != s->header->dataLengthIndicator) {
+        return 1;
+    }
+
     diff = f->header->encryptionSymbol - s->header->encryptionSymbol;
     if (diff != 0) {
         return diff;
@@ -370,6 +383,8 @@ void *id3v2CopyFrame(const void *toBeCopied) {
                                                  f->header->fileAlterPreservation,
                                                  f->header->readOnly,
                                                  f->header->unsynchronisation,
+                                                 f->header->compressed,
+                                                 f->header->dataLengthIndicator,
                                                  f->header->decompressionSize,
                                                  f->header->encryptionSymbol,
                                                  f->header->groupSymbol);
@@ -482,7 +497,7 @@ Id3v2Frame *id3v2CreateEmptyFrame(const char id[ID3V2_FRAME_ID_MAX_SIZE], uint8_
         }
     }
 
-    header = id3v2CreateFrameHeader((uint8_t *) id, false, false, false, false, 0, 0, 0);
+    header = id3v2CreateFrameHeader((uint8_t *) id, false, false, false, false, false, false, 0, 0, 0);
     f = id3v2CreateFrame(header, listDeepCopy(context), entries);
 
     hashTableFree(pairs);
@@ -1059,16 +1074,48 @@ Id3v2Frame *id3v2DetachFrameFromTag(Id3v2Tag *tag, Id3v2Frame *frame) {
 
 
 /**
+ * @brief Counts the extra header bytes a frame's format flags add after the base header.
+ * @details v2.3: decompressed size (4, when compressed), encryption method (1), group symbol (1).
+ * v2.4: group symbol (1), encryption method (1), data length indicator (4, when its flag is set).
+ * v2.2 has no format flags. Both specs count these bytes inside the frame size field.
+ *
+ * @param header - Frame header to inspect
+ * @param version - ID3v2 version the header will be written as
+ *
+ * @return uint32_t - Number of extra header bytes
+ */
+static uint32_t internal_id3v2FrameHeaderExtraSize(const Id3v2FrameHeader *header, uint8_t version) {
+    uint32_t extra = 0;
+
+    switch (version) {
+        case ID3V2_TAG_VERSION_3:
+            extra += header->compressed ? 4 : 0;
+            break;
+        case ID3V2_TAG_VERSION_4:
+            extra += header->dataLengthIndicator ? 4 : 0;
+            break;
+        default:
+            return 0;
+    }
+
+    extra += (header->encryptionSymbol > 0) ? 1 : 0;
+    extra += (header->groupSymbol > 0) ? 1 : 0;
+
+    return extra;
+}
+
+/**
  * @brief Serializes a frame header to binary format according to the specified ID3v2 version.
- * @details Converts a frame header structure into its binary representation following version-specific 
- * formats. v2.2 produces a 6-byte header. v2.3 and v2.4 produce 10+ byte headers with optional extended 
- * data fields. v2.4 uses syncsafe encoding for the frame size, extended data is conditionally appended 
- * when their values are non-zero. Returns NULL and sets outl to 0 if the header is NULL or version 
- * is invalid (greater than ID3V2_TAG_VERSION_4).
- * 
+ * @details Converts a frame header structure into its binary representation following version-specific
+ * formats. v2.2 produces a 6-byte header. v2.3 and v2.4 produce 10+ byte headers with optional extended
+ * data fields appended according to their flags (compression, data length indicator, encryption, grouping).
+ * v2.4 uses syncsafe encoding for the frame size and the data length indicator. Returns NULL and sets outl
+ * to 0 if the header is NULL or version is invalid (greater than ID3V2_TAG_VERSION_4).
+ *
  * @param header - Frame header structure to serialize
  * @param version - ID3v2 version (ID3V2_TAG_VERSION_2, ID3V2_TAG_VERSION_3, or ID3V2_TAG_VERSION_4)
- * @param frameSize - Size of frame content in bytes (excludes header). Encoded as syncsafe in v2.4
+ * @param frameSize - Size of frame content in bytes, excluding the header and its extra bytes. The size
+ * field written is frameSize plus the extra bytes, as both specs require. Encoded as syncsafe in v2.4
  * @param outl - Output parameter receiving the serialized header size in bytes, or 0 on failure
  * 
  * @return uint8_t* - Heap allocated binary header data. Caller must free. NULL on failure
@@ -1103,7 +1150,8 @@ uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, ui
 
             byteStreamWrite(stream, header->id, ID3V2_FRAME_ID_MAX_SIZE);
 
-            tmp = u32tob(frameSize);
+            // the size field also counts the extra header bytes written below
+            tmp = u32tob(frameSize + internal_id3v2FrameHeaderExtraSize(header, version));
             byteStreamWrite(stream, tmp, 4);
             free(tmp);
 
@@ -1112,12 +1160,13 @@ uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, ui
             byteStreamWriteBit(stream, header->readOnly, 5);
             byteStreamSeek(stream, 1, SEEK_CUR);
 
-            byteStreamWriteBit(stream, (header->decompressionSize > 0) ? true : false, 7);
+            byteStreamWriteBit(stream, header->compressed, 7);
             byteStreamWriteBit(stream, (header->encryptionSymbol > 0) ? true : false, 6);
             byteStreamWriteBit(stream, (header->groupSymbol > 0) ? true : false, 5);
             byteStreamSeek(stream, 1, SEEK_CUR);
 
-            if (header->decompressionSize > 0) {
+            // the decompressed size is a plain 32 bit integer in v2.3
+            if (header->compressed) {
                 byteStreamResize(stream, stream->bufferSize + 4);
                 tmp = u32tob(header->decompressionSize);
                 byteStreamWrite(stream, tmp, 4);
@@ -1142,7 +1191,8 @@ uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, ui
 
             byteStreamWrite(stream, header->id, ID3V2_FRAME_ID_MAX_SIZE);
 
-            tmp = u32tob(byteSyncintEncode(frameSize));
+            // the size field also counts the extra header bytes written below
+            tmp = u32tob(byteSyncintEncode(frameSize + internal_id3v2FrameHeaderExtraSize(header, version)));
             byteStreamWrite(stream, tmp, 4);
             free(tmp);
 
@@ -1152,10 +1202,10 @@ uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, ui
             byteStreamSeek(stream, 1, SEEK_CUR);
 
             byteStreamWriteBit(stream, (header->groupSymbol > 0) ? true : false, 6);
-            byteStreamWriteBit(stream, (header->decompressionSize > 0) ? true : false, 3);
+            byteStreamWriteBit(stream, header->compressed, 3);
             byteStreamWriteBit(stream, (header->encryptionSymbol > 0) ? true : false, 2);
             byteStreamWriteBit(stream, (header->unsynchronisation > 0) ? true : false, 1);
-            byteStreamWriteBit(stream, (header->decompressionSize > 0) ? true : false, 0);
+            byteStreamWriteBit(stream, header->dataLengthIndicator, 0);
             byteStreamSeek(stream, 1, SEEK_CUR);
 
             if (header->groupSymbol > 0) {
@@ -1168,9 +1218,10 @@ uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, ui
                 byteStreamWrite(stream, &header->encryptionSymbol, 1);
             }
 
-            if (header->decompressionSize > 0) {
+            // the data length indicator is a syncsafe integer and is written only with its flag
+            if (header->dataLengthIndicator) {
                 byteStreamResize(stream, stream->bufferSize + 4);
-                tmp = u32tob(header->decompressionSize);
+                tmp = u32tob(byteSyncintEncode(header->decompressionSize));
                 byteStreamWrite(stream, tmp, 4);
                 free(tmp);
             }
@@ -1194,13 +1245,14 @@ uint8_t *id3v2FrameHeaderSerialize(Id3v2FrameHeader *header, uint8_t version, ui
  * @brief Converts a frame header structure to its JSON representation based on ID3v2 version.
  * @details Serializes frame header metadata into a JSON string with version-specific fields. v2.2 includes 
  * only the 3-character frame ID. v2.3 adds preservation flags, compression, encryption, and grouping metadata. 
- * v2.4 additionally includes the unsynchronisation flag. Returns an empty JSON object "{}" if the header is 
+ * v2.4 additionally includes the unsynchronisation and data length indicator flags. decompressionSize holds the
+ * v2.3 decompressed size or the v2.4 data length indicator value. Returns an empty JSON object "{}" if the header is 
  * NULL or the version is unsupported.
  * 
  * Example outputs:
  * - v2.2: {"id":"TIT"}
- * - v2.3: {"id":"TIT2","tagAlterPreservation":false,"fileAlterPreservation":false,"readOnly":false,"decompressionSize":0,"encryptionSymbol":0,"groupSymbol":0}
- * - v2.4: {"id":"TIT2","tagAlterPreservation":false,"fileAlterPreservation":false,"readOnly":false,"unsynchronisation":false,"decompressionSize":0,"encryptionSymbol":0,"groupSymbol":0}
+ * - v2.3: {"id":"TIT2","tagAlterPreservation":false,"fileAlterPreservation":false,"readOnly":false,"compressed":false,"decompressionSize":0,"encryptionSymbol":0,"groupSymbol":0}
+ * - v2.4: {"id":"TIT2","tagAlterPreservation":false,"fileAlterPreservation":false,"readOnly":false,"unsynchronisation":false,"compressed":false,"dataLengthIndicator":false,"decompressionSize":0,"encryptionSymbol":0,"groupSymbol":0}
  * 
  * @param header - Frame header structure to convert to JSON
  * @param version - ID3v2 version (ID3V2_TAG_VERSION_2, ID3V2_TAG_VERSION_3, or ID3V2_TAG_VERSION_4)
@@ -1238,7 +1290,7 @@ char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, uint8_t version) {
         case ID3V2_TAG_VERSION_3:
 
             memCount += snprintf(NULL, 0,
-                                 "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"decompressionSize\":%"
+                                 "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"compressed\":%s,\"decompressionSize\":%"
                                  PRId32",\"encryptionSymbol\":%d,\"groupSymbol\":%d}",
                                  header->id[0],
                                  header->id[1],
@@ -1247,6 +1299,7 @@ char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, uint8_t version) {
                                  ((header->tagAlterPreservation == true) ? "true" : "false"),
                                  ((header->fileAlterPreservation == true) ? "true" : "false"),
                                  ((header->readOnly == true) ? "true" : "false"),
+                                 ((header->compressed == true) ? "true" : "false"),
                                  header->decompressionSize,
                                  header->encryptionSymbol,
                                  header->groupSymbol);
@@ -1254,7 +1307,7 @@ char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, uint8_t version) {
             json = calloc(memCount + 1, sizeof(char));
 
             (void) snprintf(json, memCount,
-                            "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"decompressionSize\":%"
+                            "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"compressed\":%s,\"decompressionSize\":%"
                             PRId32",\"encryptionSymbol\":%d,\"groupSymbol\":%d}",
                             header->id[0],
                             header->id[1],
@@ -1263,6 +1316,7 @@ char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, uint8_t version) {
                             ((header->tagAlterPreservation == true) ? "true" : "false"),
                             ((header->fileAlterPreservation == true) ? "true" : "false"),
                             ((header->readOnly == true) ? "true" : "false"),
+                            ((header->compressed == true) ? "true" : "false"),
                             header->decompressionSize,
                             header->encryptionSymbol,
                             header->groupSymbol);
@@ -1271,7 +1325,7 @@ char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, uint8_t version) {
         case ID3V2_TAG_VERSION_4:
 
             memCount += snprintf(NULL, 0,
-                                 "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"unsynchronisation\":%s,\"decompressionSize\":%"
+                                 "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"unsynchronisation\":%s,\"compressed\":%s,\"dataLengthIndicator\":%s,\"decompressionSize\":%"
                                  PRId32",\"encryptionSymbol\":%d,\"groupSymbol\":%d}",
                                  header->id[0],
                                  header->id[1],
@@ -1281,6 +1335,8 @@ char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, uint8_t version) {
                                  ((header->fileAlterPreservation == true) ? "true" : "false"),
                                  ((header->readOnly == true) ? "true" : "false"),
                                  ((header->unsynchronisation == true) ? "true" : "false"),
+                                 ((header->compressed == true) ? "true" : "false"),
+                                 ((header->dataLengthIndicator == true) ? "true" : "false"),
                                  header->decompressionSize,
                                  header->encryptionSymbol,
                                  header->groupSymbol);
@@ -1288,7 +1344,7 @@ char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, uint8_t version) {
             json = calloc(memCount + 1, sizeof(char));
 
             (void) snprintf(json, memCount,
-                            "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"unsynchronisation\":%s,\"decompressionSize\":%"
+                            "{\"id\":\"%c%c%c%c\",\"tagAlterPreservation\":%s,\"fileAlterPreservation\":%s,\"readOnly\":%s,\"unsynchronisation\":%s,\"compressed\":%s,\"dataLengthIndicator\":%s,\"decompressionSize\":%"
                             PRId32",\"encryptionSymbol\":%d,\"groupSymbol\":%d}",
                             header->id[0],
                             header->id[1],
@@ -1298,6 +1354,8 @@ char *id3v2FrameHeaderToJSON(const Id3v2FrameHeader *header, uint8_t version) {
                             ((header->fileAlterPreservation == true) ? "true" : "false"),
                             ((header->readOnly == true) ? "true" : "false"),
                             ((header->unsynchronisation == true) ? "true" : "false"),
+                            ((header->compressed == true) ? "true" : "false"),
+                            ((header->dataLengthIndicator == true) ? "true" : "false"),
                             header->decompressionSize,
                             header->encryptionSymbol,
                             header->groupSymbol);
@@ -2101,13 +2159,25 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
 
             break;
         case ID3V2_TAG_VERSION_3:
-            tmp = u32tob(contentSize);
+            // the size field counts the extra header bytes after the 10 byte base header
+            tmp = u32tob(contentSize + (headerSize - ID3V2_FRAME_BASE_HEADER_SIZE));
             byteStreamSeek(stream, ID3V2_FRAME_ID_MAX_SIZE, SEEK_SET);
             byteStreamWrite(stream, tmp, ID3V2_FRAME_ID_MAX_SIZE);
             free(tmp);
 
             break;
         case ID3V2_TAG_VERSION_4:
+            // the data length indicator of a frame written from its fields is the content length before
+            // unsynchronisation. compressed or encrypted frames are stored as is, so theirs stays as read.
+            // it is always the last extra header field
+            if (frame->header->dataLengthIndicator && !frame->header->compressed &&
+                frame->header->encryptionSymbol == 0 && headerSize >= ID3V2_FRAME_BASE_HEADER_SIZE + 4) {
+                tmp = u32tob(byteSyncintEncode((uint32_t) contentSize));
+                byteStreamSeek(stream, headerSize - 4, SEEK_SET);
+                byteStreamWrite(stream, tmp, 4);
+                free(tmp);
+            }
+
             // v2.4 unsynchronises per frame and the frame size counts the stored bytes
             if (frame->header->unsynchronisation && stream->bufferSize > headerSize) {
                 size_t unsyncl = 0;
@@ -2122,7 +2192,8 @@ uint8_t *id3v2FrameSerialize(Id3v2Frame *frame, uint8_t version, size_t *outl) {
                 }
             }
 
-            tmp = u32tob(byteSyncintEncode(contentSize));
+            // the size field counts the extra header bytes after the 10 byte base header
+            tmp = u32tob(byteSyncintEncode(contentSize + (headerSize - ID3V2_FRAME_BASE_HEADER_SIZE)));
             byteStreamSeek(stream, ID3V2_FRAME_ID_MAX_SIZE, SEEK_SET);
             byteStreamWrite(stream, tmp, ID3V2_FRAME_ID_MAX_SIZE);
             free(tmp);

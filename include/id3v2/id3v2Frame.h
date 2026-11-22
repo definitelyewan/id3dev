@@ -24,8 +24,8 @@ extern "C"{
 */
 
 Id3v2FrameHeader *id3v2CreateFrameHeader(uint8_t id[ID3V2_FRAME_ID_MAX_SIZE], bool tagAlter, bool fileAlter,
-                                         bool readOnly, bool unsync, uint32_t decompressionSize,
-                                         uint8_t encryptionSymbol, uint8_t groupSymbol);
+                                         bool readOnly, bool unsync, bool compressed, bool dataLengthIndicator,
+                                         uint32_t decompressionSize, uint8_t encryptionSymbol, uint8_t groupSymbol);
 
 void id3v2DestroyFrameHeader(Id3v2FrameHeader **toDelete);
 

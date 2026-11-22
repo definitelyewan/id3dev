@@ -25,7 +25,7 @@
 
 static void id3v2CreateAndDestroyFrameHeader_allInOne(void **state) {
     (void) state;
-    Id3v2FrameHeader *h = id3v2CreateFrameHeader((uint8_t *) "TT2", false, false, false, false, 0, 0xff, 0xff);
+    Id3v2FrameHeader *h = id3v2CreateFrameHeader((uint8_t *) "TT2", false, false, false, false, false, false, 0, 0xff, 0xff);
 
     assert_non_null(h);
     assert_string_equal((char *)h->id, "TT2");
@@ -61,7 +61,7 @@ static void id3v2CreateAndDestroyHeader_allInOne(void **state) {
     listInsertBack(l, (void *) id3v2CreateContentEntry((void *) "test2", 6));
     listInsertBack(l, (void *) id3v2CreateContentEntry((void *) "test3", 6));
 
-    Id3v2FrameHeader *h = id3v2CreateFrameHeader((uint8_t *) "TT2", false, false, false, false, 0, 0xff, 0xff);
+    Id3v2FrameHeader *h = id3v2CreateFrameHeader((uint8_t *) "TT2", false, false, false, false, false, false, 0, 0xff, 0xff);
 
     Id3v2Frame *f = id3v2CreateFrame(h, id3v2CreateTextFrameContext(), l);
 
@@ -395,7 +395,7 @@ static void id3v2AttachFrameFromTag_TSOA(void **state) {
     listInsertBack(entries, id3v2CreateContentEntry((void *) "\x0", 1));
     listInsertBack(entries, id3v2CreateContentEntry((void *) "SORT", 5));
 
-    Id3v2FrameHeader *h = id3v2CreateFrameHeader((uint8_t *) "TSOA", false, false, false, false, 0, 0, 0);
+    Id3v2FrameHeader *h = id3v2CreateFrameHeader((uint8_t *) "TSOA", false, false, false, false, false, false, 0, 0, 0);
     Id3v2Frame *f = id3v2CreateFrame(h, id3v2CreateTextFrameContext(), entries);
 
 
@@ -453,7 +453,7 @@ static void id3v2FrameHeaderSerialize_null(void **state) {
 
 static void id3v2FrameHeaderSerialize_v2(void **state) {
     (void) state;
-    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *) "TT2", false, false, false, false, 0, 0, 0);
+    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *) "TT2", false, false, false, false, false, false, 0, 0, 0);
     size_t outl = 0;
     uint8_t *out = id3v2FrameHeaderSerialize(frameHeader, ID3V2_TAG_VERSION_2, 100, &outl);
     uint8_t *start = out;
@@ -469,7 +469,7 @@ static void id3v2FrameHeaderSerialize_v2(void **state) {
 
 static void id3v2FrameHeaderSerialize_v3(void **state) {
     (void) state;
-    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *) "TIT2", false, false, false, false, 0, 0, 0);
+    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *) "TIT2", false, false, false, false, false, false, 0, 0, 0);
     size_t outl = 0;
     uint8_t *out = id3v2FrameHeaderSerialize(frameHeader, ID3V2_TAG_VERSION_3, 300, &outl);
     uint8_t *start = out;
@@ -489,7 +489,7 @@ static void id3v2FrameHeaderSerialize_v3(void **state) {
 static void id3v2FrameHeaderSerialize_v3AllFlags(void **state) {
     (void) state;
     Id3v2FrameHeader *frameHeader =
-            id3v2CreateFrameHeader((uint8_t *) "TALB", true, true, true, false, 500, 0x0F, 0xFF);
+            id3v2CreateFrameHeader((uint8_t *) "TALB", true, true, true, false, true, false, 500, 0x0F, 0xFF);
     size_t outl = 0;
     uint8_t *out = id3v2FrameHeaderSerialize(frameHeader, ID3V2_TAG_VERSION_3, 600, &outl);
     uint8_t *start = out;
@@ -497,7 +497,8 @@ static void id3v2FrameHeaderSerialize_v3AllFlags(void **state) {
     assert_memory_equal("TALB", out, 4);
     out += 4;
 
-    assert_int_equal(600, btou32(out, 4));
+    // the size field counts the 6 extra header bytes
+    assert_int_equal(606, btou32(out, 4));
     out += 4;
 
     assert_int_equal(0xE0, out[0]);
@@ -520,7 +521,7 @@ static void id3v2FrameHeaderSerialize_v3AllFlags(void **state) {
 
 static void id3v2FrameHeaderSerialize_v3OnlySymbols(void **state) {
     (void) state;
-    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *) "TALB", false, false, false, false, 0, 0xAF,
+    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *) "TALB", false, false, false, false, false, false, 0, 0xAF,
                                                            0x56);
     size_t outl = 0;
     uint8_t *out = id3v2FrameHeaderSerialize(frameHeader, ID3V2_TAG_VERSION_3, 100, &outl);
@@ -529,7 +530,8 @@ static void id3v2FrameHeaderSerialize_v3OnlySymbols(void **state) {
     assert_memory_equal("TALB", out, 4);
     out += 4;
 
-    assert_int_equal(100, btou32(out, 4));
+    // the size field counts the 2 extra header bytes
+    assert_int_equal(102, btou32(out, 4));
     out += 4;
 
     assert_int_equal(0x00, out[0]);
@@ -549,7 +551,7 @@ static void id3v2FrameHeaderSerialize_v3OnlySymbols(void **state) {
 
 static void id3v2FrameHeaderSerialize_v4(void **state) {
     (void) state;
-    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *) "TSOA", false, false, false, false, 0, 0, 0);
+    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *) "TSOA", false, false, false, false, false, false, 0, 0, 0);
     size_t outl = 0;
     uint8_t *out = id3v2FrameHeaderSerialize(frameHeader, ID3V2_TAG_VERSION_3, 100, &outl);
 
@@ -570,7 +572,7 @@ static void id3v2FrameHeaderSerialize_v4(void **state) {
 
 static void id3v2FrameHeaderSerialize_v4AllFlags(void **state) {
     (void) state;
-    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *) "TSOA", true, true, true, true, 12345, 0x11,
+    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *) "TSOA", true, true, true, true, true, true, 12345, 0x11,
                                                            0x22);
     size_t outl = 0;
     uint8_t *out = id3v2FrameHeaderSerialize(frameHeader, ID3V2_TAG_VERSION_4, 500, &outl);
@@ -580,7 +582,8 @@ static void id3v2FrameHeaderSerialize_v4AllFlags(void **state) {
     assert_memory_equal("TSOA", byteStreamCursor(stream), 4);
     byteStreamSeek(stream, 4, SEEK_CUR);
 
-    assert_int_equal(500, byteStreamReturnSyncInt(stream));
+    // the size field counts the 6 extra header bytes
+    assert_int_equal(506, byteStreamReturnSyncInt(stream));
 
     assert_memory_equal("\x70\x4F", byteStreamCursor(stream), 2);
     byteStreamSeek(stream, 2, SEEK_CUR);
@@ -591,7 +594,8 @@ static void id3v2FrameHeaderSerialize_v4AllFlags(void **state) {
     assert_int_equal(0x11, byteStreamCursor(stream)[0]);
     byteStreamSeek(stream, 1, SEEK_CUR);
 
-    assert_int_equal(12345, byteStreamReturnU32(stream));
+    // the data length indicator is a syncsafe integer
+    assert_int_equal(12345, byteStreamReturnSyncInt(stream));
 
     free(out);
     byteStreamDestroy(stream);
@@ -600,7 +604,7 @@ static void id3v2FrameHeaderSerialize_v4AllFlags(void **state) {
 
 static void id3v2FrameHeaderSerialize_v4NoUnsync(void **state) {
     (void) state;
-    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *) "TSOA", true, true, true, false, 12345, 0x11,
+    Id3v2FrameHeader *frameHeader = id3v2CreateFrameHeader((uint8_t *) "TSOA", true, true, true, false, true, true, 12345, 0x11,
                                                            0x22);
     size_t outl = 0;
     uint8_t *out = id3v2FrameHeaderSerialize(frameHeader, ID3V2_TAG_VERSION_4, 500, &outl);
@@ -609,7 +613,8 @@ static void id3v2FrameHeaderSerialize_v4NoUnsync(void **state) {
     assert_memory_equal("TSOA", byteStreamCursor(stream), 4);
     byteStreamSeek(stream, 4, SEEK_CUR);
 
-    assert_int_equal(500, byteStreamReturnSyncInt(stream));
+    // the size field counts the 6 extra header bytes
+    assert_int_equal(506, byteStreamReturnSyncInt(stream));
 
     assert_memory_equal("\x70\x4D", byteStreamCursor(stream), 2);
     byteStreamSeek(stream, 2, SEEK_CUR);
@@ -620,7 +625,8 @@ static void id3v2FrameHeaderSerialize_v4NoUnsync(void **state) {
     assert_int_equal(0x11, byteStreamCursor(stream)[0]);
     byteStreamSeek(stream, 1, SEEK_CUR);
 
-    assert_int_equal(12345, byteStreamReturnU32(stream));
+    // the data length indicator is a syncsafe integer
+    assert_int_equal(12345, byteStreamReturnSyncInt(stream));
 
     free(out);
     byteStreamDestroy(stream);
@@ -638,7 +644,7 @@ static void id3v2FrameHeaderToJSON_null(void **state) {
 
 static void id3v2FrameHeaderToJSON_v2(void **state) {
     (void) state;
-    Id3v2FrameHeader *frame = id3v2CreateFrameHeader((uint8_t *) "TT1", false, false, false, false, 0, 0, 0);
+    Id3v2FrameHeader *frame = id3v2CreateFrameHeader((uint8_t *) "TT1", false, false, false, false, false, false, 0, 0, 0);
     char *json = id3v2FrameHeaderToJSON(frame, ID3V2_TAG_VERSION_2);
 
     assert_string_equal("{\"id\":\"TT1\"}",
@@ -650,11 +656,11 @@ static void id3v2FrameHeaderToJSON_v2(void **state) {
 
 static void id3v2FrameHeaderToJSON_v3(void **state) {
     (void) state;
-    Id3v2FrameHeader *frame = id3v2CreateFrameHeader((uint8_t *) "TIT1", false, false, false, false, 0, 0, 0);
+    Id3v2FrameHeader *frame = id3v2CreateFrameHeader((uint8_t *) "TIT1", false, false, false, false, false, false, 0, 0, 0);
     char *json = id3v2FrameHeaderToJSON(frame, ID3V2_TAG_VERSION_3);
 
     assert_string_equal(
-        "{\"id\":\"TIT1\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0}",
+        "{\"id\":\"TIT1\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"compressed\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0}",
         json);
 
     free(json);
@@ -663,11 +669,11 @@ static void id3v2FrameHeaderToJSON_v3(void **state) {
 
 static void id3v2FrameHeaderToJSON_v3Symbol(void **state) {
     (void) state;
-    Id3v2FrameHeader *frame = id3v2CreateFrameHeader((uint8_t *) "TIT1", false, false, false, false, 0, 20, 0);
+    Id3v2FrameHeader *frame = id3v2CreateFrameHeader((uint8_t *) "TIT1", false, false, false, false, false, false, 0, 20, 0);
     char *json = id3v2FrameHeaderToJSON(frame, ID3V2_TAG_VERSION_3);
 
     assert_string_equal(
-        "{\"id\":\"TIT1\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"decompressionSize\":0,\"encryptionSymbol\":20,\"groupSymbol\":0}",
+        "{\"id\":\"TIT1\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"compressed\":false,\"decompressionSize\":0,\"encryptionSymbol\":20,\"groupSymbol\":0}",
         json);
 
     free(json);
@@ -676,11 +682,11 @@ static void id3v2FrameHeaderToJSON_v3Symbol(void **state) {
 
 static void id3v2FrameHeaderToJSON_v4WithUnsync(void **state) {
     (void) state;
-    Id3v2FrameHeader *frame = id3v2CreateFrameHeader((uint8_t *) "TIT1", false, false, false, true, 0, 0, 0);
+    Id3v2FrameHeader *frame = id3v2CreateFrameHeader((uint8_t *) "TIT1", false, false, false, true, false, false, 0, 0, 0);
     char *json = id3v2FrameHeaderToJSON(frame, ID3V2_TAG_VERSION_4);
 
     assert_string_equal(
-        "{\"id\":\"TIT1\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"unsynchronisation\":true,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0}",
+        "{\"id\":\"TIT1\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"unsynchronisation\":true,\"compressed\":false,\"dataLengthIndicator\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0}",
         json);
 
     free(json);
@@ -1259,7 +1265,7 @@ static void id3v2FrameToJSON_v3TXXX(void **state) {
     }
 
     assert_string_equal(json,
-                        "{\"header\":{\"id\":\"TXXX\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0},\"content\":[{\"value\":\"1\",\"size\":1},{\"value\":\"PERFORMER\",\"size\":9},{\"value\":\"Quadeca\",\"size\":7}]}");
+                        "{\"header\":{\"id\":\"TXXX\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"compressed\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0},\"content\":[{\"value\":\"1\",\"size\":1},{\"value\":\"PERFORMER\",\"size\":9},{\"value\":\"Quadeca\",\"size\":7}]}");
 
     free(json);
     id3v2DestroyTag(&tag);
@@ -1285,7 +1291,7 @@ static void id3v2FrameToJSON_v3APIC(void **state) {
     assert_non_null(json);
     assert_memory_equal(
         json,
-        "{\"header\":{\"id\":\"APIC\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0},\"content\":[{\"value\":\"image/jpeg\",\"size\":10},{\"value\":\"\",",
+        "{\"header\":{\"id\":\"APIC\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"compressed\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0},\"content\":[{\"value\":\"image/jpeg\",\"size\":10},{\"value\":\"\",",
         144);
 
     /**
@@ -1317,7 +1323,7 @@ static void id3v2FrameToJSON_v4ETCO(void **state) {
     assert_non_null(json);
     assert_string_equal(
         json,
-        "{\"header\":{\"id\":\"ETCO\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"unsynchronisation\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0},\"content\":[{\"value\":\"2\",\"size\":1},{\"value\":\"6\",\"size\":1},{\"value\":\"1220000\",\"size\":4},{\"value\":\"2\",\"size\":1},{\"value\":\"610000\",\"size\":4}]}");
+        "{\"header\":{\"id\":\"ETCO\",\"tagAlterPreservation\":false,\"fileAlterPreservation\":false,\"readOnly\":false,\"unsynchronisation\":false,\"compressed\":false,\"dataLengthIndicator\":false,\"decompressionSize\":0,\"encryptionSymbol\":0,\"groupSymbol\":0},\"content\":[{\"value\":\"2\",\"size\":1},{\"value\":\"6\",\"size\":1},{\"value\":\"1220000\",\"size\":4},{\"value\":\"2\",\"size\":1},{\"value\":\"610000\",\"size\":4}]}");
 
     free(json);
     id3v2DestroyTag(&tag);

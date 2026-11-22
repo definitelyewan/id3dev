@@ -130,7 +130,7 @@ git clone --recurse-submodules https://github.com/definitelyewan/id3dev.git
 ## Building
 This project comes with a Python3 script intended to be used to build it. This script is located at `./scripts/build.py` and should be run from the root directory of this project. However, if you wish to build this project via standard cmake to gain access to extra build options you can.
 build options:
-- `BUILD_SHARED_LIBS` can be toggled on for a shared library and off for a static one
+- `BUILD_ID3_SHARED_LIBS` can be toggled on for a shared library and off for a static one
 - `BUILD_ID3_DOCS` can be toggled to generate documentation
 - `BUILD_ID3_TESTS` can be toggled to generate unit tests
 - `DEBUG_ID3_SYMBOLS` can be toggled to include or not include debug symbols
